@@ -1,5 +1,5 @@
-import { RoutinePage } from '../views/Routine';
+import { LandingPage } from '@/views/Landing';
 
 export default function Page() {
-  return <RoutinePage />;
+  return <LandingPage />;
 }
