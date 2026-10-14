@@ -40,17 +40,19 @@ Every agent working on this codebase must follow these mandatory git practices:
 
 1. **Verify Before Committing**:
    - Always run `npm run build` and `npm run lint` before committing code. Zero warnings and zero errors are required.
-2. **Atomic, Descriptive Commits**:
-   - Commit after every logical task or phase of work.
-   - Use clear conventional commit messages:
-     - `feat(...)`: New feature or capability
-     - `fix(...)`: Bug fix or edge-case resolution
-     - `refactor(...)`: Code cleanup, DRY improvement, or restructuring
-     - `docs(...)`: Documentation or guidelines update
-3. **Commit Every Change**:
-   - Stage all tracked files (`git add .`) and commit without leaving uncommitted working trees.
+2. **Atomic, Granular Slicing (No Monolithic Commits)**:
+   - Commit after every isolated layer or logical milestone. Never bundle package dependencies, core types, backend routes, and UI components into a single massive commit.
+   - Slice commits by architectural layer:
+     - `build(deps): ...` — Library installations and configuration changes
+     - `feat(types): ...` or `feat(copy): ...` — Core data contracts, types, and UI copy
+     - `feat(server): ...` or `feat(api): ...` — Server route handlers, schemas, and gatekeeper logic
+     - `feat(ui): ...` — Presentation components, hooks, and client state wiring
+     - `docs(...)`: ... — Documentation, guidelines, or architectural notes
+   - Every single atomic commit must pass `npm run build` and `npm run lint`.
+3. **Traceability & History Integrity**:
+   - Each commit should explain *what* and *why*, enabling clean rollbacks and bisecting if an edge case emerges.
 4. **Push Automatically**:
-   - Push completed commits to `origin main` to keep the remote GitHub repository in sync.
+   - Push completed commit batches to `origin main` to keep the remote GitHub repository in sync.
 
 ---
 
