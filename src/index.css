@@ -1,0 +1,73 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+/* Design tokens — space-separated RGB channels so Tailwind can apply alpha. */
+:root {
+  --color-ink: 1 1 1;
+  --color-mint: 221 237 236;
+  --color-cream: 251 235 204;
+  --color-canvas: 244 244 244;
+  --color-blush: 247 222 218;
+  --color-white: 255 255 255;
+  --color-success: 16 185 129;
+  --color-warning: 217 119 6;
+  --color-danger: 225 29 72;
+  --slider-thumb-size: 1.5rem;
+  --slider-thumb-border: 4px;
+  --slider-thumb-ring: 1.5px;
+}
+html,
+body,
+#root {
+  min-height: 100%;
+  width: 100%;
+}
+body {
+  background-color: rgb(var(--color-canvas));
+  color: rgb(var(--color-ink));
+  -webkit-font-smoothing: antialiased;
+}
+/* Pain scale slider — the filled track is rendered behind the input; thumb ring uses currentColor. */
+input[type='range'].pain-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: var(--slider-thumb-size);
+  outline: none;
+}
+input[type='range'].pain-slider::-webkit-slider-runnable-track {
+  background: transparent;
+}
+input[type='range'].pain-slider::-moz-range-track {
+  background: transparent;
+}
+input[type='range'].pain-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: var(--slider-thumb-size);
+  width: var(--slider-thumb-size);
+  border-radius: 9999px;
+  background: rgb(var(--color-ink));
+  border: var(--slider-thumb-border) solid rgb(var(--color-white));
+  box-shadow: 0 0 0 var(--slider-thumb-ring) currentColor;
+  cursor: pointer;
+}
+input[type='range'].pain-slider::-moz-range-thumb {
+  height: var(--slider-thumb-size);
+  width: var(--slider-thumb-size);
+  border-radius: 9999px;
+  background: rgb(var(--color-ink));
+  border: var(--slider-thumb-border) solid rgb(var(--color-white));
+  box-shadow: 0 0 0 var(--slider-thumb-ring) currentColor;
+  cursor: pointer;
+}
+input[type='range'].pain-slider:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid rgb(var(--color-ink) / 0.3);
+  outline-offset: 2px;
+}

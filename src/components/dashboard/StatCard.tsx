@@ -1,0 +1,37 @@
+import React from 'react';
+import type { SvgIconComponent } from '@mui/icons-material';
+import { cn } from '../../utils/cn';
+import { Icon } from '../ui/Icon';
+
+export type StatTone = 'ink' | 'cream' | 'mint' | 'white';
+
+const TONES: Record<StatTone, {card: string;muted: string;}> = {
+  ink: { card: 'bg-ink text-white', muted: 'text-white/45' },
+  cream: { card: 'bg-cream text-ink', muted: 'text-ink/45' },
+  mint: { card: 'bg-mint text-ink', muted: 'text-ink/45' },
+  white: { card: 'bg-white text-ink', muted: 'text-ink/45' }
+};
+
+export interface StatCardProps {
+  label: string;
+  value: string;
+  caption: string;
+  tone: StatTone;
+  icon: SvgIconComponent;
+}
+
+export function StatCard({ label, value, caption, tone, icon }: StatCardProps) {
+  const styles = TONES[tone];
+  return (
+    <article className={cn('flex min-h-stat flex-col rounded-card p-4 transition-colors sm:p-5', styles.card)}>
+      <h2 className="flex items-center gap-2 text-body lowercase">
+        <Icon icon={icon} size="sm" />
+        {label}
+      </h2>
+      <p className="mt-auto pt-6 text-display-sm font-light lowercase leading-none tracking-tight sm:text-display">
+        {value}
+      </p>
+      <p className={cn('mt-2 text-xs lowercase', styles.muted)}>{caption}</p>
+    </article>);
+
+}
