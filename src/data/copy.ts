@@ -292,6 +292,53 @@ export const COPY = {
     errorGeneral:
       'Could not extract a protocol from this document. Please verify it is an interventional study or try another PDF.'
   },
+  landing: {
+    badge: 'google ai builder cup · media & digital experiences',
+    heroEyebrow: 'evidence into action',
+    heroTitle: 'Transform clinical trials into executable daily routines.',
+    heroSubtitle:
+      'Protocol Engine converts dense, peer-reviewed human interventional research into adaptive daily protocols with zero hallucinated gaps and an evidence-grounded AI safety assistant.',
+    ctaGuest: 'try as guest (instant demo)',
+    ctaLogin: 'sign in with account',
+    ctaSignup: 'create account',
+    scopeBadge: 'strictly interventional human research',
+    scopeNote:
+      'We validate clinical trials, rehabilitation protocols, nutrition, sleep, and pharmacology. Pure theory, non-human animal models, and observational studies are safely filtered out.',
+    features: {
+      gatekeeperTitle: 'Scientific Gatekeeper',
+      gatekeeperBody: 'Auto-filters non-human models and theoretical papers with educational feedback.',
+      auditingTitle: 'Missing Parameter Auditing',
+      auditingBody: 'Detects omitted hold durations and rest intervals, applying conservative clinical defaults.',
+      safetyTitle: 'AI Safety Assistant',
+      safetyBody: 'Ask dosage, frequency, and contraindication questions grounded strictly in the trial Methods.',
+      summaryTitle: '1-Page Clinical Brief',
+      summaryBody: 'Export formatted adherence and pain trends for your doctor or physical therapist.'
+    },
+    demoTitle: 'Try it right now',
+    demoSubtitle: 'Drop a research PDF or explore pre-loaded clinical protocols with zero setup.'
+  },
+  auth: {
+    loginTitle: 'welcome back',
+    loginSubtitle: 'sign in to access your persistent protocols and saved research history.',
+    signupTitle: 'create your account',
+    signupSubtitle: 'save and sync extracted research papers and daily progress across devices.',
+    nameLabel: 'your full name',
+    namePlaceholder: 'e.g. Dr. Jane Smith',
+    emailLabel: 'email address',
+    emailPlaceholder: 'you@example.com',
+    passwordLabel: 'password',
+    passwordPlaceholder: '••••••••',
+    loginButton: 'sign in',
+    signupButton: 'create account',
+    googleButton: 'continue with google',
+    guestButton: 'continue as guest (no sign-up required)',
+    guestNotice: 'guest mode stores protocols locally in your browser. sign in anytime to sync to the cloud.',
+    haveAccount: 'already have an account? sign in',
+    needAccount: "don't have an account? create one",
+    signOut: 'sign out',
+    guestBadge: 'guest mode',
+    saveNotice: 'sign in to sync your papers to the cloud'
+  },
   errors: {
     boundaryTitle: 'something went wrong',
     boundaryBody: 'this view failed to load. your logs are safe.',
