@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { ASSISTANT_REPLY_DELAY_MS, DEFAULT_CONFIRMATION_PAIN_SCORE } from '../data/config';
 import { COPY } from '../data/copy';
 import { initialQueuedPapers, protocols as initialProtocols } from '../data/protocols';
@@ -37,7 +38,7 @@ function createInitialRuntime(items: Protocol[]): Record<string, ProtocolRuntime
 }
 
 function buildMessage(message: NewChatMessage): ChatMessage {
-  return { ...message, id: createId('msg'), timestamp: nowLabel() };
+  return { ...message, id: message.id ?? createId('msg'), timestamp: nowLabel() };
 }
 
 /** All protocol session state + actions. Only raw state is stored; metrics are derived on render. */
@@ -169,16 +170,37 @@ export function useProtocolState() {
     );
   };
 
-  const askQuestion = (text: string) => {
+  const askQuestion = async (text: string) => {
     const target = protocol;
     pushMessages(target.id, { role: 'user', kind: 'question', content: text });
     updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: true }));
-    const timer = window.setTimeout(() => {
+
+    try {
+      const res = await fetch('/api/assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: text,
+          protocolTitle: target.title,
+          faqs: target.faqs,
+          contraindications: target.contraindications,
+          steps: target.steps
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.answer) {
+          pushMessages(target.id, { role: 'ai', kind: 'answer', content: data.answer });
+          return;
+        }
+      }
       pushMessages(target.id, { role: 'ai', kind: 'answer', content: answerFor(target, text) });
+    } catch {
+      pushMessages(target.id, { role: 'ai', kind: 'answer', content: answerFor(target, text) });
+    } finally {
       updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: false }));
-      replyTimers.current = replyTimers.current.filter((item) => item !== timer);
-    }, ASSISTANT_REPLY_DELAY_MS);
-    replyTimers.current = [...replyTimers.current, timer];
+    }
   };
 
   const addProtocol = useCallback((newProtocol: Protocol) => {
@@ -199,17 +221,81 @@ export function useProtocolState() {
     setActiveProtocol(newProtocol.id);
   }, []);
 
-  const uploadPaper = (source: string, extractedProtocol?: Protocol) => {
+  const uploadPaper = async (source: string | File, extractedProtocol?: Protocol) => {
     if (extractedProtocol) {
       addProtocol(extractedProtocol);
       return;
     }
+
+    const fileName = typeof source === 'string' ? source : source.name;
+    const queuedId = createId('queued');
+    const procId = createId('proc');
+    const targetProtocolId = protocol.id;
+
+    setQueuedPapers((prev) => [...prev, { id: queuedId, name: fileName, note: COPY.papers.queuedNote }]);
     pushMessages(
-      protocol.id,
-      { role: 'user', kind: 'file', content: source },
-      { role: 'ai', kind: 'processing', content: source, createdAt: Date.now() }
+      targetProtocolId,
+      { role: 'user', kind: 'file', content: fileName },
+      { id: procId, role: 'ai', kind: 'processing', content: fileName, createdAt: Date.now() }
     );
-    setQueuedPapers((prev) => [...prev, { id: createId('queued'), name: source, note: COPY.papers.queuedNote }]);
+
+    try {
+      const formData = new FormData();
+      if (typeof source === 'string') {
+        formData.append('url', source);
+      } else {
+        formData.append('file', source);
+      }
+
+      const res = await fetch('/api/extract', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) {
+        throw new Error(`Extraction failed with HTTP ${res.status}`);
+      }
+
+      const result = await res.json();
+
+      if (result.eligible && result.protocol) {
+        addProtocol(result.protocol);
+        setQueuedPapers((prev) => prev.filter((p) => p.id !== queuedId));
+        updateRuntime(targetProtocolId, (prev) => ({
+          ...prev,
+          messages: prev.messages.map((m) =>
+            m.id === procId
+              ? { ...m, kind: 'confirmation', content: `Protocol ready: ${result.protocol.title}` }
+              : m
+          )
+        }));
+        toast.success(COPY.extraction.success);
+      } else {
+        const reason = result.rejectionReason || COPY.extraction.declinedNonHuman;
+        setQueuedPapers((prev) => prev.filter((p) => p.id !== queuedId));
+        updateRuntime(targetProtocolId, (prev) => ({
+          ...prev,
+          messages: prev.messages.map((m) =>
+            m.id === procId
+              ? { ...m, kind: 'alert', content: reason }
+              : m
+          )
+        }));
+        toast.error(reason);
+      }
+    } catch (err) {
+      console.error('[uploadPaper] Extraction failed:', err);
+      setQueuedPapers((prev) => prev.filter((p) => p.id !== queuedId));
+      updateRuntime(targetProtocolId, (prev) => ({
+        ...prev,
+        messages: prev.messages.map((m) =>
+          m.id === procId
+            ? { ...m, kind: 'alert', content: COPY.extraction.errorGeneral }
+            : m
+        )
+      }));
+      toast.error(COPY.extraction.errorGeneral);
+    }
   };
 
   const openPainLog = useCallback(() => setIsPainLogOpen(true), []);

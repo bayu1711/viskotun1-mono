@@ -11,7 +11,7 @@ import { PillButton } from '../ui/PillButton';
 import { HiddenPdfInput } from './HiddenPdfInput';
 
 interface UploadDropzoneProps {
-  onFile: (fileName: string) => void;
+  onFile: (file: File) => void;
 }
 
 export function UploadDropzone({ onFile }: UploadDropzoneProps) {
@@ -25,7 +25,7 @@ export function UploadDropzone({ onFile }: UploadDropzoneProps) {
       return;
     }
     setError(null);
-    onFile(file.name);
+    onFile(file);
   };
 
   const handleDrop = (event: DragEvent<HTMLDivElement>) => {

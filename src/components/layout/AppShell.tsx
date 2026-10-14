@@ -28,7 +28,7 @@ export function AppShell({ children }: AppShellProps) {
       toast.error(COPY.upload.invalidType);
       return;
     }
-    uploadPaper(file.name);
+    uploadPaper(file);
     openAssistant('ask');
   });
 

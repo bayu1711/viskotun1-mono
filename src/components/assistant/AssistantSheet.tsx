@@ -35,7 +35,7 @@ export function AssistantSheet() {
     inputRef.current?.focus();
   };
 
-  const addPaper = (source: string) => {
+  const addPaper = (source: string | File) => {
     uploadPaper(source);
     setMode('ask');
   };
@@ -45,7 +45,7 @@ export function AssistantSheet() {
       toast.error(COPY.upload.invalidType);
       return;
     }
-    addPaper(file.name);
+    addPaper(file);
   };
 
   const hasConversation = messages.length > 0 || assistantTyping;
