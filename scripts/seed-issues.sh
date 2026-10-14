@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Protocol Engine — Seed GitHub Issues & Action Items
+# Protocol Engine — Seed GitHub Issues & Action Items (Granular Slices)
 # ==============================================================================
 # Usage:
-#   1. Make sure you are logged into GitHub CLI: gh auth login
+#   1. Sign in to GitHub CLI: gh auth login
 #   2. Run: ./scripts/seed-issues.sh
 # ==============================================================================
 
@@ -11,7 +11,7 @@ set -euo pipefail
 
 REPO="bayu1711/viskotun1-mono"
 
-echo "=== Protocol Engine: GitHub Issue Sync ==="
+echo "=== Protocol Engine: Granular GitHub Issue Sync ==="
 
 if ! gh auth status >/dev/null 2>&1; then
   echo "Error: You are not authenticated with GitHub CLI."
@@ -19,7 +19,7 @@ if ! gh auth status >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "Authenticated successfully. Syncing tasks to $REPO..."
+echo "Authenticated successfully. Syncing granular tasks to $REPO..."
 
 # Ensure standard labels exist
 gh label create "completed" --color "0E8A16" --description "Completed milestone task" --repo "$REPO" --force >/dev/null 2>&1 || true
@@ -111,76 +111,201 @@ ISSUE_6=$(gh issue create --repo "$REPO" \
 echo "Created $ISSUE_6"
 gh issue close "$ISSUE_6" --reason "completed" --comment "Verified and pushed to main." >/dev/null
 
-echo "Creating upcoming open action items..."
+echo "Creating granular, bite-sized action items..."
 
-# 7. LocalStorage Persistence (Open)
-ISSUE_7=$(gh issue create --repo "$REPO" \
-  --title "feat(storage): LocalStorage state hydration & offline session durability" \
+# Task 1: Sets and Pain Logs Storage
+gh issue create --repo "$REPO" \
+  --title "feat(storage): persist completed sets and pain logs in localStorage" \
   --label "phase-3" \
   --body "### Objective
-Currently, protocol progress (completed sets, pain logs) and newly extracted research papers live in React memory. If a user refreshes the browser, the state resets to mock defaults.
+Keep user check-ins and pain logs saved across browser refreshes.
+
+### Target Files
+- \`src/hooks/useProtocolState.ts\`
 
 ### Tasks
-- [ ] Add \`localStorage\` hydration to \`useProtocolState.ts\` for:
-  - Custom extracted protocols in \`protocolList\`
-  - \`activeProtocolId\`
-  - Runtime sets completed (\`setsDone\`)
-  - Pain logs and side effect notes
-- [ ] Add a clean \"Reset to Demo Defaults\" button in the UI for judges/testers.
-- [ ] Ensure safe SSR hydration (no client/server mismatch).
+- [ ] Save \`runtime[protocolId].setsDone\` to \`localStorage\` on update.
+- [ ] Save \`runtime[protocolId].painLogs\` to \`localStorage\` on update.
+- [ ] Hydrate saved counts and logs safely after initial mount.
 
 ### Acceptance Criteria
-- Uploading a paper, checking off Day 1 sets, and refreshing the browser keeps all data intact.")
-echo "Created open task: $ISSUE_7"
+- Check off 2 sets on Day 4, log pain score of 2, refresh the browser $\rightarrow$ counts and log remain intact." >/dev/null
+echo "Created Task: persist completed sets and pain logs"
 
-# 8. Cloud Run Dockerfile (Open)
-ISSUE_8=$(gh issue create --repo "$REPO" \
-  --title "build(deploy): production multi-stage Dockerfile & Cloud Run deployment config" \
+# Task 2: Uploaded Protocols Storage
+gh issue create --repo "$REPO" \
+  --title "feat(storage): persist custom uploaded protocols across browser sessions" \
+  --label "phase-3" \
+  --body "### Objective
+Ensure papers uploaded and extracted by the user do not disappear on page reload.
+
+### Target Files
+- \`src/hooks/useProtocolState.ts\`
+
+### Tasks
+- [ ] Save newly added protocols in \`protocolList\` to \`localStorage\`.
+- [ ] Save current \`activeProtocolId\` so the user stays on their active paper.
+- [ ] Merge saved protocols with defaults during client hydration.
+
+### Acceptance Criteria
+- Upload a new PDF, wait for extraction to complete, refresh the browser $\rightarrow$ custom protocol remains in sidebar and active." >/dev/null
+echo "Created Task: persist custom uploaded protocols"
+
+# Task 3: Reset to Demo Defaults
+gh issue create --repo "$REPO" \
+  --title "feat(ui): add 'Reset to Demo Defaults' action in TopBar" \
+  --label "phase-3" \
+  --body "### Objective
+Allow judges and testers to wipe local storage and restore clean baseline mock data with 1 click.
+
+### Target Files
+- \`src/components/layout/TopBar.tsx\`
+- \`src/hooks/useProtocolState.ts\`
+- \`src/data/copy.ts\`
+
+### Tasks
+- [ ] Add \`resetToDefaults()\` function in protocol state.
+- [ ] Add subtle reset button or menu item in \`TopBar.tsx\`.
+- [ ] Show toast notification on reset.
+
+### Acceptance Criteria
+- Clicking reset clears \`localStorage\` and resets active protocol back to Achilles Day 4." >/dev/null
+echo "Created Task: add Reset to Demo Defaults action"
+
+# Task 4: Multi-Stage Dockerfile
+gh issue create --repo "$REPO" \
+  --title "build(docker): create multi-stage production Dockerfile and .dockerignore" \
   --label "phase-4" \
   --body "### Objective
-Package the application for deployment to Google Cloud Run as required for the Google AI Builder Cup.
+Containerize the Next.js standalone application for Google Cloud Run deployment.
+
+### Target Files
+- \`Dockerfile\`
+- \`.dockerignore\`
 
 ### Tasks
-- [ ] Create multi-stage \`Dockerfile\` targeting Next.js \`output: 'standalone'\` (\`deps\` -> \`builder\` -> \`runner\`).
-- [ ] Create \`.dockerignore\` excluding \`node_modules\`, \`.git\`, and local env files.
-- [ ] Create \`.env.example\` documenting \`GEMINI_API_KEY\`, \`GOOGLE_CLOUD_PROJECT\`, and deployment instructions.
-- [ ] Verify image build locally: \`docker build -t protocol-engine .\`
+- [ ] Create 3-stage build: \`deps\`, \`builder\`, \`runner\`.
+- [ ] Run container with unprivileged user \`nextjs:nodejs\`.
+- [ ] Configure \`EXPOSE 3000\` and \`CMD [\"node\", \"server.js\"]\`.
+- [ ] Verify \`docker build -t protocol-engine .\` completes with image size < 150MB.
 
 ### Acceptance Criteria
-- Container runs under non-root \`nextjs:nodejs\` user with production image size under 150MB.")
-echo "Created open task: $ISSUE_8"
+- Container starts locally with \`docker run -p 3000:3000 protocol-engine\` and serves the app." >/dev/null
+echo "Created Task: create multi-stage Dockerfile"
 
-# 9. Printable Physician Summary (Open)
-ISSUE_9=$(gh issue create --repo "$REPO" \
-  --title "feat(report): 1-page printable physician summary brief" \
+# Task 5: Cloud Run Guide & .env.example
+gh issue create --repo "$REPO" \
+  --title "docs(env): create .env.example and Cloud Run deployment guide" \
+  --label "phase-4" \
+  --body "### Objective
+Document environment variables and zero-friction Google Cloud Run deployment commands.
+
+### Target Files
+- \`.env.example\`
+- \`README.md\`
+
+### Tasks
+- [ ] Document \`GEMINI_API_KEY\` and optional Vertex AI settings in \`.env.example\`.
+- [ ] Add clear \`gcloud run deploy\` instructions in \`README.md\` for hackathon evaluators.
+
+### Acceptance Criteria
+- A new developer or judge can follow the instructions to deploy the container to Cloud Run in under 5 minutes." >/dev/null
+echo "Created Task: create .env.example and Cloud Run guide"
+
+# Task 6: Printable Physician Summary Layout
+gh issue create --repo "$REPO" \
+  --title "feat(report): build printable 1-page clinical summary layout with @media print" \
   --label "phase-5" \
   --body "### Objective
-Replace the simulated export timer in \`PhysicianSummaryPanel.tsx\` with a functional 1-page clinical brief to give to doctors or physical therapists.
+Create a clean, 1-page clinical brief layout suitable for doctors or physical therapists.
+
+### Target Files
+- \`src/components/dashboard/PrintableSummaryModal.tsx\` (new)
+- \`src/data/copy.ts\`
 
 ### Tasks
-- [ ] Build a dedicated printable view / modal with \`@media print\` stylesheet.
-- [ ] Include protocol name, trial DOI, compliance percentage, pain score history, and progression notes.
-- [ ] Wire the 'Export 1-Page Summary' button to trigger print/save dialog.
+- [ ] Build modal view displaying protocol title, trial DOI, adherence %, pain score timeline, and contraindications.
+- [ ] Add \`@media print\` CSS so printing isolates the 1-page summary card and hides sidebar/nav.
 
 ### Acceptance Criteria
-- Clicking export opens a formatted 1-page document ready to save as PDF or print.")
-echo "Created open task: $ISSUE_9"
+- Browser print preview displays a clean, single-page professional medical summary without page overflows." >/dev/null
+echo "Created Task: build printable clinical summary layout"
 
-# 10. Voice Coaching TTS (Open)
-ISSUE_10=$(gh issue create --repo "$REPO" \
-  --title "feat(voice): routine voice coaching via Google Cloud Text-to-Speech (TTS)" \
+# Task 7: Wire Physician Summary Export Trigger
+gh issue create --repo "$REPO" \
+  --title "feat(ui): wire Physician Summary export button to trigger print/PDF dialog" \
   --label "phase-5" \
   --body "### Objective
-Targeting the Google AI Builder Cup *Media, Content & Digital Experiences* track by adding audio voice guidance during routine execution.
+Replace the simulated export timer with the actual print / PDF trigger.
+
+### Target Files
+- \`src/components/dashboard/PhysicianSummaryPanel.tsx\`
+- \`src/hooks/useSimulatedExport.ts\`
 
 ### Tasks
-- [ ] Create server route \`/api/tts\` generating audio speech using Google Cloud Text-to-Speech.
-- [ ] Audio companion reads step instructions, tempo cadence (\"3 seconds down, 1 second up\"), and hold countdowns.
-- [ ] Add player controls in the routine view (Play, Pause, Skip step).
+- [ ] Replace simulated timeout with opening the printable summary modal / calling \`window.print()\`.
+- [ ] Display confirmation toast upon successful trigger.
 
 ### Acceptance Criteria
-- User can press Play and perform their daily routine hands-free guided by voice cues.")
-echo "Created open task: $ISSUE_10"
+- Clicking 'Export 1-Page Summary' opens the printable view immediately." >/dev/null
+echo "Created Task: wire export button to print trigger"
+
+# Task 8: Google Text-to-Speech API Route
+gh issue create --repo "$REPO" \
+  --title "feat(api): implement /api/tts Route Handler with Google Cloud Text-to-Speech" \
+  --label "phase-5" \
+  --body "### Objective
+Generate realistic audio speech for routine voice coaching (Google AI Builder Cup track feature).
+
+### Target Files
+- \`src/app/api/tts/route.ts\` (new)
+- \`package.json\` (\`@google-cloud/text-to-speech\`)
+
+### Tasks
+- [ ] Create Route Handler accepting text string and returning MP3 audio buffer.
+- [ ] Fall back gracefully to browser Web Speech API if Google Cloud credentials are not configured.
+
+### Acceptance Criteria
+- \`POST /api/tts\` returns audio streaming with realistic cadence." >/dev/null
+echo "Created Task: implement /api/tts Route Handler"
+
+# Task 9: Voice Coaching Companion Bar
+gh issue create --repo "$REPO" \
+  --title "feat(ui): add voice coaching companion bar to routine view" \
+  --label "phase-5" \
+  --body "### Objective
+Allow users to perform their daily rehab routine hands-free guided by voice cues.
+
+### Target Files
+- \`src/components/routine/VoiceCoachBar.tsx\` (new)
+- \`src/views/Routine.tsx\`
+
+### Tasks
+- [ ] Add player bar with Play, Pause, and Skip step controls.
+- [ ] Audio companion reads step description, tempo cues (\"3 seconds down\"), and rest countdowns.
+
+### Acceptance Criteria
+- User clicks Play $\rightarrow$ audio guides them through Step 1, plays hold countdown, and advances to Step 2." >/dev/null
+echo "Created Task: add voice coaching companion bar"
+
+# Task 10: Community Insights Tooltips
+gh issue create --repo "$REPO" \
+  --title "feat(community): add interactive drop-off tooltips and outcome review filters" \
+  --label "phase-5" \
+  --body "### Objective
+Enhance community evidence charts and patient reviews.
+
+### Target Files
+- \`src/components/community/DropOffPanel.tsx\`
+- \`src/components/community/ReviewList.tsx\`
+
+### Tasks
+- [ ] Add interactive hover tooltips displaying exact drop-off % and reason per day/week.
+- [ ] Enable filtering reviews by outcome (improved, adjusted, paused).
+
+### Acceptance Criteria
+- Clicking outcome filters updates the review stream smoothly without reloads." >/dev/null
+echo "Created Task: add community tooltips and review filters"
 
 echo ""
-echo "=== All tasks synchronized to https://github.com/$REPO/issues ==="
+echo "=== All granular tasks synchronized to https://github.com/$REPO/issues ==="
