@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useProtocol } from '../../contexts/ProtocolContext';
@@ -20,6 +21,7 @@ interface AppShellProps {
 }
 
 export function AppShell({ children }: AppShellProps) {
+  const pathname = usePathname();
   const { uploadPaper } = useProtocol();
   const { openAssistant } = useAssistant();
 
@@ -31,6 +33,19 @@ export function AppShell({ children }: AppShellProps) {
     uploadPaper(file);
     openAssistant('ask');
   });
+
+  const isPublicPage = pathname === '/' || pathname === '/login' || pathname === '/signup';
+
+  if (isPublicPage) {
+    return (
+      <div className="min-h-screen w-full bg-canvas font-sans text-ink">
+        <main className="w-full">{children}</main>
+        <AssistantSheet />
+        <PainLogDrawer />
+        <FileDropOverlay visible={isDragging} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen w-full bg-canvas font-sans text-ink">

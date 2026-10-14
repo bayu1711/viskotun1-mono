@@ -5,9 +5,12 @@ import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import { COPY } from './copy';
 
 export const ROUTES = {
-  routine: '/',
+  landing: '/',
+  routine: '/routine',
   dashboard: '/dashboard',
-  community: '/community'
+  community: '/community',
+  login: '/login',
+  signup: '/signup'
 } as const;
 
 export interface NavItem {
