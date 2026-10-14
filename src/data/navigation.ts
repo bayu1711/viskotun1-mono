@@ -11,13 +11,14 @@ export const ROUTES = {
 } as const;
 
 export interface NavItem {
-  to: string;
+  href: string;
   label: string;
   icon: SvgIconComponent;
   end?: boolean;
 }
 
 export const navItems: NavItem[] = [
-{ to: ROUTES.routine, label: COPY.nav.today, icon: TaskAltIcon, end: true },
-{ to: ROUTES.dashboard, label: COPY.nav.stats, icon: BarChartRoundedIcon },
-{ to: ROUTES.community, label: COPY.nav.community, icon: PeopleAltOutlinedIcon }];
+  { href: ROUTES.routine, label: COPY.nav.today, icon: TaskAltIcon, end: true },
+  { href: ROUTES.dashboard, label: COPY.nav.stats, icon: BarChartRoundedIcon },
+  { href: ROUTES.community, label: COPY.nav.community, icon: PeopleAltOutlinedIcon }
+];

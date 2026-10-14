@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { COPY } from '../../data/copy';
 import { navItems } from '../../data/navigation';
 import { cn } from '../../utils/cn';
@@ -9,34 +12,33 @@ interface SidebarNavProps {
 }
 
 export function SidebarNav({ className }: SidebarNavProps) {
+  const pathname = usePathname();
+  const currentPath = pathname ?? '';
+
   return (
     <nav aria-label={COPY.nav.primaryLabel} className={className}>
       <ul className="space-y-1">
-        {navItems.map((item) =>
-        <li key={item.to}>
-            <NavLink
-            to={item.to}
-            end={item.end}
-            className={({ isActive }) =>
-            cn(
-              'flex items-center gap-3 py-2 text-2xl lowercase transition-colors focus:outline-none focus-visible:underline',
-              isActive ? 'text-ink' : 'text-ink/30 hover:text-ink/60'
-            )
-            }>
-            
-              {({ isActive }) =>
-            <>
-                  <span
-                aria-hidden="true"
-                className={cn('h-2 w-2 rounded-full', isActive ? 'bg-ink' : 'bg-transparent')} />
-              
-                  {item.label}
-                </>
-            }
-            </NavLink>
-          </li>
-        )}
+        {navItems.map((item) => {
+          const isActive = item.end ? currentPath === item.href : currentPath.startsWith(item.href);
+          return (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                className={cn(
+                  'flex items-center gap-3 py-2 text-2xl lowercase transition-colors focus:outline-none focus-visible:underline',
+                  isActive ? 'text-ink' : 'text-ink/30 hover:text-ink/60'
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className={cn('h-2 w-2 rounded-full', isActive ? 'bg-ink' : 'bg-transparent')}
+                />
+                {item.label}
+              </Link>
+            </li>
+          );
+        })}
       </ul>
-    </nav>);
-
+    </nav>
+  );
 }

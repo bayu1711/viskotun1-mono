@@ -1,4 +1,6 @@
-import React, { createContext, useContext } from 'react';
+'use client';
+
+import React, { createContext, useContext, useMemo } from 'react';
 import LibraryBooksOutlinedIcon from '@mui/icons-material/LibraryBooksOutlined';
 import { EmptyState } from '../components/feedback/EmptyState';
 import { COPY } from '../data/copy';
@@ -11,12 +13,12 @@ interface ProtocolContextValue extends ProtocolState {
 
 interface ProtocolProviderProps {
   children: React.ReactNode;
-  missingDataFlagEnabled: boolean;
+  missingDataFlagEnabled?: boolean;
 }
 
 const ProtocolContext = createContext<ProtocolContextValue | null>(null);
 
-export function ProtocolProvider({ children, missingDataFlagEnabled }: ProtocolProviderProps) {
+export function ProtocolProvider({ children, missingDataFlagEnabled = true }: ProtocolProviderProps) {
   if (protocols.length === 0) {
     return (
       <main className="flex min-h-screen w-full items-center justify-center bg-canvas p-6 font-sans text-ink">
@@ -24,22 +26,27 @@ export function ProtocolProvider({ children, missingDataFlagEnabled }: ProtocolP
           icon={LibraryBooksOutlinedIcon}
           title={COPY.errors.noProtocolsTitle}
           description={COPY.errors.noProtocolsBody}
-          className="w-full max-w-sm bg-white" />
-        
-      </main>);
-
+          className="w-full max-w-sm bg-white"
+        />
+      </main>
+    );
   }
 
   return (
-    <ProtocolStateProvider missingDataFlagEnabled={missingDataFlagEnabled}>{children}</ProtocolStateProvider>);
-
+    <ProtocolStateProvider missingDataFlagEnabled={missingDataFlagEnabled}>
+      {children}
+    </ProtocolStateProvider>
+  );
 }
 
-function ProtocolStateProvider({ children, missingDataFlagEnabled }: ProtocolProviderProps) {
+function ProtocolStateProvider({ children, missingDataFlagEnabled = true }: ProtocolProviderProps) {
   const state = useProtocolState();
-  return (
-    <ProtocolContext.Provider value={{ ...state, missingDataFlagEnabled }}>{children}</ProtocolContext.Provider>);
+  const value = useMemo(
+    () => ({ ...state, missingDataFlagEnabled }),
+    [state, missingDataFlagEnabled]
+  );
 
+  return <ProtocolContext.Provider value={value}>{children}</ProtocolContext.Provider>;
 }
 
 export function useProtocol(): ProtocolContextValue {

@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { KeyMetrics } from '../components/dashboard/KeyMetrics';
 import { PapersPanel } from '../components/dashboard/PapersPanel';
@@ -23,6 +25,6 @@ export function DashboardPage({ simulateExportFailure = false }: DashboardPagePr
           <PhysicianSummaryPanel simulateFailure={simulateExportFailure} />
         </aside>
       </div>
-    </PageContainer>);
-
+    </PageContainer>
+  );
 }

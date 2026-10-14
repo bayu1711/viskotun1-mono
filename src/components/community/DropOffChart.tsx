@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';

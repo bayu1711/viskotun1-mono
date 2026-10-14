@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { DropOffPanel } from '../components/community/DropOffPanel';
 import { EfficacyCard } from '../components/community/EfficacyCard';
@@ -20,20 +22,20 @@ export function CommunityPage() {
           tone="cream"
           label={COPY.community.studyEfficacy}
           value={insights.studyEfficacy}
-          caption={COPY.community.studyCaption(protocol.paper.sampleSize)} />
-        
+          caption={COPY.community.studyCaption(protocol.paper.sampleSize)}
+        />
         <EfficacyCard
           tone="mint"
           label={COPY.community.realWorldEfficacy}
           value={insights.realWorldEfficacy}
-          caption={COPY.community.realWorldCaption(insights.userCount.toLocaleString())} />
-        
+          caption={COPY.community.realWorldCaption(insights.userCount.toLocaleString())}
+        />
       </section>
 
       <div className="mt-2.5 grid grid-cols-1 gap-2.5 lg:grid-cols-split">
         <DropOffPanel />
         <ReviewsPanel />
       </div>
-    </PageContainer>);
-
+    </PageContainer>
+  );
 }

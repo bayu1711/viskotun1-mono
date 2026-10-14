@@ -1,5 +1,7 @@
+'use client';
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { cn } from '../../utils/cn';
 
 type Variant = 'outline' | 'solid' | 'outline-light';
@@ -18,7 +20,7 @@ const SIZES: Record<Size, string> = {
 };
 
 const BASE =
-'inline-flex shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:pointer-events-none disabled:opacity-30';
+  'inline-flex shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:pointer-events-none disabled:opacity-30';
 
 interface CircleButtonProps {
   /** Accessible name — required because the button is icon-only. */
@@ -45,24 +47,25 @@ export function CircleButton({
   className
 }: CircleButtonProps) {
   const classes = cn(BASE, VARIANTS[variant], SIZES[size], className);
+  const internalTarget = to || (href && !href.startsWith('http') ? href : undefined);
 
-  if (to) {
+  if (internalTarget) {
     return (
-      <Link to={to} aria-label={label} onClick={onClick} className={classes}>
+      <Link href={internalTarget} aria-label={label} onClick={onClick} className={classes}>
         {children}
-      </Link>);
-
+      </Link>
+    );
   }
   if (href) {
     return (
       <a href={href} target="_blank" rel="noreferrer" aria-label={label} className={classes}>
         {children}
-      </a>);
-
+      </a>
+    );
   }
   return (
     <button type="button" aria-label={label} onClick={onClick} disabled={disabled} className={classes}>
       {children}
-    </button>);
-
+    </button>
+  );
 }

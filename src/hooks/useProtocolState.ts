@@ -7,8 +7,8 @@ import type {
   NewChatMessage,
   ProtocolRuntime,
   ProtocolSummary,
-  QueuedPaper } from
-'../types/protocol';
+  QueuedPaper
+} from '../types/protocol';
 import { answerFor } from '../utils/assistant';
 import { createId } from '../utils/id';
 import { clamp, toPercent } from '../utils/math';
@@ -16,21 +16,22 @@ import {
   adherenceOf,
   completionOf,
   exceedsPainThreshold,
-  isProgressionReady } from
-'../utils/protocolMetrics';
+  isProgressionReady
+} from '../utils/protocolMetrics';
 import { nowLabel } from '../utils/time';
 
 function createInitialRuntime(): Record<string, ProtocolRuntime> {
   return Object.fromEntries(
     protocols.map((item) => [
-    item.id,
-    {
-      setsDone: { ...item.initialSetsDone },
-      painLogs: item.initialPainLogs,
-      messages: item.initialMessages,
-      escalationPaused: false
-    }]
-    )
+      item.id,
+      {
+        setsDone: { ...item.initialSetsDone },
+        painLogs: item.initialPainLogs,
+        messages: item.initialMessages,
+        escalationPaused: false,
+        assistantTyping: false
+      }
+    ])
   );
 }
 
@@ -42,13 +43,16 @@ function buildMessage(message: NewChatMessage): ChatMessage {
 export function useProtocolState() {
   const [activeProtocolId, setActiveProtocol] = useState(protocols[0].id);
   const [queuedPapers, setQueuedPapers] = useState<QueuedPaper[]>(initialQueuedPapers);
-  const [assistantTyping, setAssistantTyping] = useState(false);
+  const [isPainLogOpen, setIsPainLogOpen] = useState(false);
   const [runtime, setRuntime] = useState(createInitialRuntime);
   const replyTimers = useRef<number[]>([]);
 
+  // Safe timer cleanup on unmount
   useEffect(() => {
-    const timers = replyTimers.current;
-    return () => timers.forEach((timer) => window.clearTimeout(timer));
+    return () => {
+      replyTimers.current.forEach((timer) => window.clearTimeout(timer));
+      replyTimers.current = [];
+    };
   }, []);
 
   const protocol = protocols.find((item) => item.id === activeProtocolId) ?? protocols[0];
@@ -60,7 +64,10 @@ export function useProtocolState() {
 
   const pushMessages = useCallback(
     (id: string, ...messages: NewChatMessage[]) => {
-      updateRuntime(id, (prev) => ({ ...prev, messages: [...prev.messages, ...messages.map(buildMessage)] }));
+      updateRuntime(id, (prev) => ({
+        ...prev,
+        messages: [...prev.messages, ...messages.map(buildMessage)]
+      }));
     },
     [updateRuntime]
   );
@@ -74,16 +81,20 @@ export function useProtocolState() {
 
   const summaries = useMemo<ProtocolSummary[]>(
     () =>
-    protocols.map((item) => ({
-      id: item.id,
-      title: item.title,
-      shortTitle: item.shortTitle,
-      icon: item.icon,
-      currentDay: item.currentDay,
-      totalDays: item.totalDays,
-      streak: item.streak,
-      todayPercent: toPercent(completionOf(item, runtime[item.id].setsDone))
-    })),
+      protocols.map((item) => {
+        const fraction = completionOf(item, runtime[item.id].setsDone);
+        return {
+          id: item.id,
+          title: item.title,
+          shortTitle: item.shortTitle,
+          icon: item.icon,
+          currentDay: item.currentDay,
+          totalDays: item.totalDays,
+          streak: item.streak,
+          todayFraction: fraction,
+          todayPercent: toPercent(fraction)
+        };
+      }),
     [runtime]
   );
 
@@ -109,7 +120,7 @@ export function useProtocolState() {
   const incrementSet = (stepId: string) => updateSetCount(stepId, (current) => current + 1);
   const decrementSet = (stepId: string) => updateSetCount(stepId, (current) => current - 1);
   const toggleStep = (stepId: string) =>
-  updateSetCount(stepId, (current, max) => current >= max ? 0 : max);
+    updateSetCount(stepId, (current, max) => (current >= max ? 0 : max));
 
   const markTodayComplete = () => {
     const allSetsDone = Object.fromEntries(protocol.steps.map((step) => [step.id, step.sets]));
@@ -128,25 +139,25 @@ export function useProtocolState() {
       ...prev,
       escalationPaused: prev.escalationPaused || exceeded,
       painLogs: [
-      ...prev.painLogs,
-      { id: createId('pain'), day: protocol.currentDay, score, note, loggedAt: nowLabel() }]
-
+        ...prev.painLogs,
+        { id: createId('pain'), day: protocol.currentDay, score, note, loggedAt: nowLabel() }
+      ]
     }));
     pushMessages(
       protocol.id,
-      exceeded ?
-      { role: 'ai', kind: 'alert', content: COPY.safety.escalationAlert } :
-      { role: 'ai', kind: 'confirmation', content: COPY.assistant.confirmSafe(protocol.currentDay, score) }
+      exceeded
+        ? { role: 'ai', kind: 'alert', content: COPY.safety.escalationAlert }
+        : { role: 'ai', kind: 'confirmation', content: COPY.assistant.confirmSafe(protocol.currentDay, score) }
     );
   };
 
   const askQuestion = (text: string) => {
     const target = protocol;
     pushMessages(target.id, { role: 'user', kind: 'question', content: text });
-    setAssistantTyping(true);
+    updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: true }));
     const timer = window.setTimeout(() => {
       pushMessages(target.id, { role: 'ai', kind: 'answer', content: answerFor(target, text) });
-      setAssistantTyping(false);
+      updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: false }));
       replyTimers.current = replyTimers.current.filter((item) => item !== timer);
     }, ASSISTANT_REPLY_DELAY_MS);
     replyTimers.current = [...replyTimers.current, timer];
@@ -161,6 +172,9 @@ export function useProtocolState() {
     setQueuedPapers((prev) => [...prev, { id: createId('queued'), name: source, note: COPY.papers.queuedNote }]);
   };
 
+  const openPainLog = useCallback(() => setIsPainLogOpen(true), []);
+  const closePainLog = useCallback(() => setIsPainLogOpen(false), []);
+
   return {
     protocols: summaries,
     queuedPapers,
@@ -174,11 +188,15 @@ export function useProtocolState() {
     setsDone: state.setsDone,
     painLogs: state.painLogs,
     escalationPaused: state.escalationPaused,
+    todayFraction,
     todayPercent,
     adherenceRate,
     dayIsComplete,
     progressionReady,
-    assistantTyping,
+    assistantTyping: state.assistantTyping ?? false,
+    isPainLogOpen,
+    openPainLog,
+    closePainLog,
     isStepComplete,
     incrementSet,
     decrementSet,

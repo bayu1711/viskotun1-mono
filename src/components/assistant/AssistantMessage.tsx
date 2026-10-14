@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MOTION } from '../../data/config';
@@ -13,7 +15,7 @@ import { ProcessingCard } from './ProcessingCard';
 
 interface AssistantMessageProps {
   message: ChatMessage;
-  onLogPain: () => void;
+  onLogPain?: () => void;
 }
 
 /** Routes a chat message to the presentational component for its role + kind. */
@@ -29,14 +31,14 @@ export function AssistantMessage({ message, onLogPain }: AssistantMessageProps) 
     <motion.div
       initial={{ opacity: 0, y: MOTION.messageOffsetY }}
       animate={{ opacity: 1, y: 0 }}
-      transition={MOTION.message}>
-      
+      transition={MOTION.message}
+    >
       {body}
-    </motion.div>);
-
+    </motion.div>
+  );
 }
 
-function renderAiMessage(message: ChatMessage, onLogPain: () => void) {
+function renderAiMessage(message: ChatMessage, onLogPain?: () => void) {
   switch (message.kind) {
     case 'text':
       return <PaperSummaryCard intro={message.content} />;

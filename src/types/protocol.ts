@@ -162,6 +162,7 @@ export interface ProtocolRuntime {
   painLogs: PainLog[];
   messages: ChatMessage[];
   escalationPaused: boolean;
+  assistantTyping?: boolean;
 }
 
 export interface ProtocolSummary {
@@ -172,6 +173,7 @@ export interface ProtocolSummary {
   currentDay: number;
   totalDays: number;
   todayPercent: number;
+  todayFraction: number;
   streak: number;
 }
 

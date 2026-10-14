@@ -1,5 +1,6 @@
+'use client';
+
 import React from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useProtocol } from '../../contexts/ProtocolContext';
@@ -7,17 +8,20 @@ import { COPY } from '../../data/copy';
 import { useFileDrop } from '../../hooks/useFileDrop';
 import { isPdfFile } from '../../utils/files';
 import { AssistantSheet } from '../assistant/AssistantSheet';
-import { ErrorBoundary } from '../feedback/ErrorBoundary';
+import { PainLogDrawer } from '../routine/PainLogDrawer';
 import { AssistantFab } from './AssistantFab';
 import { FileDropOverlay } from './FileDropOverlay';
 import { MobileTabBar } from './MobileTabBar';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 
-export function AppShell() {
+interface AppShellProps {
+  children: React.ReactNode;
+}
+
+export function AppShell({ children }: AppShellProps) {
   const { uploadPaper } = useProtocol();
   const { openAssistant } = useAssistant();
-  const { pathname } = useLocation();
 
   const isDragging = useFileDrop((file) => {
     if (!isPdfFile(file)) {
@@ -34,17 +38,14 @@ export function AppShell() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar />
-        <main className="flex-1 pb-28">
-          <ErrorBoundary key={pathname}>
-            <Outlet />
-          </ErrorBoundary>
-        </main>
+        <main className="flex-1 pb-28">{children}</main>
         <AssistantFab />
         <MobileTabBar />
       </div>
 
       <AssistantSheet />
+      <PainLogDrawer />
       <FileDropOverlay visible={isDragging} />
-    </div>);
-
+    </div>
+  );
 }

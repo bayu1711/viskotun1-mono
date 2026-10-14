@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import NorthEastIcon from '@mui/icons-material/NorthEast';
 import { useAssistant } from '../../contexts/AssistantContext';
@@ -15,10 +17,10 @@ import { DayActions } from './DayActions';
 import { ProtocolStepRow } from './ProtocolStepRow';
 
 interface ProtocolCardProps {
-  onLogPain: () => void;
+  onLogPain?: () => void;
 }
 
-export function ProtocolCard({ onLogPain }: ProtocolCardProps) {
+export function ProtocolCard({ onLogPain }: ProtocolCardProps = {}) {
   const { protocol, escalationPaused } = useProtocol();
   const { closeAssistant } = useAssistant();
 
@@ -31,42 +33,42 @@ export function ProtocolCard({ onLogPain }: ProtocolCardProps) {
         eyebrow={COPY.protocolCard.eyebrow(protocol.phase)}
         title={COPY.protocolCard.title}
         action={
-        <CircleButton label={COPY.protocolCard.openRoutine} to={ROUTES.routine} onClick={closeAssistant}>
+          <CircleButton label={COPY.protocolCard.openRoutine} href={ROUTES.routine} onClick={closeAssistant}>
             <Icon icon={NorthEastIcon} size="md" />
           </CircleButton>
-        } />
-      
+        }
+      />
 
-      {protocol.steps.length === 0 ?
-      <EmptyState className="mt-5" title={COPY.routine.emptyStepsTitle} description={COPY.routine.emptyStepsBody} /> :
-
-      <ul className="mt-5 space-y-2">
-          {protocol.steps.map((step) =>
-        <ProtocolStepRow key={step.id} step={step} />
-        )}
+      {protocol.steps.length === 0 ? (
+        <EmptyState className="mt-5" title={COPY.routine.emptyStepsTitle} description={COPY.routine.emptyStepsBody} />
+      ) : (
+        <ul className="mt-5 space-y-2">
+          {protocol.steps.map((step) => (
+            <ProtocolStepRow key={step.id} step={step} />
+          ))}
         </ul>
-      }
+      )}
 
-      {stopRule &&
-      <Callout tone="cream" className="mt-3 rounded-tile">
+      {stopRule && (
+        <Callout tone="cream" className="mt-3 rounded-tile">
           {COPY.common.warningPrefix} {stopRule.text}
         </Callout>
-      }
+      )}
 
-      {rule &&
-      <p className="mt-3 px-1 text-xs lowercase leading-relaxed text-ink/45">
+      {rule && (
+        <p className="mt-3 px-1 text-xs lowercase leading-relaxed text-ink/45">
           {COPY.protocolCard.rulePrefix} {rule.condition.toLowerCase()} {COPY.protocolCard.ruleArrow}{' '}
           <span className="text-ink">{rule.action.toLowerCase()}</span>
         </p>
-      }
+      )}
 
       <DayActions className="mt-5 gap-2" size="md" onLogPain={onLogPain} />
 
-      {escalationPaused &&
-      <p role="status" className="mt-3 text-center text-xs lowercase text-danger">
+      {escalationPaused && (
+        <p role="status" className="mt-3 text-center text-xs lowercase text-danger">
           {COPY.safety.escalationShort}
         </p>
-      }
-    </Panel>);
-
+      )}
+    </Panel>
+  );
 }

@@ -1,4 +1,6 @@
-import React, { useId, useState } from 'react';
+'use client';
+
+import React, { useId } from 'react';
 import NorthEastIcon from '@mui/icons-material/NorthEast';
 import { Callout } from '../components/feedback/Callout';
 import { PageContainer } from '../components/layout/PageContainer';
@@ -7,7 +9,6 @@ import { DayActions } from '../components/protocol/DayActions';
 import { MissingDataBanner } from '../components/protocol/MissingDataBanner';
 import { DailyProgressBar } from '../components/routine/DailyProgressBar';
 import { HistoryCalendar } from '../components/routine/HistoryCalendar';
-import { PainLogDrawer } from '../components/routine/PainLogDrawer';
 import { PainLogList } from '../components/routine/PainLogList';
 import { TaskGrid } from '../components/routine/TaskGrid';
 import { CircleButton } from '../components/ui/CircleButton';
@@ -20,8 +21,7 @@ import { ROUTES } from '../data/navigation';
 import { stopRuleOf } from '../utils/protocolMetrics';
 
 export function RoutinePage() {
-  const { protocol, currentDay, totalDays, todayPercent, escalationPaused } = useProtocol();
-  const [isPainLogOpen, setIsPainLogOpen] = useState(false);
+  const { protocol, currentDay, totalDays, todayPercent, escalationPaused, openPainLog } = useProtocol();
   const historyHeadingId = useId();
   const painHeadingId = useId();
   const stopRule = stopRuleOf(protocol);
@@ -36,21 +36,21 @@ export function RoutinePage() {
 
           <div className="mt-5 space-y-2.5">
             <MissingDataBanner />
-            {escalationPaused &&
-            <Callout tone="blush" role="alert">
+            {escalationPaused && (
+              <Callout tone="blush" role="alert">
                 {COPY.safety.escalationAlert}
               </Callout>
-            }
+            )}
           </div>
 
           <TaskGrid steps={protocol.steps} />
-          <DayActions className="mt-2.5" onLogPain={() => setIsPainLogOpen(true)} />
+          <DayActions className="mt-2.5" onLogPain={openPainLog} />
 
-          {stopRule &&
-          <p className="mt-4 px-1 text-sm lowercase text-ink/45">
+          {stopRule && (
+            <p className="mt-4 px-1 text-sm lowercase text-ink/45">
               {COPY.common.warningPrefix} {stopRule.text}
             </p>
-          }
+          )}
         </div>
 
         <aside className="space-y-2.5">
@@ -60,11 +60,12 @@ export function RoutinePage() {
               eyebrow={COPY.routine.historyEyebrow}
               title={COPY.routine.historyTitle}
               action={
-              <CircleButton label={COPY.routine.openDashboard} to={ROUTES.dashboard}>
+                <CircleButton label={COPY.routine.openDashboard} href={ROUTES.dashboard}>
                   <Icon icon={NorthEastIcon} size="md" />
                 </CircleButton>
-              } />
-            
+              }
+            />
+
             <div className="mt-5">
               <HistoryCalendar />
             </div>
@@ -76,8 +77,6 @@ export function RoutinePage() {
           </Panel>
         </aside>
       </div>
-
-      <PainLogDrawer open={isPainLogOpen} onClose={() => setIsPainLogOpen(false)} />
-    </PageContainer>);
-
+    </PageContainer>
+  );
 }

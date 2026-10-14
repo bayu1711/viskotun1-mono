@@ -1,14 +1,18 @@
 /** Colors resolve to CSS variables declared in index.css so JS, CSS and Tailwind share one source. */
-const withAlpha = (variable) => `rgb(var(${variable}) / <alpha-value>)`
+const withAlpha = (variable) => `rgb(var(${variable}) / <alpha-value>)`;
 
-export default {content: [
-  './index.html',
-  './src/**/*.{js,ts,jsx,tsx}'
-],
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './src/**/*.{js,ts,jsx,tsx}',
+    './src/app/**/*.{js,ts,jsx,tsx}',
+    './src/components/**/*.{js,ts,jsx,tsx}',
+    './src/pages/**/*.{js,ts,jsx,tsx}',
+  ],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Helvetica Neue"', 'Helvetica', 'Inter', 'Arial', 'ui-sans-serif', 'sans-serif'],
+        sans: ['var(--font-inter)', '"Helvetica Neue"', 'Helvetica', 'Inter', 'Arial', 'ui-sans-serif', 'sans-serif'],
       },
       colors: {
         ink: withAlpha('--color-ink'),
@@ -94,4 +98,4 @@ export default {content: [
       },
     },
   },
-}
+};
