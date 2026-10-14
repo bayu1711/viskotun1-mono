@@ -278,6 +278,20 @@ export const COPY = {
     scopeNote:
       'Studies where researchers applied a measurable protocol to human participants (clinical rehab, pharmacology, sleep, nutrition, cognitive habits). Non-human or theoretical papers without an executable protocol will be declined.'
   },
+  extraction: {
+    title: 'protocol extraction',
+    parsing: 'analyzing paper with Gemini 1.5...',
+    success: 'protocol successfully extracted and activated',
+    declinedTitle: 'paper declined by gatekeeper',
+    declinedPrefix: 'Declined: ',
+    declinedNonHuman:
+      'This study appears to be non-human (in vitro or animal model) or purely observational. Protocol Engine only builds executable protocols from interventional studies conducted on human participants.',
+    declinedTheoretical:
+      'This paper appears to be theoretical physics, mathematics, or cosmology without human subject testing. Protocol Engine is specialized for human clinical, rehabilitation, and lifestyle interventions.',
+    errorTitle: 'extraction failed',
+    errorGeneral:
+      'Could not extract a protocol from this document. Please verify it is an interventional study or try another PDF.'
+  },
   errors: {
     boundaryTitle: 'something went wrong',
     boundaryBody: 'this view failed to load. your logs are safe.',

@@ -189,4 +189,4 @@ export interface ProtocolSummary {
   streak: number;
 }
 
-export type NewChatMessage = Omit<ChatMessage, 'id' | 'timestamp'>;
+export type NewChatMessage = Omit<ChatMessage, 'id' | 'timestamp'> & { id?: string };
