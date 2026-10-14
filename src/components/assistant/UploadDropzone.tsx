@@ -1,3 +1,5 @@
+'use client';
+
 import React, { type DragEvent, useRef, useState } from 'react';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import { COPY } from '../../data/copy';
@@ -42,26 +44,42 @@ export function UploadDropzone({ onFile }: UploadDropzoneProps) {
       }}
       onDragLeave={() => setIsHovering(false)}
       onDrop={handleDrop}
-      className={cn('flex flex-col items-center rounded-card border border-dashed px-5 py-6 text-center transition-colors', {
-        'border-ink bg-mint': isHovering,
-        'border-danger bg-blush/50': !isHovering && error,
-        'border-ink/30 bg-canvas': !isHovering && !error
-      })}>
-      
+      className={cn(
+        'flex flex-col items-center rounded-card border border-dashed px-5 py-6 text-center transition-colors',
+        {
+          'border-ink bg-mint': isHovering,
+          'border-danger bg-blush/50': !isHovering && error,
+          'border-ink/30 bg-canvas': !isHovering && !error
+        }
+      )}
+    >
       <IconTile variant="outline" shape="circle" size={48}>
         <Icon icon={UploadFileOutlinedIcon} size="xl" />
       </IconTile>
       <p className="mt-3 text-lg lowercase">{COPY.upload.title}</p>
       <p className="mt-0.5 text-xs lowercase text-ink/45">{COPY.upload.body}</p>
-      {error &&
-      <p role="alert" className="mt-2 text-xs lowercase text-danger">
+
+      {error && (
+        <p role="alert" className="mt-2 text-xs lowercase text-danger">
           {error}
         </p>
-      }
+      )}
+
       <PillButton size="sm" className="mt-4" onClick={() => inputRef.current?.click()}>
         {COPY.upload.browse}
       </PillButton>
-      <HiddenPdfInput ref={inputRef} onFile={acceptFile} />
-    </div>);
 
+      <div className="mt-4 rounded-tile border border-ink/10 bg-white/70 p-3 text-left">
+        <p className="flex items-center gap-1.5 text-2xs font-medium lowercase tracking-wide text-ink/70">
+          <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
+          {COPY.upload.scopeBadge}
+        </p>
+        <p className="mt-1 text-2xs leading-relaxed text-ink/50">
+          {COPY.upload.scopeNote}
+        </p>
+      </div>
+
+      <HiddenPdfInput ref={inputRef} onFile={acceptFile} />
+    </div>
+  );
 }

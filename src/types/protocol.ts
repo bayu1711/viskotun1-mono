@@ -15,12 +15,24 @@ export interface PaperMeta {
 
 export type Tone = 'ink' | 'cream' | 'mint';
 export type StepIconKey =
-'straight-knee' |
-'bent-knee' |
-'stretch' |
-'serum' |
-'microneedle' |
-'shampoo';
+  | 'straight-knee'
+  | 'bent-knee'
+  | 'stretch'
+  | 'serum'
+  | 'microneedle'
+  | 'shampoo'
+  | 'fitness'
+  | 'pill'
+  | 'timer'
+  | 'heart'
+  | 'science'
+  | 'water'
+  | 'brain'
+  | 'sleep'
+  | 'sun'
+  | 'diet'
+  | 'walk'
+  | 'check';
 
 export interface ProtocolStep {
   id: string;

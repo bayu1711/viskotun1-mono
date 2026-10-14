@@ -32,7 +32,8 @@ export const COPY = {
     todaySummaryLabel: "Today's progress",
     dayOfTotal: (day: number, total: number) => `day ${day} / ${total}`,
     dropTitle: 'drop to extract',
-    dropSubtitle: "we'll isolate the methods & build a protocol"
+    dropSubtitle: "we'll isolate the methods & build a protocol",
+    dropScope: 'interventional human research · clinical trials, RCTs & behavioral protocols'
   },
   switcher: {
     heading: 'your papers',
@@ -272,7 +273,10 @@ export const COPY = {
     title: 'drop a research pdf',
     body: 'or paste a doi / pubmed link below · methods only, no hallucinated gaps',
     browse: 'browse files',
-    invalidType: 'only pdf files are supported — please choose a .pdf'
+    invalidType: 'only pdf files are supported — please choose a .pdf',
+    scopeBadge: 'human interventional studies only',
+    scopeNote:
+      'Studies where researchers applied a measurable protocol to human participants (clinical rehab, pharmacology, sleep, nutrition, cognitive habits). Non-human or theoretical papers without an executable protocol will be declined.'
   },
   errors: {
     boundaryTitle: 'something went wrong',

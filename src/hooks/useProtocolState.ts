@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ASSISTANT_REPLY_DELAY_MS, DEFAULT_CONFIRMATION_PAIN_SCORE } from '../data/config';
 import { COPY } from '../data/copy';
-import { initialQueuedPapers, protocols } from '../data/protocols';
+import { initialQueuedPapers, protocols as initialProtocols } from '../data/protocols';
 import type {
   ChatMessage,
   NewChatMessage,
+  Protocol,
   ProtocolRuntime,
   ProtocolSummary,
   QueuedPaper
@@ -20,9 +21,9 @@ import {
 } from '../utils/protocolMetrics';
 import { nowLabel } from '../utils/time';
 
-function createInitialRuntime(): Record<string, ProtocolRuntime> {
+function createInitialRuntime(items: Protocol[]): Record<string, ProtocolRuntime> {
   return Object.fromEntries(
-    protocols.map((item) => [
+    items.map((item) => [
       item.id,
       {
         setsDone: { ...item.initialSetsDone },
@@ -41,10 +42,11 @@ function buildMessage(message: NewChatMessage): ChatMessage {
 
 /** All protocol session state + actions. Only raw state is stored; metrics are derived on render. */
 export function useProtocolState() {
-  const [activeProtocolId, setActiveProtocol] = useState(protocols[0].id);
+  const [protocolList, setProtocolList] = useState<Protocol[]>(initialProtocols);
+  const [activeProtocolId, setActiveProtocol] = useState(initialProtocols[0].id);
   const [queuedPapers, setQueuedPapers] = useState<QueuedPaper[]>(initialQueuedPapers);
   const [isPainLogOpen, setIsPainLogOpen] = useState(false);
-  const [runtime, setRuntime] = useState(createInitialRuntime);
+  const [runtime, setRuntime] = useState(() => createInitialRuntime(initialProtocols));
   const replyTimers = useRef<number[]>([]);
 
   // Safe timer cleanup on unmount
@@ -55,11 +57,26 @@ export function useProtocolState() {
     };
   }, []);
 
-  const protocol = protocols.find((item) => item.id === activeProtocolId) ?? protocols[0];
-  const state = runtime[protocol.id];
+  const protocol = protocolList.find((item) => item.id === activeProtocolId) ?? protocolList[0];
+  const state = runtime[protocol.id] ?? {
+    setsDone: {},
+    painLogs: [],
+    messages: [],
+    escalationPaused: false,
+    assistantTyping: false
+  };
 
   const updateRuntime = useCallback((id: string, update: (prev: ProtocolRuntime) => ProtocolRuntime) => {
-    setRuntime((prev) => ({ ...prev, [id]: update(prev[id]) }));
+    setRuntime((prev) => {
+      const current = prev[id] ?? {
+        setsDone: {},
+        painLogs: [],
+        messages: [],
+        escalationPaused: false,
+        assistantTyping: false
+      };
+      return { ...prev, [id]: update(current) };
+    });
   }, []);
 
   const pushMessages = useCallback(
@@ -81,8 +98,9 @@ export function useProtocolState() {
 
   const summaries = useMemo<ProtocolSummary[]>(
     () =>
-      protocols.map((item) => {
-        const fraction = completionOf(item, runtime[item.id].setsDone);
+      protocolList.map((item) => {
+        const itemState = runtime[item.id]?.setsDone ?? {};
+        const fraction = completionOf(item, itemState);
         return {
           id: item.id,
           title: item.title,
@@ -95,7 +113,7 @@ export function useProtocolState() {
           todayPercent: toPercent(fraction)
         };
       }),
-    [runtime]
+    [protocolList, runtime]
   );
 
   const findStep = (stepId: string) => protocol.steps.find((step) => step.id === stepId);
@@ -163,7 +181,29 @@ export function useProtocolState() {
     replyTimers.current = [...replyTimers.current, timer];
   };
 
-  const uploadPaper = (source: string) => {
+  const addProtocol = useCallback((newProtocol: Protocol) => {
+    setProtocolList((prev) => {
+      const exists = prev.some((p) => p.id === newProtocol.id);
+      return exists ? prev.map((p) => (p.id === newProtocol.id ? newProtocol : p)) : [...prev, newProtocol];
+    });
+    setRuntime((prev) => ({
+      ...prev,
+      [newProtocol.id]: {
+        setsDone: { ...(newProtocol.initialSetsDone ?? {}) },
+        painLogs: newProtocol.initialPainLogs ?? [],
+        messages: newProtocol.initialMessages ?? [],
+        escalationPaused: false,
+        assistantTyping: false
+      }
+    }));
+    setActiveProtocol(newProtocol.id);
+  }, []);
+
+  const uploadPaper = (source: string, extractedProtocol?: Protocol) => {
+    if (extractedProtocol) {
+      addProtocol(extractedProtocol);
+      return;
+    }
     pushMessages(
       protocol.id,
       { role: 'user', kind: 'file', content: source },
@@ -204,7 +244,8 @@ export function useProtocolState() {
     markTodayComplete,
     logPain,
     askQuestion,
-    uploadPaper
+    uploadPaper,
+    addProtocol
   };
 }
 
