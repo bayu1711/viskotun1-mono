@@ -69,6 +69,9 @@ function getFirestore(): Firestore | null {
     process.env.GOOGLE_CLOUD_PROJECT ||
     process.env.GCP_PROJECT_ID ||
     process.env.GCLOUD_PROJECT;
+  const databaseId =
+    process.env.FIRESTORE_DATABASE_ID ||
+    process.env.GOOGLE_CLOUD_FIRESTORE_DATABASE;
 
   // If no GCP project ID is specified and not in an emulator, treat as unconfigured local dev
   if (!projectId && !process.env.FIRESTORE_EMULATOR_HOST) {
@@ -78,7 +81,8 @@ function getFirestore(): Firestore | null {
 
   try {
     firestoreInstance = new Firestore({
-      projectId: projectId || undefined
+      projectId: projectId || undefined,
+      databaseId: databaseId || undefined
     });
     firestoreStatus = 'connected';
     return firestoreInstance;
