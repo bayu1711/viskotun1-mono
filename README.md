@@ -59,6 +59,33 @@ npm run build
 npm run start
 ```
 
+### Google Cloud Run Deployment
+
+Protocol Engine uses Next.js 14 `output: 'standalone'` and a multi-stage Dockerfile producing a minimal (<150MB) production container image.
+
+#### 1. One-Click Deploy via Google Cloud Run
+Deploy directly from local source to Google Cloud Run using Cloud Build:
+
+```bash
+gcloud run deploy protocol-engine \
+  --source . \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --set-env-vars GEMINI_API_KEY="your-gemini-api-key",NODE_ENV="production"
+```
+
+#### 2. Local Container Build & Verification
+You can build and test the container image locally with Docker:
+
+```bash
+# Build the production image
+docker build -t protocol-engine:latest .
+
+# Run container locally on port 3000
+docker run -p 3000:3000 -e GEMINI_API_KEY="your-gemini-api-key" protocol-engine:latest
+```
+
 ---
 
 ## Project Structure
