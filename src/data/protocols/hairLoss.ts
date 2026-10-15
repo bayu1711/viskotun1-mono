@@ -107,10 +107,10 @@ export const hairLossProtocol: Protocol = {
     escalationThreshold: 4,
     escalationMessage: 'Scalp irritation threshold exceeded (≥ 4/10). Escalation paused. Pause microneedling for 1 week and continue minoxidil only.'
   },
-  initialPainLogs: [
-  { id: 'hair-pain-1', day: 16, score: 2, note: 'Mild redness after rolling.', loggedAt: 'Mon' },
-  { id: 'hair-pain-2', day: 19, score: 1, note: 'Light itch from minoxidil.', loggedAt: 'Thu' },
-  { id: 'hair-pain-3', day: 22, score: 1, note: '', loggedAt: 'Sun' }],
+  initialFeedbackLogs: [
+  { id: 'hair-log-1', day: 16, score: 2, note: 'Mild redness after rolling.', loggedAt: 'Mon' },
+  { id: 'hair-log-2', day: 19, score: 1, note: 'Light itch from minoxidil.', loggedAt: 'Thu' },
+  { id: 'hair-log-3', day: 22, score: 1, note: '', loggedAt: 'Sun' }],
 
   initialMessages: [
   {

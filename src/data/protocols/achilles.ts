@@ -100,10 +100,10 @@ export const achillesProtocol: Protocol = {
     escalationThreshold: 4,
     escalationMessage: 'Tendon pain threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce load by 20% tomorrow or consult your therapist.'
   },
-  initialPainLogs: [
-  { id: 'ach-pain-1', day: 1, score: 3, note: 'Tender at first drop.', loggedAt: 'Sat' },
-  { id: 'ach-pain-2', day: 2, score: 2, note: '', loggedAt: 'Sun' },
-  { id: 'ach-pain-3', day: 3, score: 1, note: 'Much easier today.', loggedAt: 'Mon' }],
+  initialFeedbackLogs: [
+  { id: 'ach-log-1', day: 1, score: 3, note: 'Tender at first drop.', loggedAt: 'Sat' },
+  { id: 'ach-log-2', day: 2, score: 2, note: '', loggedAt: 'Sun' },
+  { id: 'ach-log-3', day: 3, score: 1, note: 'Much easier today.', loggedAt: 'Mon' }],
 
   initialMessages: [
   {

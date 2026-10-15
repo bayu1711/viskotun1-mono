@@ -114,9 +114,9 @@ export const FALLBACK_CREATINE_SLEEP: Protocol = {
     escalationThreshold: 3,
     escalationMessage: 'Gastric distress threshold exceeded (≥ 3/10). Escalation paused. Split daily 5g dose into two 2.5g servings with meals.'
   },
-  initialPainLogs: [
+  initialFeedbackLogs: [
     {
-      id: 'cr-pain-1',
+      id: 'cr-log-1',
       day: 1,
       score: 1,
       note: 'Mild fullness after morning dose, mental alertness maintained.',
@@ -311,9 +311,9 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
     escalationThreshold: 4,
     escalationMessage: 'Pain threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce resistance load by 20% tomorrow or consult your therapist.'
   },
-  initialPainLogs: [
+  initialFeedbackLogs: [
     {
-      id: 'pat-pain-1',
+      id: 'pat-log-1',
       day: 1,
       score: 2,
       note: 'Mild anterior knee warmth during last set, settled within 10 min.',
@@ -531,6 +531,7 @@ export function generateFallbackProtocol(source: string): Protocol {
       escalationThreshold: 4,
       escalationMessage: 'Symptom threshold exceeded. Escalation paused. Reduce dosage or intensity by 20% tomorrow.'
     },
+    initialFeedbackLogs: [],
     initialPainLogs: [],
     initialMessages: [
       {

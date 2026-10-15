@@ -97,7 +97,7 @@ Return a JSON object conforming strictly to:
     },
     "dayHistory": [],
     "initialSetsDone": {},
-    "initialPainLogs": [],
+    "initialFeedbackLogs": [],
     "initialMessages": [
       { "id": string, "role": "user", "kind": "file", "content": string, "timestamp": string },
       { "id": string, "role": "ai", "kind": "text", "content": string, "timestamp": string },
@@ -197,7 +197,8 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
           ...parsed.protocol,
           dayHistory: parsed.protocol.dayHistory ?? [],
           initialSetsDone: parsed.protocol.initialSetsDone ?? {},
-          initialPainLogs: parsed.protocol.initialPainLogs ?? [],
+          initialFeedbackLogs: parsed.protocol.initialFeedbackLogs ?? parsed.protocol.initialPainLogs ?? [],
+          initialPainLogs: parsed.protocol.initialFeedbackLogs ?? parsed.protocol.initialPainLogs ?? [],
           feedbackMetric: parsed.protocol.feedbackMetric ?? undefined,
           initialMessages: parsed.protocol.initialMessages ?? [
             {
