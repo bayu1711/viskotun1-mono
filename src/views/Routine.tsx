@@ -8,8 +8,8 @@ import { PageHeader } from '../components/layout/PageHeader';
 import { DayActions } from '../components/protocol/DayActions';
 import { MissingDataBanner } from '../components/protocol/MissingDataBanner';
 import { DailyProgressBar } from '../components/routine/DailyProgressBar';
+import { FeedbackLogList } from '../components/routine/FeedbackLogList';
 import { HistoryCalendar } from '../components/routine/HistoryCalendar';
-import { PainLogList } from '../components/routine/PainLogList';
 import { TaskGrid } from '../components/routine/TaskGrid';
 import { CircleButton } from '../components/ui/CircleButton';
 import { Icon } from '../components/ui/Icon';
@@ -23,7 +23,7 @@ import { stopRuleOf } from '../utils/protocolMetrics';
 export function RoutinePage() {
   const { protocol, currentDay, totalDays, todayPercent, todayFraction, escalationPaused, feedbackMetric } = useProtocol();
   const historyHeadingId = useId();
-  const painHeadingId = useId();
+  const feedbackHeadingId = useId();
   const stopRule = stopRuleOf(protocol);
 
   return (
@@ -71,13 +71,13 @@ export function RoutinePage() {
             </div>
           </Panel>
 
-          <Panel aria-labelledby={painHeadingId}>
+          <Panel aria-labelledby={feedbackHeadingId}>
             <SectionHeading
-              id={painHeadingId}
+              id={feedbackHeadingId}
               eyebrow={COPY.routine.metricEyebrow(feedbackMetric.eyebrow ?? feedbackMetric.name)}
               title={COPY.routine.metricTitle(feedbackMetric.logTitle)}
             />
-            <PainLogList />
+            <FeedbackLogList />
           </Panel>
         </aside>
       </div>

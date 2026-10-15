@@ -10,7 +10,7 @@ import { useFileDrop } from '../../hooks/useFileDrop';
 import { isPdfFile } from '../../utils/files';
 import { AssistantSheet } from '../assistant/AssistantSheet';
 import { ErrorBoundary } from '../feedback/ErrorBoundary';
-import { PainLogDrawer } from '../routine/PainLogDrawer';
+import { FeedbackDrawer } from '../routine/FeedbackDrawer';
 import { AssistantFab } from './AssistantFab';
 import { FileDropOverlay } from './FileDropOverlay';
 import { MobileTabBar } from './MobileTabBar';
@@ -44,7 +44,7 @@ export function AppShell({ children }: AppShellProps) {
           <ErrorBoundary>{children}</ErrorBoundary>
         </main>
         <AssistantSheet />
-        <PainLogDrawer />
+        <FeedbackDrawer />
         <FileDropOverlay visible={isDragging} />
       </div>
     );
@@ -64,7 +64,7 @@ export function AppShell({ children }: AppShellProps) {
       </div>
 
       <AssistantSheet />
-      <PainLogDrawer />
+      <FeedbackDrawer />
       <FileDropOverlay visible={isDragging} />
     </div>
   );

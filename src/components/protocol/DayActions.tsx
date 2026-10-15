@@ -7,15 +7,16 @@ import { cn } from '../../utils/cn';
 import { PillButton } from '../ui/PillButton';
 
 interface DayActionsProps {
+  onLogFeedback?: () => void;
   onLogPain?: () => void;
   size?: 'md' | 'lg';
   className?: string;
 }
 
-/** "Mark today complete" + "log pain" pair shared by the routine page and assistant protocol card. */
-export function DayActions({ onLogPain, size = 'lg', className }: DayActionsProps) {
-  const { markTodayComplete, dayIsComplete, currentDay, openPainLog, feedbackMetric } = useProtocol();
-  const handleLogPain = onLogPain ?? openPainLog;
+/** "Mark today complete" + "log feedback" pair shared by the routine page and assistant protocol card. */
+export function DayActions({ onLogFeedback, onLogPain, size = 'lg', className }: DayActionsProps) {
+  const { markTodayComplete, dayIsComplete, currentDay, openFeedbackDrawer, openPainLog, feedbackMetric } = useProtocol();
+  const handleLog = onLogFeedback ?? onLogPain ?? openFeedbackDrawer ?? openPainLog;
 
   return (
     <div className={cn('grid grid-cols-1 gap-2.5 sm:grid-cols-2', className)}>
@@ -27,7 +28,7 @@ export function DayActions({ onLogPain, size = 'lg', className }: DayActionsProp
       >
         {dayIsComplete ? COPY.dayActions.dayLogged(currentDay) : COPY.dayActions.markComplete}
       </PillButton>
-      <PillButton size={size} variant="outline" onClick={handleLogPain} aria-haspopup="dialog">
+      <PillButton size={size} variant="outline" onClick={handleLog} aria-haspopup="dialog">
         {COPY.dayActions.logFeedback(feedbackMetric?.name)}
       </PillButton>
     </div>
