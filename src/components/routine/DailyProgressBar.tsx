@@ -2,28 +2,31 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { MOTION, PERCENT_MAX } from '../../data/config';
 import { COPY } from '../../data/copy';
-import { toFraction } from '../../utils/math';
+import { toPercent } from '../../utils/math';
 
 interface DailyProgressBarProps {
-  percent: number;
+  fraction: number;
+  percent?: number;
 }
 
-export function DailyProgressBar({ percent }: DailyProgressBarProps) {
+export function DailyProgressBar({ fraction, percent }: DailyProgressBarProps) {
+  const displayPercent = percent ?? toPercent(fraction);
+
   return (
     <div
       role="progressbar"
-      aria-valuenow={percent}
+      aria-valuenow={displayPercent}
       aria-valuemin={0}
       aria-valuemax={PERCENT_MAX}
       aria-label={COPY.routine.progressLabel}
-      className="mt-4 h-hairline w-full overflow-hidden rounded-full bg-ink/10">
-      
+      className="mt-4 h-hairline w-full overflow-hidden rounded-full bg-ink/10"
+    >
       <motion.div
         className="h-full w-full origin-left bg-ink"
         initial={false}
-        animate={{ scaleX: toFraction(percent) }}
-        transition={MOTION.progress} />
-      
-    </div>);
-
+        animate={{ scaleX: fraction }}
+        transition={MOTION.progress}
+      />
+    </div>
+  );
 }

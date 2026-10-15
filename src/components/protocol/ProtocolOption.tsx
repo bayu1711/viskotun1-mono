@@ -3,7 +3,6 @@ import CheckIcon from '@mui/icons-material/Check';
 import { COPY } from '../../data/copy';
 import type { ProtocolSummary } from '../../types/protocol';
 import { cn } from '../../utils/cn';
-import { toFraction } from '../../utils/math';
 import { Icon } from '../ui/Icon';
 import { ProgressRing } from '../ui/ProgressRing';
 import { StepIcon } from '../ui/StepIcon';
@@ -28,7 +27,7 @@ export function ProtocolOption({ protocol, active, onSelect }: ProtocolOptionPro
           active && 'bg-canvas'
         )}>
         
-        <ProgressRing value={toFraction(protocol.todayPercent)} size={40} decorative>
+        <ProgressRing value={protocol.todayFraction} size={40} decorative>
           <StepIcon icon={protocol.icon} size="sm" />
         </ProgressRing>
         <PaperRowText

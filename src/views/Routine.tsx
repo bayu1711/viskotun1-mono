@@ -21,7 +21,7 @@ import { ROUTES } from '../data/navigation';
 import { stopRuleOf } from '../utils/protocolMetrics';
 
 export function RoutinePage() {
-  const { protocol, currentDay, totalDays, todayPercent, escalationPaused, openPainLog } = useProtocol();
+  const { protocol, currentDay, totalDays, todayPercent, todayFraction, escalationPaused, openPainLog } = useProtocol();
   const historyHeadingId = useId();
   const painHeadingId = useId();
   const stopRule = stopRuleOf(protocol);
@@ -31,7 +31,7 @@ export function RoutinePage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-main-aside lg:gap-10">
         <div>
           <PageHeader eyebrow={COPY.routine.eyebrow(currentDay, totalDays)} title={COPY.routine.title(todayPercent)}>
-            <DailyProgressBar percent={todayPercent} />
+            <DailyProgressBar fraction={todayFraction} percent={todayPercent} />
           </PageHeader>
 
           <div className="mt-5 space-y-2.5">
