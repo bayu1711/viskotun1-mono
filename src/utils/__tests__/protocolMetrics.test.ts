@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest';
+import { DEFAULT_FEEDBACK_METRIC } from '../../data/config';
 import type { PainLog, Protocol } from '../../types/protocol';
 import {
   adherenceOf,
   clampPainScore,
   completionOf,
   complianceLevel,
+  exceedsFeedbackThreshold,
   exceedsPainThreshold,
   isProgressionReady,
-  progressionStatus
+  progressionStatus,
+  resolveFeedbackMetric
 } from '../protocolMetrics';
 
 const mockProtocol: Protocol = {
@@ -140,17 +143,49 @@ describe('protocolMetrics', () => {
     });
   });
 
-  describe('pain thresholds & safety', () => {
-    it('flags pain scores >= 4 as exceeding threshold', () => {
+  describe('feedback metric resolution & thresholds', () => {
+    it('resolves default feedback metric when protocol omits custom metric', () => {
+      const metric = resolveFeedbackMetric(mockProtocol);
+      expect(metric.name).toBe(DEFAULT_FEEDBACK_METRIC.name);
+      expect(metric.escalationThreshold).toBe(DEFAULT_FEEDBACK_METRIC.escalationThreshold);
+    });
+
+    it('resolves custom feedback metric when defined on protocol', () => {
+      const customProtocol: Protocol = {
+        ...mockProtocol,
+        feedbackMetric: {
+          name: 'GI distress',
+          label: 'GI distress / gastric tolerance',
+          eyebrow: 'tolerance',
+          logTitle: 'distress',
+          minLabel: '0 · none',
+          maxLabel: '10 · severe',
+          maxScore: 10,
+          escalationThreshold: 3
+        }
+      };
+      const metric = resolveFeedbackMetric(customProtocol);
+      expect(metric.name).toBe('GI distress');
+      expect(metric.escalationThreshold).toBe(3);
+    });
+
+    it('flags scores using default threshold (>= 4)', () => {
       expect(exceedsPainThreshold(3)).toBe(false);
       expect(exceedsPainThreshold(4)).toBe(true);
       expect(exceedsPainThreshold(7)).toBe(true);
     });
 
-    it('clamps pain scores to 0-10 range', () => {
+    it('flags scores using custom threshold (e.g. >= 3 for GI distress)', () => {
+      expect(exceedsFeedbackThreshold(2, 3)).toBe(false);
+      expect(exceedsFeedbackThreshold(3, 3)).toBe(true);
+      expect(exceedsFeedbackThreshold(5, 3)).toBe(true);
+    });
+
+    it('clamps scores to 0-10 range by default and respects custom max', () => {
       expect(clampPainScore(-5)).toBe(0);
       expect(clampPainScore(15)).toBe(10);
       expect(clampPainScore(5)).toBe(5);
+      expect(clampPainScore(12, 8)).toBe(8);
     });
   });
 
@@ -181,13 +216,23 @@ describe('protocolMetrics', () => {
       expect(isProgressionReady(logs, false)).toBe(true);
     });
 
-    it('returns false when any of the last 3 logs is >= 2', () => {
+    it('returns false when any of the last 3 logs is >= 2 with default threshold', () => {
       const logs: PainLog[] = [
         { id: '1', day: 1, score: 1, note: '', loggedAt: '' },
         { id: '2', day: 2, score: 2, note: '', loggedAt: '' },
         { id: '3', day: 3, score: 0, note: '', loggedAt: '' }
       ];
       expect(isProgressionReady(logs, false)).toBe(false);
+    });
+
+    it('supports custom progression thresholds (e.g. < 3 allows score of 2)', () => {
+      const logs: PainLog[] = [
+        { id: '1', day: 1, score: 1, note: '', loggedAt: '' },
+        { id: '2', day: 2, score: 2, note: '', loggedAt: '' },
+        { id: '3', day: 3, score: 2, note: '', loggedAt: '' }
+      ];
+      expect(isProgressionReady(logs, false, 3)).toBe(true);
+      expect(isProgressionReady(logs, false, 2)).toBe(false);
     });
   });
 
