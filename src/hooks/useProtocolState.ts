@@ -15,6 +15,7 @@ import type {
   QueuedPaper
 } from '../types/protocol';
 import { answerFor } from '../utils/assistant';
+import { isEdgeGemmaAvailable, queryEdgeGemma } from '../utils/edgeGemma';
 import { createId } from '../utils/id';
 import { clamp, toPercent } from '../utils/math';
 import {
@@ -466,6 +467,27 @@ export function useProtocolState() {
       pushMessages(target.id, { role: 'user', kind: 'question', content: text });
       updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: true }));
 
+      // Tier 1: Try Edge Gemma (Chrome Built-in AI on-device)
+      try {
+        const canUseEdgeGemma = await isEdgeGemmaAvailable();
+        if (canUseEdgeGemma) {
+          const edgeAnswer = await queryEdgeGemma(target, text);
+          if (edgeAnswer) {
+            pushMessages(target.id, {
+              role: 'ai',
+              kind: 'answer',
+              content: edgeAnswer,
+              engine: 'on-device-gemma',
+              source: 'On-Device Gemma (Chrome Built-in AI)'
+            });
+            return;
+          }
+        }
+      } catch (edgeErr) {
+        console.info('[useProtocolState] Edge Gemma bypassed, routing to API:', edgeErr);
+      }
+
+      // Tier 2: Cloud Gemini / Server Gemma Route Handler
       try {
         const res = await fetch('/api/assistant', {
           method: 'POST',
@@ -486,13 +508,33 @@ export function useProtocolState() {
         if (res.ok) {
           const data = await res.json();
           if (data?.answer) {
-            pushMessages(target.id, { role: 'ai', kind: 'answer', content: data.answer });
+            pushMessages(target.id, {
+              role: 'ai',
+              kind: 'answer',
+              content: data.answer,
+              engine: data.engine ?? 'cloud-gemini',
+              source: data.source ?? 'Methods & Interventions Section'
+            });
             return;
           }
         }
-        pushMessages(target.id, { role: 'ai', kind: 'answer', content: answerFor(target, text) });
+
+        // Tier 3: Deterministic Local Paper Rule Engine
+        pushMessages(target.id, {
+          role: 'ai',
+          kind: 'answer',
+          content: answerFor(target, text),
+          engine: 'local-rules',
+          source: 'Methods & Interventions Section'
+        });
       } catch {
-        pushMessages(target.id, { role: 'ai', kind: 'answer', content: answerFor(target, text) });
+        pushMessages(target.id, {
+          role: 'ai',
+          kind: 'answer',
+          content: answerFor(target, text),
+          engine: 'local-rules',
+          source: 'Methods & Interventions Section'
+        });
       } finally {
         updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: false }));
       }

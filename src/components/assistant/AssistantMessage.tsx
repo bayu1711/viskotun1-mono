@@ -46,7 +46,7 @@ function renderAiMessage(message: ChatMessage) {
     case 'processing':
       return <ProcessingCard source={message.content} createdAt={message.createdAt ?? 0} />;
     case 'answer':
-      return <AnswerBubble content={message.content} />;
+      return <AnswerBubble content={message.content} engine={message.engine} source={message.source} />;
     case 'confirmation':
       return <ConfirmationCard content={message.content} />;
     case 'alert':
