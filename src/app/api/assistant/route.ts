@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { answerFor } from '../../../utils/assistant';
 import type { Protocol } from '../../../types/protocol';
+import { getEffectiveGuardrails } from '@/server/guardrailLedger';
 
 export async function POST(request: Request) {
   try {
@@ -22,7 +23,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Question is required' }, { status: 400 });
     }
 
+    const activePolicy = await getEffectiveGuardrails();
+
     const systemInstruction = `You are a clinical study safety assistant for the research paper protocol "${protocolTitle || 'Study'}".
+Clinical Policy Standard (v${activePolicy.version}):
+- Clinical Advisory: ${activePolicy.clinicalDisclaimer}
+- Safety Lockout: If the user reports symptom/pain intensity exceeding ${activePolicy.painEscalationThreshold}/10, escalation must be paused with a ${activePolicy.loadReductionPercent}% load reduction recommendation.
 Context from the paper:
 Protocol: ${protocolTitle || 'Active Protocol'}
 Steps: ${JSON.stringify(steps || [])}

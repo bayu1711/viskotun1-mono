@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { Protocol } from '../types/protocol';
 import { generateFallbackProtocol, isTheoreticalOrNonHuman } from './fallbackProtocols';
+import { getEffectiveGuardrails } from './guardrailLedger';
 
 export interface ExtractInput {
   file?: File | null;
@@ -162,6 +163,23 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
   const sourceName = input.file ? input.file.name : input.url || input.text || 'uploaded-document.pdf';
   const apiKey = process.env.GEMINI_API_KEY;
 
+  // 1. Resolve live policy from Cloud Firestore Guardrail Ledger
+  const activePolicy = await getEffectiveGuardrails();
+
+  // Dynamic gatekeeper check against live Firestore policy banned keywords
+  const lowerSource = sourceName.toLowerCase();
+  const matchedBannedKeyword = activePolicy.bannedKeywords.find((kw) =>
+    lowerSource.includes(kw.toLowerCase())
+  );
+  if (matchedBannedKeyword) {
+    return {
+      success: true,
+      eligible: false,
+      rejectionReason: `Paper declined: Matched restricted non-human / theoretical policy criterion ("${matchedBannedKeyword}"). Protocol Engine enforces interventional human science only per clinical policy v${activePolicy.version}.`,
+      source: sourceName
+    };
+  }
+
   // Gatekeeper local pre-check for non-human / theoretical keywords
   const localCheck = isTheoreticalOrNonHuman(sourceName);
   if (localCheck.declined) {
@@ -185,6 +203,11 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
         }
       });
 
+      const dynamicPolicyInstruction = `\n### ACTIVE CLINICAL GUARDRAIL POLICY (Version: ${activePolicy.version}):
+- Escalation Threshold: If subjective discomfort/pain exceeds ${activePolicy.painEscalationThreshold}/10, escalation MUST be paused with a ${activePolicy.loadReductionPercent}% load reduction.
+- Mandatory Clinical Disclaimer: "${activePolicy.clinicalDisclaimer}"
+- Banned criteria: Studies matching [${activePolicy.bannedKeywords.join(', ')}] MUST be marked eligible=false.`;
+
       let promptParts: (string | { inlineData: { data: string; mimeType: string } })[] = [];
 
       if (input.file) {
@@ -198,11 +221,13 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
             }
           },
           SYSTEM_PROMPT,
+          dynamicPolicyInstruction,
           `Analyze this attached PDF (${input.file.name}). First check the strict gatekeeper criteria. If interventional human science, extract the full protocol.`
         ];
       } else {
         promptParts = [
           SYSTEM_PROMPT,
+          dynamicPolicyInstruction,
           `Analyze this paper link or text: ${input.url || input.text}. First check gatekeeper criteria, then extract the protocol if eligible.`
         ];
       }
@@ -232,7 +257,13 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
           dayHistory: parsed.protocol.dayHistory ?? [],
           initialSetsDone: parsed.protocol.initialSetsDone ?? {},
           initialFeedbackLogs: parsed.protocol.initialFeedbackLogs ?? [],
-          feedbackMetric: parsed.protocol.feedbackMetric ?? undefined,
+          feedbackMetric: parsed.protocol.feedbackMetric
+            ? {
+                ...parsed.protocol.feedbackMetric,
+                escalationThreshold: activePolicy.painEscalationThreshold,
+                escalationMessage: activePolicy.escalationAlertMessage
+              }
+            : undefined,
           initialMessages: parsed.protocol.initialMessages ?? [
             {
               id: `${parsed.protocol.id}-msg-1`,
@@ -272,6 +303,14 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
 
   // Development / fallback mode: provides instant, calibrated protocol extraction
   const fallbackProtocol = generateFallbackProtocol(sourceName);
+  if (fallbackProtocol.feedbackMetric) {
+    fallbackProtocol.feedbackMetric = {
+      ...fallbackProtocol.feedbackMetric,
+      escalationThreshold: activePolicy.painEscalationThreshold,
+      escalationMessage: activePolicy.escalationAlertMessage
+    };
+  }
+
   return {
     success: true,
     eligible: true,
