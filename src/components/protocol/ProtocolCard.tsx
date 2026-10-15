@@ -16,11 +16,7 @@ import { SectionHeading } from '../ui/SectionHeading';
 import { DayActions } from './DayActions';
 import { ProtocolStepRow } from './ProtocolStepRow';
 
-interface ProtocolCardProps {
-  onLogPain?: () => void;
-}
-
-export function ProtocolCard({ onLogPain }: ProtocolCardProps = {}) {
+export function ProtocolCard() {
   const { protocol, escalationPaused } = useProtocol();
   const { closeAssistant } = useAssistant();
 
@@ -62,7 +58,7 @@ export function ProtocolCard({ onLogPain }: ProtocolCardProps = {}) {
         </p>
       )}
 
-      <DayActions className="mt-5 gap-2" size="md" onLogPain={onLogPain} />
+      <DayActions className="mt-5 gap-2" size="md" />
 
       {escalationPaused && (
         <p role="status" className="mt-3 text-center text-xs lowercase text-danger">

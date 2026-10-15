@@ -15,16 +15,15 @@ import { ProcessingCard } from './ProcessingCard';
 
 interface AssistantMessageProps {
   message: ChatMessage;
-  onLogPain?: () => void;
 }
 
 /** Routes a chat message to the presentational component for its role + kind. */
-export function AssistantMessage({ message, onLogPain }: AssistantMessageProps) {
+export function AssistantMessage({ message }: AssistantMessageProps) {
   if (message.role === 'user') {
     return message.kind === 'file' ? <UserFileBubble message={message} /> : <UserTextBubble content={message.content} />;
   }
 
-  const body = renderAiMessage(message, onLogPain);
+  const body = renderAiMessage(message);
   if (!body) return null;
 
   return (
@@ -38,12 +37,12 @@ export function AssistantMessage({ message, onLogPain }: AssistantMessageProps) 
   );
 }
 
-function renderAiMessage(message: ChatMessage, onLogPain?: () => void) {
+function renderAiMessage(message: ChatMessage) {
   switch (message.kind) {
     case 'text':
       return <PaperSummaryCard intro={message.content} />;
     case 'protocol':
-      return <ProtocolCard onLogPain={onLogPain} />;
+      return <ProtocolCard />;
     case 'processing':
       return <ProcessingCard source={message.content} createdAt={message.createdAt ?? 0} />;
     case 'answer':

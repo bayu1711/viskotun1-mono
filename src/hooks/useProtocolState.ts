@@ -285,31 +285,42 @@ export function useProtocolState() {
     [protocolList, runtime]
   );
 
-  const findStep = (stepId: string) => protocol.steps.find((step) => step.id === stepId);
+  const findStep = useCallback(
+    (stepId: string) => protocol.steps.find((step) => step.id === stepId),
+    [protocol.steps]
+  );
 
-  const isStepComplete = (stepId: string) => {
-    const step = findStep(stepId);
-    return step ? (state.setsDone[stepId] ?? 0) >= step.sets : false;
-  };
+  const isStepComplete = useCallback(
+    (stepId: string) => {
+      const step = protocol.steps.find((s) => s.id === stepId);
+      return step ? (state.setsDone[stepId] ?? 0) >= step.sets : false;
+    },
+    [protocol.steps, state.setsDone]
+  );
 
-  const updateSetCount = (stepId: string, next: (current: number, max: number) => number) => {
-    const step = findStep(stepId);
-    if (!step) return;
-    updateRuntime(protocol.id, (prev) => ({
-      ...prev,
-      setsDone: {
-        ...prev.setsDone,
-        [stepId]: clamp(next(prev.setsDone[stepId] ?? 0, step.sets), 0, step.sets)
-      }
-    }));
-  };
+  const updateSetCount = useCallback(
+    (stepId: string, next: (current: number, max: number) => number) => {
+      const step = protocol.steps.find((s) => s.id === stepId);
+      if (!step) return;
+      updateRuntime(protocol.id, (prev) => ({
+        ...prev,
+        setsDone: {
+          ...prev.setsDone,
+          [stepId]: clamp(next(prev.setsDone[stepId] ?? 0, step.sets), 0, step.sets)
+        }
+      }));
+    },
+    [protocol.id, protocol.steps, updateRuntime]
+  );
 
-  const incrementSet = (stepId: string) => updateSetCount(stepId, (current) => current + 1);
-  const decrementSet = (stepId: string) => updateSetCount(stepId, (current) => current - 1);
-  const toggleStep = (stepId: string) =>
-    updateSetCount(stepId, (current, max) => (current >= max ? 0 : max));
+  const incrementSet = useCallback((stepId: string) => updateSetCount(stepId, (current) => current + 1), [updateSetCount]);
+  const decrementSet = useCallback((stepId: string) => updateSetCount(stepId, (current) => current - 1), [updateSetCount]);
+  const toggleStep = useCallback(
+    (stepId: string) => updateSetCount(stepId, (current, max) => (current >= max ? 0 : max)),
+    [updateSetCount]
+  );
 
-  const markTodayComplete = () => {
+  const markTodayComplete = useCallback(() => {
     const allSetsDone = Object.fromEntries(protocol.steps.map((step) => [step.id, step.sets]));
     updateRuntime(protocol.id, (prev) => ({ ...prev, setsDone: allSetsDone }));
     const latestScore = state.painLogs[state.painLogs.length - 1]?.score ?? DEFAULT_CONFIRMATION_PAIN_SCORE;
@@ -318,58 +329,64 @@ export function useProtocolState() {
       kind: 'confirmation',
       content: COPY.assistant.confirmLogged(protocol.currentDay, latestScore)
     });
-  };
+  }, [protocol.steps, protocol.id, protocol.currentDay, state.painLogs, updateRuntime, pushMessages]);
 
-  const logPain = (score: number, note: string) => {
-    const exceeded = exceedsPainThreshold(score);
-    updateRuntime(protocol.id, (prev) => ({
-      ...prev,
-      escalationPaused: prev.escalationPaused || exceeded,
-      painLogs: [
-        ...prev.painLogs,
-        { id: createId('pain'), day: protocol.currentDay, score, note, loggedAt: nowLabel() }
-      ]
-    }));
-    pushMessages(
-      protocol.id,
-      exceeded
-        ? { role: 'ai', kind: 'alert', content: COPY.safety.escalationAlert }
-        : { role: 'ai', kind: 'confirmation', content: COPY.assistant.confirmSafe(protocol.currentDay, score) }
-    );
-  };
+  const logPain = useCallback(
+    (score: number, note: string) => {
+      const exceeded = exceedsPainThreshold(score);
+      updateRuntime(protocol.id, (prev) => ({
+        ...prev,
+        escalationPaused: prev.escalationPaused || exceeded,
+        painLogs: [
+          ...prev.painLogs,
+          { id: createId('pain'), day: protocol.currentDay, score, note, loggedAt: nowLabel() }
+        ]
+      }));
+      pushMessages(
+        protocol.id,
+        exceeded
+          ? { role: 'ai', kind: 'alert', content: COPY.safety.escalationAlert }
+          : { role: 'ai', kind: 'confirmation', content: COPY.assistant.confirmSafe(protocol.currentDay, score) }
+      );
+    },
+    [protocol.id, protocol.currentDay, updateRuntime, pushMessages]
+  );
 
-  const askQuestion = async (text: string) => {
-    const target = protocol;
-    pushMessages(target.id, { role: 'user', kind: 'question', content: text });
-    updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: true }));
+  const askQuestion = useCallback(
+    async (text: string) => {
+      const target = protocol;
+      pushMessages(target.id, { role: 'user', kind: 'question', content: text });
+      updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: true }));
 
-    try {
-      const res = await fetch('/api/assistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: text,
-          protocolTitle: target.title,
-          faqs: target.faqs,
-          contraindications: target.contraindications,
-          steps: target.steps
-        })
-      });
+      try {
+        const res = await fetch('/api/assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: text,
+            protocolTitle: target.title,
+            faqs: target.faqs,
+            contraindications: target.contraindications,
+            steps: target.steps
+          })
+        });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data?.answer) {
-          pushMessages(target.id, { role: 'ai', kind: 'answer', content: data.answer });
-          return;
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.answer) {
+            pushMessages(target.id, { role: 'ai', kind: 'answer', content: data.answer });
+            return;
+          }
         }
+        pushMessages(target.id, { role: 'ai', kind: 'answer', content: answerFor(target, text) });
+      } catch {
+        pushMessages(target.id, { role: 'ai', kind: 'answer', content: answerFor(target, text) });
+      } finally {
+        updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: false }));
       }
-      pushMessages(target.id, { role: 'ai', kind: 'answer', content: answerFor(target, text) });
-    } catch {
-      pushMessages(target.id, { role: 'ai', kind: 'answer', content: answerFor(target, text) });
-    } finally {
-      updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: false }));
-    }
-  };
+    },
+    [protocol, pushMessages, updateRuntime]
+  );
 
   const addProtocol = useCallback((newProtocol: Protocol) => {
     setProtocolList((prev) => {
@@ -389,120 +406,154 @@ export function useProtocolState() {
     setActiveProtocol(newProtocol.id);
   }, []);
 
-  const uploadPaper = async (source: string | File, extractedProtocol?: Protocol) => {
-    if (extractedProtocol) {
-      addProtocol(extractedProtocol);
-      return;
-    }
-
-    const fileName = typeof source === 'string' ? source : source.name;
-    const queuedId = createId('queued');
-    const procId = createId('proc');
-    const targetProtocolId = protocol.id;
-
-    setQueuedPapers((prev) => [...prev, { id: queuedId, name: fileName, note: COPY.papers.queuedNote }]);
-    pushMessages(
-      targetProtocolId,
-      { role: 'user', kind: 'file', content: fileName },
-      { id: procId, role: 'ai', kind: 'processing', content: fileName, createdAt: Date.now() }
-    );
-
-    try {
-      const formData = new FormData();
-      if (typeof source === 'string') {
-        formData.append('url', source);
-      } else {
-        formData.append('file', source);
+  const uploadPaper = useCallback(
+    async (source: string | File, extractedProtocol?: Protocol) => {
+      if (extractedProtocol) {
+        addProtocol(extractedProtocol);
+        return;
       }
 
-      const res = await fetch('/api/extract', {
-        method: 'POST',
-        body: formData
-      });
+      const fileName = typeof source === 'string' ? source : source.name;
+      const queuedId = createId('queued');
+      const procId = createId('proc');
+      const targetProtocolId = protocol.id;
 
-      if (!res.ok) {
-        throw new Error(`Extraction failed with HTTP ${res.status}`);
-      }
+      setQueuedPapers((prev) => [...prev, { id: queuedId, name: fileName, note: COPY.papers.queuedNote }]);
+      pushMessages(
+        targetProtocolId,
+        { role: 'user', kind: 'file', content: fileName },
+        { id: procId, role: 'ai', kind: 'processing', content: fileName, createdAt: Date.now() }
+      );
 
-      const result = await res.json();
+      try {
+        const formData = new FormData();
+        if (typeof source === 'string') {
+          formData.append('url', source);
+        } else {
+          formData.append('file', source);
+        }
 
-      if (result.eligible && result.protocol) {
-        addProtocol(result.protocol);
+        const res = await fetch('/api/extract', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) {
+          throw new Error(`Extraction failed with HTTP ${res.status}`);
+        }
+
+        const result = await res.json();
+
+        if (result.eligible && result.protocol) {
+          addProtocol(result.protocol);
+          setQueuedPapers((prev) => prev.filter((p) => p.id !== queuedId));
+          updateRuntime(targetProtocolId, (prev) => ({
+            ...prev,
+            messages: prev.messages.map((m) =>
+              m.id === procId
+                ? { ...m, kind: 'confirmation', content: `Protocol ready: ${result.protocol.title}` }
+                : m
+            )
+          }));
+          toast.success(COPY.extraction.success);
+        } else {
+          const reason = result.rejectionReason || COPY.extraction.declinedNonHuman;
+          setQueuedPapers((prev) => prev.filter((p) => p.id !== queuedId));
+          updateRuntime(targetProtocolId, (prev) => ({
+            ...prev,
+            messages: prev.messages.map((m) =>
+              m.id === procId
+                ? { ...m, kind: 'alert', content: reason }
+                : m
+            )
+          }));
+          toast.error(reason);
+        }
+      } catch (err) {
+        console.error('[uploadPaper] Extraction failed:', err);
         setQueuedPapers((prev) => prev.filter((p) => p.id !== queuedId));
         updateRuntime(targetProtocolId, (prev) => ({
           ...prev,
           messages: prev.messages.map((m) =>
             m.id === procId
-              ? { ...m, kind: 'confirmation', content: `Protocol ready: ${result.protocol.title}` }
+              ? { ...m, kind: 'alert', content: COPY.extraction.errorGeneral }
               : m
           )
         }));
-        toast.success(COPY.extraction.success);
-      } else {
-        const reason = result.rejectionReason || COPY.extraction.declinedNonHuman;
-        setQueuedPapers((prev) => prev.filter((p) => p.id !== queuedId));
-        updateRuntime(targetProtocolId, (prev) => ({
-          ...prev,
-          messages: prev.messages.map((m) =>
-            m.id === procId
-              ? { ...m, kind: 'alert', content: reason }
-              : m
-          )
-        }));
-        toast.error(reason);
+        toast.error(COPY.extraction.errorGeneral);
       }
-    } catch (err) {
-      console.error('[uploadPaper] Extraction failed:', err);
-      setQueuedPapers((prev) => prev.filter((p) => p.id !== queuedId));
-      updateRuntime(targetProtocolId, (prev) => ({
-        ...prev,
-        messages: prev.messages.map((m) =>
-          m.id === procId
-            ? { ...m, kind: 'alert', content: COPY.extraction.errorGeneral }
-            : m
-        )
-      }));
-      toast.error(COPY.extraction.errorGeneral);
-    }
-  };
+    },
+    [protocol.id, addProtocol, pushMessages, updateRuntime]
+  );
 
   const openPainLog = useCallback(() => setIsPainLogOpen(true), []);
   const closePainLog = useCallback(() => setIsPainLogOpen(false), []);
 
-  return {
-    protocols: summaries,
-    queuedPapers,
-    activeProtocolId: protocol.id,
-    setActiveProtocol,
-    protocol,
-    currentDay: protocol.currentDay,
-    totalDays: protocol.totalDays,
-    streak: protocol.streak,
-    messages: state.messages,
-    setsDone: state.setsDone,
-    painLogs: state.painLogs,
-    escalationPaused: state.escalationPaused,
-    todayFraction,
-    todayPercent,
-    adherenceRate,
-    dayIsComplete,
-    progressionReady,
-    assistantTyping: state.assistantTyping ?? false,
-    isPainLogOpen,
-    openPainLog,
-    closePainLog,
-    isStepComplete,
-    incrementSet,
-    decrementSet,
-    toggleStep,
-    markTodayComplete,
-    logPain,
-    askQuestion,
-    uploadPaper,
-    addProtocol,
-    resetToDefaults,
-    hasHydrated
-  };
+  return useMemo(
+    () => ({
+      protocols: summaries,
+      queuedPapers,
+      activeProtocolId: protocol.id,
+      setActiveProtocol,
+      protocol,
+      currentDay: protocol.currentDay,
+      totalDays: protocol.totalDays,
+      streak: protocol.streak,
+      messages: state.messages,
+      setsDone: state.setsDone,
+      painLogs: state.painLogs,
+      escalationPaused: state.escalationPaused,
+      todayFraction,
+      todayPercent,
+      adherenceRate,
+      dayIsComplete,
+      progressionReady,
+      assistantTyping: state.assistantTyping ?? false,
+      isPainLogOpen,
+      openPainLog,
+      closePainLog,
+      isStepComplete,
+      incrementSet,
+      decrementSet,
+      toggleStep,
+      markTodayComplete,
+      logPain,
+      askQuestion,
+      uploadPaper,
+      addProtocol,
+      resetToDefaults,
+      hasHydrated
+    }),
+    [
+      summaries,
+      queuedPapers,
+      protocol,
+      state.messages,
+      state.setsDone,
+      state.painLogs,
+      state.escalationPaused,
+      state.assistantTyping,
+      todayFraction,
+      todayPercent,
+      adherenceRate,
+      dayIsComplete,
+      progressionReady,
+      isPainLogOpen,
+      openPainLog,
+      closePainLog,
+      isStepComplete,
+      incrementSet,
+      decrementSet,
+      toggleStep,
+      markTodayComplete,
+      logPain,
+      askQuestion,
+      uploadPaper,
+      addProtocol,
+      resetToDefaults,
+      hasHydrated
+    ]
+  );
 }
 
 export type ProtocolState = ReturnType<typeof useProtocolState>;

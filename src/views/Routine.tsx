@@ -44,7 +44,7 @@ export function RoutinePage() {
           </div>
 
           <TaskGrid steps={protocol.steps} />
-          <DayActions className="mt-2.5" onLogPain={openPainLog} />
+          <DayActions className="mt-2.5" />
 
           {stopRule && (
             <p className="mt-4 px-1 text-sm lowercase text-ink/45">
