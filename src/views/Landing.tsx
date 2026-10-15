@@ -142,7 +142,7 @@ export function LandingPage() {
               <p className="mt-4 text-xs font-mono lowercase text-ink/40">Step 03</p>
               <h3 className="mt-1 text-lg font-medium lowercase">Parameter Auditing</h3>
               <p className="mt-2 text-xs leading-relaxed lowercase text-ink/60">
-                Detects omitted hold times or rest intervals. Flags them as conservative clinical baselines with zero hallucinated gaps.
+                Detects omitted dosages, hold times, or execution parameters. Flags them as conservative clinical baselines with zero hallucinated gaps.
               </p>
             </div>
 

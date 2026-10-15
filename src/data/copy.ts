@@ -69,12 +69,12 @@ export const COPY = {
     logFeedback: (name?: string) => (name ? `log ${name}` : 'log feedback')
   },
   safety: {
-    escalationAlert: `Feedback threshold exceeded. Escalation paused. Recommendation: Reduce load by ${LOAD_REDUCTION_PERCENT}% tomorrow or consult your therapist.`,
+    escalationAlert: `Feedback threshold exceeded. Escalation paused. Recommendation: Reduce load/dose by ${LOAD_REDUCTION_PERCENT}% tomorrow or consult your doctor or specialist.`,
     dynamicEscalationAlert: (name?: string, customMessage?: string) =>
       customMessage ||
       `${name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Symptom'} threshold exceeded. Escalation paused. Recommendation: Reduce load/dose by ${LOAD_REDUCTION_PERCENT}% tomorrow or consult your specialist.`,
-    escalationShort: `escalation paused — load reduced ${LOAD_REDUCTION_PERCENT}% for tomorrow`,
-    pausedRecommendation: `Paused — reduce load by ${LOAD_REDUCTION_PERCENT}% tomorrow.`
+    escalationShort: `escalation paused — load/dose reduced ${LOAD_REDUCTION_PERCENT}% for tomorrow`,
+    pausedRecommendation: `Paused — reduce load/dose by ${LOAD_REDUCTION_PERCENT}% tomorrow.`
   },
   calendar: {
     listLabel: 'Protocol day history',
@@ -117,18 +117,19 @@ export const COPY = {
   task: {
     complete: (action: string) => `Complete ${action}`,
     uncheck: (action: string) => `Uncheck ${action}`,
-    decrease: (action: string) => `Decrease sets for ${action}`,
-    increase: (action: string) => `Increase sets for ${action}`,
-    counterLabel: (action: string) => `Set counter for ${action}`,
+    decrease: (action: string) => `Decrease progress for ${action}`,
+    increase: (action: string) => `Increase progress for ${action}`,
+    counterLabel: (action: string) => `Progress counter for ${action}`,
     frequency: 'frequency:',
     source: 'source:',
     sourcePaper: 'paper',
     sourceDefaulted: 'defaulted',
     inferredMarker: ' *',
-    inferredNote: '* hold time not reported by authors — conservative default applied',
+    inferredNote: '* parameter not reported by authors — conservative clinical default applied',
     defaultSetLabel: 'sets',
     holdStatLabel: 'hold:',
     repsStatLabel: 'reps:',
+    targetStatLabel: 'target:',
     perSetHold: (seconds: number) => `× ${seconds}s hold`,
     perSetReps: (reps: number) => `× ${reps} reps`,
     holdValue: (seconds: number) => `${seconds}s`,
@@ -145,7 +146,7 @@ export const COPY = {
     ruleArrow: '→'
   },
   missingData: {
-    caution: 'Caution: The authors omitted exact set/rep counts for',
+    caution: 'Caution: The authors omitted exact dosing or execution parameters for',
     fallback: 'System defaulted to conservative baseline parameters.'
   },
   dashboard: {
@@ -165,7 +166,7 @@ export const COPY = {
     phase: {
       paused: 'escalation paused',
       ready: 'progression trigger ready',
-      holding: 'holding current load'
+      holding: 'holding current phase'
     },
     papersLabel: 'All papers',
     papersEyebrow: 'all',
@@ -186,18 +187,31 @@ export const COPY = {
     high: 'high',
     moderate: 'moderate'
   },
-  physicianSummary: {
-    eyebrow: 'physician',
-    title: 'summary',
+  shareableSummary: {
+    eyebrow: 'shareable',
+    title: 'protocol summary',
+    cardTitle: '1-page brief',
     body: (title: string) =>
-    `1-page brief of ${title}: protocol, adherence and biofeedback log for your doctor or specialist.`,
-    export: '📄 export 1-page physician summary pdf',
-    exporting: 'preparing summary…',
-    success: '✓ summary ready — your download has started',
-    successToast: 'physician summary exported',
+      `1-page brief of ${title}: trial citation, daily routine, adherence rate, and logs to share with your coach, doctor, or personal records.`,
+    export: '📄 view & print 1-page summary',
+    exporting: 'preparing 1-page summary…',
+    success: '✓ 1-page summary ready',
+    successToast: 'shareable summary generated',
     error: "We couldn't generate the summary. Check your connection and try again.",
     errorToast: 'export failed',
-    retry: 'try again'
+    retry: 'try again',
+    printButton: 'print / save as pdf',
+    closeButton: 'close',
+    disclaimer:
+      'Protocol Engine translates human interventional research into structured daily routines. This summary is intended for personal tracking, coaching, or clinical review and does not constitute medical advice.',
+    trialCitation: 'study citation & methodology',
+    adherenceAndStreak: 'adherence & progression',
+    prescribedRoutine: 'prescribed routine & methods',
+    safetyAndRules: 'safety rules & contraindications',
+    recentLogs: 'recent biofeedback logs',
+    noLogsYet: 'no daily logs recorded yet',
+    generatedOn: (date: string) => `generated on ${date}`,
+    dialogLabel: 'Shareable Protocol Summary and Progress Brief'
   },
   community: {
     eyebrow: 'community',
@@ -321,7 +335,7 @@ export const COPY = {
       gatekeeperTitle: 'Scientific Gatekeeper',
       gatekeeperBody: 'Auto-filters non-human models and theoretical papers with educational feedback.',
       auditingTitle: 'Missing Parameter Auditing',
-      auditingBody: 'Detects omitted hold durations and rest intervals, applying conservative clinical defaults.',
+      auditingBody: 'Detects omitted dosages, hold durations, and execution parameters, applying conservative clinical defaults.',
       safetyTitle: 'AI Safety Assistant',
       safetyBody: 'Ask dosage, frequency, and contraindication questions grounded strictly in the trial Methods.',
       summaryTitle: '1-Page Clinical Brief',

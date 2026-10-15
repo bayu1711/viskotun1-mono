@@ -15,14 +15,34 @@ export function getStepDisplay(step: ProtocolStep): StepDisplay {
   const seconds = step.durationSeconds ?? 0;
   const isTimed = seconds > 0;
   const setLabel = step.setLabel ?? COPY.task.defaultSetLabel;
+  const isSingleUnit = step.reps === 1 && step.setLabel && step.setLabel !== 'sets';
+
+  const defaultPerSet = isTimed
+    ? COPY.task.perSetHold(seconds)
+    : isSingleUnit
+    ? `× 1 ${setLabel}`
+    : COPY.task.perSetReps(step.reps);
+
+  const defaultStatLabel = isTimed
+    ? COPY.task.holdStatLabel
+    : isSingleUnit
+    ? COPY.task.targetStatLabel
+    : COPY.task.repsStatLabel;
+
+  const defaultStatValue = isTimed
+    ? COPY.task.holdValue(seconds)
+    : isSingleUnit
+    ? `1 ${setLabel}`
+    : String(step.reps);
+
   const summaryValue =
-  step.statValue ?? (isTimed ? COPY.task.holdSummary(seconds) : COPY.task.repsSummary(step.reps));
+    step.statValue ?? (isTimed ? COPY.task.holdSummary(seconds) : isSingleUnit ? `1 ${setLabel}` : COPY.task.repsSummary(step.reps));
 
   return {
     setLabel,
-    perSet: step.perSetLabel ?? (isTimed ? COPY.task.perSetHold(seconds) : COPY.task.perSetReps(step.reps)),
-    statLabel: step.statLabel ?? (isTimed ? COPY.task.holdStatLabel : COPY.task.repsStatLabel),
-    statValue: step.statValue ?? (isTimed ? COPY.task.holdValue(seconds) : String(step.reps)),
+    perSet: step.perSetLabel ?? defaultPerSet,
+    statLabel: step.statLabel ?? defaultStatLabel,
+    statValue: step.statValue ?? defaultStatValue,
     summary: `${step.sets} ${setLabel} · ${summaryValue}`
   };
 }
