@@ -67,3 +67,23 @@ input[type='range'].feedback-slider:focus-visible::-webkit-slider-thumb {
   outline: 2px solid rgb(var(--color-ink) / 0.3);
   outline-offset: 2px;
 }
+
+/* Print optimization for 1-page Shareable Summary */
+@media print {
+  @page {
+    margin: 1.2cm;
+    size: auto;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+  .no-print,
+  aside,
+  header,
+  nav,
+  [data-no-print='true'] {
+    display: none !important;
+  }
+}

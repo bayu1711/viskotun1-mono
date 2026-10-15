@@ -3,17 +3,13 @@
 import React from 'react';
 import { KeyMetrics } from '../components/dashboard/KeyMetrics';
 import { PapersPanel } from '../components/dashboard/PapersPanel';
-import { PhysicianSummaryPanel } from '../components/dashboard/PhysicianSummaryPanel';
 import { ProgressionPanel } from '../components/dashboard/ProgressionPanel';
+import { ShareableSummaryPanel } from '../components/dashboard/ShareableSummaryPanel';
 import { PageContainer } from '../components/layout/PageContainer';
 import { PageHeader } from '../components/layout/PageHeader';
 import { COPY } from '../data/copy';
 
-interface DashboardPageProps {
-  simulateExportFailure?: boolean;
-}
-
-export function DashboardPage({ simulateExportFailure = false }: DashboardPageProps) {
+export function DashboardPage() {
   return (
     <PageContainer>
       <PageHeader eyebrow={COPY.dashboard.eyebrow} title={COPY.dashboard.title} />
@@ -22,7 +18,7 @@ export function DashboardPage({ simulateExportFailure = false }: DashboardPagePr
         <PapersPanel />
         <aside className="space-y-2.5">
           <ProgressionPanel />
-          <PhysicianSummaryPanel simulateFailure={simulateExportFailure} />
+          <ShareableSummaryPanel />
         </aside>
       </div>
     </PageContainer>
