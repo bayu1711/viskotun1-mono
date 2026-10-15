@@ -9,6 +9,7 @@ import { COPY } from '../../data/copy';
 import { useFileDrop } from '../../hooks/useFileDrop';
 import { isPdfFile } from '../../utils/files';
 import { AssistantSheet } from '../assistant/AssistantSheet';
+import { ErrorBoundary } from '../feedback/ErrorBoundary';
 import { PainLogDrawer } from '../routine/PainLogDrawer';
 import { AssistantFab } from './AssistantFab';
 import { FileDropOverlay } from './FileDropOverlay';
@@ -39,7 +40,9 @@ export function AppShell({ children }: AppShellProps) {
   if (isPublicPage) {
     return (
       <div className="min-h-screen w-full bg-canvas font-sans text-ink">
-        <main className="w-full">{children}</main>
+        <main className="w-full">
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </main>
         <AssistantSheet />
         <PainLogDrawer />
         <FileDropOverlay visible={isDragging} />
@@ -53,7 +56,9 @@ export function AppShell({ children }: AppShellProps) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar />
-        <main className="flex-1 pb-28">{children}</main>
+        <main className="flex-1 pb-28">
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </main>
         <AssistantFab />
         <MobileTabBar />
       </div>
