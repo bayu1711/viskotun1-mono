@@ -164,7 +164,11 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
 
       const response = await model.generateContent(promptParts);
       const text = response.response.text();
-      const parsed = JSON.parse(text);
+      const cleanJson = text
+        .replace(/^```(?:json)?\s*/i, '')
+        .replace(/\s*```$/i, '')
+        .trim();
+      const parsed = JSON.parse(cleanJson);
 
       if (!parsed.eligible) {
         return {

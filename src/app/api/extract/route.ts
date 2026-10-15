@@ -12,6 +12,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'PDF file or paper URL/DOI is required' }, { status: 400 });
     }
 
+    if (file) {
+      const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20 MB
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        return NextResponse.json({ error: 'File size exceeds maximum limit of 20MB' }, { status: 413 });
+      }
+
+      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+      if (!isPdf) {
+        return NextResponse.json({ error: 'Invalid file format. Only PDF files are supported.' }, { status: 415 });
+      }
+    }
+
     const result = await extractPaperProtocol({ file, url, text });
     return NextResponse.json(result);
   } catch (error) {
