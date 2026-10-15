@@ -270,19 +270,19 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
   progressionRules: [
     {
       id: 'pat-rule-1',
-      condition: 'Pain score remains ≤ 3/10 during and after sessions for 1 full week',
+      condition: 'Tendon discomfort remains ≤ 3/10 during and after sessions for 1 full week',
       action: 'Increase resistance load by 2.5kg to 5kg on bilateral squats'
     },
     {
       id: 'pat-rule-2',
-      condition: 'Next-day morning tendon stiffness or pain score ≥ 5/10',
+      condition: 'Next-day morning tendon stiffness or discomfort score ≥ 5/10',
       action: 'Hold current load and insert an extra 24h rest window'
     }
   ],
   contraindications: [
     {
       id: 'pat-c-1',
-      text: 'Stop immediately if sharp, stabbing pain exceeds 4/10 or joint locking occurs.',
+      text: 'Stop immediately if sharp, stabbing discomfort exceeds 4/10 or joint locking occurs.',
       severity: 'stop'
     },
     {
@@ -301,15 +301,15 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
   dayHistory: [],
   initialSetsDone: { 'pat-1': 2, 'pat-2': 0, 'pat-3': 1 },
   feedbackMetric: {
-    name: 'pain',
-    label: 'tendon pain',
-    eyebrow: 'pain',
+    name: 'tendon discomfort',
+    label: 'tendon discomfort / load tolerance',
+    eyebrow: 'tendon discomfort',
     logTitle: 'log',
     minLabel: '0 · none',
     maxLabel: '10 · severe',
     maxScore: 10,
     escalationThreshold: 4,
-    escalationMessage: 'Pain threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce resistance load by 20% tomorrow or consult your therapist.'
+    escalationMessage: 'Tendon discomfort threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce resistance load by 20% tomorrow or consult your therapist.'
   },
   initialFeedbackLogs: [
     {
@@ -358,14 +358,14 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
       { period: 4, dropOff: 10 }
     ],
     insightLead: '42% drop-off in Week 2',
-    insightRest: 'due to heavy eccentric muscle soreness. Soreness is normal; sharp tendon pain is not.',
+    insightRest: 'due to heavy eccentric muscle soreness. Soreness is normal; sharp tendon strain is not.',
     reviews: [
       {
         id: 'pat-rev-1',
         handle: 'Anonymous · 25M · Volleyball',
         day: 10,
         outcome: 'improved',
-        text: 'Pain on stairs decreased from 6/10 to 1/10 by adherence to the 3s tempo.',
+        text: 'Discomfort on stairs decreased from 6/10 to 1/10 by adherence to the 3s tempo.',
         adherence: 95
       }
     ]
@@ -378,10 +378,10 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
         'Heavy slow loading produces continuous high tendon strain without high-impact peaks, maximizing collagen synthesis and tendon stiffness (Methods, p. 5).'
     },
     {
-      question: 'is pain during the exercise acceptable?',
-      keywords: ['pain', 'acceptable', 'hurt', 'safe'],
+      question: 'is discomfort during the exercise acceptable?',
+      keywords: ['discomfort', 'soreness', 'acceptable', 'hurt', 'safe'],
       answer:
-        'Yes, pain up to 3/10 is considered safe and therapeutic during tendon remodeling. If pain reaches 4/10 or higher, stop the exercise.'
+        'Yes, mild discomfort up to 3/10 is considered safe and therapeutic during tendon remodeling. If discomfort reaches 4/10 or higher, stop the exercise.'
     }
   ]
 };

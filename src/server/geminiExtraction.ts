@@ -28,6 +28,14 @@ Your role is to transform dense peer-reviewed research papers into executable, a
    - Purely observational or demographic without a prescribed executable intervention.
    - Theoretical physics, mathematics, cosmology, quantum theory, computer science, economics, or general non-human science.
    Provide a clear educational rejectionReason explaining why.
+3. ADAPTIVE BIOFEEDBACK & SAFETY METRIC (feedbackMetric):
+   Dynamically extract the study's primary subjective adverse effect, symptom, or tolerability measure:
+   - Musculoskeletal / rehab -> name: "tendon discomfort" or "joint soreness", label: "tendon discomfort / load tolerance", eyebrow: "discomfort"
+   - Dermatology / hair / topical -> name: "scalp irritation", label: "scalp irritation / erythema", eyebrow: "irritation"
+   - Pharmacology / supplementation -> name: "GI distress", label: "gastrointestinal distress / nausea", eyebrow: "tolerance"
+   - Sleep / cognitive interventions -> name: "mental fatigue", label: "daytime grogginess / mental fatigue", eyebrow: "fatigue"
+   - Physical exertion / cardio -> name: "exertion", label: "rating of perceived exertion (RPE)", eyebrow: "exertion"
+   Never force physical therapy metrics if the study is in nutrition, pharmacology, sleep, or dermatology.
 
 ### OUTPUT JSON FORMAT:
 Return a JSON object conforming strictly to:
@@ -197,7 +205,7 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
           ...parsed.protocol,
           dayHistory: parsed.protocol.dayHistory ?? [],
           initialSetsDone: parsed.protocol.initialSetsDone ?? {},
-          initialFeedbackLogs: parsed.protocol.initialFeedbackLogs ?? (parsed.protocol as any).initialPainLogs ?? [],
+          initialFeedbackLogs: parsed.protocol.initialFeedbackLogs ?? [],
           feedbackMetric: parsed.protocol.feedbackMetric ?? undefined,
           initialMessages: parsed.protocol.initialMessages ?? [
             {
