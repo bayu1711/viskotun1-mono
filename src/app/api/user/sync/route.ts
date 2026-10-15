@@ -3,23 +3,33 @@ import type { Protocol, ProtocolRuntime } from '@/types/protocol';
 
 interface UserSyncPayload {
   userId: string;
+  activeProtocolId?: string;
   protocols: Protocol[];
   runtime: Record<string, ProtocolRuntime>;
 }
 
 // In-memory server-side user store (ready for Cloud Firestore / Cloud SQL persistence)
-const userStorage = new Map<string, { protocols: Protocol[]; runtime: Record<string, ProtocolRuntime>; updatedAt: number }>();
+const userStorage = new Map<
+  string,
+  {
+    activeProtocolId?: string;
+    protocols: Protocol[];
+    runtime: Record<string, ProtocolRuntime>;
+    updatedAt: number;
+  }
+>();
 
 export async function POST(request: Request) {
   try {
     const body: UserSyncPayload = await request.json();
-    const { userId, protocols, runtime } = body;
+    const { userId, activeProtocolId, protocols, runtime } = body;
 
     if (!userId) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
     userStorage.set(userId, {
+      activeProtocolId,
       protocols: protocols || [],
       runtime: runtime || {},
       updatedAt: Date.now()
@@ -56,6 +66,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       found: true,
+      activeProtocolId: data.activeProtocolId,
       protocols: data.protocols,
       runtime: data.runtime,
       updatedAt: data.updatedAt
