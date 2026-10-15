@@ -49,6 +49,35 @@ Research Paper (PDF)
 
 ---
 
+## Hybrid AI Architecture: Cloud Gemini + Edge Gemma
+
+Protocol Engine employs a **Hybrid AI Tiering** model designed to optimize cost, latency, and patient privacy:
+
+```text
+                                  User Action
+                                       │
+        ┌──────────────────────────────┴──────────────────────────────┐
+        ▼                                                             ▼
+[PDF Ingestion & Schema Extraction]                       [Daily Adherence Q&A]
+                │                                                     │
+                ▼                                                     ▼
+    Gemini 1.5/2.0 Flash (Cloud)                          3-Tier Fallback Cascade:
+  • 1M+ token context window                             1. Edge Gemma (window.ai)
+  • Ingests 30-page clinical papers                        • 100% on-device (Chrome AI)
+  • Multi-column tables & dosing extraction                • $0 API cost, 0ms latency
+  • Generates `dataCollectionSpec`                         • Complete medical data privacy
+                                                         2. Cloud Gemini Flash
+                                                           • High-reasoning fallback
+                                                         3. Offline Rule Matcher
+                                                           • Deterministic paper citation
+```
+
+1. **Cloud Tier (Gemini Flash)**: Handles complex multimodal document processing where a large context window and multimodal OCR are essential.
+2. **Edge Tier (Gemma on-device)**: Handles repetitive daily routine Q&A through Chrome Built-in AI (`window.ai`). Patient health queries never leave the device.
+3. **Private Server Tier (Gemma Endpoint)**: Supports connecting private self-hosted Gemma 2 instances via Ollama or Google Vertex AI Model Garden (`GEMMA_ENDPOINT_URL`).
+
+---
+
 ## Tech Stack
 
 - **Framework**: Next.js 14 (App Router, Server & Client Components)
