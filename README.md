@@ -78,6 +78,41 @@ Protocol Engine employs a **Hybrid AI Tiering** model designed to optimize cost,
 
 ---
 
+## Dynamic Guardrail Policy Ledger (Google Cloud Firestore)
+
+In safety-critical clinical and health applications, hardcoded thresholds in code are insufficient when medical advisory guidelines or contraindications update. Protocol Engine features a **Dynamic Guardrail Policy Ledger** backed by **Google Cloud Firestore**:
+
+```text
+                                  ┌───────────────────────────────┐
+                                  │ Google Cloud Firestore        │
+                                  │ (collection: 'policies')      │
+                                  │ doc: 'clinical_guardrails'    │
+                                  └──────────────┬────────────────┘
+                                                 │
+                                                 ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Next.js Server Policy Ledger (src/server/guardrailLedger.ts)                │
+│  • Hot memory cache (1-min TTL) for sub-millisecond request resolution     │
+│  • Automatic fail-safe fallback to baseline standards if offline/unconfigured│
+│  • Injects dynamic gatekeeper criteria & adverse thresholds into Gemini    │
+└──────────────┬──────────────────────────────────────────────────────────────┘
+               │
+       ┌───────┴───────────────────────────────┐
+       ▼                                       ▼
+┌───────────────────────────────┐  ┌───────────────────────────────────────────┐
+│ /api/extract & /api/assistant │  │ /api/admin/guardrails                     │
+│ Dynamic gatekeeping, adverse  │  │ GET: Live ledger health & active policy   │
+│ threshold injection & safety  │  │ POST: Dynamic policy tuning without rebuild│
+│ advisories                    │  │ DELETE: Reset to clinical baseline       │
+└───────────────────────────────┘  └───────────────────────────────────────────┘
+```
+
+- **Zero-Downtime Policy Tuning**: Clinical administrators can update adverse escalation thresholds, load reduction percentages, and gatekeeper criteria on the fly without rebuilding or redeploying Docker containers.
+- **Fail-Safe Baseline**: If Google Cloud credentials are omitted in local development, the ledger operates seamlessly using an in-memory hot cache initialized with conservative clinical standards.
+- **Interactive UI Inspector**: Tap the **Shield** icon in the TopBar to inspect live policy provenance, view Firestore connectivity status, and test dynamic policy updates in real time.
+
+---
+
 ## Tech Stack
 
 - **Framework**: Next.js 14 (App Router, Server & Client Components)
