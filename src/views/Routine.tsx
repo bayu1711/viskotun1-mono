@@ -11,6 +11,7 @@ import { DailyProgressBar } from '../components/routine/DailyProgressBar';
 import { FeedbackLogList } from '../components/routine/FeedbackLogList';
 import { HistoryCalendar } from '../components/routine/HistoryCalendar';
 import { TaskGrid } from '../components/routine/TaskGrid';
+import { VoiceCoachBar } from '../components/routine/VoiceCoachBar';
 import { CircleButton } from '../components/ui/CircleButton';
 import { Icon } from '../components/ui/Icon';
 import { Panel } from '../components/ui/Panel';
@@ -21,7 +22,16 @@ import { ROUTES } from '../data/navigation';
 import { stopRuleOf } from '../utils/protocolMetrics';
 
 export function RoutinePage() {
-  const { protocol, currentDay, totalDays, todayPercent, todayFraction, escalationPaused, feedbackMetric } = useProtocol();
+  const {
+    protocol,
+    currentDay,
+    totalDays,
+    todayPercent,
+    todayFraction,
+    escalationPaused,
+    feedbackMetric,
+    incrementSet
+  } = useProtocol();
   const historyHeadingId = useId();
   const feedbackHeadingId = useId();
   const stopRule = stopRuleOf(protocol);
@@ -41,6 +51,16 @@ export function RoutinePage() {
                 {COPY.safety.dynamicEscalationAlert(feedbackMetric.name, feedbackMetric.escalationMessage)}
               </Callout>
             )}
+            <VoiceCoachBar
+              steps={protocol.steps}
+              safetyRule={stopRule?.text}
+              onStepComplete={(stepIndex) => {
+                const step = protocol.steps[stepIndex];
+                if (step) {
+                  incrementSet(step.id);
+                }
+              }}
+            />
           </div>
 
           <TaskGrid steps={protocol.steps} />

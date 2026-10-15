@@ -69,7 +69,7 @@ export const COPY = {
     logFeedback: (name?: string) => (name ? `log ${name}` : 'log feedback')
   },
   safety: {
-    escalationAlert: `Feedback threshold exceeded. Escalation paused. Recommendation: Reduce load/dose by ${LOAD_REDUCTION_PERCENT}% tomorrow or consult your doctor or specialist.`,
+    escalationAlert: `Feedback threshold exceeded. Escalation paused. Recommendation: Reduce load/dose by ${LOAD_REDUCTION_PERCENT}% tomorrow or consult a specialist.`,
     dynamicEscalationAlert: (name?: string, customMessage?: string) =>
       customMessage ||
       `${name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Symptom'} threshold exceeded. Escalation paused. Recommendation: Reduce load/dose by ${LOAD_REDUCTION_PERCENT}% tomorrow or consult your specialist.`,
@@ -192,7 +192,7 @@ export const COPY = {
     title: 'protocol summary',
     cardTitle: '1-page brief',
     body: (title: string) =>
-      `1-page brief of ${title}: trial citation, daily routine, adherence rate, and logs to share with your coach, doctor, or personal records.`,
+      `1-page brief of ${title}: trial citation, daily routine, adherence rate, and logs to share with your coach, specialist, or personal records.`,
     export: '📄 view & print 1-page summary',
     exporting: 'preparing 1-page summary…',
     success: '✓ 1-page summary ready',
@@ -212,6 +212,31 @@ export const COPY = {
     noLogsYet: 'no daily logs recorded yet',
     generatedOn: (date: string) => `generated on ${date}`,
     dialogLabel: 'Shareable Protocol Summary and Progress Brief'
+  },
+  voiceCoach: {
+    eyebrow: 'hands-free',
+    title: 'voice coach',
+    listening: 'coaching active',
+    idle: 'hands-free audio guidance',
+    play: 'start voice coach',
+    pause: 'pause voice coach',
+    resume: 'resume voice coach',
+    stepPacing: (current: number, total: number) => `step ${current} of ${total}`,
+    nextStep: 'next step',
+    prevStep: 'previous step',
+    speed: (rate: number) => `${rate}x speed`,
+    soundOn: 'sound cues on',
+    soundMuted: 'sound cues muted',
+    countdown: (seconds: number) => `hold: ${seconds}s`,
+    countdownComplete: 'hold complete',
+    countdownActive: (seconds: number) => `${seconds}s hold timer running`,
+    stepAnnouncement: (stepNum: number, total: number, title: string, details: string) =>
+      `Step ${stepNum} of ${total}: ${title}. ${details}`,
+    safetyReminder: (rule: string) => `Safety reminder: ${rule}`,
+    holdCountdownStart: (seconds: number) => `Begin hold for ${seconds} seconds. 3, 2, 1, start.`,
+    holdFinished: 'Hold complete. Relax.',
+    finishedAllSteps: 'Great work! You have completed all prescribed protocol steps for today.',
+    unsupported: 'Voice synthesis is not supported on this browser.'
   },
   community: {
     eyebrow: 'community',
@@ -339,7 +364,7 @@ export const COPY = {
       safetyTitle: 'AI Safety Assistant',
       safetyBody: 'Ask dosage, frequency, and contraindication questions grounded strictly in the trial Methods.',
       summaryTitle: '1-Page Clinical Brief',
-      summaryBody: 'Export formatted adherence and biofeedback trends for your doctor or healthcare specialist.'
+      summaryBody: 'Export formatted adherence and biofeedback trends for your specialist or personal records.'
     },
     demoTitle: 'Try it right now',
     demoSubtitle: 'Drop a research PDF or explore pre-loaded clinical protocols with zero setup.'
