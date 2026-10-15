@@ -27,7 +27,7 @@ import { nowLabel } from '../utils/time';
 function createInitialRuntime(items: Protocol[]): Record<string, ProtocolRuntime> {
   return Object.fromEntries(
     items.map((item) => {
-      const logs = item.initialFeedbackLogs ?? (item as any).initialPainLogs ?? [];
+      const logs = item.initialFeedbackLogs ?? [];
       return [
         item.id,
         {
@@ -110,7 +110,7 @@ export function useProtocolState() {
                         assistantTyping: false
                       }),
                       ...(val as ProtocolRuntime),
-                      feedbackLogs: (val as ProtocolRuntime).feedbackLogs ?? (val as any).painLogs ?? [],
+                      feedbackLogs: (val as ProtocolRuntime).feedbackLogs ?? [],
                       assistantTyping: false
                     };
                   }
@@ -348,7 +348,7 @@ export function useProtocolState() {
       const exceeded = exceedsFeedbackThreshold(score, threshold);
       const newLog = { id: createId('log'), day: protocol.currentDay, score, note, loggedAt: nowLabel() };
       updateRuntime(protocol.id, (prev) => {
-        const existing = prev.feedbackLogs ?? (prev as any).painLogs ?? [];
+        const existing = prev.feedbackLogs ?? [];
         const next = [...existing, newLog];
         return {
           ...prev,
@@ -412,7 +412,7 @@ export function useProtocolState() {
       return exists ? prev.map((p) => (p.id === newProtocol.id ? newProtocol : p)) : [...prev, newProtocol];
     });
     setRuntime((prev) => {
-      const logs = newProtocol.initialFeedbackLogs ?? (newProtocol as any).initialPainLogs ?? [];
+      const logs = newProtocol.initialFeedbackLogs ?? [];
       return {
         ...prev,
         [newProtocol.id]: {

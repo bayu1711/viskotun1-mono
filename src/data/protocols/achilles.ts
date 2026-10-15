@@ -63,17 +63,17 @@ export const achillesProtocol: Protocol = {
   progressionRules: [
   {
     id: 'ach-rule-1',
-    condition: 'Pain remains below 2/10 for 3 consecutive days',
+    condition: 'Tendon discomfort remains below 2/10 for 3 consecutive days',
     action: 'Increase load by 5% (add weighted pack)'
   },
   {
     id: 'ach-rule-2',
-    condition: 'Pain score ≥ 4/10 on any session',
+    condition: 'Discomfort score ≥ 4/10 on any session',
     action: 'Pause escalation and reduce load by 20% the next day'
   }],
 
   contraindications: [
-  { id: 'ach-c-1', text: 'Stop immediately if acute pain exceeds 3/10.', severity: 'stop' },
+  { id: 'ach-c-1', text: 'Stop immediately if acute tendon discomfort exceeds 3/10.', severity: 'stop' },
   {
     id: 'ach-c-2',
     text: 'Skip the session if morning stiffness persists beyond 60 minutes.',
@@ -90,15 +90,15 @@ export const achillesProtocol: Protocol = {
   dayHistory: [1, 0.67, 1],
   initialSetsDone: { 'ach-1': 3, 'ach-2': 3, 'ach-3': 0 },
   feedbackMetric: {
-    name: 'pain',
-    label: 'tendon pain',
-    eyebrow: 'pain',
+    name: 'tendon discomfort',
+    label: 'tendon discomfort / load tolerance',
+    eyebrow: 'discomfort',
     logTitle: 'log',
     minLabel: '0 · none',
     maxLabel: '10 · severe',
     maxScore: 10,
     escalationThreshold: 4,
-    escalationMessage: 'Tendon pain threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce load by 20% tomorrow or consult your therapist.'
+    escalationMessage: 'Tendon discomfort threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce load by 20% tomorrow or consult your therapist.'
   },
   initialFeedbackLogs: [
   { id: 'ach-log-1', day: 1, score: 3, note: 'Tender at first drop.', loggedAt: 'Sat' },
@@ -158,7 +158,7 @@ export const achillesProtocol: Protocol = {
       handle: 'Anonymous · 29M · Basketball',
       day: 14,
       outcome: 'improved',
-      text: 'Finished Phase 1 at 0/10 pain. Morning stiffness dropped from 25 min to under 5 min.',
+      text: 'Finished Phase 1 at 0/10 discomfort. Morning stiffness dropped from 25 min to under 5 min.',
       adherence: 96
     },
     {
@@ -179,16 +179,16 @@ export const achillesProtocol: Protocol = {
     'The trial prescribed 3 sets of 15 reps for both heel-drop variants, twice daily, 7 days a week (Methods, p. 4). That volume was held constant through Phase 1.'
   },
   {
-    question: 'is some pain okay?',
-    keywords: ['pain', 'hurt', 'sore', 'ache'],
+    question: 'is some discomfort okay?',
+    keywords: ['discomfort', 'soreness', 'hurt', 'safe'],
     answer:
-    'Yes — mild discomfort during loading was allowed. The stop rule is acute pain above 3/10. Past that, stop the session and log it so escalation pauses.'
+    'Yes — mild discomfort during loading was allowed. The stop rule is acute discomfort above 3/10. Past that, stop the session and log it so escalation pauses.'
   },
   {
     question: 'when do I add load?',
     keywords: ['progress', 'increase', 'load', 'weight', 'heavier', 'backpack'],
     answer:
-    'Per the progression rule: once pain stays below 2/10 for 3 consecutive days, add 5% load using a weighted backpack.'
+    'Per the progression rule: once discomfort stays below 2/10 for 3 consecutive days, add 5% load using a weighted backpack.'
   },
   {
     question: 'why is the stretch defaulted?',
