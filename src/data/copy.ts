@@ -88,10 +88,37 @@ export const COPY = {
       today: 'today'
     }
   },
+  severityLevels: {
+    mild: 'mild',
+    moderate: 'moderate',
+    severe: 'severe'
+  },
   painLevels: {
     mild: 'mild',
     moderate: 'moderate',
     severe: 'severe'
+  },
+  feedbackDrawer: {
+    dialogLabel: 'Log subjective feedback',
+    metricDialogLabel: (name?: string) => `Log ${name || 'feedback or side effect'}`,
+    close: 'Close',
+    header: (day: number) => `feedback · day ${day}`,
+    metricHeader: (name: string, day: number) => `${name} · day ${day}`,
+    decrease: 'Decrease score',
+    decreaseMetric: (name: string) => `Decrease ${name} score`,
+    increase: 'Increase score',
+    increaseMetric: (name: string) => `Increase ${name} score`,
+    ofMax: (max: number) => `of ${max}`,
+    sliderLabel: (min: number, max: number) => `Score scale from ${min} to ${max}`,
+    metricSliderLabel: (name: string, min: number, max: number) => `${name} scale from ${min} to ${max}`,
+    sliderValue: (score: number, max: number, level: string) => `${score} out of ${max}, ${level}`,
+    minLabel: (min: number) => `${min} · none`,
+    maxLabel: (max: number) => `${max} · severe`,
+    notesLabel: 'Notes',
+    notesPlaceholder: 'Optional notes for AI adjustment...',
+    save: 'save log to protocol',
+    saved: 'log saved to your protocol',
+    savedMetric: (name?: string) => `${name || 'feedback'} saved to your protocol`
   },
   painDrawer: {
     dialogLabel: 'Log pain or side effect',

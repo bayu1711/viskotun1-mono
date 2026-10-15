@@ -1,4 +1,4 @@
-import { PAIN_MILD_MAX, PAIN_MODERATE_MAX } from '../data/config';
+import { FEEDBACK_MILD_MAX, FEEDBACK_MODERATE_MAX } from '../data/config';
 import { COPY } from '../data/copy';
 import type { Tone } from '../types/protocol';
 
@@ -35,9 +35,10 @@ export const toneStyles: Record<Tone, ToneStyle> = {
   mint: { card: 'bg-mint text-ink', ...LIGHT_SURFACE }
 };
 
-export type PainLevel = 'mild' | 'moderate' | 'severe';
+export type SeverityLevel = 'mild' | 'moderate' | 'severe';
+export type PainLevel = SeverityLevel;
 
-interface PainToneStyle {
+interface SeverityToneStyle {
   /** Drawer background */
   panel: string;
   /** Score chip background */
@@ -46,21 +47,24 @@ interface PainToneStyle {
   accent: string;
 }
 
-const PAIN_TONES: Record<PainLevel, PainToneStyle> = {
+const SEVERITY_TONES: Record<SeverityLevel, SeverityToneStyle> = {
   mild: { panel: 'bg-mint', chip: 'bg-mint', accent: 'text-success' },
   moderate: { panel: 'bg-cream', chip: 'bg-cream', accent: 'text-warning' },
   severe: { panel: 'bg-blush', chip: 'bg-blush', accent: 'text-danger' }
 };
 
-export function painLevel(score: number): PainLevel {
-  if (score <= PAIN_MILD_MAX) return 'mild';
-  if (score <= PAIN_MODERATE_MAX) return 'moderate';
+export function severityLevel(score: number): SeverityLevel {
+  if (score <= FEEDBACK_MILD_MAX) return 'mild';
+  if (score <= FEEDBACK_MODERATE_MAX) return 'moderate';
   return 'severe';
 }
+export const painLevel = severityLevel;
 
-export function painTone(score: number) {
-  const level = painLevel(score);
-  return { level, label: COPY.painLevels[level], ...PAIN_TONES[level] };
+export function severityTone(score: number) {
+  const level = severityLevel(score);
+  return { level, label: COPY.severityLevels[level], ...SEVERITY_TONES[level] };
 }
+export const painTone = severityTone;
 
-export type PainTone = ReturnType<typeof painTone>;
+export type SeverityTone = ReturnType<typeof severityTone>;
+export type PainTone = SeverityTone;

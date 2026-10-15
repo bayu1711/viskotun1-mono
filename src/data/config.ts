@@ -1,13 +1,24 @@
-/** Pain scale */
-export const PAIN_SCORE_MIN = 0;
-export const PAIN_SCORE_MAX = 10;
-export const PAIN_SCORE_DEFAULT = 2;
-export const PAIN_SCORE_STEP = 1;
-export const PAIN_MILD_MAX = 3;
-export const PAIN_MODERATE_MAX = 6;
-export const PAIN_ESCALATION_THRESHOLD = 4;
-export const PAIN_NOTE_MAX_LENGTH = 280;
-export const DEFAULT_CONFIRMATION_PAIN_SCORE = 1;
+/** Subjective feedback & safety score configuration */
+export const FEEDBACK_SCORE_MIN = 0;
+export const FEEDBACK_SCORE_MAX = 10;
+export const FEEDBACK_SCORE_DEFAULT = 2;
+export const FEEDBACK_SCORE_STEP = 1;
+export const FEEDBACK_MILD_MAX = 3;
+export const FEEDBACK_MODERATE_MAX = 6;
+export const FEEDBACK_ESCALATION_THRESHOLD = 4;
+export const FEEDBACK_NOTE_MAX_LENGTH = 280;
+export const DEFAULT_CONFIRMATION_SCORE = 1;
+
+/** Backwards-compatible aliases */
+export const PAIN_SCORE_MIN = FEEDBACK_SCORE_MIN;
+export const PAIN_SCORE_MAX = FEEDBACK_SCORE_MAX;
+export const PAIN_SCORE_DEFAULT = FEEDBACK_SCORE_DEFAULT;
+export const PAIN_SCORE_STEP = FEEDBACK_SCORE_STEP;
+export const PAIN_MILD_MAX = FEEDBACK_MILD_MAX;
+export const PAIN_MODERATE_MAX = FEEDBACK_MODERATE_MAX;
+export const PAIN_ESCALATION_THRESHOLD = FEEDBACK_ESCALATION_THRESHOLD;
+export const PAIN_NOTE_MAX_LENGTH = FEEDBACK_NOTE_MAX_LENGTH;
+export const DEFAULT_CONFIRMATION_PAIN_SCORE = DEFAULT_CONFIRMATION_SCORE;
 
 /** Default feedback metric when paper omits custom subjective measures */
 export const DEFAULT_FEEDBACK_METRIC = {
@@ -17,13 +28,14 @@ export const DEFAULT_FEEDBACK_METRIC = {
   logTitle: 'log',
   minLabel: '0 · none',
   maxLabel: '10 · severe',
-  maxScore: PAIN_SCORE_MAX,
-  escalationThreshold: PAIN_ESCALATION_THRESHOLD
+  maxScore: FEEDBACK_SCORE_MAX,
+  escalationThreshold: FEEDBACK_ESCALATION_THRESHOLD
 } as const;
 
 /** Progression & safety rules */
 export const PROGRESSION_WINDOW_LOGS = 3;
-export const PROGRESSION_MAX_PAIN_SCORE = 2;
+export const PROGRESSION_MAX_SCORE = 2;
+export const PROGRESSION_MAX_PAIN_SCORE = PROGRESSION_MAX_SCORE;
 export const LOAD_REDUCTION_PERCENT = 20;
 
 /** Adherence & insights thresholds */

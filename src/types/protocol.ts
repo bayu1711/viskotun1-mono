@@ -166,7 +166,8 @@ export interface Protocol {
   /** Completion ratio (0–1) for each day before the current day, index 0 = day 1. */
   dayHistory: number[];
   initialSetsDone: Record<string, number>;
-  initialPainLogs: PainLog[];
+  initialFeedbackLogs?: FeedbackLog[];
+  initialPainLogs?: PainLog[];
   feedbackMetric?: FeedbackMetric;
   initialMessages: ChatMessage[];
   community: CommunityInsights;
@@ -186,6 +187,7 @@ export type DropOffUnit = CommunityInsights['dropOffUnit'];
 /** Mutable, per-protocol session state (everything else is derived during render). */
 export interface ProtocolRuntime {
   setsDone: Record<string, number>;
+  feedbackLogs: FeedbackLog[];
   painLogs: PainLog[];
   messages: ChatMessage[];
   escalationPaused: boolean;

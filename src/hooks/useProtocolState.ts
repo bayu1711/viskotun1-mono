@@ -26,16 +26,20 @@ import { nowLabel } from '../utils/time';
 
 function createInitialRuntime(items: Protocol[]): Record<string, ProtocolRuntime> {
   return Object.fromEntries(
-    items.map((item) => [
-      item.id,
-      {
-        setsDone: { ...item.initialSetsDone },
-        painLogs: item.initialPainLogs,
-        messages: item.initialMessages,
-        escalationPaused: false,
-        assistantTyping: false
-      }
-    ])
+    items.map((item) => {
+      const logs = item.initialFeedbackLogs ?? item.initialPainLogs ?? [];
+      return [
+        item.id,
+        {
+          setsDone: { ...item.initialSetsDone },
+          feedbackLogs: logs,
+          painLogs: logs,
+          messages: item.initialMessages,
+          escalationPaused: false,
+          assistantTyping: false
+        }
+      ];
+    })
   );
 }
 
@@ -101,12 +105,15 @@ export function useProtocolState() {
                     merged[key] = {
                       ...(prev[key] ?? {
                         setsDone: {},
+                        feedbackLogs: [],
                         painLogs: [],
                         messages: [],
                         escalationPaused: false,
                         assistantTyping: false
                       }),
                       ...(val as ProtocolRuntime),
+                      feedbackLogs: (val as ProtocolRuntime).feedbackLogs ?? (val as ProtocolRuntime).painLogs ?? [],
+                      painLogs: (val as ProtocolRuntime).feedbackLogs ?? (val as ProtocolRuntime).painLogs ?? [],
                       assistantTyping: false
                     };
                   }
@@ -230,6 +237,7 @@ export function useProtocolState() {
   const protocol = protocolList.find((item) => item.id === activeProtocolId) ?? protocolList[0];
   const state = runtime[protocol.id] ?? {
     setsDone: {},
+    feedbackLogs: [],
     painLogs: [],
     messages: [],
     escalationPaused: false,
@@ -240,6 +248,7 @@ export function useProtocolState() {
     setRuntime((prev) => {
       const current = prev[id] ?? {
         setsDone: {},
+        feedbackLogs: [],
         painLogs: [],
         messages: [],
         escalationPaused: false,
@@ -342,14 +351,17 @@ export function useProtocolState() {
       const metric = resolveFeedbackMetric(protocol);
       const threshold = metric.escalationThreshold ?? PAIN_ESCALATION_THRESHOLD;
       const exceeded = exceedsPainThreshold(score, threshold);
-      updateRuntime(protocol.id, (prev) => ({
-        ...prev,
-        escalationPaused: prev.escalationPaused || exceeded,
-        painLogs: [
-          ...prev.painLogs,
-          { id: createId('pain'), day: protocol.currentDay, score, note, loggedAt: nowLabel() }
-        ]
-      }));
+      const newLog = { id: createId('log'), day: protocol.currentDay, score, note, loggedAt: nowLabel() };
+      updateRuntime(protocol.id, (prev) => {
+        const existing = prev.feedbackLogs ?? prev.painLogs ?? [];
+        const next = [...existing, newLog];
+        return {
+          ...prev,
+          escalationPaused: prev.escalationPaused || exceeded,
+          feedbackLogs: next,
+          painLogs: next
+        };
+      });
       pushMessages(
         protocol.id,
         exceeded
@@ -405,16 +417,20 @@ export function useProtocolState() {
       const exists = prev.some((p) => p.id === newProtocol.id);
       return exists ? prev.map((p) => (p.id === newProtocol.id ? newProtocol : p)) : [...prev, newProtocol];
     });
-    setRuntime((prev) => ({
-      ...prev,
-      [newProtocol.id]: {
-        setsDone: { ...(newProtocol.initialSetsDone ?? {}) },
-        painLogs: newProtocol.initialPainLogs ?? [],
-        messages: newProtocol.initialMessages ?? [],
-        escalationPaused: false,
-        assistantTyping: false
-      }
-    }));
+    setRuntime((prev) => {
+      const logs = newProtocol.initialFeedbackLogs ?? newProtocol.initialPainLogs ?? [];
+      return {
+        ...prev,
+        [newProtocol.id]: {
+          setsDone: { ...(newProtocol.initialSetsDone ?? {}) },
+          feedbackLogs: logs,
+          painLogs: logs,
+          messages: newProtocol.initialMessages ?? [],
+          escalationPaused: false,
+          assistantTyping: false
+        }
+      };
+    });
     setActiveProtocol(newProtocol.id);
   }, []);
 
@@ -513,7 +529,8 @@ export function useProtocolState() {
       streak: protocol.streak,
       messages: state.messages,
       setsDone: state.setsDone,
-      painLogs: state.painLogs,
+      feedbackLogs: state.feedbackLogs ?? state.painLogs ?? [],
+      painLogs: state.feedbackLogs ?? state.painLogs ?? [],
       escalationPaused: state.escalationPaused,
       feedbackMetric,
       todayFraction,
@@ -522,6 +539,9 @@ export function useProtocolState() {
       dayIsComplete,
       progressionReady,
       assistantTyping: state.assistantTyping ?? false,
+      isFeedbackDrawerOpen: isPainLogOpen,
+      openFeedbackDrawer: openPainLog,
+      closeFeedbackDrawer: closePainLog,
       isPainLogOpen,
       openPainLog,
       closePainLog,
@@ -544,6 +564,7 @@ export function useProtocolState() {
       protocol,
       state.messages,
       state.setsDone,
+      state.feedbackLogs,
       state.painLogs,
       state.escalationPaused,
       feedbackMetric,
