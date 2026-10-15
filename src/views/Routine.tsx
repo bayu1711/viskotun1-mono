@@ -10,6 +10,7 @@ import { MissingDataBanner } from '../components/protocol/MissingDataBanner';
 import { DailyProgressBar } from '../components/routine/DailyProgressBar';
 import { FeedbackLogList } from '../components/routine/FeedbackLogList';
 import { HistoryCalendar } from '../components/routine/HistoryCalendar';
+import { MilestoneBanner } from '../components/routine/MilestoneBanner';
 import { TaskGrid } from '../components/routine/TaskGrid';
 import { VoiceCoachBar } from '../components/routine/VoiceCoachBar';
 import { CircleButton } from '../components/ui/CircleButton';
@@ -45,6 +46,7 @@ export function RoutinePage() {
           </PageHeader>
 
           <div className="mt-5 space-y-2.5">
+            <MilestoneBanner />
             <MissingDataBanner />
             {escalationPaused && (
               <Callout tone="blush" role="alert">

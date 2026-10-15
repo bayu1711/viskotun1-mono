@@ -440,7 +440,8 @@ export const COPY = {
       bannerTitle: (day: number) => `Day ${day} Milestone Assessment Scheduled`,
       bannerSubtitle: 'This paper prescribes a formal outcome evaluation for today.',
       action: 'Record milestone assessment',
-      completedBadge: 'Milestone documented'
+      completedBadge: 'Milestone documented',
+      reviewAction: 'Review measurement'
     },
     dashboard: {
       photoSplitTitle: 'Milestone Photo Progression',
