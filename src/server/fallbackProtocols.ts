@@ -500,7 +500,7 @@ export function generateFallbackProtocol(source: string): Protocol {
     progressionRules: [
       {
         id: `${slug}-rule-1`,
-        condition: 'Compliance rate ≥ 85% with pain score ≤ 2/10 for 5 consecutive days',
+        condition: 'Compliance rate ≥ 85% with adverse symptom score ≤ 2/10 for 5 consecutive days',
         action: 'Progress load or duration by 10% in Phase 2'
       }
     ],
@@ -532,7 +532,6 @@ export function generateFallbackProtocol(source: string): Protocol {
       escalationMessage: 'Symptom threshold exceeded. Escalation paused. Reduce dosage or intensity by 20% tomorrow.'
     },
     initialFeedbackLogs: [],
-    initialPainLogs: [],
     initialMessages: [
       {
         id: `${slug}-msg-1`,

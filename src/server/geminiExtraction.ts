@@ -197,8 +197,7 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
           ...parsed.protocol,
           dayHistory: parsed.protocol.dayHistory ?? [],
           initialSetsDone: parsed.protocol.initialSetsDone ?? {},
-          initialFeedbackLogs: parsed.protocol.initialFeedbackLogs ?? parsed.protocol.initialPainLogs ?? [],
-          initialPainLogs: parsed.protocol.initialFeedbackLogs ?? parsed.protocol.initialPainLogs ?? [],
+          initialFeedbackLogs: parsed.protocol.initialFeedbackLogs ?? (parsed.protocol as any).initialPainLogs ?? [],
           feedbackMetric: parsed.protocol.feedbackMetric ?? undefined,
           initialMessages: parsed.protocol.initialMessages ?? [
             {
