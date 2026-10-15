@@ -7,8 +7,8 @@ This document establishes the architectural principles, engineering standards, a
 ## 1. Core Engineering Principles
 
 ### A. Strict DRY (Don't Repeat Yourself)
-- **Single Source of Truth for State & Modals**: Never mount duplicate modal dialogs or drawers across different views. Shared modals (such as `PainLogDrawer`, `AssistantSheet`) must be mounted **once** in [`AppShell.tsx`](file:///src/components/layout/AppShell.tsx) and controlled via shared Context.
-- **No Prop Drilling for Global Actions**: Actions like opening a drawer (`openPainLog`) or triggering the assistant must be exposed via React Context (`useProtocol`, `useAssistant`), not passed down through multiple component levels.
+- **Single Source of Truth for State & Modals**: Never mount duplicate modal dialogs or drawers across different views. Shared modals (such as `FeedbackDrawer`, `AssistantSheet`) must be mounted **once** in [`AppShell.tsx`](file:///src/components/layout/AppShell.tsx) and controlled via shared Context.
+- **No Prop Drilling for Global Actions**: Actions like opening a drawer (`openFeedbackDrawer`) or triggering the assistant must be exposed via React Context (`useProtocol`, `useAssistant`), not passed down through multiple component levels.
 - **No Lossy Round-Trip Calculations**: When derived metrics exist as raw ratios (e.g. `todayFraction: 0–1`), export and consume them directly. Never round-trip them into display integers and back (`ratio -> toPercent -> toFraction`).
 - **Centralized Design Tokens & Tones**: Use the established semantic palette (`ink`, `mint`, `cream`, `blush`, `white`). Do not invent ad-hoc hex colors or duplicate variant dictionaries across components without using the shared utilities in `src/utils/tones.ts`.
 - **Centralized UI Copy**: All user-facing strings, button labels, and system messages must be declared in [`src/data/copy.ts`](file:///src/data/copy.ts) for consistency and future localization.

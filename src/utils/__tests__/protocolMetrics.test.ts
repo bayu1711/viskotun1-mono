@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_FEEDBACK_METRIC } from '../../data/config';
-import type { PainLog, Protocol } from '../../types/protocol';
+import type { FeedbackLog, Protocol } from '../../types/protocol';
 import {
   adherenceOf,
+  clampFeedbackScore,
   clampPainScore,
   completionOf,
   complianceLevel,
@@ -66,6 +67,7 @@ const mockProtocol: Protocol = {
   missingDataFlags: [],
   dayHistory: [],
   initialSetsDone: {},
+  initialFeedbackLogs: [],
   initialPainLogs: [],
   initialMessages: [],
   community: {
@@ -191,7 +193,7 @@ describe('protocolMetrics', () => {
 
   describe('isProgressionReady', () => {
     it('returns false if escalation is paused', () => {
-      const logs: PainLog[] = [
+      const logs: FeedbackLog[] = [
         { id: '1', day: 1, score: 0, note: '', loggedAt: '' },
         { id: '2', day: 2, score: 1, note: '', loggedAt: '' },
         { id: '3', day: 3, score: 0, note: '', loggedAt: '' }
@@ -200,7 +202,7 @@ describe('protocolMetrics', () => {
     });
 
     it('returns false if fewer than 3 logs exist', () => {
-      const logs: PainLog[] = [
+      const logs: FeedbackLog[] = [
         { id: '1', day: 1, score: 0, note: '', loggedAt: '' },
         { id: '2', day: 2, score: 1, note: '', loggedAt: '' }
       ];
@@ -208,7 +210,7 @@ describe('protocolMetrics', () => {
     });
 
     it('returns true when last 3 logs are under progression pain threshold (< 2)', () => {
-      const logs: PainLog[] = [
+      const logs: FeedbackLog[] = [
         { id: '1', day: 1, score: 1, note: '', loggedAt: '' },
         { id: '2', day: 2, score: 0, note: '', loggedAt: '' },
         { id: '3', day: 3, score: 1, note: '', loggedAt: '' }
@@ -217,7 +219,7 @@ describe('protocolMetrics', () => {
     });
 
     it('returns false when any of the last 3 logs is >= 2 with default threshold', () => {
-      const logs: PainLog[] = [
+      const logs: FeedbackLog[] = [
         { id: '1', day: 1, score: 1, note: '', loggedAt: '' },
         { id: '2', day: 2, score: 2, note: '', loggedAt: '' },
         { id: '3', day: 3, score: 0, note: '', loggedAt: '' }
@@ -226,7 +228,7 @@ describe('protocolMetrics', () => {
     });
 
     it('supports custom progression thresholds (e.g. < 3 allows score of 2)', () => {
-      const logs: PainLog[] = [
+      const logs: FeedbackLog[] = [
         { id: '1', day: 1, score: 1, note: '', loggedAt: '' },
         { id: '2', day: 2, score: 2, note: '', loggedAt: '' },
         { id: '3', day: 3, score: 2, note: '', loggedAt: '' }

@@ -153,7 +153,7 @@ export function LandingPage() {
               <p className="mt-4 text-xs font-mono lowercase text-white/50">Step 04</p>
               <h3 className="mt-1 text-lg font-medium lowercase">Adaptive Routine & Q&A</h3>
               <p className="mt-2 text-xs leading-relaxed lowercase text-white/70">
-                Executes daily sets, progression rules, pain thresholds, and answers questions strictly cited from the Methods.
+                Executes daily sets, progression rules, safety & biofeedback thresholds, and answers questions strictly cited from the Methods.
               </p>
             </div>
           </div>

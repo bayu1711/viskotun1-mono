@@ -2,13 +2,13 @@ import {
   ADHERENCE_HIGH_MIN,
   ADHERENCE_MODERATE_MIN,
   DEFAULT_FEEDBACK_METRIC,
-  PAIN_ESCALATION_THRESHOLD,
-  PAIN_SCORE_MAX,
-  PAIN_SCORE_MIN,
-  PROGRESSION_MAX_PAIN_SCORE,
-  PROGRESSION_WINDOW_LOGS } from
-'../data/config';
-import type { FeedbackMetric, PaperMeta, PainLog, Protocol } from '../types/protocol';
+  FEEDBACK_ESCALATION_THRESHOLD,
+  FEEDBACK_SCORE_MAX,
+  FEEDBACK_SCORE_MIN,
+  PROGRESSION_MAX_SCORE,
+  PROGRESSION_WINDOW_LOGS
+} from '../data/config';
+import type { FeedbackLog, FeedbackMetric, PaperMeta, Protocol } from '../types/protocol';
 import { clamp, toPercent } from './math';
 
 export function resolveFeedbackMetric(protocol?: { feedbackMetric?: FeedbackMetric }): FeedbackMetric {
@@ -36,22 +36,22 @@ export function adherenceOf(protocol: Protocol, todayFraction: number) {
   return clamp(toPercent(rawRate), 0, 100);
 }
 
-export function exceedsPainThreshold(score: number, threshold = PAIN_ESCALATION_THRESHOLD) {
+export function exceedsFeedbackThreshold(score: number, threshold = FEEDBACK_ESCALATION_THRESHOLD) {
   return score >= threshold;
 }
-export const exceedsFeedbackThreshold = exceedsPainThreshold;
+export const exceedsPainThreshold = exceedsFeedbackThreshold;
 
-export function clampPainScore(score: number, max = PAIN_SCORE_MAX, min = PAIN_SCORE_MIN) {
+export function clampFeedbackScore(score: number, max = FEEDBACK_SCORE_MAX, min = FEEDBACK_SCORE_MIN) {
   return clamp(score, min, max);
 }
-export const clampFeedbackScore = clampPainScore;
+export const clampPainScore = clampFeedbackScore;
 
 export function isProgressionReady(
-  painLogs: PainLog[],
+  feedbackLogs: FeedbackLog[],
   escalationPaused: boolean,
-  maxScore = PROGRESSION_MAX_PAIN_SCORE
+  maxScore = PROGRESSION_MAX_SCORE
 ) {
-  const recent = painLogs.slice(-PROGRESSION_WINDOW_LOGS);
+  const recent = feedbackLogs.slice(-PROGRESSION_WINDOW_LOGS);
   return (
     !escalationPaused &&
     recent.length === PROGRESSION_WINDOW_LOGS &&

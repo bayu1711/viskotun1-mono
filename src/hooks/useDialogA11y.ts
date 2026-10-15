@@ -22,7 +22,7 @@ interface DialogA11yOptions {
 /**
  * Modal accessibility: moves focus into the dialog, traps Tab/Shift+Tab,
  * closes on Escape and restores focus to the trigger on close.
- * Stack-aware so nested dialogs (pain log over the assistant) behave correctly.
+ * Stack-aware so nested dialogs (feedback log over the assistant) behave correctly.
  */
 export function useDialogA11y<T extends HTMLElement>(
 containerRef: RefObject<T>,
