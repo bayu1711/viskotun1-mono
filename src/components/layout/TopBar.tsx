@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import AddIcon from '@mui/icons-material/Add';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProtocol } from '../../contexts/ProtocolContext';
@@ -13,7 +14,7 @@ import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 
 export function TopBar() {
-  const { streak } = useProtocol();
+  const { streak, resetToDefaults } = useProtocol();
   const { openAssistant } = useAssistant();
   const { user, isGuest, logout } = useAuth();
 
@@ -50,6 +51,10 @@ export function TopBar() {
             <Icon icon={LogoutOutlinedIcon} size="md" />
           </CircleButton>
         )}
+
+        <CircleButton label={COPY.shell.resetDemo} onClick={resetToDefaults} size={38}>
+          <Icon icon={RestartAltOutlinedIcon} size="md" />
+        </CircleButton>
 
         <CircleButton label={COPY.shell.addPaper} onClick={() => openAssistant('upload')}>
           <Icon icon={AddIcon} size="lg" />
