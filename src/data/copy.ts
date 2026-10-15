@@ -53,9 +53,12 @@ export const COPY = {
     openDashboard: 'Open dashboard',
     painEyebrow: 'pain',
     painTitle: 'log',
+    metricEyebrow: (name?: string) => name || 'pain',
+    metricTitle: (title?: string) => title || 'log',
     painDay: (day: number) => `day ${day}`,
     noNotes: 'no notes',
     emptyPainTitle: 'no pain logged yet',
+    emptyMetricTitle: (name?: string) => (name ? `no ${name} logged yet` : 'no feedback logged yet'),
     emptyPainBody: 'log how you feel after each session so the protocol can adapt.',
     emptyStepsTitle: 'no steps extracted',
     emptyStepsBody: 'this paper did not report an executable routine.'
@@ -63,10 +66,14 @@ export const COPY = {
   dayActions: {
     markComplete: 'mark today complete',
     dayLogged: (day: number) => `✓ day ${day} logged`,
-    logPain: 'log pain / side effect'
+    logPain: 'log pain / side effect',
+    logFeedback: (name?: string) => (name ? `log ${name}` : 'log pain / side effect')
   },
   safety: {
     escalationAlert: `Pain threshold exceeded. Escalation paused. Recommendation: Reduce load by ${LOAD_REDUCTION_PERCENT}% tomorrow or consult your therapist.`,
+    dynamicEscalationAlert: (name?: string, customMessage?: string) =>
+      customMessage ||
+      `${name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Symptom'} threshold exceeded. Escalation paused. Recommendation: Reduce load/dose by ${LOAD_REDUCTION_PERCENT}% tomorrow or consult your specialist.`,
     escalationShort: `escalation paused — load reduced ${LOAD_REDUCTION_PERCENT}% for tomorrow`,
     pausedRecommendation: `Paused — reduce load by ${LOAD_REDUCTION_PERCENT}% tomorrow.`
   },
@@ -88,19 +95,25 @@ export const COPY = {
   },
   painDrawer: {
     dialogLabel: 'Log pain or side effect',
+    metricDialogLabel: (name?: string) => `Log ${name || 'pain or side effect'}`,
     close: 'Close',
     header: (day: number) => `pain · day ${day}`,
+    metricHeader: (name: string, day: number) => `${name} · day ${day}`,
     decrease: 'Decrease pain score',
+    decreaseMetric: (name: string) => `Decrease ${name} score`,
     increase: 'Increase pain score',
+    increaseMetric: (name: string) => `Increase ${name} score`,
     ofMax: (max: number) => `of ${max}`,
     sliderLabel: (min: number, max: number) => `Pain scale from ${min} to ${max}`,
+    metricSliderLabel: (name: string, min: number, max: number) => `${name} scale from ${min} to ${max}`,
     sliderValue: (score: number, max: number, level: string) => `${score} out of ${max}, ${level}`,
     minLabel: (min: number) => `${min} · none`,
     maxLabel: (max: number) => `${max} · severe`,
     notesLabel: 'Notes',
     notesPlaceholder: 'Optional notes for AI adjustment...',
     save: 'save log to protocol',
-    saved: 'pain log saved to your protocol'
+    saved: 'pain log saved to your protocol',
+    savedMetric: (name?: string) => `${name || 'feedback'} saved to your protocol`
   },
   task: {
     complete: (action: string) => `Complete ${action}`,

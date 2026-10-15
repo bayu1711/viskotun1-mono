@@ -1,14 +1,19 @@
 import {
   ADHERENCE_HIGH_MIN,
   ADHERENCE_MODERATE_MIN,
+  DEFAULT_FEEDBACK_METRIC,
   PAIN_ESCALATION_THRESHOLD,
   PAIN_SCORE_MAX,
   PAIN_SCORE_MIN,
   PROGRESSION_MAX_PAIN_SCORE,
   PROGRESSION_WINDOW_LOGS } from
 '../data/config';
-import type { PaperMeta, PainLog, Protocol } from '../types/protocol';
+import type { FeedbackMetric, PaperMeta, PainLog, Protocol } from '../types/protocol';
 import { clamp, toPercent } from './math';
+
+export function resolveFeedbackMetric(protocol?: { feedbackMetric?: FeedbackMetric }): FeedbackMetric {
+  return protocol?.feedbackMetric ?? DEFAULT_FEEDBACK_METRIC;
+}
 
 /** Fraction (0–1) of today's sets completed across all steps. */
 export function completionOf(protocol: Protocol, setsDone: Record<string, number>) {
@@ -31,21 +36,27 @@ export function adherenceOf(protocol: Protocol, todayFraction: number) {
   return clamp(toPercent(rawRate), 0, 100);
 }
 
-export function exceedsPainThreshold(score: number) {
-  return score >= PAIN_ESCALATION_THRESHOLD;
+export function exceedsPainThreshold(score: number, threshold = PAIN_ESCALATION_THRESHOLD) {
+  return score >= threshold;
 }
+export const exceedsFeedbackThreshold = exceedsPainThreshold;
 
-export function clampPainScore(score: number) {
-  return clamp(score, PAIN_SCORE_MIN, PAIN_SCORE_MAX);
+export function clampPainScore(score: number, max = PAIN_SCORE_MAX, min = PAIN_SCORE_MIN) {
+  return clamp(score, min, max);
 }
+export const clampFeedbackScore = clampPainScore;
 
-export function isProgressionReady(painLogs: PainLog[], escalationPaused: boolean) {
+export function isProgressionReady(
+  painLogs: PainLog[],
+  escalationPaused: boolean,
+  maxScore = PROGRESSION_MAX_PAIN_SCORE
+) {
   const recent = painLogs.slice(-PROGRESSION_WINDOW_LOGS);
   return (
     !escalationPaused &&
     recent.length === PROGRESSION_WINDOW_LOGS &&
-    recent.every((log) => log.score < PROGRESSION_MAX_PAIN_SCORE));
-
+    recent.every((log) => log.score < maxScore)
+  );
 }
 
 export type ComplianceLevel = 'high' | 'moderate' | 'low';

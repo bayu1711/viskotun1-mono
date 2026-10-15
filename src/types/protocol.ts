@@ -73,13 +73,27 @@ export interface MissingDataFlag {
   fallback: string;
 }
 
-export interface PainLog {
+export interface FeedbackMetric {
+  name: string;
+  label: string;
+  eyebrow?: string;
+  logTitle?: string;
+  minLabel?: string;
+  maxLabel?: string;
+  maxScore?: number;
+  escalationThreshold?: number;
+  escalationMessage?: string;
+}
+
+export interface FeedbackLog {
   id: string;
   day: number;
   score: number;
   note: string;
   loggedAt: string;
 }
+
+export type PainLog = FeedbackLog;
 
 export type ChatRole = 'user' | 'ai';
 export type ChatKind =
@@ -153,6 +167,7 @@ export interface Protocol {
   dayHistory: number[];
   initialSetsDone: Record<string, number>;
   initialPainLogs: PainLog[];
+  feedbackMetric?: FeedbackMetric;
   initialMessages: ChatMessage[];
   community: CommunityInsights;
   faqs: PaperFaq[];

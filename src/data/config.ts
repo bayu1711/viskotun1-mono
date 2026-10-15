@@ -9,6 +9,18 @@ export const PAIN_ESCALATION_THRESHOLD = 4;
 export const PAIN_NOTE_MAX_LENGTH = 280;
 export const DEFAULT_CONFIRMATION_PAIN_SCORE = 1;
 
+/** Default feedback metric when paper omits custom subjective measures */
+export const DEFAULT_FEEDBACK_METRIC = {
+  name: 'pain',
+  label: 'pain / side effect',
+  eyebrow: 'pain',
+  logTitle: 'log',
+  minLabel: '0 · none',
+  maxLabel: '10 · severe',
+  maxScore: PAIN_SCORE_MAX,
+  escalationThreshold: PAIN_ESCALATION_THRESHOLD
+} as const;
+
 /** Progression & safety rules */
 export const PROGRESSION_WINDOW_LOGS = 3;
 export const PROGRESSION_MAX_PAIN_SCORE = 2;
