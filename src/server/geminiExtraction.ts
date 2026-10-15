@@ -71,16 +71,16 @@ Return a JSON object conforming strictly to:
         "icon": string,
         "action": string,
         "detail": string,
-        "sets": number,
-        "reps": number,
-        "frequency": string,
-        "tempo": string, // optional
-        "durationSeconds": number, // optional
-        "inferred": boolean, // MUST BE true if parameters like hold time or rest were not reported by authors
-        "setLabel": string,
-        "perSetLabel": string,
-        "statLabel": string,
-        "statValue": string
+        "sets": number, // count of daily rounds, doses, applications, or sets
+        "reps": number, // repetitions if physical exercise, or 1 for discrete doses/sessions
+        "frequency": string, // e.g. "1x Daily", "Morning & Night", "3x Weekly"
+        "tempo": string, // optional: cadence if physical exercise (e.g. "3s eccentric")
+        "durationSeconds": number, // optional: duration if timed exposure/hold (e.g. 1200 for 20m light therapy)
+        "inferred": boolean, // MUST BE true if key parameters (dosage, rest window, hold time) were omitted by authors
+        "setLabel": string, // unit label: "dose", "serving", "application", "session", or "sets"
+        "perSetLabel": string, // per-round description: e.g. "× 5g with meal", "× 1 mL topical", "× 15 reps"
+        "statLabel": string, // primary measure label: e.g. "dose:", "volume:", "duration:", "reps:"
+        "statValue": string // primary measure value: e.g. "5g", "1 mL", "20 min", "15"
       }
     ],
     "progressionRules": [

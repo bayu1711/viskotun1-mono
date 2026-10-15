@@ -309,7 +309,7 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
     maxLabel: '10 · severe',
     maxScore: 10,
     escalationThreshold: 4,
-    escalationMessage: 'Tendon discomfort threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce resistance load by 20% tomorrow or consult your therapist.'
+    escalationMessage: 'Tendon discomfort threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce resistance load by 20% tomorrow or consult your therapist or clinician.'
   },
   initialFeedbackLogs: [
     {
@@ -474,14 +474,16 @@ export function generateFallbackProtocol(source: string): Protocol {
       {
         id: `${slug}-1`,
         tone: 'ink',
-        icon: 'fitness',
+        icon: 'science',
         action: 'Primary Prescribed Intervention',
         detail: 'Standardized experimental dosage/repetition protocol under controlled observation.',
-        sets: 3,
-        reps: 10,
+        sets: 1,
+        reps: 1,
         frequency: '1x Daily',
-        statLabel: 'reps:',
-        statValue: '10'
+        setLabel: 'dose / round',
+        perSetLabel: '1 protocol round',
+        statLabel: 'target:',
+        statValue: '1 daily session'
       },
       {
         id: `${slug}-2`,
