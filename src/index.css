@@ -31,23 +31,19 @@ body {
 }
 
 /* Feedback scale slider — the filled track is rendered behind the input; thumb ring uses currentColor. */
-input[type='range'].feedback-slider,
-input[type='range'].pain-slider {
+input[type='range'].feedback-slider {
   -webkit-appearance: none;
   appearance: none;
   height: var(--slider-thumb-size);
   outline: none;
 }
-input[type='range'].feedback-slider::-webkit-slider-runnable-track,
-input[type='range'].pain-slider::-webkit-slider-runnable-track {
+input[type='range'].feedback-slider::-webkit-slider-runnable-track {
   background: transparent;
 }
-input[type='range'].feedback-slider::-moz-range-track,
-input[type='range'].pain-slider::-moz-range-track {
+input[type='range'].feedback-slider::-moz-range-track {
   background: transparent;
 }
-input[type='range'].feedback-slider::-webkit-slider-thumb,
-input[type='range'].pain-slider::-webkit-slider-thumb {
+input[type='range'].feedback-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   height: var(--slider-thumb-size);
@@ -58,8 +54,7 @@ input[type='range'].pain-slider::-webkit-slider-thumb {
   box-shadow: 0 0 0 var(--slider-thumb-ring) currentColor;
   cursor: pointer;
 }
-input[type='range'].feedback-slider::-moz-range-thumb,
-input[type='range'].pain-slider::-moz-range-thumb {
+input[type='range'].feedback-slider::-moz-range-thumb {
   height: var(--slider-thumb-size);
   width: var(--slider-thumb-size);
   border-radius: 9999px;
@@ -68,8 +63,7 @@ input[type='range'].pain-slider::-moz-range-thumb {
   box-shadow: 0 0 0 var(--slider-thumb-ring) currentColor;
   cursor: pointer;
 }
-input[type='range'].feedback-slider:focus-visible::-webkit-slider-thumb,
-input[type='range'].pain-slider:focus-visible::-webkit-slider-thumb {
+input[type='range'].feedback-slider:focus-visible::-webkit-slider-thumb {
   outline: 2px solid rgb(var(--color-ink) / 0.3);
   outline-offset: 2px;
 }
