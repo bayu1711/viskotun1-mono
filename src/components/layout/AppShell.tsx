@@ -11,6 +11,7 @@ import { isPdfFile } from '../../utils/files';
 import { AssistantSheet } from '../assistant/AssistantSheet';
 import { ErrorBoundary } from '../feedback/ErrorBoundary';
 import { FeedbackDrawer } from '../routine/FeedbackDrawer';
+import { PolicyLedgerDrawer } from '../admin/PolicyLedgerDrawer';
 import { AssistantFab } from './AssistantFab';
 import { FileDropOverlay } from './FileDropOverlay';
 import { MobileTabBar } from './MobileTabBar';
@@ -45,6 +46,7 @@ export function AppShell({ children }: AppShellProps) {
         </main>
         <AssistantSheet />
         <FeedbackDrawer />
+        <PolicyLedgerDrawer />
         <FileDropOverlay visible={isDragging} />
       </div>
     );
@@ -65,6 +67,7 @@ export function AppShell({ children }: AppShellProps) {
 
       <AssistantSheet />
       <FeedbackDrawer />
+      <PolicyLedgerDrawer />
       <FileDropOverlay visible={isDragging} />
     </div>
   );

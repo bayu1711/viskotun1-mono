@@ -3,8 +3,10 @@ import Link from 'next/link';
 import AddIcon from '@mui/icons-material/Add';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined';
+import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { usePolicyLedger } from '../../contexts/PolicyLedgerContext';
 import { useProtocol } from '../../contexts/ProtocolContext';
 import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
@@ -17,6 +19,7 @@ export function TopBar() {
   const { streak, resetToDefaults } = useProtocol();
   const { openAssistant } = useAssistant();
   const { user, isGuest, logout } = useAuth();
+  const { openPolicyDrawer, isLiveFirestore } = usePolicyLedger();
 
   const displayName = user?.name || 'Guest Explorer';
   const displayInitials = user?.initials || 'ge';
@@ -51,6 +54,16 @@ export function TopBar() {
             <Icon icon={LogoutOutlinedIcon} size="md" />
           </CircleButton>
         )}
+
+        <CircleButton label="Clinical Guardrail Policy Ledger" onClick={openPolicyDrawer} size={38} className="relative">
+          <Icon icon={ShieldOutlinedIcon} size="md" />
+          {isLiveFirestore && (
+            <span
+              className="absolute right-1 top-1 h-2 w-2 rounded-full border border-ink bg-mint"
+              aria-hidden="true"
+            />
+          )}
+        </CircleButton>
 
         <CircleButton label={COPY.shell.resetDemo} onClick={resetToDefaults} size={38}>
           <Icon icon={RestartAltOutlinedIcon} size="md" />

@@ -5,6 +5,7 @@ import { Toaster } from 'sonner';
 import { AppShell } from '../components/layout/AppShell';
 import { AssistantProvider } from '../contexts/AssistantContext';
 import { AuthProvider } from '../contexts/AuthContext';
+import { PolicyLedgerProvider } from '../contexts/PolicyLedgerContext';
 import { ProtocolProvider } from '../contexts/ProtocolContext';
 
 interface ProvidersProps {
@@ -16,8 +17,10 @@ export function Providers({ children }: ProvidersProps) {
     <AuthProvider>
       <ProtocolProvider missingDataFlagEnabled={true}>
         <AssistantProvider>
-          <AppShell>{children}</AppShell>
-          <Toaster position="top-center" />
+          <PolicyLedgerProvider>
+            <AppShell>{children}</AppShell>
+            <Toaster position="top-center" />
+          </PolicyLedgerProvider>
         </AssistantProvider>
       </ProtocolProvider>
     </AuthProvider>
