@@ -13,19 +13,25 @@ const STATUS_TONE: Record<ProgressionStatus, PanelTone> = {
 };
 
 export function ProgressionPanel() {
-  const { protocol, escalationPaused, progressionReady } = useProtocol();
+  const { protocol, escalationPaused, progressionReady, feedbackMetric } = useProtocol();
   const status = progressionStatus(escalationPaused, progressionReady);
 
   return (
     <Panel tone={STATUS_TONE[status]} aria-live="polite">
       <SectionHeading eyebrow={COPY.dashboard.progressionEyebrow} title={COPY.dashboard.progressionTitle} />
-      <p className="mt-4 text-sm leading-relaxed">{progressionMessage(status, protocol.progressionRules[0])}</p>
-    </Panel>);
-
+      <p className="mt-4 text-sm leading-relaxed">
+        {progressionMessage(status, protocol.progressionRules[0], feedbackMetric?.escalationMessage)}
+      </p>
+    </Panel>
+  );
 }
 
-function progressionMessage(status: ProgressionStatus, rule: ProgressionRule | undefined) {
-  if (status === 'paused') return COPY.safety.pausedRecommendation;
+function progressionMessage(
+  status: ProgressionStatus,
+  rule: ProgressionRule | undefined,
+  escalationMessage?: string
+) {
+  if (status === 'paused') return escalationMessage || COPY.safety.pausedRecommendation;
   if (status === 'ready' && rule) return COPY.dashboard.progressionReady(rule.condition, rule.action);
   return COPY.dashboard.progressionHolding;
 }

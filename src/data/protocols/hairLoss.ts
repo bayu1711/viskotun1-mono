@@ -87,7 +87,7 @@ export const hairLossProtocol: Protocol = {
   },
   {
     id: 'hair-c-2',
-    text: 'Stop minoxidil and see a doctor if chest pain, dizziness or a racing heartbeat occurs.',
+    text: 'Stop minoxidil and see a specialist if chest pain, dizziness or a racing heartbeat occurs.',
     severity: 'caution'
   }],
 

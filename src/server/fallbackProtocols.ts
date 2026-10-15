@@ -176,7 +176,7 @@ export const FALLBACK_CREATINE_SLEEP: Protocol = {
       },
       {
         id: 'cr-rev-2',
-        handle: 'Anonymous · 34F · Resident Physician',
+        handle: 'Anonymous · 34F · Clinical Specialist',
         day: 4,
         outcome: 'adjusted',
         text: 'Split the 5g into 2.5g twice daily per the safety rule when mild nausea appeared. Smooth sailing after.',
@@ -309,7 +309,7 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
     maxLabel: '10 · severe',
     maxScore: 10,
     escalationThreshold: 4,
-    escalationMessage: 'Tendon discomfort threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce resistance load by 20% tomorrow or consult your therapist or clinician.'
+    escalationMessage: 'Tendon discomfort threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce resistance load by 20% tomorrow or consult a specialist.'
   },
   initialFeedbackLogs: [
     {

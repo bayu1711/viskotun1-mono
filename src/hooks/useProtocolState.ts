@@ -383,9 +383,13 @@ export function useProtocolState() {
           body: JSON.stringify({
             question: text,
             protocolTitle: target.title,
+            shortTitle: target.shortTitle,
             faqs: target.faqs,
             contraindications: target.contraindications,
-            steps: target.steps
+            steps: target.steps,
+            progressionRules: target.progressionRules,
+            feedbackMetric: target.feedbackMetric,
+            paper: target.paper
           })
         });
 

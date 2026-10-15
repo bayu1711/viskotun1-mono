@@ -98,7 +98,7 @@ export const achillesProtocol: Protocol = {
     maxLabel: '10 · severe',
     maxScore: 10,
     escalationThreshold: 4,
-    escalationMessage: 'Tendon discomfort threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce load by 20% tomorrow or consult your therapist or clinician.'
+    escalationMessage: 'Tendon discomfort threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce load by 20% tomorrow or consult a specialist.'
   },
   initialFeedbackLogs: [
   { id: 'ach-log-1', day: 1, score: 3, note: 'Tender at first drop.', loggedAt: 'Sat' },

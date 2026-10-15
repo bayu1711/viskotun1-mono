@@ -212,34 +212,34 @@ Document environment variables and zero-friction Google Cloud Run deployment com
 - A new developer or judge can follow the instructions to deploy the container to Cloud Run in under 5 minutes." >/dev/null
 echo "Created Task: create .env.example and Cloud Run guide"
 
-# Task 6: Printable Physician Summary Layout
+# Task 6: Printable Shareable Summary Layout
 gh issue create --repo "$REPO" \
   --title "feat(report): build printable 1-page clinical summary layout with @media print" \
   --label "phase-5" \
   --body "### Objective
-Create a clean, 1-page clinical brief layout suitable for doctors or physical therapists.
+Create a clean, 1-page clinical brief layout suitable for specialists or personal tracking.
 
 ### Target Files
-- \`src/components/dashboard/PrintableSummaryModal.tsx\` (new)
+- \`src/components/dashboard/ShareableSummaryModal.tsx\` (new)
 - \`src/data/copy.ts\`
 
 ### Tasks
-- [ ] Build modal view displaying protocol title, trial DOI, adherence %, pain score timeline, and contraindications.
+- [ ] Build modal view displaying protocol title, trial DOI, adherence %, symptom score timeline, and contraindications.
 - [ ] Add \`@media print\` CSS so printing isolates the 1-page summary card and hides sidebar/nav.
 
 ### Acceptance Criteria
-- Browser print preview displays a clean, single-page professional medical summary without page overflows." >/dev/null
+- Browser print preview displays a clean, single-page professional clinical summary without page overflows." >/dev/null
 echo "Created Task: build printable clinical summary layout"
 
-# Task 7: Wire Physician Summary Export Trigger
+# Task 7: Wire Shareable Summary Export Trigger
 gh issue create --repo "$REPO" \
-  --title "feat(ui): wire Physician Summary export button to trigger print/PDF dialog" \
+  --title "feat(ui): wire Shareable Summary export button to trigger print/PDF dialog" \
   --label "phase-5" \
   --body "### Objective
 Replace the simulated export timer with the actual print / PDF trigger.
 
 ### Target Files
-- \`src/components/dashboard/PhysicianSummaryPanel.tsx\`
+- \`src/components/dashboard/ShareableSummaryPanel.tsx\`
 - \`src/hooks/useSimulatedExport.ts\`
 
 ### Tasks
