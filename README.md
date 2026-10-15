@@ -10,8 +10,8 @@ Built with **Next.js 14 (App Router)**, **TypeScript**, and **Tailwind CSS**, de
 
 Peer-reviewed clinical literature is notoriously dense and difficult for patients and athletes to follow safely. **Protocol Engine** bridges this gap by:
 - Ingesting scientific PDFs and isolating actionable methods, dosing, tempo, and contraindications.
-- Translating trial parameters into personalized daily routines with live set tracking and smart pain scoring.
-- Applying adaptive progression rules: automatically pausing escalation and reducing training load when adverse pain thresholds are exceeded.
+- Translating trial parameters into personalized daily routines with live set tracking and smart biofeedback scoring.
+- Applying adaptive progression rules: automatically pausing escalation and recommending load/dosage reductions when adverse symptom or tolerability thresholds are exceeded.
 - Providing an AI paper assistant for Q&A grounded directly in the study's Methods and Interventions section.
 
 ---
@@ -79,7 +79,7 @@ npm run start
 │   │   ├── feedback/           # Error boundary, fallbacks, callouts
 │   │   ├── layout/             # Shell, sidebar, topbar, mobile nav
 │   │   ├── protocol/           # Step rows, paper pickers, switchers
-│   │   ├── routine/            # Set counters, pain scale slider, calendar
+│   │   ├── routine/            # Set counters, biofeedback scale slider, calendar
 │   │   └── ui/                 # Atomic design tokens (buttons, badges, icons)
 │   ├── contexts/               # React Contexts (ProtocolState, AssistantState)
 │   ├── data/                   # Centralized copy, config, and study data
