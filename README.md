@@ -10,9 +10,42 @@ Built with **Next.js 14 (App Router)**, **TypeScript**, and **Tailwind CSS**, de
 
 Peer-reviewed clinical literature is notoriously dense and difficult for patients and athletes to follow safely. **Protocol Engine** bridges this gap by:
 - Ingesting scientific PDFs and isolating actionable methods, dosing, tempo, and contraindications.
+- **The "Morphing" Pipeline (Schema-Driven Adaptive UI)**: Dynamically generating bespoke data collection widgets and dashboard analytics tailored to the study's endpoints (photo uploads for dermatology/posture, numeric biomarker steppers for blood glucose, reaction timers for cognitive trials, or 0–10 sliders for physical therapy).
 - Translating trial parameters into personalized daily routines with live set tracking and smart biofeedback scoring.
 - Applying adaptive progression rules: automatically pausing escalation and recommending load/dosage reductions when adverse symptom or tolerability thresholds are exceeded.
 - Providing an AI paper assistant for Q&A grounded directly in the study's Methods and Interventions section.
+
+---
+
+## The "Morphing" Pipeline (Schema-Driven Adaptive UI)
+
+A core innovation of Protocol Engine is **Schema-Driven Adaptive UI** (Generative UI). Instead of forcing every clinical study into an identical generic slider or checkbox, the research paper dynamically constructs its own user interface:
+
+```text
+Research Paper (PDF)
+      │
+      ▼
+[1. Extraction Layer — Gemini Multimodal]
+  Analyzes "Methods" & "Outcomes" sections to isolate trial endpoints
+  Outputs declarative `dataCollectionSpec` array alongside physical steps
+      │
+      ▼
+[2. Registry Layer — Polymorphic Component Factory]
+  <DynamicFieldRenderer /> mounts exact matching UI primitives:
+  • 'scale'       ➔ Severity-toned 0–10 visual analog slider
+  • 'photo'       ➔ Camera/upload widget with alignment guidelines
+  • 'numeric'     ➔ Stepper with unit validation (e.g. mg/dL, mmHg)
+  • 'timer'       ➔ Countdown/stopwatch for functional mobility tests
+  • 'multichoice' ➔ Single-tap clinical chip selectors
+      │
+      ▼
+[3. Presentation Layer — Milestone Awareness & Adaptive Dashboards]
+  • Daily vs Milestone Scheduling (e.g., photo check-ins on Day 1, 14, 30 only)
+  • Morphing Dashboard Visualizers:
+    - Photos ➔ Interactive Before / After split comparison slider
+    - Numbers ➔ Clinical biomarker trend curves with normal ranges
+    - Scales ➔ Tolerability and load escalation pause timelines
+```
 
 ---
 
