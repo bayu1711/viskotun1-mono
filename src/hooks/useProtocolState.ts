@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { AuthContext } from '../contexts/AuthContext';
-import { ASSISTANT_REPLY_DELAY_MS, DEFAULT_CONFIRMATION_PAIN_SCORE } from '../data/config';
+import { DEFAULT_CONFIRMATION_PAIN_SCORE } from '../data/config';
 import { COPY } from '../data/copy';
 import { initialQueuedPapers, protocols as initialProtocols } from '../data/protocols';
 import type {
@@ -55,15 +55,7 @@ export function useProtocolState() {
   const [isPainLogOpen, setIsPainLogOpen] = useState(false);
   const [runtime, setRuntime] = useState(() => createInitialRuntime(initialProtocols));
   const [hasHydrated, setHasHydrated] = useState(false);
-  const replyTimers = useRef<number[]>([]);
-
-  // Safe timer cleanup on unmount
-  useEffect(() => {
-    return () => {
-      replyTimers.current.forEach((timer) => window.clearTimeout(timer));
-      replyTimers.current = [];
-    };
-  }, []);
+  const [hasRemoteHydrated, setHasRemoteHydrated] = useState(false);
 
   // Safe client hydration from localStorage
   useEffect(() => {
@@ -155,8 +147,50 @@ export function useProtocolState() {
   const isAuthenticated = auth?.isAuthenticated;
   const userId = auth?.user?.id;
 
+  // Fetch cloud state on initial authentication
   useEffect(() => {
-    if (!hasHydrated || !isAuthenticated || !userId) return;
+    let isMounted = true;
+    if (!isAuthenticated || !userId) {
+      setHasRemoteHydrated(false);
+      return;
+    }
+
+    async function fetchRemoteState() {
+      try {
+        const res = await fetch(`/api/user/sync?userId=${encodeURIComponent(userId!)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted && data.found) {
+            if (Array.isArray(data.protocols) && data.protocols.length > 0) {
+              setProtocolList(data.protocols);
+            }
+            if (data.activeProtocolId) {
+              setActiveProtocol(data.activeProtocolId);
+            }
+            if (data.runtime && typeof data.runtime === 'object') {
+              setRuntime((prev) => ({ ...prev, ...data.runtime }));
+            }
+          }
+        }
+      } catch (err) {
+        console.error('[useProtocolState] Cloud fetch error:', err);
+      } finally {
+        if (isMounted) {
+          setHasRemoteHydrated(true);
+        }
+      }
+    }
+
+    fetchRemoteState();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isAuthenticated, userId]);
+
+  // Outbound sync to backend once remote state is confirmed/hydrated
+  useEffect(() => {
+    if (!hasHydrated || !isAuthenticated || !userId || !hasRemoteHydrated) return;
 
     const timer = window.setTimeout(() => {
       fetch('/api/user/sync', {
@@ -174,7 +208,7 @@ export function useProtocolState() {
     }, 1000);
 
     return () => window.clearTimeout(timer);
-  }, [protocolList, activeProtocolId, runtime, hasHydrated, isAuthenticated, userId]);
+  }, [protocolList, activeProtocolId, runtime, hasHydrated, isAuthenticated, userId, hasRemoteHydrated]);
 
   const resetToDefaults = useCallback(() => {
     try {
