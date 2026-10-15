@@ -14,7 +14,7 @@ interface DayActionsProps {
 
 /** "Mark today complete" + "log pain" pair shared by the routine page and assistant protocol card. */
 export function DayActions({ onLogPain, size = 'lg', className }: DayActionsProps) {
-  const { markTodayComplete, dayIsComplete, currentDay, openPainLog } = useProtocol();
+  const { markTodayComplete, dayIsComplete, currentDay, openPainLog, feedbackMetric } = useProtocol();
   const handleLogPain = onLogPain ?? openPainLog;
 
   return (
@@ -28,7 +28,7 @@ export function DayActions({ onLogPain, size = 'lg', className }: DayActionsProp
         {dayIsComplete ? COPY.dayActions.dayLogged(currentDay) : COPY.dayActions.markComplete}
       </PillButton>
       <PillButton size={size} variant="outline" onClick={handleLogPain} aria-haspopup="dialog">
-        {COPY.dayActions.logPain}
+        {COPY.dayActions.logFeedback(feedbackMetric?.name)}
       </PillButton>
     </div>
   );

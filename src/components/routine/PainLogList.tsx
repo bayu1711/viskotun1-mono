@@ -6,17 +6,17 @@ import { EmptyState } from '../feedback/EmptyState';
 import { PainLogItem } from './PainLogItem';
 
 export function PainLogList() {
-  const { painLogs } = useProtocol();
+  const { painLogs, feedbackMetric } = useProtocol();
 
   if (painLogs.length === 0) {
     return (
       <EmptyState
         className="mt-4"
         icon={MonitorHeartOutlinedIcon}
-        title={COPY.routine.emptyPainTitle}
-        description={COPY.routine.emptyPainBody} />);
-
-
+        title={COPY.routine.emptyMetricTitle(feedbackMetric?.name)}
+        description={COPY.routine.emptyPainBody}
+      />
+    );
   }
 
   const latestFirst = [...painLogs].reverse();

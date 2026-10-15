@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { AuthContext } from '../contexts/AuthContext';
-import { DEFAULT_CONFIRMATION_PAIN_SCORE } from '../data/config';
+import { DEFAULT_CONFIRMATION_PAIN_SCORE, PAIN_ESCALATION_THRESHOLD } from '../data/config';
 import { COPY } from '../data/copy';
 import { initialQueuedPapers, protocols as initialProtocols } from '../data/protocols';
 import type {
@@ -19,7 +19,8 @@ import {
   adherenceOf,
   completionOf,
   exceedsPainThreshold,
-  isProgressionReady
+  isProgressionReady,
+  resolveFeedbackMetric
 } from '../utils/protocolMetrics';
 import { nowLabel } from '../utils/time';
 
@@ -263,7 +264,12 @@ export function useProtocolState() {
   const todayPercent = toPercent(todayFraction);
   const dayIsComplete = todayFraction === 1;
   const adherenceRate = adherenceOf(protocol, todayFraction);
-  const progressionReady = isProgressionReady(state.painLogs, state.escalationPaused);
+  const feedbackMetric = resolveFeedbackMetric(protocol);
+  const progressionReady = isProgressionReady(
+    state.painLogs,
+    state.escalationPaused,
+    feedbackMetric.escalationThreshold ?? PAIN_ESCALATION_THRESHOLD
+  );
 
   const summaries = useMemo<ProtocolSummary[]>(
     () =>
@@ -333,7 +339,9 @@ export function useProtocolState() {
 
   const logPain = useCallback(
     (score: number, note: string) => {
-      const exceeded = exceedsPainThreshold(score);
+      const metric = resolveFeedbackMetric(protocol);
+      const threshold = metric.escalationThreshold ?? PAIN_ESCALATION_THRESHOLD;
+      const exceeded = exceedsPainThreshold(score, threshold);
       updateRuntime(protocol.id, (prev) => ({
         ...prev,
         escalationPaused: prev.escalationPaused || exceeded,
@@ -345,11 +353,15 @@ export function useProtocolState() {
       pushMessages(
         protocol.id,
         exceeded
-          ? { role: 'ai', kind: 'alert', content: COPY.safety.escalationAlert }
+          ? {
+              role: 'ai',
+              kind: 'alert',
+              content: COPY.safety.dynamicEscalationAlert(metric.name, metric.escalationMessage)
+            }
           : { role: 'ai', kind: 'confirmation', content: COPY.assistant.confirmSafe(protocol.currentDay, score) }
       );
     },
-    [protocol.id, protocol.currentDay, updateRuntime, pushMessages]
+    [protocol, updateRuntime, pushMessages]
   );
 
   const askQuestion = useCallback(
@@ -503,6 +515,7 @@ export function useProtocolState() {
       setsDone: state.setsDone,
       painLogs: state.painLogs,
       escalationPaused: state.escalationPaused,
+      feedbackMetric,
       todayFraction,
       todayPercent,
       adherenceRate,
@@ -518,6 +531,7 @@ export function useProtocolState() {
       toggleStep,
       markTodayComplete,
       logPain,
+      logFeedback: logPain,
       askQuestion,
       uploadPaper,
       addProtocol,
@@ -532,6 +546,7 @@ export function useProtocolState() {
       state.setsDone,
       state.painLogs,
       state.escalationPaused,
+      feedbackMetric,
       state.assistantTyping,
       todayFraction,
       todayPercent,

@@ -2,7 +2,7 @@ import React, { type FormEvent, useId, useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { toast } from 'sonner';
 import { useProtocol } from '../../contexts/ProtocolContext';
-import { PAIN_NOTE_MAX_LENGTH, PAIN_SCORE_DEFAULT } from '../../data/config';
+import { PAIN_ESCALATION_THRESHOLD, PAIN_NOTE_MAX_LENGTH, PAIN_SCORE_DEFAULT } from '../../data/config';
 import { COPY } from '../../data/copy';
 import { cn } from '../../utils/cn';
 import { exceedsPainThreshold } from '../../utils/protocolMetrics';
@@ -19,16 +19,18 @@ interface PainLogFormProps {
 
 /** Mounted only while the drawer is open, so its state resets naturally on every open. */
 export function PainLogForm({ onClose }: PainLogFormProps) {
-  const { logPain, currentDay } = useProtocol();
+  const { logPain, currentDay, feedbackMetric } = useProtocol();
   const [score, setScore] = useState(PAIN_SCORE_DEFAULT);
   const [note, setNote] = useState('');
   const noteId = useId();
   const tone = painTone(score);
+  const threshold = feedbackMetric.escalationThreshold ?? PAIN_ESCALATION_THRESHOLD;
+  const isExceeded = exceedsPainThreshold(score, threshold);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     logPain(score, note.trim());
-    toast.success(COPY.painDrawer.saved);
+    toast.success(COPY.painDrawer.savedMetric(feedbackMetric.name));
     onClose();
   };
 
@@ -39,18 +41,20 @@ export function PainLogForm({ onClose }: PainLogFormProps) {
           <CircleButton label={COPY.painDrawer.close} onClick={onClose}>
             <Icon icon={CloseIcon} size="md" />
           </CircleButton>
-          <h2 className="text-sm lowercase">{COPY.painDrawer.header(currentDay)}</h2>
+          <h2 className="text-sm lowercase">
+            {COPY.painDrawer.metricHeader(feedbackMetric.name, currentDay)}
+          </h2>
           <span className="w-10" aria-hidden="true" />
         </div>
-        <PainScoreControl score={score} tone={tone} onChange={setScore} />
+        <PainScoreControl score={score} tone={tone} onChange={setScore} metric={feedbackMetric} />
       </div>
 
       <div className="px-6 pb-8 pt-6 sm:pb-6">
-        {exceedsPainThreshold(score) &&
-        <Callout tone="blush" role="status" className="mb-4 rounded-tile px-4 py-3">
-            {COPY.safety.escalationAlert}
+        {isExceeded && (
+          <Callout tone="blush" role="status" className="mb-4 rounded-tile px-4 py-3">
+            {COPY.safety.dynamicEscalationAlert(feedbackMetric.name, feedbackMetric.escalationMessage)}
           </Callout>
-        }
+        )}
         <label htmlFor={noteId} className="sr-only">
           {COPY.painDrawer.notesLabel}
         </label>

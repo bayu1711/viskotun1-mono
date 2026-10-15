@@ -21,7 +21,7 @@ import { ROUTES } from '../data/navigation';
 import { stopRuleOf } from '../utils/protocolMetrics';
 
 export function RoutinePage() {
-  const { protocol, currentDay, totalDays, todayPercent, todayFraction, escalationPaused, openPainLog } = useProtocol();
+  const { protocol, currentDay, totalDays, todayPercent, todayFraction, escalationPaused, feedbackMetric } = useProtocol();
   const historyHeadingId = useId();
   const painHeadingId = useId();
   const stopRule = stopRuleOf(protocol);
@@ -38,7 +38,7 @@ export function RoutinePage() {
             <MissingDataBanner />
             {escalationPaused && (
               <Callout tone="blush" role="alert">
-                {COPY.safety.escalationAlert}
+                {COPY.safety.dynamicEscalationAlert(feedbackMetric.name, feedbackMetric.escalationMessage)}
               </Callout>
             )}
           </div>
@@ -72,7 +72,11 @@ export function RoutinePage() {
           </Panel>
 
           <Panel aria-labelledby={painHeadingId}>
-            <SectionHeading id={painHeadingId} eyebrow={COPY.routine.painEyebrow} title={COPY.routine.painTitle} />
+            <SectionHeading
+              id={painHeadingId}
+              eyebrow={COPY.routine.metricEyebrow(feedbackMetric.eyebrow ?? feedbackMetric.name)}
+              title={COPY.routine.metricTitle(feedbackMetric.logTitle)}
+            />
             <PainLogList />
           </Panel>
         </aside>
