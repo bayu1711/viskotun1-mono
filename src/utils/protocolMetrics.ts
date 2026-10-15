@@ -8,11 +8,58 @@ import {
   PROGRESSION_MAX_SCORE,
   PROGRESSION_WINDOW_LOGS
 } from '../data/config';
-import type { FeedbackLog, FeedbackMetric, PaperMeta, Protocol } from '../types/protocol';
+import type {
+  DataCollectionField,
+  FeedbackLog,
+  FeedbackMetric,
+  PaperMeta,
+  Protocol
+} from '../types/protocol';
 import { clamp, toPercent } from './math';
 
 export function resolveFeedbackMetric(protocol?: { feedbackMetric?: FeedbackMetric }): FeedbackMetric {
   return protocol?.feedbackMetric ?? DEFAULT_FEEDBACK_METRIC;
+}
+
+export function resolveDataCollectionSpec(protocol?: Protocol): DataCollectionField[] {
+  if (protocol?.dataCollectionSpec && protocol.dataCollectionSpec.length > 0) {
+    return protocol.dataCollectionSpec;
+  }
+  const metric = resolveFeedbackMetric(protocol);
+  return [
+    {
+      id: 'default-feedback-scale',
+      name: metric.name,
+      label: metric.label,
+      type: 'scale',
+      frequency: 'daily',
+      min: 0,
+      max: metric.maxScore ?? 10,
+      step: 1,
+      escalationThreshold: metric.escalationThreshold,
+      escalationMessage: metric.escalationMessage
+    }
+  ];
+}
+
+export function isMilestoneDay(protocol?: Protocol, day?: number): boolean {
+  if (!protocol || typeof day !== 'number') return false;
+  const spec = resolveDataCollectionSpec(protocol);
+  return spec.some(
+    (field) => field.frequency === 'milestone' && field.milestoneDays?.includes(day)
+  );
+}
+
+export function getScheduledFieldsForDay(protocol?: Protocol, day?: number): DataCollectionField[] {
+  if (!protocol) return [];
+  const targetDay = day ?? protocol.currentDay;
+  const spec = resolveDataCollectionSpec(protocol);
+  return spec.filter((field) => {
+    if (field.frequency === 'daily') return true;
+    if (field.frequency === 'milestone') return field.milestoneDays?.includes(targetDay);
+    if (field.frequency === 'weekly') return targetDay % 7 === 1 || targetDay === 1;
+    return true;
+  });
 }
 
 /** Fraction (0–1) of today's sets completed across all steps. */

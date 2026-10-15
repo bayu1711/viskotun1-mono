@@ -15,7 +15,7 @@ interface DayActionsProps {
 /** "Mark today complete" + "log feedback" pair shared by the routine page and assistant protocol card. */
 export function DayActions({ onLogFeedback, size = 'lg', className }: DayActionsProps) {
   const { markTodayComplete, dayIsComplete, currentDay, openFeedbackDrawer, feedbackMetric } = useProtocol();
-  const handleLog = onLogFeedback ?? openFeedbackDrawer;
+  const handleLog = onLogFeedback ?? (() => openFeedbackDrawer());
 
   return (
     <div className={cn('grid grid-cols-1 gap-2.5 sm:grid-cols-2', className)}>
@@ -27,7 +27,7 @@ export function DayActions({ onLogFeedback, size = 'lg', className }: DayActions
       >
         {dayIsComplete ? COPY.dayActions.dayLogged(currentDay) : COPY.dayActions.markComplete}
       </PillButton>
-      <PillButton size={size} variant="outline" onClick={handleLog} aria-haspopup="dialog">
+      <PillButton size={size} variant="outline" onClick={() => handleLog()} aria-haspopup="dialog">
         {COPY.dayActions.logFeedback(feedbackMetric?.name)}
       </PillButton>
     </div>

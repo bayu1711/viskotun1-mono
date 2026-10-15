@@ -6,6 +6,8 @@ import { COPY } from '../data/copy';
 import { initialQueuedPapers, protocols as initialProtocols } from '../data/protocols';
 import type {
   ChatMessage,
+  DataCollectionField,
+  MorphingDataLog,
   NewChatMessage,
   Protocol,
   ProtocolRuntime,
@@ -19,7 +21,10 @@ import {
   adherenceOf,
   completionOf,
   exceedsFeedbackThreshold,
+  getScheduledFieldsForDay,
+  isMilestoneDay,
   isProgressionReady,
+  resolveDataCollectionSpec,
   resolveFeedbackMetric
 } from '../utils/protocolMetrics';
 import { nowLabel } from '../utils/time';
@@ -28,11 +33,13 @@ function createInitialRuntime(items: Protocol[]): Record<string, ProtocolRuntime
   return Object.fromEntries(
     items.map((item) => {
       const logs = item.initialFeedbackLogs ?? [];
+      const morphLogs = item.initialMorphingLogs ?? [];
       return [
         item.id,
         {
           setsDone: { ...item.initialSetsDone },
           feedbackLogs: logs,
+          morphingLogs: morphLogs,
           messages: item.initialMessages,
           escalationPaused: false,
           assistantTyping: false
@@ -57,6 +64,7 @@ export function useProtocolState() {
   const [activeProtocolId, setActiveProtocol] = useState(initialProtocols[0].id);
   const [queuedPapers, setQueuedPapers] = useState<QueuedPaper[]>(initialQueuedPapers);
   const [isFeedbackDrawerOpen, setIsFeedbackDrawerOpen] = useState(false);
+  const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
   const [runtime, setRuntime] = useState(() => createInitialRuntime(initialProtocols));
   const [hasHydrated, setHasHydrated] = useState(false);
   const [hasRemoteHydrated, setHasRemoteHydrated] = useState(false);
@@ -105,12 +113,14 @@ export function useProtocolState() {
                       ...(prev[key] ?? {
                         setsDone: {},
                         feedbackLogs: [],
+                        morphingLogs: [],
                         messages: [],
                         escalationPaused: false,
                         assistantTyping: false
                       }),
                       ...(val as ProtocolRuntime),
                       feedbackLogs: (val as ProtocolRuntime).feedbackLogs ?? [],
+                      morphingLogs: (val as ProtocolRuntime).morphingLogs ?? [],
                       assistantTyping: false
                     };
                   }
@@ -235,6 +245,7 @@ export function useProtocolState() {
   const state = runtime[protocol.id] ?? {
     setsDone: {},
     feedbackLogs: [],
+    morphingLogs: [],
     messages: [],
     escalationPaused: false,
     assistantTyping: false
@@ -245,6 +256,7 @@ export function useProtocolState() {
       const current = prev[id] ?? {
         setsDone: {},
         feedbackLogs: [],
+        morphingLogs: [],
         messages: [],
         escalationPaused: false,
         assistantTyping: false
@@ -252,6 +264,21 @@ export function useProtocolState() {
       return { ...prev, [id]: update(current) };
     });
   }, []);
+
+  const feedbackMetric = useMemo(() => resolveFeedbackMetric(protocol), [protocol]);
+  const dataCollectionSpec = useMemo(() => resolveDataCollectionSpec(protocol), [protocol]);
+  const morphingLogs = useMemo(
+    () => state.morphingLogs ?? protocol.initialMorphingLogs ?? [],
+    [state.morphingLogs, protocol.initialMorphingLogs]
+  );
+  const isCurrentDayMilestone = useMemo(
+    () => isMilestoneDay(protocol, protocol.currentDay),
+    [protocol]
+  );
+  const scheduledFields = useMemo(
+    () => getScheduledFieldsForDay(protocol, protocol.currentDay),
+    [protocol]
+  );
 
   const pushMessages = useCallback(
     (id: string, ...messages: NewChatMessage[]) => {
@@ -268,7 +295,6 @@ export function useProtocolState() {
   const todayPercent = toPercent(todayFraction);
   const dayIsComplete = todayFraction === 1;
   const adherenceRate = adherenceOf(protocol, todayFraction);
-  const feedbackMetric = resolveFeedbackMetric(protocol);
   const progressionReady = isProgressionReady(
     state.feedbackLogs,
     state.escalationPaused,
@@ -365,6 +391,70 @@ export function useProtocolState() {
               content: COPY.safety.dynamicEscalationAlert(metric.name, metric.escalationMessage)
             }
           : { role: 'ai', kind: 'confirmation', content: COPY.assistant.confirmSafe(protocol.currentDay, score) }
+      );
+    },
+    [protocol, updateRuntime, pushMessages]
+  );
+
+  const logMorphingData = useCallback(
+    (fieldId: string, value: number | string | boolean, note = '') => {
+      const spec = resolveDataCollectionSpec(protocol);
+      const field = spec.find((f) => f.id === fieldId) ?? spec[0];
+      const threshold = field.escalationThreshold ?? FEEDBACK_ESCALATION_THRESHOLD;
+      const isNumeric = typeof value === 'number';
+      const exceeded = isNumeric && exceedsFeedbackThreshold(value, threshold);
+
+      const newMorphLog: MorphingDataLog = {
+        id: createId('morph'),
+        fieldId,
+        day: protocol.currentDay,
+        value,
+        note,
+        loggedAt: nowLabel()
+      };
+
+      updateRuntime(protocol.id, (prev) => {
+        const existingMorph = prev.morphingLogs ?? [];
+        const nextMorph = [...existingMorph, newMorphLog];
+
+        let nextFeedback = prev.feedbackLogs ?? [];
+        if (field.type === 'scale' && isNumeric) {
+          nextFeedback = [
+            ...nextFeedback,
+            { id: createId('log'), day: protocol.currentDay, score: value, note, loggedAt: nowLabel() }
+          ];
+        }
+
+        return {
+          ...prev,
+          escalationPaused: prev.escalationPaused || exceeded,
+          morphingLogs: nextMorph,
+          feedbackLogs: nextFeedback
+        };
+      });
+
+      const displayVal =
+        typeof value === 'boolean'
+          ? value
+            ? 'Present'
+            : 'Absent'
+          : typeof value === 'string' && value.startsWith('data:')
+          ? 'Clinical Photo Attached'
+          : `${value}${field.unit ? ' ' + field.unit : ''}`;
+
+      pushMessages(
+        protocol.id,
+        exceeded
+          ? {
+              role: 'ai',
+              kind: 'alert',
+              content: COPY.safety.dynamicEscalationAlert(field.name, field.escalationMessage)
+            }
+          : {
+              role: 'ai',
+              kind: 'confirmation',
+              content: `${field.name} recorded for Day ${protocol.currentDay} (${displayVal}).`
+            }
       );
     },
     [protocol, updateRuntime, pushMessages]
@@ -511,8 +601,16 @@ export function useProtocolState() {
     [protocol.id, addProtocol, pushMessages, updateRuntime]
   );
 
-  const openFeedbackDrawer = useCallback(() => setIsFeedbackDrawerOpen(true), []);
-  const closeFeedbackDrawer = useCallback(() => setIsFeedbackDrawerOpen(false), []);
+  const openFeedbackDrawer = useCallback((fieldId?: string) => {
+    if (fieldId) {
+      setActiveFieldId(fieldId);
+    }
+    setIsFeedbackDrawerOpen(true);
+  }, []);
+  const closeFeedbackDrawer = useCallback(() => {
+    setIsFeedbackDrawerOpen(false);
+    setActiveFieldId(null);
+  }, []);
 
   return useMemo(
     () => ({
@@ -527,6 +625,12 @@ export function useProtocolState() {
       messages: state.messages,
       setsDone: state.setsDone,
       feedbackLogs: state.feedbackLogs ?? [],
+      morphingLogs,
+      dataCollectionSpec,
+      activeFieldId,
+      setActiveFieldId,
+      isCurrentDayMilestone,
+      scheduledFields,
       escalationPaused: state.escalationPaused,
       feedbackMetric,
       todayFraction,
@@ -544,6 +648,7 @@ export function useProtocolState() {
       toggleStep,
       markTodayComplete,
       logFeedback,
+      logMorphingData,
       askQuestion,
       uploadPaper,
       addProtocol,
@@ -557,6 +662,11 @@ export function useProtocolState() {
       state.messages,
       state.setsDone,
       state.feedbackLogs,
+      morphingLogs,
+      dataCollectionSpec,
+      activeFieldId,
+      isCurrentDayMilestone,
+      scheduledFields,
       state.escalationPaused,
       feedbackMetric,
       state.assistantTyping,
@@ -574,6 +684,7 @@ export function useProtocolState() {
       toggleStep,
       markTodayComplete,
       logFeedback,
+      logMorphingData,
       askQuestion,
       uploadPaper,
       addProtocol,
