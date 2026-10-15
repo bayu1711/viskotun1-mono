@@ -295,6 +295,16 @@ export const COPY = {
     emptyTitle: 'no messages yet',
     emptyBody: 'ask about dosing, frequency, safety or progression.',
     answerSource: 'source · methods section',
+    engines: {
+      onDeviceGemma: '⚡ On-Device Gemma',
+      cloudGemini: '☁️ Gemini Flash',
+      serverGemma: '⚡ Gemma 2 Endpoint',
+      localRules: '🔒 Deterministic Matcher',
+      onDeviceBadge: 'on-device (0ms · private)',
+      cloudBadge: 'cloud AI',
+      localBadge: 'offline matcher',
+      activeEngineLabel: 'ai engine:'
+    },
     backToToday: 'back to today',
     meta: {
       sample: 'sample:',

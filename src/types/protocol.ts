@@ -138,6 +138,8 @@ export type ChatKind =
 'answer' |
 'processing';
 
+export type AIEngineType = 'on-device-gemma' | 'cloud-gemini' | 'server-gemma' | 'local-rules';
+
 export interface ChatMessage {
   id: string;
   role: ChatRole;
@@ -145,6 +147,8 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
   createdAt?: number;
+  engine?: AIEngineType;
+  source?: string;
 }
 
 export interface CommunityReview {
