@@ -450,7 +450,11 @@ export const COPY = {
       currentLabel: (day: number) => `Milestone (Day ${day})`,
       biomarkerTitle: 'Biomarker Longitudinal Trends',
       biomarkerSubtitle: 'Patient readings tracked against published trial baseline',
-      targetZone: 'Target Reference Zone'
+      targetZone: 'Target Reference Zone',
+      gridToggle: 'standardization grid',
+      noMilestonesYet: 'No milestone evaluations completed yet',
+      currentReading: (val: number | string, unit?: string) => `Current: ${val} ${unit || ''}`.trim(),
+      targetReference: (target: string) => `Target: ${target}`
     }
   }
 } as const;
