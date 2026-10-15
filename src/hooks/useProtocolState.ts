@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { AuthContext } from '../contexts/AuthContext';
 import { ASSISTANT_REPLY_DELAY_MS, DEFAULT_CONFIRMATION_PAIN_SCORE } from '../data/config';
 import { COPY } from '../data/copy';
 import { initialQueuedPapers, protocols as initialProtocols } from '../data/protocols';
@@ -41,13 +42,19 @@ function buildMessage(message: NewChatMessage): ChatMessage {
   return { ...message, id: message.id ?? createId('msg'), timestamp: nowLabel() };
 }
 
+const STORAGE_KEY_PROTOCOLS = 'protocol_engine_protocols_v1';
+const STORAGE_KEY_ACTIVE_ID = 'protocol_engine_active_id_v1';
+const STORAGE_KEY_RUNTIME = 'protocol_engine_runtime_v1';
+
 /** All protocol session state + actions. Only raw state is stored; metrics are derived on render. */
 export function useProtocolState() {
+  const auth = useContext(AuthContext);
   const [protocolList, setProtocolList] = useState<Protocol[]>(initialProtocols);
   const [activeProtocolId, setActiveProtocol] = useState(initialProtocols[0].id);
   const [queuedPapers, setQueuedPapers] = useState<QueuedPaper[]>(initialQueuedPapers);
   const [isPainLogOpen, setIsPainLogOpen] = useState(false);
   const [runtime, setRuntime] = useState(() => createInitialRuntime(initialProtocols));
+  const [hasHydrated, setHasHydrated] = useState(false);
   const replyTimers = useRef<number[]>([]);
 
   // Safe timer cleanup on unmount
@@ -56,6 +63,133 @@ export function useProtocolState() {
       replyTimers.current.forEach((timer) => window.clearTimeout(timer));
       replyTimers.current = [];
     };
+  }, []);
+
+  // Safe client hydration from localStorage
+  useEffect(() => {
+    let isMounted = true;
+    try {
+      const savedActiveId = window.localStorage.getItem(STORAGE_KEY_ACTIVE_ID);
+      const savedProtocolsRaw = window.localStorage.getItem(STORAGE_KEY_PROTOCOLS);
+      const savedRuntimeRaw = window.localStorage.getItem(STORAGE_KEY_RUNTIME);
+
+      let loadedProtocols = initialProtocols;
+      if (savedProtocolsRaw) {
+        try {
+          const parsed: Protocol[] = JSON.parse(savedProtocolsRaw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const defaultIds = new Set(initialProtocols.map((p) => p.id));
+            const customOnes = parsed.filter((p) => !defaultIds.has(p.id));
+            loadedProtocols = [...initialProtocols, ...customOnes];
+            if (isMounted) {
+              setProtocolList(loadedProtocols);
+            }
+          }
+        } catch (err) {
+          console.error('[useProtocolState] Failed parsing saved protocols:', err);
+        }
+      }
+
+      if (savedActiveId && loadedProtocols.some((p) => p.id === savedActiveId)) {
+        if (isMounted) {
+          setActiveProtocol(savedActiveId);
+        }
+      }
+
+      if (savedRuntimeRaw) {
+        try {
+          const parsedRuntime = JSON.parse(savedRuntimeRaw);
+          if (parsedRuntime && typeof parsedRuntime === 'object') {
+            if (isMounted) {
+              setRuntime((prev) => {
+                const merged = { ...prev };
+                for (const [key, val] of Object.entries(parsedRuntime)) {
+                  if (val && typeof val === 'object') {
+                    merged[key] = {
+                      ...(prev[key] ?? {
+                        setsDone: {},
+                        painLogs: [],
+                        messages: [],
+                        escalationPaused: false,
+                        assistantTyping: false
+                      }),
+                      ...(val as ProtocolRuntime),
+                      assistantTyping: false
+                    };
+                  }
+                }
+                return merged;
+              });
+            }
+          }
+        } catch (err) {
+          console.error('[useProtocolState] Failed parsing saved runtime:', err);
+        }
+      }
+    } catch (err) {
+      console.error('[useProtocolState] Hydration error:', err);
+    } finally {
+      if (isMounted) {
+        setHasHydrated(true);
+      }
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Persist changes to localStorage once hydrated
+  useEffect(() => {
+    if (!hasHydrated) return;
+    try {
+      window.localStorage.setItem(STORAGE_KEY_PROTOCOLS, JSON.stringify(protocolList));
+      window.localStorage.setItem(STORAGE_KEY_ACTIVE_ID, activeProtocolId);
+      window.localStorage.setItem(STORAGE_KEY_RUNTIME, JSON.stringify(runtime));
+    } catch (err) {
+      console.error('[useProtocolState] LocalStorage write error:', err);
+    }
+  }, [protocolList, activeProtocolId, runtime, hasHydrated]);
+
+  // Sync to backend for authenticated users
+  const isAuthenticated = auth?.isAuthenticated;
+  const userId = auth?.user?.id;
+
+  useEffect(() => {
+    if (!hasHydrated || !isAuthenticated || !userId) return;
+
+    const timer = window.setTimeout(() => {
+      fetch('/api/user/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          activeProtocolId,
+          protocols: protocolList,
+          runtime
+        })
+      }).catch((err) => {
+        console.error('[useProtocolState] Cloud sync error:', err);
+      });
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [protocolList, activeProtocolId, runtime, hasHydrated, isAuthenticated, userId]);
+
+  const resetToDefaults = useCallback(() => {
+    try {
+      window.localStorage.removeItem(STORAGE_KEY_PROTOCOLS);
+      window.localStorage.removeItem(STORAGE_KEY_ACTIVE_ID);
+      window.localStorage.removeItem(STORAGE_KEY_RUNTIME);
+    } catch (err) {
+      console.error('[useProtocolState] Error clearing localStorage:', err);
+    }
+
+    setProtocolList(initialProtocols);
+    setActiveProtocol(initialProtocols[0].id);
+    setQueuedPapers(initialQueuedPapers);
+    setRuntime(createInitialRuntime(initialProtocols));
+    toast.success(COPY.demo.resetSuccess);
   }, []);
 
   const protocol = protocolList.find((item) => item.id === activeProtocolId) ?? protocolList[0];
@@ -331,7 +465,9 @@ export function useProtocolState() {
     logPain,
     askQuestion,
     uploadPaper,
-    addProtocol
+    addProtocol,
+    resetToDefaults,
+    hasHydrated
   };
 }
 

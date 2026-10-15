@@ -14,7 +14,7 @@ const GUEST_USER: User = {
   createdAt: Date.now()
 };
 
-const AuthContext = createContext<AuthState | null>(null);
+export const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
