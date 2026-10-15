@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     if (apiKey) {
       try {
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-2.5-flash' });
+        const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-3.8-flash' });
         const context = `
 Protocol: ${protocolTitle || 'Active Protocol'}
 Steps: ${JSON.stringify(steps || [])}
