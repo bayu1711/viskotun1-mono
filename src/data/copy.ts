@@ -28,6 +28,7 @@ export const COPY = {
     streak: (days: number) => `🔥 ${days} day streak`,
     addPaper: 'Add new paper',
     openAssistant: 'Open paper assistant',
+    resetDemo: 'reset to demo defaults',
     assistantFab: (title: string) => `ask about ${title} or drop a pdf`,
     todaySummaryLabel: "Today's progress",
     dayOfTotal: (day: number, total: number) => `day ${day} / ${total}`,
@@ -345,5 +346,8 @@ export const COPY = {
     retry: 'reload view',
     noProtocolsTitle: 'no protocols available',
     noProtocolsBody: 'add a research paper to get started.'
+  },
+  demo: {
+    resetSuccess: 'reset to demo defaults — storage cleared'
   }
 } as const;
