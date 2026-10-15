@@ -194,30 +194,31 @@ When the data collection morphs, the **Dashboard** dynamically selects the appro
 ## 7. Phased Implementation Roadmap
 
 ### Phase 1: Data Contracts & Gemini Extraction
-- [ ] Update `src/types/protocol.ts` with `DataCollectionField` and `MorphingDataLog`.
-- [ ] Extend Gemini extraction prompt in `src/server/geminiExtraction.ts` to extract `dataCollectionSpec` from paper Methods.
-- [ ] Add fallback specs in `src/server/fallbackProtocols.ts`:
-  - Achilles Tendinopathy $\rightarrow$ `scale` (Pain VAS 0–10)
-  - Creatine Sleep Deprivation $\rightarrow$ `timer` (Psychomotor Vigilance Task) & `multichoice` (Stanford Sleepiness Scale)
-  - Collagen & Skin Elasticity $\rightarrow$ `photo` (Milestone Baseline/Day 14/Day 30 photo)
+- [x] Update `src/types/protocol.ts` with `DataCollectionField` and `MorphingDataLog`.
+- [x] Extend Gemini extraction prompt in `src/server/geminiExtraction.ts` to extract `dataCollectionSpec` from paper Methods.
+- [x] Add fallback specs in `src/server/fallbackProtocols.ts`:
+  - Achilles Tendinopathy $\rightarrow$ `scale` (Pain VAS 0–10) & `numeric` (Lunge dorsiflexion angle)
+  - Creatine Sleep Deprivation $\rightarrow$ `timer` (Psychomotor Vigilance Task), `multichoice` (Stanford Sleepiness Scale), & `scale` (GI distress)
+  - Hair Loss Trial $\rightarrow$ `photo` (Milestone Baseline/Day 14/28/56/84 vertex photo) & `scale` (Scalp irritation)
 
 ### Phase 2: Widget Primitives & Factory Component
-- [ ] Create `src/components/routine/widgets/ScaleWidget.tsx`.
-- [ ] Create `src/components/routine/widgets/NumericWidget.tsx`.
-- [ ] Create `src/components/routine/widgets/PhotoWidget.tsx`.
-- [ ] Create `src/components/routine/widgets/TimerWidget.tsx`.
-- [ ] Create `src/components/routine/widgets/MultiChoiceWidget.tsx`.
-- [ ] Create polymorphic `DynamicFieldRenderer.tsx` and integrate into `FeedbackDrawer.tsx`.
+- [x] Create `src/components/routine/widgets/ScaleWidget.tsx`.
+- [x] Create `src/components/routine/widgets/NumericWidget.tsx`.
+- [x] Create `src/components/routine/widgets/PhotoWidget.tsx`.
+- [x] Create `src/components/routine/widgets/TimerWidget.tsx`.
+- [x] Create `src/components/routine/widgets/MultiChoiceWidget.tsx`.
+- [x] Create `src/components/routine/widgets/BooleanWidget.tsx`.
+- [x] Create polymorphic `DynamicFieldRenderer.tsx` and integrate into `FeedbackLogForm.tsx`.
 
 ### Phase 3: Milestone Awareness & Routine Integration
-- [ ] Update `useProtocolState.ts` to store polymorphic `morphingLogs` in `localStorage`.
-- [ ] Detect current day milestone status (`isMilestoneDay(protocol, currentDay)`).
-- [ ] Render milestone callout banner on scheduled evaluation days.
+- [x] Update `useProtocolState.ts` to store polymorphic `morphingLogs` in `localStorage`.
+- [x] Detect current day milestone status (`isMilestoneDay(protocol, currentDay)`).
+- [x] Render milestone callout banner on scheduled evaluation days (`MilestoneBanner.tsx`).
 
 ### Phase 4: Morphing Dashboard Analytics
-- [ ] Create `src/components/dashboard/MilestonePhotoComparison.tsx`.
-- [ ] Create `src/components/dashboard/BiomarkerTrendChart.tsx`.
-- [ ] Conditionally render visualizers in `src/views/Dashboard.tsx` based on `protocol.dataCollectionSpec`.
+- [x] Create `src/components/dashboard/MilestonePhotoComparison.tsx`.
+- [x] Create `src/components/dashboard/BiomarkerChartContent.tsx` and `BiomarkerTrendChart.tsx`.
+- [x] Conditionally render visualizers in `src/views/Dashboard.tsx` based on `protocol.dataCollectionSpec`.
 
 ---
 
