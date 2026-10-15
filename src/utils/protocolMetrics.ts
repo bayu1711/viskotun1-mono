@@ -23,8 +23,12 @@ export function completionOf(protocol: Protocol, setsDone: Record<string, number
 /** Average completion across every day so far, including today. */
 export function adherenceOf(protocol: Protocol, todayFraction: number) {
   if (protocol.currentDay <= 0) return 0;
-  const history = protocol.dayHistory.reduce((sum, value) => sum + value, 0);
-  return toPercent((history + todayFraction) / protocol.currentDay);
+  // History represents completed days prior to currentDay (days 1 .. currentDay - 1)
+  const pastDaysCount = Math.max(0, protocol.currentDay - 1);
+  const pastHistory = protocol.dayHistory.slice(0, pastDaysCount);
+  const historySum = pastHistory.reduce((sum, value) => sum + value, 0);
+  const rawRate = (historySum + Math.min(Math.max(0, todayFraction), 1)) / protocol.currentDay;
+  return clamp(toPercent(rawRate), 0, 100);
 }
 
 export function exceedsPainThreshold(score: number) {

@@ -101,7 +101,7 @@ export const FALLBACK_CREATINE_SLEEP: Protocol = {
       fallback: 'Conservative baseline: 4 × 500 mL water spaced across the waking day'
     }
   ],
-  dayHistory: [1],
+  dayHistory: [],
   initialSetsDone: { 'cr-1': 1, 'cr-2': 0, 'cr-3': 1 },
   initialPainLogs: [
     {
@@ -287,7 +287,7 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
       fallback: 'Conservative baseline: 3 × 45s isometric hold'
     }
   ],
-  dayHistory: [1],
+  dayHistory: [],
   initialSetsDone: { 'pat-1': 2, 'pat-2': 0, 'pat-3': 1 },
   initialPainLogs: [
     {
@@ -496,7 +496,7 @@ export function generateFallbackProtocol(source: string): Protocol {
         fallback: 'Conservative baseline: 3 × 30s with 60s recovery'
       }
     ],
-    dayHistory: [1],
+    dayHistory: [],
     initialSetsDone: { [`${slug}-1`]: 1, [`${slug}-2`]: 0 },
     initialPainLogs: [],
     initialMessages: [

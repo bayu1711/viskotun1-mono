@@ -84,7 +84,7 @@ Return a JSON object conforming strictly to:
     "missingDataFlags": [
       { "stepId": string, "parameter": string, "fallback": string }
     ],
-    "dayHistory": [1],
+    "dayHistory": [],
     "initialSetsDone": {},
     "initialPainLogs": [],
     "initialMessages": [
@@ -180,7 +180,7 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
       if (parsed.protocol) {
         const protocol: Protocol = {
           ...parsed.protocol,
-          dayHistory: parsed.protocol.dayHistory ?? [1],
+          dayHistory: parsed.protocol.dayHistory ?? [],
           initialSetsDone: parsed.protocol.initialSetsDone ?? {},
           initialPainLogs: parsed.protocol.initialPainLogs ?? [],
           initialMessages: parsed.protocol.initialMessages ?? [
