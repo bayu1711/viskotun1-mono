@@ -114,6 +114,67 @@ export const FALLBACK_CREATINE_SLEEP: Protocol = {
     escalationThreshold: 3,
     escalationMessage: 'Gastric distress threshold exceeded (≥ 3/10). Escalation paused. Split daily 5g dose into two 2.5g servings with meals.'
   },
+  dataCollectionSpec: [
+    {
+      id: 'cr-pvt-timer',
+      name: 'Reaction Time (PVT)',
+      label: 'Psychomotor Vigilance Test (PVT)',
+      type: 'timer',
+      frequency: 'daily',
+      unit: 'seconds',
+      min: 10,
+      max: 600,
+      step: 1,
+      instructions: 'Record reaction time performance across standard 10-minute assessment window.'
+    },
+    {
+      id: 'cr-sleepiness-scale',
+      name: 'Stanford Sleepiness Score',
+      label: 'Subjective Alertness Assessment',
+      type: 'multichoice',
+      frequency: 'daily',
+      options: [
+        '1 · Feeling active, vital, alert, or wide awake',
+        '2 · Functioning at high levels, but not at peak',
+        '3 · Awake, but relaxed; responsive but not fully alert',
+        '4 · Somewhat foggy, let down',
+        '5 · Foggy; losing interest in remaining awake; slowed down',
+        '6 · Sleepy, woozy, fighting sleep; prefer to lie down',
+        '7 · No longer fighting sleep, sleep onset imminent'
+      ],
+      instructions: 'Select acute alertness state prior to cognitive evaluation.'
+    },
+    {
+      id: 'cr-distress-scale',
+      name: 'GI distress',
+      label: 'GI distress / tolerance',
+      type: 'scale',
+      frequency: 'daily',
+      min: 0,
+      max: 10,
+      step: 1,
+      escalationThreshold: 3,
+      escalationMessage: 'Gastric distress threshold exceeded (≥ 3/10). Escalation paused. Split daily 5g dose into two 2.5g servings with meals.'
+    }
+  ],
+  initialMorphingLogs: [
+    {
+      id: 'cr-m-1',
+      fieldId: 'cr-pvt-timer',
+      day: 1,
+      value: 242,
+      loggedAt: 'Today',
+      note: 'Reaction latency baseline 242ms.'
+    },
+    {
+      id: 'cr-m-2',
+      fieldId: 'cr-sleepiness-scale',
+      day: 1,
+      value: '2 · Functioning at high levels, but not at peak',
+      loggedAt: 'Today',
+      note: 'Alertness restored within 30 min of morning dose.'
+    }
+  ],
   initialFeedbackLogs: [
     {
       id: 'cr-log-1',
@@ -311,6 +372,50 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
     escalationThreshold: 4,
     escalationMessage: 'Tendon discomfort threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce resistance load by 20% tomorrow or consult a specialist.'
   },
+  dataCollectionSpec: [
+    {
+      id: 'pat-pain-scale',
+      name: 'Tendon Discomfort',
+      label: 'Tendon Discomfort (VAS 0–10)',
+      type: 'scale',
+      frequency: 'daily',
+      min: 0,
+      max: 10,
+      step: 1,
+      escalationThreshold: 4,
+      escalationMessage: 'Tendon discomfort threshold exceeded (≥ 4/10). Escalation paused. Reduce resistance load by 20% tomorrow.'
+    },
+    {
+      id: 'pat-knee-angle',
+      name: 'Knee Flexion Angle',
+      label: 'Active Knee Flexion Range of Motion',
+      type: 'numeric',
+      frequency: 'weekly',
+      unit: '°',
+      min: 0,
+      max: 150,
+      step: 1,
+      instructions: 'Measure active knee flexion angle in prone position with goniometer aligned to lateral femoral condyle.'
+    }
+  ],
+  initialMorphingLogs: [
+    {
+      id: 'pat-m-1',
+      fieldId: 'pat-pain-scale',
+      day: 1,
+      value: 2,
+      loggedAt: 'Today',
+      note: 'Mild anterior knee warmth during last set, settled within 10 min.'
+    },
+    {
+      id: 'pat-m-2',
+      fieldId: 'pat-knee-angle',
+      day: 1,
+      value: 125,
+      loggedAt: 'Today',
+      note: 'Baseline active knee flexion angle.'
+    }
+  ],
   initialFeedbackLogs: [
     {
       id: 'pat-log-1',

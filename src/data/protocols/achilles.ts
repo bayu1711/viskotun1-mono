@@ -100,6 +100,38 @@ export const achillesProtocol: Protocol = {
     escalationThreshold: 4,
     escalationMessage: 'Tendon discomfort threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce load by 20% tomorrow or consult a specialist.'
   },
+  dataCollectionSpec: [
+    {
+      id: 'ach-pain-vas',
+      name: 'Tendon Discomfort',
+      label: 'Tendon Discomfort (VAS 0–10)',
+      type: 'scale',
+      frequency: 'daily',
+      min: 0,
+      max: 10,
+      step: 1,
+      escalationThreshold: 4,
+      escalationMessage: 'Tendon discomfort threshold exceeded (≥ 4/10). Escalation paused. Reduce load by 20% tomorrow.'
+    },
+    {
+      id: 'ach-dorsiflexion',
+      name: 'Ankle Dorsiflexion Angle',
+      label: 'Weight-Bearing Lunge Dorsiflexion',
+      type: 'numeric',
+      frequency: 'weekly',
+      unit: '°',
+      min: 0,
+      max: 45,
+      step: 1,
+      instructions: 'Measure knee-to-wall distance or goniometer joint angle at maximum comfortable knee bend.'
+    }
+  ],
+  initialMorphingLogs: [
+    { id: 'ach-m-1', fieldId: 'ach-pain-vas', day: 1, value: 3, loggedAt: 'Sat', note: 'Tender at first drop.' },
+    { id: 'ach-m-2', fieldId: 'ach-pain-vas', day: 2, value: 2, loggedAt: 'Sun', note: '' },
+    { id: 'ach-m-3', fieldId: 'ach-pain-vas', day: 3, value: 1, loggedAt: 'Mon', note: 'Much easier today.' },
+    { id: 'ach-m-4', fieldId: 'ach-dorsiflexion', day: 1, value: 28, loggedAt: 'Sat', note: 'Baseline knee-to-wall lunge angle.' }
+  ],
   initialFeedbackLogs: [
   { id: 'ach-log-1', day: 1, score: 3, note: 'Tender at first drop.', loggedAt: 'Sat' },
   { id: 'ach-log-2', day: 2, score: 2, note: '', loggedAt: 'Sun' },

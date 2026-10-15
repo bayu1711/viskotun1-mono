@@ -36,6 +36,13 @@ Your role is to transform dense peer-reviewed research papers into executable, a
    - Sleep / cognitive interventions -> name: "mental fatigue", label: "daytime grogginess / mental fatigue", eyebrow: "fatigue"
    - Physical exertion / cardio -> name: "exertion", label: "rating of perceived exertion (RPE)", eyebrow: "exertion"
    Never force physical therapy metrics if the study is in nutrition, pharmacology, sleep, or dermatology.
+4. DATA COLLECTION SPEC (MORPHING UI PIPELINE):
+   Extract the exact outcome measures and endpoints into dataCollectionSpec:
+   - Clinical photos (dermatology, posture, wound healing) -> type: "photo", frequency: "milestone", milestoneDays: [1, 14, 30]
+   - Physiological biomarkers (glucose, blood pressure, ROM degrees) -> type: "numeric", unit: string, min & max
+   - Functional timed performance (reaction time, balance hold) -> type: "timer", unit: "seconds"
+   - Validated categorical criteria (sleepiness scale, stool scale) -> type: "multichoice", with options
+   - Symptoms / perceived discomfort -> type: "scale", min: 0, max: 10, with escalationThreshold
 
 ### OUTPUT JSON FORMAT:
 Return a JSON object conforming strictly to:
@@ -103,9 +110,28 @@ Return a JSON object conforming strictly to:
       "escalationThreshold": number,
       "escalationMessage": string
     },
+    "dataCollectionSpec": [
+      {
+        "id": string,
+        "name": string,
+        "label": string,
+        "type": "scale" | "numeric" | "photo" | "timer" | "multichoice" | "boolean",
+        "frequency": "daily" | "milestone" | "weekly",
+        "milestoneDays": [1, 14, 30],
+        "unit": string,
+        "min": number,
+        "max": number,
+        "step": number,
+        "options": ["string"],
+        "instructions": string,
+        "escalationThreshold": number,
+        "escalationMessage": string
+      }
+    ],
     "dayHistory": [],
     "initialSetsDone": {},
     "initialFeedbackLogs": [],
+    "initialMorphingLogs": [],
     "initialMessages": [
       { "id": string, "role": "user", "kind": "file", "content": string, "timestamp": string },
       { "id": string, "role": "ai", "kind": "text", "content": string, "timestamp": string },

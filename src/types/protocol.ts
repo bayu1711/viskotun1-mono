@@ -73,6 +73,40 @@ export interface MissingDataFlag {
   fallback: string;
 }
 
+export type WidgetType =
+  | 'scale'
+  | 'numeric'
+  | 'photo'
+  | 'timer'
+  | 'multichoice'
+  | 'boolean';
+
+export interface DataCollectionField {
+  id: string;
+  name: string;
+  label: string;
+  type: WidgetType;
+  frequency: 'daily' | 'milestone' | 'weekly';
+  milestoneDays?: number[];
+  unit?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  options?: string[];
+  instructions?: string;
+  escalationThreshold?: number;
+  escalationMessage?: string;
+}
+
+export interface MorphingDataLog {
+  id: string;
+  fieldId: string;
+  day: number;
+  loggedAt: string;
+  value: number | string | boolean;
+  note?: string;
+}
+
 export interface FeedbackMetric {
   name: string;
   label: string;
@@ -166,6 +200,8 @@ export interface Protocol {
   initialSetsDone: Record<string, number>;
   initialFeedbackLogs?: FeedbackLog[];
   feedbackMetric?: FeedbackMetric;
+  dataCollectionSpec?: DataCollectionField[];
+  initialMorphingLogs?: MorphingDataLog[];
   initialMessages: ChatMessage[];
   community: CommunityInsights;
   faqs: PaperFaq[];
@@ -185,6 +221,7 @@ export type DropOffUnit = CommunityInsights['dropOffUnit'];
 export interface ProtocolRuntime {
   setsDone: Record<string, number>;
   feedbackLogs: FeedbackLog[];
+  morphingLogs?: MorphingDataLog[];
   messages: ChatMessage[];
   escalationPaused: boolean;
   assistantTyping?: boolean;

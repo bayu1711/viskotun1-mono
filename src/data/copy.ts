@@ -400,5 +400,56 @@ export const COPY = {
   },
   demo: {
     resetSuccess: 'reset to demo defaults — storage cleared'
+  },
+  morphing: {
+    dialogTitle: (name: string, day: number) => `${name} · day ${day}`,
+    milestoneTag: 'Milestone Assessment',
+    dailyTag: 'Daily Metric',
+    saveEntry: 'Save measurement to protocol',
+    savedToast: (name: string) => `${name} recorded successfully`,
+    widgets: {
+      photo: {
+        uploadPrompt: 'Capture or upload clinical photograph',
+        dropHint: 'Drag & drop image file or click to select',
+        changePhoto: 'Change photo',
+        retake: 'Retake',
+        instructionsLabel: 'Standardized study protocol guidelines:',
+        previewAlt: 'Milestone clinical assessment photo'
+      },
+      numeric: {
+        enterValue: 'Measured value',
+        referenceRange: (min?: number, max?: number, unit?: string) =>
+          `Target range: ${min ?? 0}–${max ?? 100} ${unit || ''}`
+      },
+      timer: {
+        start: 'Start test timer',
+        pause: 'Pause',
+        reset: 'Reset',
+        complete: 'Test complete!',
+        targetDuration: (seconds: number) => `Target duration: ${seconds}s`
+      },
+      multichoice: {
+        selectOne: 'Select clinical classification:'
+      },
+      boolean: {
+        yes: 'Yes, present',
+        no: 'No, absent'
+      }
+    },
+    milestone: {
+      bannerTitle: (day: number) => `Day ${day} Milestone Assessment Scheduled`,
+      bannerSubtitle: 'This paper prescribes a formal outcome evaluation for today.',
+      action: 'Record milestone assessment',
+      completedBadge: 'Milestone documented'
+    },
+    dashboard: {
+      photoSplitTitle: 'Milestone Photo Progression',
+      photoSplitSubtitle: 'Standardized photographic evaluation across trial duration',
+      baselineLabel: 'Baseline (Day 1)',
+      currentLabel: (day: number) => `Milestone (Day ${day})`,
+      biomarkerTitle: 'Biomarker Longitudinal Trends',
+      biomarkerSubtitle: 'Patient readings tracked against published trial baseline',
+      targetZone: 'Target Reference Zone'
+    }
   }
 } as const;

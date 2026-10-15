@@ -107,6 +107,55 @@ export const hairLossProtocol: Protocol = {
     escalationThreshold: 4,
     escalationMessage: 'Scalp irritation threshold exceeded (≥ 4/10). Escalation paused. Pause microneedling for 1 week and continue minoxidil only.'
   },
+  dataCollectionSpec: [
+    {
+      id: 'hair-vertex-photo',
+      name: 'Vertex Scalp Photo',
+      label: 'Standardized Scalp Clinical Photo',
+      type: 'photo',
+      frequency: 'milestone',
+      milestoneDays: [1, 14, 28, 56, 84],
+      instructions: 'Take an overhead photograph under diffuse ambient lighting at approximately 30 cm distance.'
+    },
+    {
+      id: 'hair-irritation-scale',
+      name: 'Scalp Irritation',
+      label: 'Scalp Erythema & Itching',
+      type: 'scale',
+      frequency: 'daily',
+      min: 0,
+      max: 10,
+      step: 1,
+      escalationThreshold: 4,
+      escalationMessage: 'Scalp irritation threshold exceeded (≥ 4/10). Escalation paused. Pause microneedling for 1 week and continue minoxidil only.'
+    }
+  ],
+  initialMorphingLogs: [
+    {
+      id: 'hair-m-1',
+      fieldId: 'hair-vertex-photo',
+      day: 1,
+      value: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="400" height="300" fill="%23f7f5f0"/><circle cx="200" cy="150" r="80" fill="%23eedcc6"/><ellipse cx="200" cy="140" rx="35" ry="25" fill="%23dfcaa9" opacity="0.8"/><text x="200" y="270" font-family="monospace" font-size="12" fill="%232b2927" text-anchor="middle">Baseline Scalp Vertex (Day 1)</text></svg>',
+      loggedAt: 'Day 1',
+      note: 'Baseline standardized photographic documentation.'
+    },
+    {
+      id: 'hair-m-2',
+      fieldId: 'hair-irritation-scale',
+      day: 16,
+      value: 2,
+      loggedAt: 'Mon',
+      note: 'Mild redness after rolling.'
+    },
+    {
+      id: 'hair-m-3',
+      fieldId: 'hair-irritation-scale',
+      day: 19,
+      value: 1,
+      loggedAt: 'Thu',
+      note: 'Light itch from minoxidil.'
+    }
+  ],
   initialFeedbackLogs: [
   { id: 'hair-log-1', day: 16, score: 2, note: 'Mild redness after rolling.', loggedAt: 'Mon' },
   { id: 'hair-log-2', day: 19, score: 1, note: 'Light itch from minoxidil.', loggedAt: 'Thu' },
