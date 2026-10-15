@@ -103,6 +103,17 @@ export const FALLBACK_CREATINE_SLEEP: Protocol = {
   ],
   dayHistory: [],
   initialSetsDone: { 'cr-1': 1, 'cr-2': 0, 'cr-3': 1 },
+  feedbackMetric: {
+    name: 'GI distress',
+    label: 'GI distress / tolerance',
+    eyebrow: 'tolerance',
+    logTitle: 'distress',
+    minLabel: '0 · none',
+    maxLabel: '10 · severe nausea',
+    maxScore: 10,
+    escalationThreshold: 3,
+    escalationMessage: 'Gastric distress threshold exceeded (≥ 3/10). Escalation paused. Split daily 5g dose into two 2.5g servings with meals.'
+  },
   initialPainLogs: [
     {
       id: 'cr-pain-1',
@@ -289,6 +300,17 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
   ],
   dayHistory: [],
   initialSetsDone: { 'pat-1': 2, 'pat-2': 0, 'pat-3': 1 },
+  feedbackMetric: {
+    name: 'pain',
+    label: 'tendon pain',
+    eyebrow: 'pain',
+    logTitle: 'log',
+    minLabel: '0 · none',
+    maxLabel: '10 · severe',
+    maxScore: 10,
+    escalationThreshold: 4,
+    escalationMessage: 'Pain threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce resistance load by 20% tomorrow or consult your therapist.'
+  },
   initialPainLogs: [
     {
       id: 'pat-pain-1',
@@ -498,6 +520,17 @@ export function generateFallbackProtocol(source: string): Protocol {
     ],
     dayHistory: [],
     initialSetsDone: { [`${slug}-1`]: 1, [`${slug}-2`]: 0 },
+    feedbackMetric: {
+      name: 'tolerability',
+      label: 'symptom / tolerability',
+      eyebrow: 'symptom',
+      logTitle: 'log',
+      minLabel: '0 · none',
+      maxLabel: '10 · severe',
+      maxScore: 10,
+      escalationThreshold: 4,
+      escalationMessage: 'Symptom threshold exceeded. Escalation paused. Reduce dosage or intensity by 20% tomorrow.'
+    },
     initialPainLogs: [],
     initialMessages: [
       {

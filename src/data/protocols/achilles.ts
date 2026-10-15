@@ -89,6 +89,17 @@ export const achillesProtocol: Protocol = {
 
   dayHistory: [1, 0.67, 1],
   initialSetsDone: { 'ach-1': 3, 'ach-2': 3, 'ach-3': 0 },
+  feedbackMetric: {
+    name: 'pain',
+    label: 'tendon pain',
+    eyebrow: 'pain',
+    logTitle: 'log',
+    minLabel: '0 · none',
+    maxLabel: '10 · severe',
+    maxScore: 10,
+    escalationThreshold: 4,
+    escalationMessage: 'Tendon pain threshold exceeded (≥ 4/10). Escalation paused. Recommendation: Reduce load by 20% tomorrow or consult your therapist.'
+  },
   initialPainLogs: [
   { id: 'ach-pain-1', day: 1, score: 3, note: 'Tender at first drop.', loggedAt: 'Sat' },
   { id: 'ach-pain-2', day: 2, score: 2, note: '', loggedAt: 'Sun' },
