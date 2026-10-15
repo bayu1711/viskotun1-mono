@@ -93,8 +93,6 @@ export interface FeedbackLog {
   loggedAt: string;
 }
 
-export type PainLog = FeedbackLog;
-
 export type ChatRole = 'user' | 'ai';
 export type ChatKind =
 'text' |
@@ -167,7 +165,6 @@ export interface Protocol {
   dayHistory: number[];
   initialSetsDone: Record<string, number>;
   initialFeedbackLogs?: FeedbackLog[];
-  initialPainLogs?: PainLog[];
   feedbackMetric?: FeedbackMetric;
   initialMessages: ChatMessage[];
   community: CommunityInsights;
@@ -188,7 +185,6 @@ export type DropOffUnit = CommunityInsights['dropOffUnit'];
 export interface ProtocolRuntime {
   setsDone: Record<string, number>;
   feedbackLogs: FeedbackLog[];
-  painLogs: PainLog[];
   messages: ChatMessage[];
   escalationPaused: boolean;
   assistantTyping?: boolean;

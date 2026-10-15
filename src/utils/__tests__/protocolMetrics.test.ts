@@ -4,11 +4,9 @@ import type { FeedbackLog, Protocol } from '../../types/protocol';
 import {
   adherenceOf,
   clampFeedbackScore,
-  clampPainScore,
   completionOf,
   complianceLevel,
   exceedsFeedbackThreshold,
-  exceedsPainThreshold,
   isProgressionReady,
   progressionStatus,
   resolveFeedbackMetric
@@ -59,16 +57,15 @@ const mockProtocol: Protocol = {
     }
   ],
   progressionRules: [
-    { id: 'rule-1', condition: 'pain < 2', action: 'increase load' }
+    { id: 'rule-1', condition: 'adverse score < 2', action: 'increase load' }
   ],
   contraindications: [
-    { id: 'c-1', text: 'stop on sharp pain', severity: 'stop' }
+    { id: 'c-1', text: 'stop on sharp discomfort', severity: 'stop' }
   ],
   missingDataFlags: [],
   dayHistory: [],
   initialSetsDone: {},
   initialFeedbackLogs: [],
-  initialPainLogs: [],
   initialMessages: [],
   community: {
     studyEfficacy: 80,
@@ -172,9 +169,9 @@ describe('protocolMetrics', () => {
     });
 
     it('flags scores using default threshold (>= 4)', () => {
-      expect(exceedsPainThreshold(3)).toBe(false);
-      expect(exceedsPainThreshold(4)).toBe(true);
-      expect(exceedsPainThreshold(7)).toBe(true);
+      expect(exceedsFeedbackThreshold(3)).toBe(false);
+      expect(exceedsFeedbackThreshold(4)).toBe(true);
+      expect(exceedsFeedbackThreshold(7)).toBe(true);
     });
 
     it('flags scores using custom threshold (e.g. >= 3 for GI distress)', () => {
@@ -184,10 +181,10 @@ describe('protocolMetrics', () => {
     });
 
     it('clamps scores to 0-10 range by default and respects custom max', () => {
-      expect(clampPainScore(-5)).toBe(0);
-      expect(clampPainScore(15)).toBe(10);
-      expect(clampPainScore(5)).toBe(5);
-      expect(clampPainScore(12, 8)).toBe(8);
+      expect(clampFeedbackScore(-5)).toBe(0);
+      expect(clampFeedbackScore(15)).toBe(10);
+      expect(clampFeedbackScore(5)).toBe(5);
+      expect(clampFeedbackScore(12, 8)).toBe(8);
     });
   });
 
@@ -209,7 +206,7 @@ describe('protocolMetrics', () => {
       expect(isProgressionReady(logs, false)).toBe(false);
     });
 
-    it('returns true when last 3 logs are under progression pain threshold (< 2)', () => {
+    it('returns true when last 3 logs are under progression feedback threshold (<= 2)', () => {
       const logs: FeedbackLog[] = [
         { id: '1', day: 1, score: 1, note: '', loggedAt: '' },
         { id: '2', day: 2, score: 0, note: '', loggedAt: '' },

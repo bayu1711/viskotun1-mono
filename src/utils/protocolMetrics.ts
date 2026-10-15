@@ -39,12 +39,10 @@ export function adherenceOf(protocol: Protocol, todayFraction: number) {
 export function exceedsFeedbackThreshold(score: number, threshold = FEEDBACK_ESCALATION_THRESHOLD) {
   return score >= threshold;
 }
-export const exceedsPainThreshold = exceedsFeedbackThreshold;
 
 export function clampFeedbackScore(score: number, max = FEEDBACK_SCORE_MAX, min = FEEDBACK_SCORE_MIN) {
   return clamp(score, min, max);
 }
-export const clampPainScore = clampFeedbackScore;
 
 export function isProgressionReady(
   feedbackLogs: FeedbackLog[],

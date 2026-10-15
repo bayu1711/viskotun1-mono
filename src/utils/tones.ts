@@ -36,7 +36,6 @@ export const toneStyles: Record<Tone, ToneStyle> = {
 };
 
 export type SeverityLevel = 'mild' | 'moderate' | 'severe';
-export type PainLevel = SeverityLevel;
 
 interface SeverityToneStyle {
   /** Drawer background */
@@ -58,13 +57,10 @@ export function severityLevel(score: number): SeverityLevel {
   if (score <= FEEDBACK_MODERATE_MAX) return 'moderate';
   return 'severe';
 }
-export const painLevel = severityLevel;
 
 export function severityTone(score: number) {
   const level = severityLevel(score);
   return { level, label: COPY.severityLevels[level], ...SEVERITY_TONES[level] };
 }
-export const painTone = severityTone;
 
 export type SeverityTone = ReturnType<typeof severityTone>;
-export type PainTone = SeverityTone;
