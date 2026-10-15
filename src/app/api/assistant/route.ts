@@ -80,7 +80,7 @@ Instructions:
       try {
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({
-          model: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
+          model: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
           systemInstruction
         });
 

@@ -195,7 +195,7 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
   if (apiKey) {
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const modelName = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+      const modelName = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite';
       const model = genAI.getGenerativeModel({
         model: modelName,
         generationConfig: {
