@@ -8,15 +8,14 @@ import { PillButton } from '../ui/PillButton';
 
 interface DayActionsProps {
   onLogFeedback?: () => void;
-  onLogPain?: () => void;
   size?: 'md' | 'lg';
   className?: string;
 }
 
 /** "Mark today complete" + "log feedback" pair shared by the routine page and assistant protocol card. */
-export function DayActions({ onLogFeedback, onLogPain, size = 'lg', className }: DayActionsProps) {
-  const { markTodayComplete, dayIsComplete, currentDay, openFeedbackDrawer, openPainLog, feedbackMetric } = useProtocol();
-  const handleLog = onLogFeedback ?? onLogPain ?? openFeedbackDrawer ?? openPainLog;
+export function DayActions({ onLogFeedback, size = 'lg', className }: DayActionsProps) {
+  const { markTodayComplete, dayIsComplete, currentDay, openFeedbackDrawer, feedbackMetric } = useProtocol();
+  const handleLog = onLogFeedback ?? openFeedbackDrawer;
 
   return (
     <div className={cn('grid grid-cols-1 gap-2.5 sm:grid-cols-2', className)}>

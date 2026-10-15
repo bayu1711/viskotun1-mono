@@ -1,1 +1,0 @@
-export { FeedbackDrawer as PainLogDrawer } from './FeedbackDrawer';

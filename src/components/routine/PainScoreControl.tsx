@@ -1,1 +1,0 @@
-export { FeedbackScoreControl as PainScoreControl } from './FeedbackScoreControl';

@@ -15,8 +15,8 @@ interface FeedbackDrawerProps {
 
 export function FeedbackDrawer({ open, onClose }: FeedbackDrawerProps = {}) {
   const protocol = useProtocol();
-  const isOpen = open ?? protocol.isFeedbackDrawerOpen ?? protocol.isPainLogOpen;
-  const handleClose = onClose ?? protocol.closeFeedbackDrawer ?? protocol.closePainLog;
+  const isOpen = open ?? protocol.isFeedbackDrawerOpen;
+  const handleClose = onClose ?? protocol.closeFeedbackDrawer;
 
   const panelRef = useRef<HTMLDivElement>(null);
   useDialogA11y(panelRef, { open: isOpen, onClose: handleClose });

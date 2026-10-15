@@ -1,1 +1,0 @@
-export { FeedbackLogItem as PainLogItem } from './FeedbackLogItem';

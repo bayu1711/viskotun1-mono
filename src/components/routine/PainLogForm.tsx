@@ -1,1 +1,0 @@
-export { FeedbackLogForm as PainLogForm } from './FeedbackLogForm';

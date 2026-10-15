@@ -18,7 +18,7 @@ export function FeedbackLogItem({ log }: FeedbackLogItemProps) {
         {log.score}
       </IconTile>
       <div className="min-w-0 flex-1">
-        <p className="text-sm lowercase">{COPY.routine.painDay(log.day)}</p>
+        <p className="text-sm lowercase">{COPY.routine.feedbackDay(log.day)}</p>
         <p className="truncate text-xs text-ink/45">{log.note || COPY.routine.noNotes}</p>
       </div>
       <span className="text-xs lowercase text-ink/45">{tone.label}</span>

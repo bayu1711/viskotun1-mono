@@ -1,1 +1,0 @@
-export { FeedbackLogList as PainLogList } from './FeedbackLogList';

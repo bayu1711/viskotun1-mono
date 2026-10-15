@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { AuthContext } from '../contexts/AuthContext';
-import { DEFAULT_CONFIRMATION_PAIN_SCORE, PAIN_ESCALATION_THRESHOLD } from '../data/config';
+import { DEFAULT_CONFIRMATION_SCORE, FEEDBACK_ESCALATION_THRESHOLD } from '../data/config';
 import { COPY } from '../data/copy';
 import { initialQueuedPapers, protocols as initialProtocols } from '../data/protocols';
 import type {
@@ -18,7 +18,7 @@ import { clamp, toPercent } from '../utils/math';
 import {
   adherenceOf,
   completionOf,
-  exceedsPainThreshold,
+  exceedsFeedbackThreshold,
   isProgressionReady,
   resolveFeedbackMetric
 } from '../utils/protocolMetrics';
@@ -27,13 +27,12 @@ import { nowLabel } from '../utils/time';
 function createInitialRuntime(items: Protocol[]): Record<string, ProtocolRuntime> {
   return Object.fromEntries(
     items.map((item) => {
-      const logs = item.initialFeedbackLogs ?? item.initialPainLogs ?? [];
+      const logs = item.initialFeedbackLogs ?? (item as any).initialPainLogs ?? [];
       return [
         item.id,
         {
           setsDone: { ...item.initialSetsDone },
           feedbackLogs: logs,
-          painLogs: logs,
           messages: item.initialMessages,
           escalationPaused: false,
           assistantTyping: false
@@ -57,7 +56,7 @@ export function useProtocolState() {
   const [protocolList, setProtocolList] = useState<Protocol[]>(initialProtocols);
   const [activeProtocolId, setActiveProtocol] = useState(initialProtocols[0].id);
   const [queuedPapers, setQueuedPapers] = useState<QueuedPaper[]>(initialQueuedPapers);
-  const [isPainLogOpen, setIsPainLogOpen] = useState(false);
+  const [isFeedbackDrawerOpen, setIsFeedbackDrawerOpen] = useState(false);
   const [runtime, setRuntime] = useState(() => createInitialRuntime(initialProtocols));
   const [hasHydrated, setHasHydrated] = useState(false);
   const [hasRemoteHydrated, setHasRemoteHydrated] = useState(false);
@@ -106,14 +105,12 @@ export function useProtocolState() {
                       ...(prev[key] ?? {
                         setsDone: {},
                         feedbackLogs: [],
-                        painLogs: [],
                         messages: [],
                         escalationPaused: false,
                         assistantTyping: false
                       }),
                       ...(val as ProtocolRuntime),
-                      feedbackLogs: (val as ProtocolRuntime).feedbackLogs ?? (val as ProtocolRuntime).painLogs ?? [],
-                      painLogs: (val as ProtocolRuntime).feedbackLogs ?? (val as ProtocolRuntime).painLogs ?? [],
+                      feedbackLogs: (val as ProtocolRuntime).feedbackLogs ?? (val as any).painLogs ?? [],
                       assistantTyping: false
                     };
                   }
@@ -238,7 +235,6 @@ export function useProtocolState() {
   const state = runtime[protocol.id] ?? {
     setsDone: {},
     feedbackLogs: [],
-    painLogs: [],
     messages: [],
     escalationPaused: false,
     assistantTyping: false
@@ -249,7 +245,6 @@ export function useProtocolState() {
       const current = prev[id] ?? {
         setsDone: {},
         feedbackLogs: [],
-        painLogs: [],
         messages: [],
         escalationPaused: false,
         assistantTyping: false
@@ -275,9 +270,9 @@ export function useProtocolState() {
   const adherenceRate = adherenceOf(protocol, todayFraction);
   const feedbackMetric = resolveFeedbackMetric(protocol);
   const progressionReady = isProgressionReady(
-    state.painLogs,
+    state.feedbackLogs,
     state.escalationPaused,
-    feedbackMetric.escalationThreshold ?? PAIN_ESCALATION_THRESHOLD
+    feedbackMetric.escalationThreshold ?? FEEDBACK_ESCALATION_THRESHOLD
   );
 
   const summaries = useMemo<ProtocolSummary[]>(
@@ -338,28 +333,27 @@ export function useProtocolState() {
   const markTodayComplete = useCallback(() => {
     const allSetsDone = Object.fromEntries(protocol.steps.map((step) => [step.id, step.sets]));
     updateRuntime(protocol.id, (prev) => ({ ...prev, setsDone: allSetsDone }));
-    const latestScore = state.painLogs[state.painLogs.length - 1]?.score ?? DEFAULT_CONFIRMATION_PAIN_SCORE;
+    const latestScore = state.feedbackLogs[state.feedbackLogs.length - 1]?.score ?? DEFAULT_CONFIRMATION_SCORE;
     pushMessages(protocol.id, {
       role: 'ai',
       kind: 'confirmation',
       content: COPY.assistant.confirmLogged(protocol.currentDay, latestScore)
     });
-  }, [protocol.steps, protocol.id, protocol.currentDay, state.painLogs, updateRuntime, pushMessages]);
+  }, [protocol.steps, protocol.id, protocol.currentDay, state.feedbackLogs, updateRuntime, pushMessages]);
 
-  const logPain = useCallback(
+  const logFeedback = useCallback(
     (score: number, note: string) => {
       const metric = resolveFeedbackMetric(protocol);
-      const threshold = metric.escalationThreshold ?? PAIN_ESCALATION_THRESHOLD;
-      const exceeded = exceedsPainThreshold(score, threshold);
+      const threshold = metric.escalationThreshold ?? FEEDBACK_ESCALATION_THRESHOLD;
+      const exceeded = exceedsFeedbackThreshold(score, threshold);
       const newLog = { id: createId('log'), day: protocol.currentDay, score, note, loggedAt: nowLabel() };
       updateRuntime(protocol.id, (prev) => {
-        const existing = prev.feedbackLogs ?? prev.painLogs ?? [];
+        const existing = prev.feedbackLogs ?? (prev as any).painLogs ?? [];
         const next = [...existing, newLog];
         return {
           ...prev,
           escalationPaused: prev.escalationPaused || exceeded,
-          feedbackLogs: next,
-          painLogs: next
+          feedbackLogs: next
         };
       });
       pushMessages(
@@ -418,13 +412,12 @@ export function useProtocolState() {
       return exists ? prev.map((p) => (p.id === newProtocol.id ? newProtocol : p)) : [...prev, newProtocol];
     });
     setRuntime((prev) => {
-      const logs = newProtocol.initialFeedbackLogs ?? newProtocol.initialPainLogs ?? [];
+      const logs = newProtocol.initialFeedbackLogs ?? (newProtocol as any).initialPainLogs ?? [];
       return {
         ...prev,
         [newProtocol.id]: {
           setsDone: { ...(newProtocol.initialSetsDone ?? {}) },
           feedbackLogs: logs,
-          painLogs: logs,
           messages: newProtocol.initialMessages ?? [],
           escalationPaused: false,
           assistantTyping: false
@@ -514,8 +507,8 @@ export function useProtocolState() {
     [protocol.id, addProtocol, pushMessages, updateRuntime]
   );
 
-  const openPainLog = useCallback(() => setIsPainLogOpen(true), []);
-  const closePainLog = useCallback(() => setIsPainLogOpen(false), []);
+  const openFeedbackDrawer = useCallback(() => setIsFeedbackDrawerOpen(true), []);
+  const closeFeedbackDrawer = useCallback(() => setIsFeedbackDrawerOpen(false), []);
 
   return useMemo(
     () => ({
@@ -529,8 +522,7 @@ export function useProtocolState() {
       streak: protocol.streak,
       messages: state.messages,
       setsDone: state.setsDone,
-      feedbackLogs: state.feedbackLogs ?? state.painLogs ?? [],
-      painLogs: state.feedbackLogs ?? state.painLogs ?? [],
+      feedbackLogs: state.feedbackLogs ?? [],
       escalationPaused: state.escalationPaused,
       feedbackMetric,
       todayFraction,
@@ -539,19 +531,15 @@ export function useProtocolState() {
       dayIsComplete,
       progressionReady,
       assistantTyping: state.assistantTyping ?? false,
-      isFeedbackDrawerOpen: isPainLogOpen,
-      openFeedbackDrawer: openPainLog,
-      closeFeedbackDrawer: closePainLog,
-      isPainLogOpen,
-      openPainLog,
-      closePainLog,
+      isFeedbackDrawerOpen,
+      openFeedbackDrawer,
+      closeFeedbackDrawer,
       isStepComplete,
       incrementSet,
       decrementSet,
       toggleStep,
       markTodayComplete,
-      logPain,
-      logFeedback: logPain,
+      logFeedback,
       askQuestion,
       uploadPaper,
       addProtocol,
@@ -565,7 +553,6 @@ export function useProtocolState() {
       state.messages,
       state.setsDone,
       state.feedbackLogs,
-      state.painLogs,
       state.escalationPaused,
       feedbackMetric,
       state.assistantTyping,
@@ -574,15 +561,15 @@ export function useProtocolState() {
       adherenceRate,
       dayIsComplete,
       progressionReady,
-      isPainLogOpen,
-      openPainLog,
-      closePainLog,
+      isFeedbackDrawerOpen,
+      openFeedbackDrawer,
+      closeFeedbackDrawer,
       isStepComplete,
       incrementSet,
       decrementSet,
       toggleStep,
       markTodayComplete,
-      logPain,
+      logFeedback,
       askQuestion,
       uploadPaper,
       addProtocol,
