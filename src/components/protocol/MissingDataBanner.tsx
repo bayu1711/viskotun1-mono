@@ -1,18 +1,19 @@
 import React from 'react';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { Callout } from '../feedback/Callout';
 import { Icon } from '../ui/Icon';
 import { IconTile } from '../ui/IconTile';
 
 export function MissingDataBanner() {
-  const { protocol, missingDataFlagEnabled } = useProtocol();
-  const flag = protocol.missingDataFlags[0];
+  const { routine, protocol = routine, missingDataFlagEnabled } = useRoutine();
+  const current = routine || protocol;
+  const flag = current?.missingDataFlags?.[0];
 
   if (!missingDataFlagEnabled || !flag) return null;
 
-  const step = protocol.steps.find((item) => item.id === flag.stepId);
+  const step = current?.steps?.find((item) => item.id === flag.stepId);
 
   return (
     <Callout
