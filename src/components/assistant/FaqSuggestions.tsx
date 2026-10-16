@@ -1,6 +1,6 @@
 import React from 'react';
 import { COPY } from '../../data/copy';
-import type { PaperFaq } from '../../types/protocol';
+import type { PaperFaq } from '../../types/routine';
 
 interface FaqSuggestionsProps {
   faqs: PaperFaq[];
