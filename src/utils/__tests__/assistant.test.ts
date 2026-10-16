@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { Protocol } from '../../types/protocol';
+import type { Routine } from '../../types/routine';
 import { answerFor } from '../assistant';
 
-const sampleProtocol: Protocol = {
+const sampleProtocol: Routine = {
   id: 'creatine-test',
   title: 'Creatine Supplementation in Sleep Deprivation',
   shortTitle: 'creatine sleep',

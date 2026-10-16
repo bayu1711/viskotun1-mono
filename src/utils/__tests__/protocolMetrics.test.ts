@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_FEEDBACK_METRIC } from '../../data/config';
-import type { FeedbackLog, Protocol } from '../../types/protocol';
+import type { FeedbackLog, Protocol } from '../../types/routine';
 import {
   adherenceOf,
   clampFeedbackScore,

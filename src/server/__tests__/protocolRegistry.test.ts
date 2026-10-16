@@ -6,7 +6,7 @@ import {
   addCommunityReview,
   getCommunityMetrics
 } from '../protocolRegistry';
-import type { Protocol } from '../../types/protocol';
+import type { Protocol } from '../../types/routine';
 
 describe('protocolRegistry', () => {
   it('locates built-in canonical protocols by preset ID and DOI', async () => {
