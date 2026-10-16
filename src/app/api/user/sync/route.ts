@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { Protocol, ProtocolRuntime } from '@/types/protocol';
+import { getFirestore } from '@/server/guardrailLedger';
 
 interface UserSyncPayload {
   userId: string;
@@ -8,7 +9,7 @@ interface UserSyncPayload {
   runtime: Record<string, ProtocolRuntime>;
 }
 
-// In-memory server-side user store (ready for Cloud Firestore / Cloud SQL persistence)
+// In-memory server-side user store with fail-safe fallback
 const userStorage = new Map<
   string,
   {
@@ -28,12 +29,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    userStorage.set(userId, {
+    const payload = {
       activeProtocolId,
       protocols: protocols || [],
       runtime: runtime || {},
       updatedAt: Date.now()
-    });
+    };
+
+    userStorage.set(userId, payload);
+
+    const db = getFirestore();
+    if (db) {
+      try {
+        await db.collection('users').doc(userId).set(payload, { merge: true });
+      } catch (firestoreErr) {
+        console.warn('[UserSyncRoute] Could not persist to Firestore, stored in memory cache:', firestoreErr);
+      }
+    }
 
     return NextResponse.json({
       success: true,
@@ -53,6 +65,27 @@ export async function GET(request: Request) {
 
     if (!userId) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
+
+    const db = getFirestore();
+    if (db) {
+      try {
+        const doc = await db.collection('users').doc(userId).get();
+        if (doc.exists) {
+          const data = doc.data();
+          if (data) {
+            return NextResponse.json({
+              found: true,
+              activeProtocolId: data.activeProtocolId,
+              protocols: data.protocols,
+              runtime: data.runtime,
+              updatedAt: data.updatedAt
+            });
+          }
+        }
+      } catch (firestoreErr) {
+        console.warn('[UserSyncRoute] Could not read from Firestore, falling back to memory cache:', firestoreErr);
+      }
     }
 
     const data = userStorage.get(userId);

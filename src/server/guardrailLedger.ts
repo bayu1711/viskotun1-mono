@@ -60,7 +60,7 @@ let firestoreInstance: Firestore | null = null;
 let firestoreStatus: 'connected' | 'unconfigured' | 'error' = 'unconfigured';
 
 /** Get or initialize Firestore singleton with fail-safe error handling. */
-function getFirestore(): Firestore | null {
+export function getFirestore(): Firestore | null {
   if (firestoreInstance) {
     return firestoreInstance;
   }
