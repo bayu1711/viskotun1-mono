@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     } = body;
 
     if (!question) {
-      return NextResponse.json({ error: 'Question is required' }, { status: 400 });
+      return NextResponse.json({ error: COPY.api.assistant.questionRequired }, { status: 400 });
     }
 
     const activePolicy = await getEffectiveGuardrails();
@@ -116,6 +116,6 @@ Instructions:
     });
   } catch (error) {
     console.error('[AssistantRoute] Handler error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: COPY.api.assistant.internalError }, { status: 500 });
   }
 }

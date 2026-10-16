@@ -1,4 +1,5 @@
 import type { Protocol } from '../types/protocol';
+import { COPY } from '../data/copy';
 
 export const FALLBACK_CREATINE_SLEEP: Protocol = {
   id: 'creatine-sleep',
@@ -521,14 +522,12 @@ export function isTheoreticalOrNonHuman(input: string): { declined: boolean; rea
       if (['rodent', 'mouse', 'mice', 'rat', 'in vitro', 'cell culture', 'petri'].includes(keyword)) {
         return {
           declined: true,
-          reason:
-            'Declined: Non-human animal or in-vitro study. Protocol Engine specializes strictly in interventional studies with human participants (clinical rehab, pharmacology, nutrition, sleep, cognitive habits).'
+          reason: COPY.extraction.declinedAnimalReason
         };
       }
       return {
         declined: true,
-        reason:
-          'Declined: Theoretical physics, mathematics, or non-interventional topic. Protocol Engine only builds executable protocols from interventional studies conducted on human participants.'
+        reason: COPY.extraction.declinedTheoreticalReason
       };
     }
   }

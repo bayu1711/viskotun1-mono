@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { COPY } from '@/data/copy';
 
 interface TTSRequestBody {
   text?: string;
@@ -15,7 +16,7 @@ export async function POST(req: NextRequest) {
       body = await req.json();
     } catch {
       return NextResponse.json(
-        { error: 'Invalid JSON payload' },
+        { error: COPY.api.tts.invalidJson },
         { status: 400 }
       );
     }
@@ -24,14 +25,14 @@ export async function POST(req: NextRequest) {
 
     if (!text || typeof text !== 'string' || text.trim().length === 0) {
       return NextResponse.json(
-        { error: 'The "text" field is required and must be a non-empty string.' },
+        { error: COPY.api.tts.textRequired },
         { status: 400 }
       );
     }
 
     if (text.length > MAX_TEXT_LENGTH) {
       return NextResponse.json(
-        { error: `Text length exceeds maximum allowed limit of ${MAX_TEXT_LENGTH} characters.` },
+        { error: COPY.api.tts.textExceeded(MAX_TEXT_LENGTH) },
         { status: 400 }
       );
     }
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('[/api/tts] Speech synthesis error:', error);
     return NextResponse.json(
-      { error: 'Failed to process speech synthesis request.' },
+      { error: COPY.api.tts.synthesisFailed },
       { status: 500 }
     );
   }

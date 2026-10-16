@@ -176,7 +176,7 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
     return {
       success: true,
       eligible: false,
-      rejectionReason: `Paper declined: Matched restricted non-human / theoretical policy criterion ("${matchedBannedKeyword}"). Protocol Engine enforces interventional human science only per clinical policy v${activePolicy.version}.`,
+      rejectionReason: COPY.extraction.matchedBannedKeyword(matchedBannedKeyword, activePolicy.version),
       source: sourceName
     };
   }

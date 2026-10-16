@@ -5,6 +5,7 @@ import {
   resetGuardrailPolicy
 } from '@/server/guardrailLedger';
 import type { GuardrailUpdateRequest } from '@/types/guardrails';
+import { COPY } from '@/data/copy';
 
 /** GET: Inspect live guardrail policy and Cloud Firestore ledger status */
 export async function GET() {
@@ -14,7 +15,7 @@ export async function GET() {
   } catch (error) {
     console.error('[AdminGuardrailsRoute] GET error:', error);
     return NextResponse.json(
-      { error: 'Failed to retrieve guardrail policy ledger status' },
+      { error: COPY.api.guardrails.retrieveError },
       { status: 500 }
     );
   }
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
         body.painEscalationThreshold > 10
       ) {
         return NextResponse.json(
-          { error: 'painEscalationThreshold must be a number between 1 and 10' },
+          { error: COPY.api.guardrails.invalidThreshold },
           { status: 400 }
         );
       }
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
         body.loadReductionPercent > 90
       ) {
         return NextResponse.json(
-          { error: 'loadReductionPercent must be a percentage between 5 and 90' },
+          { error: COPY.api.guardrails.invalidReduction },
           { status: 400 }
         );
       }
@@ -56,7 +57,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Clinical guardrail policy ledger updated successfully',
+      message: COPY.api.guardrails.updatedSuccess,
       policy: updated,
       isLiveFirestore: status.isLiveFirestore,
       firestoreStatus: status.firestoreStatus
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('[AdminGuardrailsRoute] POST error:', error);
     return NextResponse.json(
-      { error: 'Failed to update guardrail policy' },
+      { error: COPY.api.guardrails.updateError },
       { status: 500 }
     );
   }
@@ -78,7 +79,7 @@ export async function DELETE() {
 
     return NextResponse.json({
       success: true,
-      message: 'Guardrail policy ledger reset to baseline clinical standards',
+      message: COPY.api.guardrails.resetSuccess,
       policy: reset,
       isLiveFirestore: status.isLiveFirestore,
       firestoreStatus: status.firestoreStatus
@@ -86,7 +87,7 @@ export async function DELETE() {
   } catch (error) {
     console.error('[AdminGuardrailsRoute] DELETE error:', error);
     return NextResponse.json(
-      { error: 'Failed to reset guardrail policy' },
+      { error: COPY.api.guardrails.resetError },
       { status: 500 }
     );
   }

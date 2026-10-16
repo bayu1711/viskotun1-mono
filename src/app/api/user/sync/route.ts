@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { Protocol, ProtocolRuntime } from '@/types/protocol';
 import { getFirestore } from '@/server/guardrailLedger';
+import { COPY } from '@/data/copy';
 
 interface UserSyncPayload {
   userId: string;
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
     const { userId, activeProtocolId, protocols, runtime } = body;
 
     if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+      return NextResponse.json({ error: COPY.api.userSync.userIdRequired }, { status: 400 });
     }
 
     const payload = {
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('User sync error:', error);
-    return NextResponse.json({ error: 'Internal Server Error during user sync' }, { status: 500 });
+    return NextResponse.json({ error: COPY.api.userSync.internalError }, { status: 500 });
   }
 }
 
@@ -64,7 +65,7 @@ export async function GET(request: Request) {
     const userId = searchParams.get('userId');
 
     if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+      return NextResponse.json({ error: COPY.api.userSync.userIdRequired }, { status: 400 });
     }
 
     const db = getFirestore();
@@ -106,6 +107,6 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error('User sync fetch error:', error);
-    return NextResponse.json({ error: 'Internal Server Error fetching user sync' }, { status: 500 });
+    return NextResponse.json({ error: COPY.api.userSync.fetchError }, { status: 500 });
   }
 }
