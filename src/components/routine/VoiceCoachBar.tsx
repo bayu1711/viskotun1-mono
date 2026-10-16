@@ -145,7 +145,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
             aria-label={COPY.voiceCoach.speed(speed)}
             className="flex h-9 min-w-[36px] items-center justify-center rounded-full border border-ink/15 bg-canvas px-2 text-2xs font-semibold lowercase text-ink transition-colors hover:bg-cream"
           >
-            {speed}x
+            {COPY.voiceCoach.speedDisplay(speed)}
           </button>
 
           {/* Audio Chime Mute Toggle */}

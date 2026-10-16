@@ -147,7 +147,7 @@ export function PolicyLedgerDrawer() {
                     </p>
                   </div>
                   <span className="rounded-full bg-ink px-3 py-1 font-mono text-sm font-medium text-white">
-                    {threshold} / 10
+                    {COPY.policyLedger.thresholdDisplay(threshold)}
                   </span>
                 </div>
 
@@ -179,7 +179,7 @@ export function PolicyLedgerDrawer() {
                     </p>
                   </div>
                   <span className="rounded-full bg-ink px-3 py-1 font-mono text-sm font-medium text-white">
-                    {loadReduction}%
+                    {COPY.policyLedger.loadReductionDisplay(loadReduction)}
                   </span>
                 </div>
 

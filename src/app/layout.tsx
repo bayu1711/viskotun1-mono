@@ -4,6 +4,8 @@ import { Inter } from 'next/font/google';
 import '../index.css';
 import { Providers } from './providers';
 
+import { COPY } from '@/data/copy';
+
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
@@ -11,13 +13,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Protocol Engine // AI Research & Health Protocols',
-  description:
-    'An AI-powered digital experience transforming complex peer-reviewed research papers into executable, adaptive, and personalized protocols.',
-  keywords: ['health protocols', 'AI research extraction', 'clinical trials', 'personalized medicine', 'rehabilitation'],
+  title: COPY.metadata.title,
+  description: COPY.metadata.description,
+  keywords: [...COPY.metadata.keywords],
   openGraph: {
-    title: 'Protocol Engine // AI Research & Health Protocols',
-    description: 'Transforming complex research papers into executable daily routines with an adaptive AI safety assistant.',
+    title: COPY.metadata.openGraphTitle,
+    description: COPY.metadata.openGraphDescription,
     type: 'website',
   },
 };

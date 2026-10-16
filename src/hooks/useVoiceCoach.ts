@@ -130,17 +130,17 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
     let details = '';
 
     if (step.durationSeconds && step.durationSeconds > 0) {
-      details = `${step.sets} sets with a ${step.durationSeconds} second hold. ${step.detail}.`;
+      details = COPY.voiceCoach.script.timedHoldDetail(step.sets, step.durationSeconds, step.detail);
     } else if (step.reps > 0) {
-      details = `${step.sets} sets of ${step.reps} repetitions. ${step.detail}.`;
+      details = COPY.voiceCoach.script.repsDetail(step.sets, step.reps, step.detail);
     } else {
-      const unit = step.setLabel || 'doses';
+      const unit = step.setLabel || COPY.voiceCoach.script.defaultDosesUnit;
       const dose = step.statValue ? `, ${step.statValue}` : '';
-      details = `${step.sets} ${unit}${dose}. ${step.detail}.`;
+      details = COPY.voiceCoach.script.dosageDetail(step.sets, unit, dose, step.detail);
     }
 
     if (step.tempo) {
-      details += ` Prescribed tempo is ${step.tempo}.`;
+      details += COPY.voiceCoach.script.prescribedTempo(step.tempo);
     }
 
     return COPY.voiceCoach.stepAnnouncement(stepNum, total, step.action, details);
@@ -163,7 +163,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
           setCountdownRemaining(remaining);
 
           if (remaining === 10 && remaining > 0) {
-            speak('10 seconds remaining.');
+            speak(COPY.voiceCoach.secondsRemaining);
           } else if (remaining <= 3 && remaining > 0) {
             if (isSoundEnabled) playAudioChime('tick');
           }
@@ -226,7 +226,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
 
     // If a safety rule is provided, read it first on initial launch
     if (currentStepIndex === 0 && safetyRule) {
-      speak(`${COPY.voiceCoach.safetyReminder(safetyRule)}. Ready to begin.`, () => {
+      speak(`${COPY.voiceCoach.safetyReminder(safetyRule)}. ${COPY.voiceCoach.readyToBegin}`, () => {
         guideStep(0);
       });
     } else {

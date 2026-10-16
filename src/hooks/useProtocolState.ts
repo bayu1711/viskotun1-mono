@@ -437,10 +437,10 @@ export function useProtocolState() {
       const displayVal =
         typeof value === 'boolean'
           ? value
-            ? 'Present'
-            : 'Absent'
+            ? COPY.morphing.values.present
+            : COPY.morphing.values.absent
           : typeof value === 'string' && value.startsWith('data:')
-          ? 'Clinical Photo Attached'
+          ? COPY.morphing.values.photoAttached
           : `${value}${field.unit ? ' ' + field.unit : ''}`;
 
       pushMessages(
@@ -454,7 +454,7 @@ export function useProtocolState() {
           : {
               role: 'ai',
               kind: 'confirmation',
-              content: `${field.name} recorded for Day ${protocol.currentDay} (${displayVal}).`
+              content: COPY.morphing.values.fieldConfirmation(field.name, protocol.currentDay, displayVal)
             }
       );
     },
@@ -478,7 +478,7 @@ export function useProtocolState() {
               kind: 'answer',
               content: edgeAnswer,
               engine: 'on-device-gemma',
-              source: 'On-Device Gemma (Chrome Built-in AI)'
+              source: COPY.assistant.engines.onDeviceGemmaSource
             });
             return;
           }
@@ -513,7 +513,7 @@ export function useProtocolState() {
               kind: 'answer',
               content: data.answer,
               engine: data.engine ?? 'cloud-gemini',
-              source: data.source ?? 'Methods & Interventions Section'
+              source: data.source ?? COPY.assistant.methodsSectionSource
             });
             return;
           }
@@ -525,7 +525,7 @@ export function useProtocolState() {
           kind: 'answer',
           content: answerFor(target, text),
           engine: 'local-rules',
-          source: 'Methods & Interventions Section'
+          source: COPY.assistant.methodsSectionSource
         });
       } catch {
         pushMessages(target.id, {
@@ -533,7 +533,7 @@ export function useProtocolState() {
           kind: 'answer',
           content: answerFor(target, text),
           engine: 'local-rules',
-          source: 'Methods & Interventions Section'
+          source: COPY.assistant.methodsSectionSource
         });
       } finally {
         updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: false }));
@@ -596,7 +596,7 @@ export function useProtocolState() {
         });
 
         if (!res.ok) {
-          throw new Error(`Extraction failed with HTTP ${res.status}`);
+          throw new Error(COPY.extraction.failedWithStatus(res.status));
         }
 
         const result = await res.json();
@@ -608,7 +608,7 @@ export function useProtocolState() {
             ...prev,
             messages: prev.messages.map((m) =>
               m.id === procId
-                ? { ...m, kind: 'confirmation', content: `Protocol ready: ${result.protocol.title}` }
+                ? { ...m, kind: 'confirmation', content: COPY.extraction.protocolReady(result.protocol.title) }
                 : m
             )
           }));

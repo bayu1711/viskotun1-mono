@@ -226,7 +226,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                       </div>
                       <div className="text-right shrink-0">
                         <p className="font-semibold text-ink">
-                          {step.sets} {step.setLabel || 'sets'} {step.perSetLabel || ''}
+                          {step.sets} {step.setLabel || COPY.task.defaultSetLabel} {step.perSetLabel || ''}
                         </p>
                         <p className="text-3xs text-ink/50">{step.frequency}</p>
                       </div>
