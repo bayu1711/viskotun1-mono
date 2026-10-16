@@ -3,6 +3,7 @@ import { LOAD_REDUCTION_PERCENT } from './config';
 /** Centralized UI copy. Protocol-specific content lives in data/protocols. */
 export const COPY = {
   metadata: {
+    lang: 'en',
     title: 'Protocol Engine // AI Research & Health Protocols',
     description:
       'An AI-powered digital experience transforming complex peer-reviewed research papers into executable, adaptive, and personalized protocols.',
@@ -58,7 +59,9 @@ export const COPY = {
     meta: (day: number, total: number, percent: number) => `day ${day}/${total} · ${percent}% today`
   },
   papers: {
-    queuedNote: 'extracting protocol…'
+    queuedNote: 'extracting protocol…',
+    initialQueuedPaperName: 'Evening Light Restriction & Sleep Latency',
+    initialQueuedPaperNote: 'pilot trial · awaiting your review'
   },
   routine: {
     eyebrow: (day: number, total: number) => `day ${day} of ${total}`,
@@ -113,6 +116,15 @@ export const COPY = {
     severe: 'severe'
   },
   feedbackDrawer: {
+    defaultMetricName: 'feedback',
+    defaultMetric: {
+      name: 'biofeedback',
+      label: 'symptom / exertion score',
+      eyebrow: 'feedback',
+      logTitle: 'log check-in',
+      minLabel: '0 · none',
+      maxLabel: '10 · severe'
+    },
     dialogLabel: 'Log subjective feedback',
     metricDialogLabel: (name?: string) => `Log ${name || 'feedback or side effect'}`,
     close: 'Close',
@@ -328,7 +340,11 @@ export const COPY = {
     },
     reviewMeta: (outcome: string, day: number) => `${outcome} · day ${day}`,
     reviewAdherence: (adherence: number) => `${adherence}% adherence`,
-    emptyReviews: 'no logs match this filter yet'
+    emptyReviews: 'no logs match this filter yet',
+    fallbackInsightLead: 'Common drop-off peak at Day 7',
+    fallbackInsightRest: 'due to habit formation fatigue. Keep your sets consistent.',
+    fallbackReviewHandle: 'Participant · 30M',
+    fallbackReviewText: 'Noticeable progression by strictly adhering to the daily prescribed sets.'
   },
   badges: {
     rct: 'RCT gold standard',
@@ -386,6 +402,9 @@ export const COPY = {
     timestampJustNow: 'Just now',
     parsedSummary: (pages: number | string) =>
       `Parsed ${pages} pages and isolated the Methods & Interventions section. Non-interventional sections and theoretical discussions were safely excluded.`,
+    fallbackFaqQuestion: 'what is the evidence grade for this protocol?',
+    fallbackFaqAnswer:
+      'The paper was evaluated as a randomized human intervention trial. Inferred parameters are explicitly flagged in the protocol.',
     offlineAnswers: {
       safetyStopRule: (stopText: string, cautionText = '') =>
         `Safety stop rule: ${stopText}${cautionText}`,
@@ -529,6 +548,18 @@ export const COPY = {
     defaultGoogleUser: 'Google User',
     googleResearcher: 'Google Researcher',
     defaultInvestigator: 'Clinical Investigator',
+    initials: {
+      guest: 'ge',
+      clinicalUser: 'cu',
+      googleUser: 'gu',
+      googleResearcher: 'gr',
+      investigator: 'ci',
+      fallback: 'us'
+    },
+    currentUser: {
+      name: 'Alex Rivera',
+      initials: 'ar'
+    },
     tabSignIn: 'sign in',
     tabCreateAccount: 'create account',
     toastValidEmail: 'please enter a valid email address.',
@@ -661,6 +692,7 @@ export const COPY = {
     title: 'Clinical Policy Ledger',
     firestoreLive: 'Firestore Live',
     memoryCache: 'Memory Hot Cache · Fail-Safe',
+    versionFallback: 'baseline',
     versionLabel: (version: string) => `version ${version} · Google Cloud Firestore`,
     close: 'Close policy ledger',
     governanceBadge: 'Dynamic Runtime Governance',
@@ -722,5 +754,33 @@ export const COPY = {
       internalError: 'Internal Server Error during user sync',
       fetchError: 'Internal Server Error fetching user sync'
     }
+  },
+  fallbackProtocol: {
+    phase: 'Phase 1: Week 1–2',
+    phaseLabel: 'week 1',
+    authors: 'Research Collaborative & Clinical Investigators',
+    journal: 'Journal of Interventional Human Science',
+    trialType: 'Randomized Controlled Trial',
+    step1Action: 'Primary Prescribed Intervention',
+    step1Detail: 'Standardized experimental dosage/repetition protocol under controlled observation.',
+    step1Frequency: '1x Daily',
+    step1SetLabel: 'dose / round',
+    step1PerSetLabel: '1 protocol round',
+    step1StatLabel: 'target:',
+    step1StatValue: '1 daily session',
+    step2Action: 'Sustained Adaptation Hold',
+    step2Detail:
+      'Authors reported adaptation timing without specifying exact hold duration. Conservative 30s baseline applied.',
+    step2Frequency: '1x Daily',
+    progressionCondition: 'Compliance rate ≥ 85% with adverse symptom score ≤ 2/10 for 5 consecutive days',
+    progressionAction: 'Progress load or duration by 10% in Phase 2',
+    contraindicationText: 'Stop immediately if sharp acute discomfort or unexpected adverse symptoms occur.',
+    missingParameter: 'Rest interval and hold duration',
+    missingFallback: 'Conservative baseline: 3 × 30s with 60s recovery',
+    metricName: 'tolerability',
+    metricLabel: 'symptom / tolerability',
+    eyebrow: 'symptom',
+    logTitle: 'log',
+    dropOffUnit: 'day'
   }
 } as const;
