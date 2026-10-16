@@ -654,6 +654,41 @@ export function useProtocolState() {
     setActiveFieldId(null);
   }, []);
 
+  const updateGuardrailThreshold = useCallback(
+    (threshold: number, message?: string) => {
+      setProtocolList((prev) =>
+        prev.map((p) => {
+          if (p.id !== protocol.id) return p;
+          const updatedFeedbackMetric = p.feedbackMetric
+            ? {
+                ...p.feedbackMetric,
+                escalationThreshold: threshold,
+                escalationMessage: message || p.feedbackMetric.escalationMessage
+              }
+            : p.feedbackMetric;
+
+          const updatedSpec = (p.dataCollectionSpec || []).map((field) => {
+            if (field.type === 'scale' || field.escalationThreshold !== undefined) {
+              return {
+                ...field,
+                escalationThreshold: threshold,
+                escalationMessage: message || field.escalationMessage
+              };
+            }
+            return field;
+          });
+
+          return {
+            ...p,
+            feedbackMetric: updatedFeedbackMetric,
+            dataCollectionSpec: updatedSpec
+          };
+        })
+      );
+    },
+    [protocol.id]
+  );
+
   return useMemo(
     () => ({
       protocols: summaries,
@@ -695,6 +730,7 @@ export function useProtocolState() {
       uploadPaper,
       addProtocol,
       resetToDefaults,
+      updateGuardrailThreshold,
       hasHydrated
     }),
     [
@@ -731,6 +767,7 @@ export function useProtocolState() {
       uploadPaper,
       addProtocol,
       resetToDefaults,
+      updateGuardrailThreshold,
       hasHydrated
     ]
   );

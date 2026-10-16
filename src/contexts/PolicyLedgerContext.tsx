@@ -2,11 +2,13 @@
 
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { toast } from 'sonner';
+import { COPY } from '../data/copy';
 import type {
   GuardrailPolicy,
   GuardrailUpdateRequest,
   GuardrailLedgerResponse
 } from '../types/guardrails';
+import { useProtocol } from './ProtocolContext';
 
 interface PolicyLedgerContextValue {
   policy: GuardrailPolicy | null;
@@ -25,6 +27,7 @@ interface PolicyLedgerContextValue {
 const PolicyLedgerContext = createContext<PolicyLedgerContextValue | null>(null);
 
 export function PolicyLedgerProvider({ children }: { children: React.ReactNode }) {
+  const { updateGuardrailThreshold } = useProtocol();
   const [policy, setPolicy] = useState<GuardrailPolicy | null>(null);
   const [isLiveFirestore, setIsLiveFirestore] = useState(false);
   const [firestoreStatus, setFirestoreStatus] = useState<'connected' | 'unconfigured' | 'error'>('unconfigured');
@@ -42,13 +45,20 @@ export function PolicyLedgerProvider({ children }: { children: React.ReactNode }
         setIsLiveFirestore(data.isLiveFirestore);
         setFirestoreStatus(data.firestoreStatus);
         setLastSyncedAt(data.lastSyncedAt);
+
+        if (data.policy?.painEscalationThreshold !== undefined) {
+          updateGuardrailThreshold(
+            data.policy.painEscalationThreshold,
+            data.policy.escalationAlertMessage
+          );
+        }
       }
     } catch (err) {
       console.warn('[PolicyLedgerContext] Could not fetch live policy ledger:', err);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [updateGuardrailThreshold]);
 
   useEffect(() => {
     refreshPolicy();
@@ -73,21 +83,29 @@ export function PolicyLedgerProvider({ children }: { children: React.ReactNode }
           setIsLiveFirestore(data.isLiveFirestore);
           setFirestoreStatus(data.firestoreStatus);
           setLastSyncedAt(new Date().toISOString());
-          toast.success('Clinical guardrail policy ledger updated');
+
+          if (data.policy?.painEscalationThreshold !== undefined) {
+            updateGuardrailThreshold(
+              data.policy.painEscalationThreshold,
+              data.policy.escalationAlertMessage
+            );
+          }
+
+          toast.success(COPY.policyLedger.toastUpdated);
           return true;
         } else {
-          toast.error('Failed to update guardrail policy ledger');
+          toast.error(COPY.policyLedger.toastUpdateError);
           return false;
         }
       } catch (err) {
         console.error('[PolicyLedgerContext] Update error:', err);
-        toast.error('Network error updating policy ledger');
+        toast.error(COPY.policyLedger.toastNetworkError);
         return false;
       } finally {
         setIsLoading(false);
       }
     },
-    []
+    [updateGuardrailThreshold]
   );
 
   const resetPolicy = useCallback(async (): Promise<boolean> => {
@@ -100,17 +118,25 @@ export function PolicyLedgerProvider({ children }: { children: React.ReactNode }
         setIsLiveFirestore(data.isLiveFirestore);
         setFirestoreStatus(data.firestoreStatus);
         setLastSyncedAt(new Date().toISOString());
-        toast.success('Guardrails reset to baseline clinical standards');
+
+        if (data.policy?.painEscalationThreshold !== undefined) {
+          updateGuardrailThreshold(
+            data.policy.painEscalationThreshold,
+            data.policy.escalationAlertMessage
+          );
+        }
+
+        toast.success(COPY.policyLedger.toastReset);
         return true;
       }
       return false;
     } catch {
-      toast.error('Failed to reset guardrails');
+      toast.error(COPY.policyLedger.toastResetError);
       return false;
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [updateGuardrailThreshold]);
 
   const value = useMemo(
     () => ({
