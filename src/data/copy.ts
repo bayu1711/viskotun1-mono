@@ -48,6 +48,7 @@ export const COPY = {
     resetDemo: 'reset to demo defaults',
     assistantFab: (title: string) => `ask about ${title} or drop a pdf`,
     todaySummaryLabel: "Today's progress",
+    noActiveProtocol: 'no active protocol',
     dayOfTotal: (day: number, total: number) => `day ${day} / ${total}`,
     dropTitle: 'drop to extract',
     dropSubtitle: "we'll isolate the methods & build a protocol",
@@ -782,5 +783,87 @@ export const COPY = {
     eyebrow: 'symptom',
     logTitle: 'log',
     dropOffUnit: 'day'
+  },
+  howTo: {
+    buttonLabel: 'how to use & sample papers',
+    buttonShort: 'how to',
+    buttonExploreSamples: 'explore sample papers',
+    dialogLabel: 'How to use Protocol Engine & sample research papers',
+    title: 'How Protocol Engine Works',
+    eyebrow: 'user guide & clinical research papers',
+    badge: 'Interactive Research Pipeline',
+    intro:
+      'Protocol Engine converts dense, peer-reviewed human interventional research into executable daily protocols with zero hallucinated gaps and an evidence-grounded AI safety assistant.',
+    tabs: {
+      guide: 'how it works',
+      samples: 'sample papers',
+      scope: 'accepted papers'
+    },
+    steps: [
+      {
+        step: '01',
+        title: 'Ingest Research PDF',
+        description:
+          'Upload any peer-reviewed clinical trial (RCT) or human interventional paper. Gemini Multimodal analyzes the Methods and Outcomes sections to extract dosing, tempo, sets, and contraindications.'
+      },
+      {
+        step: '02',
+        title: 'Morphing UI Generation',
+        description:
+          'The paper constructs its own interface: milestone photos for dermatology, reaction timers for cognitive trials, and numeric biomarker steppers for blood glucose or blood pressure.'
+      },
+      {
+        step: '03',
+        title: 'Adaptive Safety & Biofeedback',
+        description:
+          'Track daily sets and log adverse tolerability. Escalation automatically freezes and recommends load reductions when discomfort thresholds are exceeded in the Firestore Guardrail Ledger.'
+      }
+    ],
+    samplesTitle: 'Curated Sample Research Papers',
+    samplesSubtitle:
+      'Explore these pre-calibrated clinical protocols or download the original open-access PDFs from PubMed Central (PMC) to test live extraction.',
+    loadButton: 'Try this sample',
+    loadedButton: 'Active in workspace',
+    downloadPdfButton: 'Download Open-Access PDF',
+    doiLabel: 'View on PMC / DOI',
+    loadedToast: (title: string) => `Loaded ${title} protocol into your workspace`,
+    featuresHeader: 'Trial Endpoints & Morphing UI Tested:',
+    scopeTitle: 'Strict Gatekeeper Scope',
+    scopeSubtitle:
+      'Protocol Engine specializes strictly in Interventional Human Science. Theoretical topics and non-human animal models are safely rejected.',
+    acceptedHeader: 'Accepted Topics (Eligible)',
+    acceptedList: [
+      'Musculoskeletal & physical therapy rehabilitation protocols',
+      'Pharmacological and nutritional human clinical trials',
+      'Sleep scheduling, light therapy & circadian hygiene',
+      'Dermatology and topical regenerative regimens',
+      'Cardiorespiratory and exercise prescription studies'
+    ],
+    rejectedHeader: 'Rejected Topics (Auto-Declined by Gatekeeper)',
+    rejectedList: [
+      'Preclinical animal studies (mice, rats, rodents, rabbits)',
+      'In vitro assays, cell cultures, and petri dish experiments',
+      'Theoretical physics, mathematics, cosmology, quantum theory',
+      'Macroeconomics, finance, and non-health computer science',
+      'Purely observational surveys lacking an actionable intervention'
+    ],
+    testGatekeeperTitle: 'Test AI Safety Gatekeeper',
+    testGatekeeperSubtitle:
+      'Download this preclinical rodent study PDF to verify that our Guardrail Ledger immediately detects and declines non-human research with an educational clinical notice.',
+    testGatekeeperBadge: 'Intentional Rejection Test'
+  },
+  onboarding: {
+    welcomeEyebrow: 'getting started',
+    welcomeTitle: 'turn clinical research into daily routines',
+    welcomeSubtitle:
+      'Protocol Engine ingests peer-reviewed clinical research and transforms it into executable, adaptive daily health protocols. No pre-loaded dummy papers—start fresh with your own PDF or load a curated sample.',
+    ctaUpload: 'upload research paper',
+    ctaHowTo: 'how to & sample papers',
+    dropPrompt: 'drop a research pdf here to extract',
+    dropSubtext: 'clinical trials, RCTs, rehabilitation, nutrition, sleep & pharmacology',
+    samplesHeading: 'or try a curated sample protocol with one click:',
+    quickLoadButton: 'use protocol',
+    noActiveProtocol: 'no active protocol',
+    noActiveProtocolDesc: 'upload a research paper or load a sample from the guide to start tracking.'
   }
 } as const;
