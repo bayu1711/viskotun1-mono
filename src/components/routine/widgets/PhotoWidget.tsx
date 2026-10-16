@@ -16,7 +16,9 @@ interface PhotoWidgetProps {
   onChange: (value: string) => void;
 }
 
-const DEFAULT_DEMO_PHOTO = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="400" height="300" fill="%23f7f5f0"/><circle cx="200" cy="150" r="80" fill="%23eedcc6"/><ellipse cx="200" cy="140" rx="35" ry="25" fill="%23dfcaa9" opacity="0.8"/><text x="200" y="270" font-family="sans-serif" font-size="12" fill="%232b2927" text-anchor="middle">Milestone Clinical Photograph</text></svg>`;
+const DEFAULT_DEMO_PHOTO = COPY.morphing.widgets.photo.demoPhotoSvg(
+  COPY.morphing.widgets.photo.demoPhotoSvgText
+);
 
 export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);

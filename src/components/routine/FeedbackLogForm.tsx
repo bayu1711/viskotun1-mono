@@ -115,7 +115,7 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
                 )}
               >
                 {field.name}
-                {field.frequency === 'milestone' && ' (milestone)'}
+                {field.frequency === 'milestone' && COPY.morphing.milestoneSuffix}
               </button>
             );
           })}

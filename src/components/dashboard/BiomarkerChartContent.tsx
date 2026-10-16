@@ -77,7 +77,7 @@ export function BiomarkerChartContent({
             tickLine={false}
             axisLine={false}
             tick={{ className: 'fill-ink/40', fontSize: CHART_TICK_FONT_SIZE }}
-            tickFormatter={(day) => `d${day}`}
+            tickFormatter={(day) => COPY.morphing.dashboard.dayTick(Number(day))}
           />
           <YAxis
             domain={[min ?? 'auto', max ?? 'auto']}

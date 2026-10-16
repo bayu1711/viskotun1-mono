@@ -11,11 +11,13 @@ import { Icon } from '../ui/Icon';
 import { Panel } from '../ui/Panel';
 import { SectionHeading } from '../ui/SectionHeading';
 
-const STANDARDIZED_BASELINE_MOCKUP =
-  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450"><rect width="600" height="450" fill="%23f4f6f4"/><circle cx="300" cy="225" r="160" fill="%23dce3de" stroke="%232e3a34" stroke-width="2"/><ellipse cx="300" cy="210" rx="70" ry="80" fill="%23c2cdc5" opacity="0.85"/><text x="300" y="340" font-family="sans-serif" font-size="14" font-weight="500" text-anchor="middle" fill="%232e3a34" opacity="0.7">day 1 baseline · vertex thinning</text><path d="M 270 200 Q 300 180 330 200" stroke="%232e3a34" stroke-width="1.5" fill="none" opacity="0.45"/><path d="M 280 220 Q 300 205 320 220" stroke="%232e3a34" stroke-width="1.5" fill="none" opacity="0.45"/></svg>';
+const STANDARDIZED_BASELINE_MOCKUP = COPY.morphing.dashboard.baselineMockupSvg(
+  COPY.morphing.dashboard.baselineMockupSvgText
+);
 
-const SAMPLE_PROGRESSION_MOCKUP =
-  'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450"><rect width="600" height="450" fill="%23edf2ee"/><circle cx="300" cy="225" r="160" fill="%23d5ded8" stroke="%232e3a34" stroke-width="2"/><ellipse cx="300" cy="210" rx="90" ry="100" fill="%239eafa3" opacity="0.95"/><text x="300" y="340" font-family="sans-serif" font-size="14" font-weight="500" text-anchor="middle" fill="%232e3a34" opacity="0.85">day 28 milestone · increased terminal density</text><path d="M 255 190 Q 300 165 345 190" stroke="%232e3a34" stroke-width="2.5" fill="none" opacity="0.7"/><path d="M 265 210 Q 300 185 335 210" stroke="%232e3a34" stroke-width="2.5" fill="none" opacity="0.7"/><path d="M 275 230 Q 300 205 325 230" stroke="%232e3a34" stroke-width="2.5" fill="none" opacity="0.7"/></svg>';
+const SAMPLE_PROGRESSION_MOCKUP = COPY.morphing.dashboard.progressionMockupSvg(
+  COPY.morphing.dashboard.progressionMockupSvgText
+);
 
 export function MilestonePhotoComparison() {
   const { protocol, morphingLogs, openFeedbackDrawer } = useProtocol();
