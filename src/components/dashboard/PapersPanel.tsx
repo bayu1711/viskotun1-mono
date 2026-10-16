@@ -75,21 +75,23 @@ export function PapersPanel() {
         </ul>
       )}
 
-      <div className="mt-5 flex flex-wrap items-center gap-1.5 border-t border-ink/10 pt-4">
-        {protocol.paper.evidenceBadges.map((badge) => (
-          <EvidenceBadgeChip key={badge} badge={badge} />
-        ))}
-        <a
-          href={`${DOI_BASE_URL}${protocol.paper.doi}`}
-          target="_blank"
-          rel="noreferrer"
-          className="ml-auto flex items-center gap-1 text-xs lowercase text-ink/55 transition-colors hover:text-ink focus:outline-none focus-visible:underline"
-        >
-          {COPY.dashboard.sourcePaper}
-          <Icon icon={NorthEastIcon} size="xs" />
-          <span className="sr-only">{COPY.common.opensInNewTab}</span>
-        </a>
-      </div>
+      {protocol && (
+        <div className="mt-5 flex flex-wrap items-center gap-1.5 border-t border-ink/10 pt-4">
+          {protocol.paper.evidenceBadges.map((badge) => (
+            <EvidenceBadgeChip key={badge} badge={badge} />
+          ))}
+          <a
+            href={`${DOI_BASE_URL}${protocol.paper.doi}`}
+            target="_blank"
+            rel="noreferrer"
+            className="ml-auto flex items-center gap-1 text-xs lowercase text-ink/55 transition-colors hover:text-ink focus:outline-none focus-visible:underline"
+          >
+            {COPY.dashboard.sourcePaper}
+            <Icon icon={NorthEastIcon} size="xs" />
+            <span className="sr-only">{COPY.common.opensInNewTab}</span>
+          </a>
+        </div>
+      )}
     </Panel>
   );
 }

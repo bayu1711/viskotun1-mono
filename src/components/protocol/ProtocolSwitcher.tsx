@@ -35,6 +35,19 @@ export function ProtocolSwitcher() {
     openAssistant('upload');
   };
 
+  if (!protocol) {
+    return (
+      <button
+        type="button"
+        onClick={handleAddPaper}
+        className="flex items-center gap-2 rounded-full border border-dashed border-ink/40 py-1.5 px-3 text-sm lowercase text-ink/70 hover:border-ink hover:text-ink transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+      >
+        <Icon icon={AddIcon} size="sm" />
+        <span>{COPY.switcher.addPaper}</span>
+      </button>
+    );
+  }
+
   return (
     <div ref={rootRef} className="relative inline-block">
       <button

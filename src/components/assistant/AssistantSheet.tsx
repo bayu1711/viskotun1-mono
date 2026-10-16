@@ -79,7 +79,7 @@ export function AssistantSheet() {
           >
             <AssistantHeader
               mode={mode}
-              protocolTitle={protocol.shortTitle}
+              protocolTitle={protocol ? protocol.shortTitle : COPY.brand.name}
               titleId={titleId}
               onModeChange={handleModeChange}
               onClose={closeAssistant}
@@ -106,7 +106,7 @@ export function AssistantSheet() {
               {mode === 'upload' ? (
                 <UploadDropzone onFile={addPaper} />
               ) : (
-                <FaqSuggestions faqs={protocol.faqs} onSelect={askQuestion} />
+                <FaqSuggestions faqs={protocol?.faqs ?? []} onSelect={askQuestion} />
               )}
               <AssistantComposer
                 ref={inputRef}

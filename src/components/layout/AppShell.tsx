@@ -12,6 +12,7 @@ import { AssistantSheet } from '../assistant/AssistantSheet';
 import { ErrorBoundary } from '../feedback/ErrorBoundary';
 import { FeedbackDrawer } from '../routine/FeedbackDrawer';
 import { PolicyLedgerDrawer } from '../admin/PolicyLedgerDrawer';
+import { HowToModal } from '../howto/HowToModal';
 import { AssistantFab } from './AssistantFab';
 import { FileDropOverlay } from './FileDropOverlay';
 import { MobileTabBar } from './MobileTabBar';
@@ -47,6 +48,7 @@ export function AppShell({ children }: AppShellProps) {
         <AssistantSheet />
         <FeedbackDrawer />
         <PolicyLedgerDrawer />
+        <HowToModal />
         <FileDropOverlay visible={isDragging} />
       </div>
     );
@@ -68,6 +70,7 @@ export function AppShell({ children }: AppShellProps) {
       <AssistantSheet />
       <FeedbackDrawer />
       <PolicyLedgerDrawer />
+      <HowToModal />
       <FileDropOverlay visible={isDragging} />
     </div>
   );

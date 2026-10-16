@@ -11,18 +11,22 @@ export function AssistantFab() {
   const { protocol } = useProtocol();
   const { openAssistant, isOpen } = useAssistant();
 
+  const label = protocol
+    ? COPY.shell.assistantFab(protocol.shortTitle)
+    : COPY.shell.openAssistant;
+
   return (
     <button
       type="button"
-      onClick={() => openAssistant('ask')}
+      onClick={() => openAssistant(protocol ? 'ask' : 'upload')}
       aria-haspopup="dialog"
       aria-expanded={isOpen}
-      className="fixed bottom-6 right-8 z-nav hidden items-center gap-3 rounded-full bg-ink py-2 pl-2 pr-5 text-sm lowercase text-white shadow-float transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 lg:flex">
-      
+      className="fixed bottom-6 right-8 z-nav hidden items-center gap-3 rounded-full bg-ink py-2 pl-2 pr-5 text-sm lowercase text-white shadow-float transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 lg:flex"
+    >
       <IconTile variant="inverse" shape="circle" size={36}>
         <Icon icon={AutoAwesomeOutlinedIcon} size="md" />
       </IconTile>
-      {COPY.shell.assistantFab(protocol.shortTitle)}
-    </button>);
-
+      {label}
+    </button>
+  );
 }

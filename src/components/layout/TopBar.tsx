@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import AddIcon from '@mui/icons-material/Add';
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
@@ -16,7 +17,7 @@ import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 
 export function TopBar() {
-  const { streak, resetToDefaults } = useProtocol();
+  const { streak, resetToDefaults, openHowTo } = useProtocol();
   const { openAssistant } = useAssistant();
   const { user, isGuest, logout } = useAuth();
   const { openPolicyDrawer, isLiveFirestore } = usePolicyLedger();
@@ -54,6 +55,10 @@ export function TopBar() {
             <Icon icon={LogoutOutlinedIcon} size="md" />
           </CircleButton>
         )}
+
+        <CircleButton label={COPY.howTo.dialogLabel} onClick={openHowTo} size={38}>
+          <Icon icon={HelpOutlineOutlinedIcon} size="md" />
+        </CircleButton>
 
         <CircleButton label={COPY.policyLedger.dialogLabel} onClick={openPolicyDrawer} size={38} className="relative">
           <Icon icon={ShieldOutlinedIcon} size="md" />

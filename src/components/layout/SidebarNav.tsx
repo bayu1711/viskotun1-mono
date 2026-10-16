@@ -3,9 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
+import { useProtocol } from '../../contexts/ProtocolContext';
 import { COPY } from '../../data/copy';
 import { navItems } from '../../data/navigation';
 import { cn } from '../../utils/cn';
+import { Icon } from '../ui/Icon';
 
 interface SidebarNavProps {
   className?: string;
@@ -14,6 +17,7 @@ interface SidebarNavProps {
 export function SidebarNav({ className }: SidebarNavProps) {
   const pathname = usePathname();
   const currentPath = pathname ?? '';
+  const { openHowTo } = useProtocol();
 
   return (
     <nav aria-label={COPY.nav.primaryLabel} className={className}>
@@ -39,6 +43,19 @@ export function SidebarNav({ className }: SidebarNavProps) {
           );
         })}
       </ul>
+
+      <div className="mt-8 border-t border-ink/10 pt-4">
+        <button
+          type="button"
+          onClick={openHowTo}
+          className="flex items-center gap-2.5 rounded-full py-1.5 text-xs lowercase font-medium text-ink/60 transition-colors hover:text-ink focus:outline-none focus-visible:underline"
+        >
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cream text-ink">
+            <Icon icon={HelpOutlineOutlinedIcon} size="xs" />
+          </span>
+          <span>{COPY.howTo.buttonShort}</span>
+        </button>
+      </div>
     </nav>
   );
 }

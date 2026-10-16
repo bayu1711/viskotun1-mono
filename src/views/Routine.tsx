@@ -17,6 +17,7 @@ import { CircleButton } from '../components/ui/CircleButton';
 import { Icon } from '../components/ui/Icon';
 import { Panel } from '../components/ui/Panel';
 import { SectionHeading } from '../components/ui/SectionHeading';
+import { EmptyRoutineView } from '../components/routine/EmptyRoutineView';
 import { useProtocol } from '../contexts/ProtocolContext';
 import { COPY } from '../data/copy';
 import { ROUTES } from '../data/navigation';
@@ -35,6 +36,11 @@ export function RoutinePage() {
   } = useProtocol();
   const historyHeadingId = useId();
   const feedbackHeadingId = useId();
+
+  if (!protocol) {
+    return <EmptyRoutineView />;
+  }
+
   const stopRule = stopRuleOf(protocol);
 
   return (
