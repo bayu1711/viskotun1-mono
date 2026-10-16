@@ -244,3 +244,28 @@ export interface ProtocolSummary {
 }
 
 export type NewChatMessage = Omit<ChatMessage, 'id' | 'timestamp'> & { id?: string };
+
+/** Persistent paper document contract stored in the unified Firebase papers table */
+export interface StoredPaper {
+  id: string;
+  title: string;
+  shortTitle: string;
+  domain: string;
+  category: string;
+  authors: string;
+  journal: string;
+  year: number;
+  doi: string;
+  pmcId?: string;
+  openAccessUrl: string;
+  pdfUrl: string;
+  summary: string;
+  featuresTested: string[];
+  protocolId?: string;
+  isSample: boolean;
+  isGuardrailRejectionTest?: boolean;
+  protocol?: Protocol;
+  userId?: string | null;
+  createdAt: number;
+  updatedAt: number;
+}

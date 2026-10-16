@@ -754,6 +754,13 @@ export const COPY = {
       userIdRequired: 'User ID is required',
       internalError: 'Internal Server Error during user sync',
       fetchError: 'Internal Server Error fetching user sync'
+    },
+    papers: {
+      fetchError: 'Internal Server Error fetching papers',
+      saveError: 'Internal Server Error saving paper',
+      paperRequired: 'Paper object is required',
+      seedSuccess: 'Sample papers seeded successfully',
+      saveSuccess: 'Paper saved to Firestore papers collection'
     }
   },
   fallbackProtocol: {
@@ -822,6 +829,8 @@ export const COPY = {
     samplesTitle: 'Curated Sample Research Papers',
     samplesSubtitle:
       'Explore these pre-calibrated clinical protocols or download the original open-access PDFs from PubMed Central (PMC) to test live extraction.',
+    firestoreSyncLive: 'Firebase Firestore live',
+    firestoreSyncLocal: 'Local verified catalog',
     loadButton: 'Try this sample',
     loadedButton: 'Active in workspace',
     downloadPdfButton: 'Download Open-Access PDF',
