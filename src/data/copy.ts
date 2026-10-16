@@ -399,7 +399,15 @@ export const COPY = {
     needAccount: "don't have an account? create one",
     signOut: 'sign out',
     guestBadge: 'guest mode',
-    saveNotice: 'sign in to sync your papers to the cloud'
+    saveNotice: 'sign in to sync your papers to the cloud',
+    orWithEmail: 'or with email',
+    toastValidEmail: 'please enter a valid email address.',
+    toastWelcomeBack: 'welcome back!',
+    toastAccountCreated: 'account created successfully!',
+    toastAuthFailed: 'authentication failed. please try again.',
+    toastGoogleSuccess: 'signed in with google!',
+    toastGoogleFailed: 'google sign-in failed.',
+    toastGuestEntered: 'entered as guest explorer'
   },
   errors: {
     boundaryTitle: 'something went wrong',

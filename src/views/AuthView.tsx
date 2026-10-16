@@ -29,21 +29,21 @@ export function AuthView({ mode }: AuthViewProps) {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      toast.error('Please enter a valid email address.');
+      toast.error(COPY.auth.toastValidEmail);
       return;
     }
     setIsSubmitting(true);
     try {
       if (isLogin) {
         await loginWithEmail(email, password);
-        toast.success('Welcome back!');
+        toast.success(COPY.auth.toastWelcomeBack);
       } else {
         await signupWithEmail(name, email, password);
-        toast.success('Account created successfully!');
+        toast.success(COPY.auth.toastAccountCreated);
       }
       router.push(ROUTES.routine);
     } catch {
-      toast.error('Authentication failed. Please try again.');
+      toast.error(COPY.auth.toastAuthFailed);
     } finally {
       setIsSubmitting(false);
     }
@@ -53,10 +53,10 @@ export function AuthView({ mode }: AuthViewProps) {
     setIsSubmitting(true);
     try {
       await loginWithGoogle();
-      toast.success('Signed in with Google!');
+      toast.success(COPY.auth.toastGoogleSuccess);
       router.push(ROUTES.routine);
     } catch {
-      toast.error('Google sign-in failed.');
+      toast.error(COPY.auth.toastGoogleFailed);
     } finally {
       setIsSubmitting(false);
     }
@@ -64,7 +64,7 @@ export function AuthView({ mode }: AuthViewProps) {
 
   const handleGuestContinue = () => {
     loginAsGuest();
-    toast.info('Entered as Guest Explorer');
+    toast.info(COPY.auth.toastGuestEntered);
     router.push(ROUTES.routine);
   };
 
@@ -103,7 +103,7 @@ export function AuthView({ mode }: AuthViewProps) {
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-ink/10" />
           </div>
-          <span className="relative bg-white px-3 text-2xs lowercase text-ink/40">or with email</span>
+          <span className="relative bg-white px-3 text-2xs lowercase text-ink/40">{COPY.auth.orWithEmail}</span>
         </div>
 
         {/* Email/Password Form */}
