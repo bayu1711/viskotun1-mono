@@ -209,9 +209,27 @@ export const COPY = {
     prescribedRoutine: 'prescribed routine & methods',
     safetyAndRules: 'safety rules & contraindications',
     recentLogs: 'recent biofeedback logs',
-    noLogsYet: 'no daily logs recorded yet',
+    noLogsYet: 'no biofeedback logs recorded yet.',
     generatedOn: (date: string) => `generated on ${date}`,
-    dialogLabel: 'Shareable Protocol Summary and Progress Brief'
+    dialogLabel: 'Shareable Protocol Summary and Progress Brief',
+    timelineProgress: 'Timeline Progress',
+    adherenceRate: 'Adherence Rate',
+    consistencyStreak: 'Consistency Streak',
+    progressionGate: 'Progression Gate',
+    statusPaused: '⚠️ Escalation Paused',
+    statusReady: '✓ Ready to Advance',
+    statusHolding: 'Holding Load',
+    conservativeBaseline: 'conservative baseline',
+    progressionRuleHeading: 'Progression Rule',
+    safetyRulesHeading: 'Safety & Stop Rules',
+    conditionLabel: 'Condition:',
+    actionLabel: 'Action:',
+    standardDurationFallback: 'Follow standardized clinical duration.',
+    stopImmediatelyIf: 'Stop immediately if:',
+    standardMonitoringFallback: 'Standard clinical monitoring; pause if severe discomfort occurs.',
+    dayUnit: (count: number) => (count === 1 ? 'day' : 'days'),
+    sampleSize: (sampleSize: number | string) => `Sample Size: N = ${sampleSize}`,
+    dayRatio: (current: number, total: number) => `Day ${current} / ${total}`
   },
   voiceCoach: {
     eyebrow: 'hands-free',
@@ -227,6 +245,7 @@ export const COPY = {
     speed: (rate: number) => `${rate}x speed`,
     soundOn: 'sound cues on',
     soundMuted: 'sound cues muted',
+    techNote: 'web speech + timer cues',
     countdown: (seconds: number) => `hold: ${seconds}s`,
     countdownComplete: 'hold complete',
     countdownActive: (seconds: number) => `${seconds}s hold timer running`,
@@ -377,7 +396,34 @@ export const COPY = {
       summaryBody: 'Export formatted adherence and biofeedback trends for your specialist or personal records.'
     },
     demoTitle: 'Try it right now',
-    demoSubtitle: 'Drop a research PDF or explore pre-loaded clinical protocols with zero setup.'
+    demoSubtitle: 'Drop a research PDF or explore pre-loaded clinical protocols with zero setup.',
+    architecture: 'Architecture',
+    architectureTitle: 'how protocol engine works',
+    capabilities: 'Capabilities',
+    capabilitiesTitle: 'built for clinical rigour',
+    nav: {
+      howItWorks: 'how it works',
+      gatekeeper: 'scientific gatekeeper',
+      features: 'features'
+    },
+    steps: {
+      step1Number: 'Step 01',
+      step1Title: 'Multimodal Ingestion',
+      step1Body: 'Drop any clinical research PDF. Gemini 1.5 processes document bytes natively without fragile text scraping.',
+      step2Number: 'Step 02',
+      step2Title: 'Scientific Gatekeeper',
+      step2Body: 'Verifies human interventional criteria. Theoretical physics or non-human animal assays are rejected with educational guidance.',
+      step3Number: 'Step 03',
+      step3Title: 'Parameter Auditing',
+      step3Body: 'Detects omitted dosages, hold times, or execution parameters. Flags them as conservative clinical baselines with zero hallucinated gaps.',
+      step4Number: 'Step 04',
+      step4Title: 'Adaptive Routine & Q&A',
+      step4Body: 'Executes daily sets, progression rules, safety & biofeedback thresholds, and answers questions strictly cited from the Methods.'
+    },
+    footerTagline: 'protocol engine · interventional human research intelligence',
+    footerSignIn: 'sign in',
+    footerCreateAccount: 'create account',
+    footerGithub: 'github'
   },
   auth: {
     loginTitle: 'welcome back',
@@ -401,6 +447,10 @@ export const COPY = {
     guestBadge: 'guest mode',
     saveNotice: 'sign in to sync your papers to the cloud',
     orWithEmail: 'or with email',
+    defaultGuestName: 'Guest Explorer',
+    defaultClinicalUser: 'Verified Clinical User',
+    defaultGoogleUser: 'Google User',
+    googleResearcher: 'Google Researcher',
     toastValidEmail: 'please enter a valid email address.',
     toastWelcomeBack: 'welcome back!',
     toastAccountCreated: 'account created successfully!',
@@ -426,32 +476,48 @@ export const COPY = {
     saveEntry: 'Save measurement to protocol',
     savedToast: (name: string) => `${name} recorded successfully`,
     widgets: {
+      evaluationRule: 'Evaluation Rule: ',
+      measurementCriteria: 'Measurement Criteria: ',
+      protocolNote: 'Protocol Note: ',
+      protocolGuidelines: 'Protocol Test Guidelines: ',
       photo: {
         uploadPrompt: 'Capture or upload clinical photograph',
         dropHint: 'Drag & drop image file or click to select',
         changePhoto: 'Change photo',
         retake: 'Retake',
         instructionsLabel: 'Standardized study protocol guidelines:',
-        previewAlt: 'Milestone clinical assessment photo'
+        previewAlt: 'Milestone clinical assessment photo',
+        removePhoto: 'Remove photo',
+        attached: '✓ photo attached to milestone record',
+        uploadButton: 'Upload file',
+        demoCaptureButton: 'Load Demo Capture'
       },
       numeric: {
         enterValue: 'Measured value',
         referenceRange: (min?: number, max?: number, unit?: string) =>
-          `Target range: ${min ?? 0}–${max ?? 100} ${unit || ''}`
+          `Target range: ${min ?? 0}–${max ?? 100} ${unit || ''}`,
+        decrease: (name: string) => `Decrease ${name}`,
+        increase: (name: string) => `Increase ${name}`
       },
       timer: {
         start: 'Start test timer',
         pause: 'Pause',
         reset: 'Reset',
         complete: 'Test complete!',
-        targetDuration: (seconds: number) => `Target duration: ${seconds}s`
+        targetDuration: (seconds: number) => `Target duration: ${seconds}s`,
+        secondsElapsed: (seconds: number) => `${seconds} seconds elapsed`
       },
       multichoice: {
-        selectOne: 'Select clinical classification:'
+        selectOne: 'Select clinical classification:',
+        defaultOptions: ['Mild', 'Moderate', 'Severe']
       },
       boolean: {
         yes: 'Yes, present',
         no: 'No, absent'
+      },
+      scale: {
+        minimalSuffix: '· minimal',
+        severeSuffix: '· severe'
       }
     },
     milestone: {
@@ -472,7 +538,16 @@ export const COPY = {
       gridToggle: 'standardization grid',
       noMilestonesYet: 'No milestone evaluations completed yet',
       currentReading: (val: number | string, unit?: string) => `Current: ${val} ${unit || ''}`.trim(),
-      targetReference: (target: string) => `Target: ${target}`
+      targetReference: (target: string) => `Target: ${target}`,
+      milestonePeriod: 'milestone period:',
+      dragHint: 'drag split slider horizontally to inspect morphological progression',
+      overheadStandard: 'study protocol standardized 30cm overhead alignment',
+      baselineAlt: 'Baseline Day 1 assessment',
+      milestoneAlt: (day: number) => `Day ${day} milestone assessment`,
+      sliderAria: 'Split slider comparison percentage',
+      dayPill: (day: number, hasLog: boolean) => `day ${day} ${hasLog ? '✓' : ''}`.trim(),
+      previewBadge: ' (preview)',
+      dayTooltip: (day: number) => `Day ${day}`
     }
   },
   policyLedger: {
