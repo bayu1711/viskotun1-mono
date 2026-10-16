@@ -163,6 +163,7 @@ Return a JSON object conforming strictly to:
 
 export async function extractPaperProtocol(input: ExtractInput): Promise<ExtractResult> {
   const sourceName = input.file ? input.file.name : input.url || input.text || 'uploaded-document.pdf';
+
   const apiKey = process.env.GEMINI_API_KEY;
 
   // 1. Resolve live policy from Cloud Firestore Guardrail Ledger
@@ -321,3 +322,6 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
     source: sourceName
   };
 }
+
+export const extractPaperRoutine = extractPaperProtocol;
+

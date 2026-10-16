@@ -7,8 +7,8 @@
  */
 
 import { getFirestore } from './guardrailLedger';
-import { SAMPLE_PAPERS, PRECALIBRATED_SAMPLE_PROTOCOLS, type SamplePaper } from '../data/samplePapers';
-import type { Protocol, StoredPaper } from '../types/protocol';
+import { SAMPLE_PAPERS, PRECALIBRATED_SAMPLE_PROTOCOLS, PRECALIBRATED_SAMPLE_ROUTINES, type SamplePaper } from '../data/samplePapers';
+import type { Routine, Protocol, StoredPaper } from '../types/routine';
 
 export const PAPERS_COLLECTION = 'papers';
 

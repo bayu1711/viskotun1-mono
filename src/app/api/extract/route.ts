@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { extractPaperProtocol } from '../../../server/geminiExtraction';
-import { saveCanonicalProtocol } from '../../../server/protocolRegistry';
+import { extractPaperRoutine } from '../../../server/geminiExtraction';
+import { saveCanonicalRoutine } from '../../../server/routineRegistry';
 import { COPY } from '../../../data/copy';
 
 export async function POST(request: Request) {
@@ -26,13 +26,15 @@ export async function POST(request: Request) {
       }
     }
 
-    const result = await extractPaperProtocol({ file, url, text });
+    const result = await extractPaperRoutine({ file, url, text });
 
-    if (result.success && result.protocol) {
-      const { protocol: canonicalProtocol, isNew } = await saveCanonicalProtocol(result.protocol);
+    if (result.success && (result.routine || result.protocol)) {
+      const targetRoutine = (result.routine || result.protocol)!;
+      const { protocol: canonicalRoutine, isNew } = await saveCanonicalRoutine(targetRoutine);
       return NextResponse.json({
         ...result,
-        protocol: canonicalProtocol,
+        routine: canonicalRoutine,
+        protocol: canonicalRoutine,
         isExistingCanonical: !isNew
       });
     }

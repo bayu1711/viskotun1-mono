@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSamplePapers, savePaper, getUserPapers, seedSamplePapersIfEmpty } from '../../../server/papersStorage';
 import { COPY } from '../../../data/copy';
-import type { StoredPaper } from '../../../types/protocol';
+import type { StoredPaper } from '../../../types/routine';
 
 export async function GET(request: Request) {
   try {

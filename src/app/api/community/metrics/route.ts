@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCommunityMetrics } from '../../../../server/protocolRegistry';
+import { getCommunityMetrics } from '../../../../server/routineRegistry';
 import { COPY } from '../../../../data/copy';
 
 export const dynamic = 'force-dynamic';

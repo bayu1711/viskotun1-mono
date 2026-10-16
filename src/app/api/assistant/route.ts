@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { answerFor } from '../../../utils/assistant';
 import { COPY } from '../../../data/copy';
-import type { Protocol } from '../../../types/protocol';
+import type { Routine, Protocol } from '../../../types/routine';
 import { getEffectiveGuardrails } from '@/server/guardrailLedger';
 
 export async function POST(request: Request) {
@@ -10,6 +10,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       question,
+      routineTitle,
       protocolTitle,
       shortTitle,
       faqs,
@@ -20,18 +21,20 @@ export async function POST(request: Request) {
       paper
     } = body;
 
+    const resolvedTitle = routineTitle || protocolTitle || 'Study';
+
     if (!question) {
       return NextResponse.json({ error: COPY.api.assistant.questionRequired }, { status: 400 });
     }
 
     const activePolicy = await getEffectiveGuardrails();
 
-    const systemInstruction = `You are a clinical study safety assistant for the research paper protocol "${protocolTitle || 'Study'}".
+    const systemInstruction = `You are a clinical study safety assistant for the research paper routine "${resolvedTitle}".
 Clinical Policy Standard (v${activePolicy.version}):
 - Clinical Advisory: ${activePolicy.clinicalDisclaimer}
 - Safety Lockout: If the user reports symptom/pain intensity exceeding ${activePolicy.painEscalationThreshold}/10, escalation must be paused with a ${activePolicy.loadReductionPercent}% load reduction recommendation.
 Context from the paper:
-Protocol: ${protocolTitle || 'Active Protocol'}
+Routine: ${resolvedTitle}
 Steps: ${JSON.stringify(steps || [])}
 Contraindications: ${JSON.stringify(contraindications || [])}
 Progression Rules: ${JSON.stringify(progressionRules || [])}
@@ -96,17 +99,17 @@ Instructions:
       }
     }
 
-    // 3. Dynamic local fallback matching using full protocol context
+    // 3. Dynamic local fallback matching using full routine context
     const proto = {
-      title: protocolTitle || 'Study',
-      shortTitle: shortTitle || protocolTitle || 'this protocol',
+      title: resolvedTitle,
+      shortTitle: shortTitle || resolvedTitle || 'this routine',
       faqs: Array.isArray(faqs) ? faqs : [],
       contraindications: Array.isArray(contraindications) ? contraindications : [],
       steps: Array.isArray(steps) ? steps : [],
       progressionRules: Array.isArray(progressionRules) ? progressionRules : [],
       feedbackMetric,
       paper
-    } as unknown as Protocol;
+    } as unknown as Routine;
 
     const answer = answerFor(proto, question);
     return NextResponse.json({

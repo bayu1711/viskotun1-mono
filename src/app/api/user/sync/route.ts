@@ -1,23 +1,27 @@
 import { NextResponse } from 'next/server';
-import type { Protocol, ProtocolRuntime } from '../../../../types/protocol';
+import type { Routine, RoutineRuntime, Protocol, ProtocolRuntime } from '../../../../types/routine';
 import { getFirestore } from '../../../../server/guardrailLedger';
-import { saveCanonicalProtocol } from '../../../../server/protocolRegistry';
+import { saveCanonicalRoutine } from '../../../../server/routineRegistry';
 import { COPY } from '../../../../data/copy';
 
 interface UserSyncPayload {
   userId: string;
+  activeRoutineId?: string;
   activeProtocolId?: string;
-  protocols: Protocol[];
-  runtime: Record<string, ProtocolRuntime>;
+  routines?: Routine[];
+  protocols?: Protocol[];
+  runtime: Record<string, RoutineRuntime>;
 }
 
 // In-memory server-side user store with fail-safe fallback
 const userStorage = new Map<
   string,
   {
+    activeRoutineId?: string;
     activeProtocolId?: string;
+    routines: Routine[];
     protocols: Protocol[];
-    runtime: Record<string, ProtocolRuntime>;
+    runtime: Record<string, RoutineRuntime>;
     updatedAt: number;
   }
 >();
@@ -25,15 +29,20 @@ const userStorage = new Map<
 export async function POST(request: Request) {
   try {
     const body: UserSyncPayload = await request.json();
-    const { userId, activeProtocolId, protocols, runtime } = body;
+    const { userId, activeRoutineId, activeProtocolId, routines, protocols, runtime } = body;
 
     if (!userId) {
       return NextResponse.json({ error: COPY.api.userSync.userIdRequired }, { status: 400 });
     }
 
+    const resolvedActiveId = activeRoutineId || activeProtocolId;
+    const resolvedRoutines = routines || protocols || [];
+
     const payload = {
-      activeProtocolId,
-      protocols: protocols || [],
+      activeRoutineId: resolvedActiveId,
+      activeProtocolId: resolvedActiveId,
+      routines: resolvedRoutines,
+      protocols: resolvedRoutines,
       runtime: runtime || {},
       updatedAt: Date.now()
     };
@@ -45,10 +54,10 @@ export async function POST(request: Request) {
       try {
         await db.collection('users').doc(userId).set(payload, { merge: true });
 
-        // Ensure each protocol is registered canonically in Firestore
-        if (protocols && protocols.length > 0) {
-          for (const proto of protocols) {
-            await saveCanonicalProtocol(proto).catch(() => {});
+        // Ensure each routine is registered canonically in Firestore
+        if (resolvedRoutines.length > 0) {
+          for (const routine of resolvedRoutines) {
+            await saveCanonicalRoutine(routine).catch(() => {});
           }
         }
       } catch (firestoreErr: any) {
@@ -59,7 +68,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       syncedAt: Date.now(),
-      protocolCount: (protocols || []).length
+      routineCount: resolvedRoutines.length,
+      protocolCount: resolvedRoutines.length
     });
   } catch (error) {
     console.error('User sync error:', error);
@@ -83,10 +93,14 @@ export async function GET(request: Request) {
         if (doc.exists) {
           const data = doc.data();
           if (data) {
+            const resolvedActiveId = data.activeRoutineId || data.activeProtocolId;
+            const resolvedRoutines = data.routines || data.protocols || [];
             return NextResponse.json({
               found: true,
-              activeProtocolId: data.activeProtocolId,
-              protocols: data.protocols,
+              activeRoutineId: resolvedActiveId,
+              activeProtocolId: resolvedActiveId,
+              routines: resolvedRoutines,
+              protocols: resolvedRoutines,
               runtime: data.runtime,
               updatedAt: data.updatedAt
             });
@@ -101,6 +115,7 @@ export async function GET(request: Request) {
     if (!data) {
       return NextResponse.json({
         found: false,
+        routines: [],
         protocols: [],
         runtime: {}
       });
@@ -108,8 +123,10 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       found: true,
-      activeProtocolId: data.activeProtocolId,
-      protocols: data.protocols,
+      activeRoutineId: data.activeRoutineId || data.activeProtocolId,
+      activeProtocolId: data.activeRoutineId || data.activeProtocolId,
+      routines: data.routines || data.protocols,
+      protocols: data.routines || data.protocols,
       runtime: data.runtime,
       updatedAt: data.updatedAt
     });

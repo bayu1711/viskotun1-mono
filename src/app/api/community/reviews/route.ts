@@ -3,9 +3,9 @@ import {
   getCommunityReviews,
   addCommunityReview,
   getCommunityMetrics
-} from '../../../../server/protocolRegistry';
+} from '../../../../server/routineRegistry';
 import { COPY } from '../../../../data/copy';
-import type { ReviewOutcome } from '../../../../types/protocol';
+import type { ReviewOutcome } from '../../../../types/routine';
 
 export const dynamic = 'force-dynamic';
 
