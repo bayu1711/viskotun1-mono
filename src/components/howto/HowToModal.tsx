@@ -25,7 +25,7 @@ import { PillButton } from '../ui/PillButton';
 type HowToTab = 'guide' | 'samples' | 'scope';
 
 export function HowToModal() {
-  const { isHowToOpen, closeHowTo, loadSampleProtocol, activeProtocolId } = useProtocol();
+  const { isHowToOpen, closeHowTo, loadSampleProtocol, activeProtocolId, samplePapers, sampleSource } = useProtocol();
   const [activeTab, setActiveTab] = useState<HowToTab>('guide');
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -157,12 +157,26 @@ export function HowToModal() {
               {activeTab === 'samples' && (
                 <div className="space-y-5">
                   <div className="space-y-1">
-                    <h3 className="text-sm font-medium lowercase text-ink">{COPY.howTo.samplesTitle}</h3>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="text-sm font-medium lowercase text-ink">{COPY.howTo.samplesTitle}</h3>
+                      <span
+                        className={cn(
+                          'rounded-full px-2.5 py-0.5 text-2xs font-medium lowercase border',
+                          sampleSource === 'firestore-live'
+                            ? 'border-mint/60 bg-mint/20 text-ink'
+                            : 'border-ink/10 bg-canvas text-ink/60'
+                        )}
+                      >
+                        {sampleSource === 'firestore-live'
+                          ? COPY.howTo.firestoreSyncLive
+                          : COPY.howTo.firestoreSyncLocal}
+                      </span>
+                    </div>
                     <p className="text-xs lowercase text-ink/60">{COPY.howTo.samplesSubtitle}</p>
                   </div>
 
                   <div className="space-y-4">
-                    {SAMPLE_PAPERS.map((paper) => {
+                    {(samplePapers && samplePapers.length > 0 ? samplePapers : SAMPLE_PAPERS).map((paper) => {
                       const isPrecalibrated = Boolean(paper.protocolId);
                       const isActive = paper.protocolId === activeProtocolId;
                       const isRejectionTest = Boolean(paper.isGuardrailRejectionTest);

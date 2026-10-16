@@ -4,7 +4,7 @@ import { AuthContext } from '../contexts/AuthContext';
 import { DEFAULT_CONFIRMATION_SCORE, FEEDBACK_ESCALATION_THRESHOLD } from '../data/config';
 import { COPY } from '../data/copy';
 import { initialQueuedPapers, protocols as initialProtocols, sampleProtocols } from '../data/protocols';
-import { PRECALIBRATED_SAMPLE_PROTOCOLS } from '../data/samplePapers';
+import { PRECALIBRATED_SAMPLE_PROTOCOLS, SAMPLE_PAPERS, type SamplePaper } from '../data/samplePapers';
 import type {
   ChatMessage,
   DataCollectionField,
@@ -12,6 +12,7 @@ import type {
   NewChatMessage,
   Protocol,
   ProtocolRuntime,
+  ProtocolStep,
   ProtocolSummary,
   QueuedPaper
 } from '../types/protocol';
@@ -55,13 +56,24 @@ function buildMessage(message: NewChatMessage): ChatMessage {
   return { ...message, id: message.id ?? createId('msg'), timestamp: nowLabel() };
 }
 
-const STORAGE_KEY_PROTOCOLS = 'protocol_engine_protocols_v1';
-const STORAGE_KEY_ACTIVE_ID = 'protocol_engine_active_id_v1';
-const STORAGE_KEY_RUNTIME = 'protocol_engine_runtime_v1';
+const STORAGE_VERSION = 'v2';
+const STORAGE_KEY_PREFIX = `protocol_engine_${STORAGE_VERSION}`;
+
+function getStorageKeys(userId?: string) {
+  const scope = userId ? `usr_${userId}` : 'guest';
+  return {
+    protocols: `${STORAGE_KEY_PREFIX}_${scope}_protocols`,
+    activeId: `${STORAGE_KEY_PREFIX}_${scope}_active_id`,
+    runtime: `${STORAGE_KEY_PREFIX}_${scope}_runtime`
+  };
+}
 
 /** All protocol session state + actions. Only raw state is stored; metrics are derived on render. */
 export function useProtocolState() {
   const auth = useContext(AuthContext);
+  const isAuthenticated = auth?.isAuthenticated;
+  const userId = auth?.user?.id;
+
   const [protocolList, setProtocolList] = useState<Protocol[]>(initialProtocols);
   const [activeProtocolId, setActiveProtocol] = useState<string>(initialProtocols[0]?.id ?? '');
   const [queuedPapers, setQueuedPapers] = useState<QueuedPaper[]>(initialQueuedPapers);
@@ -72,37 +84,81 @@ export function useProtocolState() {
   const [hasHydrated, setHasHydrated] = useState(false);
   const [hasRemoteHydrated, setHasRemoteHydrated] = useState(false);
 
-  // Safe client hydration from localStorage
+  // Dynamic sample research papers pulled from Firebase Firestore
+  const [samplePapers, setSamplePapers] = useState<SamplePaper[]>(SAMPLE_PAPERS);
+  const [sampleProtocolsMap, setSampleProtocolsMap] = useState<Record<string, Protocol>>(PRECALIBRATED_SAMPLE_PROTOCOLS);
+  const [sampleSource, setSampleSource] = useState<'firestore-live' | 'memory-cache'>('memory-cache');
+
+  // Pull sample papers from Firebase Firestore on startup
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchFirebaseSamplePapers() {
+      try {
+        const res = await fetch('/api/papers?type=samples');
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted) {
+            if (Array.isArray(data.samplePapers) && data.samplePapers.length > 0) {
+              setSamplePapers(data.samplePapers);
+            }
+            if (data.protocols && typeof data.protocols === 'object') {
+              setSampleProtocolsMap((prev) => ({ ...prev, ...data.protocols }));
+            }
+            if (data.source) {
+              setSampleSource(data.source);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[useProtocolState] Could not fetch sample papers from Firebase, using baseline:', err);
+      }
+    }
+
+    fetchFirebaseSamplePapers();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Safe client hydration from scoped localStorage and legacy cleanup
   useEffect(() => {
     let isMounted = true;
     try {
-      const savedActiveId = window.localStorage.getItem(STORAGE_KEY_ACTIVE_ID);
-      const savedProtocolsRaw = window.localStorage.getItem(STORAGE_KEY_PROTOCOLS);
-      const savedRuntimeRaw = window.localStorage.getItem(STORAGE_KEY_RUNTIME);
+      // Clean up legacy v1 storage keys that may contain old default pre-seeded papers
+      window.localStorage.removeItem('protocol_engine_protocols_v1');
+      window.localStorage.removeItem('protocol_engine_active_id_v1');
+      window.localStorage.removeItem('protocol_engine_runtime_v1');
 
-      let loadedProtocols = initialProtocols;
+      const keys = getStorageKeys(isAuthenticated ? userId : undefined);
+      const savedProtocolsRaw = window.localStorage.getItem(keys.protocols);
+      const savedActiveId = window.localStorage.getItem(keys.activeId);
+      const savedRuntimeRaw = window.localStorage.getItem(keys.runtime);
+
+      let loadedProtocols: Protocol[] = [];
       if (savedProtocolsRaw) {
         try {
-          const parsed: Protocol[] = JSON.parse(savedProtocolsRaw);
-          if (Array.isArray(parsed) && parsed.length > 0) {
+          const parsed = JSON.parse(savedProtocolsRaw);
+          if (Array.isArray(parsed)) {
             loadedProtocols = parsed;
             if (isMounted) {
               setProtocolList(loadedProtocols);
             }
           }
         } catch (err) {
-          console.error('[useProtocolState] Failed parsing saved protocols:', err);
+          console.error('[useProtocolState] Failed parsing scoped protocols:', err);
+        }
+      } else {
+        if (isMounted) {
+          setProtocolList([]);
         }
       }
 
       if (savedActiveId && loadedProtocols.some((p) => p.id === savedActiveId)) {
-        if (isMounted) {
-          setActiveProtocol(savedActiveId);
-        }
+        if (isMounted) setActiveProtocol(savedActiveId);
       } else if (loadedProtocols.length > 0) {
-        if (isMounted) {
-          setActiveProtocol(loadedProtocols[0].id);
-        }
+        if (isMounted) setActiveProtocol(loadedProtocols[0].id);
+      } else {
+        if (isMounted) setActiveProtocol('');
       }
 
       if (savedRuntimeRaw) {
@@ -110,32 +166,15 @@ export function useProtocolState() {
           const parsedRuntime = JSON.parse(savedRuntimeRaw);
           if (parsedRuntime && typeof parsedRuntime === 'object') {
             if (isMounted) {
-              setRuntime((prev) => {
-                const merged = { ...prev };
-                for (const [key, val] of Object.entries(parsedRuntime)) {
-                  if (val && typeof val === 'object') {
-                    merged[key] = {
-                      ...(prev[key] ?? {
-                        setsDone: {},
-                        feedbackLogs: [],
-                        morphingLogs: [],
-                        messages: [],
-                        escalationPaused: false,
-                        assistantTyping: false
-                      }),
-                      ...(val as ProtocolRuntime),
-                      feedbackLogs: (val as ProtocolRuntime).feedbackLogs ?? [],
-                      morphingLogs: (val as ProtocolRuntime).morphingLogs ?? [],
-                      assistantTyping: false
-                    };
-                  }
-                }
-                return merged;
-              });
+              setRuntime(parsedRuntime);
             }
           }
         } catch (err) {
-          console.error('[useProtocolState] Failed parsing saved runtime:', err);
+          console.error('[useProtocolState] Failed parsing scoped runtime:', err);
+        }
+      } else {
+        if (isMounted) {
+          setRuntime({});
         }
       }
     } catch (err) {
@@ -149,25 +188,22 @@ export function useProtocolState() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [isAuthenticated, userId]);
 
-  // Persist changes to localStorage once hydrated
+  // Persist changes to scoped localStorage once hydrated
   useEffect(() => {
     if (!hasHydrated) return;
+    const keys = getStorageKeys(isAuthenticated ? userId : undefined);
     try {
-      window.localStorage.setItem(STORAGE_KEY_PROTOCOLS, JSON.stringify(protocolList));
-      window.localStorage.setItem(STORAGE_KEY_ACTIVE_ID, activeProtocolId);
-      window.localStorage.setItem(STORAGE_KEY_RUNTIME, JSON.stringify(runtime));
+      window.localStorage.setItem(keys.protocols, JSON.stringify(protocolList));
+      window.localStorage.setItem(keys.activeId, activeProtocolId);
+      window.localStorage.setItem(keys.runtime, JSON.stringify(runtime));
     } catch (err) {
       console.error('[useProtocolState] LocalStorage write error:', err);
     }
-  }, [protocolList, activeProtocolId, runtime, hasHydrated]);
+  }, [protocolList, activeProtocolId, runtime, hasHydrated, isAuthenticated, userId]);
 
-  // Sync to backend for authenticated users
-  const isAuthenticated = auth?.isAuthenticated;
-  const userId = auth?.user?.id;
-
-  // Fetch cloud state on initial authentication
+  // Fetch cloud state when authenticating as a signed-in user
   useEffect(() => {
     let isMounted = true;
     if (!isAuthenticated || !userId) {
@@ -180,15 +216,51 @@ export function useProtocolState() {
         const res = await fetch(`/api/user/sync?userId=${encodeURIComponent(userId!)}`);
         if (res.ok) {
           const data = await res.json();
-          if (isMounted && data.found) {
-            if (Array.isArray(data.protocols) && data.protocols.length > 0) {
-              setProtocolList(data.protocols);
-            }
-            if (data.activeProtocolId) {
-              setActiveProtocol(data.activeProtocolId);
-            }
-            if (data.runtime && typeof data.runtime === 'object') {
-              setRuntime((prev) => ({ ...prev, ...data.runtime }));
+          if (isMounted) {
+            if (data.found && Array.isArray(data.protocols) && data.protocols.length > 0) {
+              // Sanitize legacy auto-synced default papers if user never made active progress on them
+              const isLegacyAutoSynced =
+                data.protocols.length === 3 &&
+                data.protocols.every((p: Protocol) =>
+                  ['achilles', 'hair-loss', 'creatine-sleep'].includes(p.id)
+                ) &&
+                (!data.runtime ||
+                  Object.keys(data.runtime).every((k) => {
+                    const r = data.runtime[k];
+                    return !r?.feedbackLogs?.length && !r?.morphingLogs?.length;
+                  }));
+
+              if (isLegacyAutoSynced) {
+                // Start with a clean onboarding slate and clean up remote record
+                setProtocolList([]);
+                setActiveProtocol('');
+                setRuntime({});
+                fetch('/api/user/sync', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    userId,
+                    activeProtocolId: '',
+                    protocols: [],
+                    runtime: {}
+                  })
+                }).catch(() => {});
+              } else {
+                setProtocolList(data.protocols);
+                if (data.activeProtocolId) {
+                  setActiveProtocol(data.activeProtocolId);
+                } else {
+                  setActiveProtocol(data.protocols[0]?.id ?? '');
+                }
+                if (data.runtime && typeof data.runtime === 'object') {
+                  setRuntime(data.runtime);
+                }
+              }
+            } else {
+              // Brand new user: clean slate with 0 papers pre-selected
+              setProtocolList([]);
+              setActiveProtocol('');
+              setRuntime({});
             }
           }
         }
@@ -231,59 +303,78 @@ export function useProtocolState() {
   }, [protocolList, activeProtocolId, runtime, hasHydrated, isAuthenticated, userId, hasRemoteHydrated]);
 
   const resetToDefaults = useCallback(() => {
+    const keys = getStorageKeys(isAuthenticated ? userId : undefined);
     try {
-      window.localStorage.removeItem(STORAGE_KEY_PROTOCOLS);
-      window.localStorage.removeItem(STORAGE_KEY_ACTIVE_ID);
-      window.localStorage.removeItem(STORAGE_KEY_RUNTIME);
+      window.localStorage.removeItem(keys.protocols);
+      window.localStorage.removeItem(keys.activeId);
+      window.localStorage.removeItem(keys.runtime);
     } catch (err) {
       console.error('[useProtocolState] Error clearing localStorage:', err);
     }
 
-    setProtocolList(initialProtocols);
-    setActiveProtocol(initialProtocols[0]?.id ?? '');
+    setProtocolList([]);
+    setActiveProtocol('');
     setQueuedPapers(initialQueuedPapers);
-    setRuntime(createInitialRuntime(initialProtocols));
+    setRuntime({});
+
+    if (isAuthenticated && userId) {
+      fetch('/api/user/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          activeProtocolId: '',
+          protocols: [],
+          runtime: {}
+        })
+      }).catch(() => {});
+    }
+
     toast.success(COPY.demo.resetSuccess);
-  }, []);
+  }, [isAuthenticated, userId]);
 
   const openHowTo = useCallback(() => setIsHowToOpen(true), []);
   const closeHowTo = useCallback(() => setIsHowToOpen(false), []);
 
-  const loadSampleProtocol = useCallback((sampleId: string) => {
-    const sample =
-      PRECALIBRATED_SAMPLE_PROTOCOLS[sampleId] ||
-      sampleProtocols.find((p) => p.id === sampleId);
-    if (!sample) {
-      toast.error(`Sample protocol "${sampleId}" not found`);
-      return;
-    }
+  const loadSampleProtocol = useCallback(
+    (sampleId: string) => {
+      const sample =
+        sampleProtocolsMap[sampleId] ||
+        PRECALIBRATED_SAMPLE_PROTOCOLS[sampleId] ||
+        sampleProtocols.find((p) => p.id === sampleId);
+      if (!sample) {
+        toast.error(`Sample protocol "${sampleId}" not found`);
+        return;
+      }
 
-    setProtocolList((prev) => {
-      const exists = prev.some((p) => p.id === sample.id);
-      if (exists) return prev;
-      return [...prev, sample];
-    });
+      setProtocolList((prev) => {
+        const exists = prev.some((p) => p.id === sample.id);
+        if (exists) return prev;
+        return [...prev, sample];
+      });
 
-    setActiveProtocol(sample.id);
+      setActiveProtocol(sample.id);
 
-    setRuntime((prev) => {
-      if (prev[sample.id]) return prev;
-      return {
-        ...prev,
-        [sample.id]: {
-          setsDone: { ...(sample.initialSetsDone ?? {}) },
-          feedbackLogs: sample.initialFeedbackLogs ?? [],
-          morphingLogs: sample.initialMorphingLogs ?? [],
-          messages: sample.initialMessages ?? [],
-          escalationPaused: false,
-          assistantTyping: false
-        }
-      };
-    });
+      setRuntime((prev) => {
+        if (prev[sample.id]) return prev;
+        return {
+          ...prev,
+          [sample.id]: {
+            setsDone: { ...(sample.initialSetsDone ?? {}) },
+            feedbackLogs: sample.initialFeedbackLogs ?? [],
+            morphingLogs: sample.initialMorphingLogs ?? [],
+            messages: sample.initialMessages ?? [],
+            escalationPaused: false,
+            assistantTyping: false
+          }
+        };
+      });
 
-    setIsHowToOpen(false);
-    toast.success(COPY.howTo.loadedToast(sample.shortTitle || sample.title));
-  }, []);
+      setIsHowToOpen(false);
+      toast.success(COPY.howTo.loadedToast(sample.shortTitle || sample.title));
+    },
+    [sampleProtocolsMap]
+  );
 
   const protocol = (protocolList.find((item) => item.id === activeProtocolId) ?? protocolList[0]) || null;
   const state: ProtocolRuntime = protocol && runtime[protocol.id]
@@ -680,6 +771,36 @@ export function useProtocolState() {
 
         if (result.eligible && result.protocol) {
           addProtocol(result.protocol);
+
+          // Persist uploaded paper to unified Firebase papers collection
+          fetch('/api/papers', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              paper: {
+                id: result.protocol.id,
+                title: result.protocol.paper?.title || result.protocol.title,
+                shortTitle: result.protocol.shortTitle,
+                domain: result.protocol.phase || 'Clinical Research',
+                category: 'rehab',
+                authors: result.protocol.paper?.authors || 'Unknown Authors',
+                journal: result.protocol.paper?.journal || 'Clinical Trial',
+                year: result.protocol.paper?.year || new Date().getFullYear(),
+                doi: result.protocol.paper?.doi || '',
+                openAccessUrl: result.protocol.paper?.doi ? `https://doi.org/${result.protocol.paper?.doi}` : '',
+                pdfUrl: typeof source === 'string' ? source : '',
+                summary: result.protocol.steps?.map((s: ProtocolStep) => s.action).join('. ') || '',
+                featuresTested: result.protocol.steps?.map((s: ProtocolStep) => s.action) || [],
+                protocolId: result.protocol.id,
+                isSample: false,
+                userId: userId || 'guest'
+              },
+              protocol: result.protocol
+            })
+          }).catch((err) => {
+            console.warn('[uploadPaper] Could not persist to Firebase papers collection:', err);
+          });
+
           setQueuedPapers((prev) => prev.filter((p) => p.id !== queuedId));
           updateRuntime(targetProtocolId, (prev) => ({
             ...prev,
@@ -717,7 +838,7 @@ export function useProtocolState() {
         toast.error(COPY.extraction.errorGeneral);
       }
     },
-    [protocol?.id, addProtocol, pushMessages, updateRuntime]
+    [protocol?.id, addProtocol, pushMessages, updateRuntime, userId]
   );
 
   const openFeedbackDrawer = useCallback((fieldId?: string) => {
@@ -802,6 +923,8 @@ export function useProtocolState() {
       openHowTo,
       closeHowTo,
       loadSampleProtocol,
+      samplePapers,
+      sampleSource,
       isStepComplete,
       incrementSet,
       decrementSet,
@@ -844,6 +967,8 @@ export function useProtocolState() {
       openHowTo,
       closeHowTo,
       loadSampleProtocol,
+      samplePapers,
+      sampleSource,
       isStepComplete,
       incrementSet,
       decrementSet,
