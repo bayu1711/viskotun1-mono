@@ -157,7 +157,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                   <span>•</span>
                   <span>{protocol.paper.trialType}</span>
                   <span>•</span>
-                  <span>Sample Size: N = {protocol.paper.sampleSize}</span>
+                  <span>{COPY.shareableSummary.sampleSize(protocol.paper.sampleSize)}</span>
                   <div className="ml-auto flex gap-1">
                     {protocol.paper.evidenceBadges.map((badge) => (
                       <EvidenceBadgeChip key={badge} badge={badge} />
@@ -169,13 +169,13 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
               {/* Key Adherence & Metric Badges */}
               <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4 print:grid-cols-4">
                 <div className="rounded-tile border border-ink/10 bg-canvas/40 p-3 print:bg-white">
-                  <p className="text-2xs lowercase text-ink/50">Timeline Progress</p>
+                  <p className="text-2xs lowercase text-ink/50">{COPY.shareableSummary.timelineProgress}</p>
                   <p className="mt-1 text-lg font-bold text-ink">
                     Day {currentDay} <span className="text-xs font-normal text-ink/50">/ {totalDays}</span>
                   </p>
                 </div>
                 <div className="rounded-tile border border-ink/10 bg-cream/30 p-3 print:bg-white">
-                  <p className="text-2xs lowercase text-ink/50">Adherence Rate</p>
+                  <p className="text-2xs lowercase text-ink/50">{COPY.shareableSummary.adherenceRate}</p>
                   <p className="mt-1 text-lg font-bold text-ink">
                     {adherenceRate}%{' '}
                     <span className="text-xs font-normal text-ink/60 capitalize">
@@ -184,15 +184,19 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                   </p>
                 </div>
                 <div className="rounded-tile border border-ink/10 bg-mint/30 p-3 print:bg-white">
-                  <p className="text-2xs lowercase text-ink/50">Consistency Streak</p>
+                  <p className="text-2xs lowercase text-ink/50">{COPY.shareableSummary.consistencyStreak}</p>
                   <p className="mt-1 text-lg font-bold text-ink">
-                    {streak} {streak === 1 ? 'day' : 'days'}
+                    {streak} {COPY.shareableSummary.dayUnit(streak)}
                   </p>
                 </div>
                 <div className="rounded-tile border border-ink/10 bg-canvas/40 p-3 print:bg-white">
-                  <p className="text-2xs lowercase text-ink/50">Progression Gate</p>
+                  <p className="text-2xs lowercase text-ink/50">{COPY.shareableSummary.progressionGate}</p>
                   <p className="mt-1 text-sm font-semibold capitalize text-ink">
-                    {status === 'paused' ? '⚠️ Escalation Paused' : status === 'ready' ? '✓ Ready to Advance' : 'Holding Load'}
+                    {status === 'paused'
+                      ? COPY.shareableSummary.statusPaused
+                      : status === 'ready'
+                      ? COPY.shareableSummary.statusReady
+                      : COPY.shareableSummary.statusHolding}
                   </p>
                 </div>
               </div>
@@ -213,7 +217,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                           <p className="font-semibold text-ink">{step.action}</p>
                           {step.inferred && (
                             <span className="rounded bg-cream px-1.5 py-0.2 text-3xs font-medium text-ink">
-                              conservative baseline
+                              {COPY.shareableSummary.conservativeBaseline}
                             </span>
                           )}
                         </div>
@@ -234,31 +238,31 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
               <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 print:grid-cols-2">
                 <div className="rounded-tile border border-ink/15 p-4 bg-canvas/30 print:bg-white">
                   <h4 className="text-2xs font-mono uppercase tracking-wider text-ink/60">
-                    Progression Rule
+                    {COPY.shareableSummary.progressionRuleHeading}
                   </h4>
                   {progressionRule ? (
                     <p className="mt-1 text-xs text-ink">
-                      <span className="font-medium">Condition:</span> {progressionRule.condition}
+                      <span className="font-medium">{COPY.shareableSummary.conditionLabel}</span> {progressionRule.condition}
                       <br />
-                      <span className="font-medium">Action:</span> {progressionRule.action}
+                      <span className="font-medium">{COPY.shareableSummary.actionLabel}</span> {progressionRule.action}
                     </p>
                   ) : (
-                    <p className="mt-1 text-xs text-ink/50">Follow standardized clinical duration.</p>
+                    <p className="mt-1 text-xs text-ink/50">{COPY.shareableSummary.standardDurationFallback}</p>
                   )}
                 </div>
 
                 <div className="rounded-tile border border-ink/15 p-4 bg-blush/20 print:bg-white">
                   <h4 className="text-2xs font-mono uppercase tracking-wider text-danger">
-                    Safety & Stop Rules
+                    {COPY.shareableSummary.safetyRulesHeading}
                   </h4>
                   {stopRule ? (
                     <p className="mt-1 text-xs text-ink">
-                      <span className="font-semibold text-danger">Stop immediately if:</span>{' '}
+                      <span className="font-semibold text-danger">{COPY.shareableSummary.stopImmediatelyIf}</span>{' '}
                       {stopRule.text}
                     </p>
                   ) : (
                     <p className="mt-1 text-xs text-ink/60">
-                      Standard clinical monitoring; pause if severe discomfort occurs.
+                      {COPY.shareableSummary.standardMonitoringFallback}
                     </p>
                   )}
                 </div>

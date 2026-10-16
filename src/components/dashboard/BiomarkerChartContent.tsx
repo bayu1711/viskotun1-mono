@@ -12,6 +12,7 @@ import {
   YAxis
 } from 'recharts';
 import { CHART_MARGIN, CHART_TICK_FONT_SIZE } from '../../data/config';
+import { COPY } from '../../data/copy';
 
 export interface BiomarkerDataPoint {
   day: number;
@@ -40,7 +41,9 @@ function CustomTooltip({ active, payload, label, unit }: CustomTooltipProps) {
 
   return (
     <div className="rounded-card border border-ink/15 bg-white p-2.5 shadow-md">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-ink/50">Day {label}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-ink/50">
+        {COPY.morphing.dashboard.dayTooltip(Number(label))}
+      </p>
       <p className="mt-0.5 text-sm font-medium text-ink">
         {val} {unit || ''}
       </p>

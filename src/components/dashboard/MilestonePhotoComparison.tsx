@@ -82,7 +82,7 @@ export function MilestonePhotoComparison() {
 
       {/* Milestone Day Switcher */}
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium text-ink/50">milestone period:</span>
+        <span className="text-xs font-medium text-ink/50">{COPY.morphing.dashboard.milestonePeriod}</span>
         {milestoneDays
           .filter((day) => day > 1)
           .map((day) => {
@@ -101,7 +101,7 @@ export function MilestonePhotoComparison() {
                     : 'bg-canvas text-ink/70 hover:bg-ink/10'
                 }`}
               >
-                day {day} {hasLog ? '✓' : ''}
+                {COPY.morphing.dashboard.dayPill(day, hasLog)}
               </button>
             );
           })}
@@ -113,7 +113,7 @@ export function MilestonePhotoComparison() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={milestoneSrc}
-          alt={`Day ${selectedMilestoneDay} milestone assessment`}
+          alt={COPY.morphing.dashboard.milestoneAlt(selectedMilestoneDay)}
           className="absolute inset-0 h-full w-full object-cover"
         />
 
@@ -125,7 +125,7 @@ export function MilestonePhotoComparison() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={baselineSrc}
-            alt="Baseline Day 1 assessment"
+            alt={COPY.morphing.dashboard.baselineAlt}
             className="absolute inset-0 h-full max-w-none object-cover"
             style={{ width: '100%', minWidth: '100%', height: '100%' }}
           />
@@ -168,7 +168,7 @@ export function MilestonePhotoComparison() {
           max={100}
           value={sliderPos}
           onChange={(e) => setSliderPos(Number(e.target.value))}
-          aria-label="Split slider comparison percentage"
+          aria-label={COPY.morphing.dashboard.sliderAria}
           className="absolute inset-0 h-full w-full cursor-ew-resize opacity-0"
         />
 
@@ -178,13 +178,13 @@ export function MilestonePhotoComparison() {
         </div>
         <div className="pointer-events-none absolute top-3 right-3 rounded-full bg-ink/80 px-3 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
           {COPY.morphing.dashboard.currentLabel(selectedMilestoneDay)}
-          {isSimulated && ' (preview)'}
+          {isSimulated && COPY.morphing.dashboard.previewBadge}
         </div>
       </div>
 
       <div className="mt-3 flex items-center justify-between text-[11px] text-ink/50">
-        <span>drag split slider horizontally to inspect morphological progression</span>
-        <span>study protocol standardized 30cm overhead alignment</span>
+        <span>{COPY.morphing.dashboard.dragHint}</span>
+        <span>{COPY.morphing.dashboard.overheadStandard}</span>
       </div>
     </Panel>
   );
