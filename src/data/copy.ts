@@ -2,6 +2,21 @@ import { LOAD_REDUCTION_PERCENT } from './config';
 
 /** Centralized UI copy. Protocol-specific content lives in data/protocols. */
 export const COPY = {
+  metadata: {
+    title: 'Protocol Engine // AI Research & Health Protocols',
+    description:
+      'An AI-powered digital experience transforming complex peer-reviewed research papers into executable, adaptive, and personalized protocols.',
+    keywords: [
+      'health protocols',
+      'AI research extraction',
+      'clinical trials',
+      'personalized medicine',
+      'rehabilitation'
+    ],
+    openGraphTitle: 'Protocol Engine // AI Research & Health Protocols',
+    openGraphDescription:
+      'Transforming complex research papers into executable daily routines with an adaptive AI safety assistant.'
+  },
   brand: {
     mark: '//',
     name: 'protocol engine',
@@ -252,6 +267,7 @@ export const COPY = {
     nextStep: 'next step',
     prevStep: 'previous step',
     speed: (rate: number) => `${rate}x speed`,
+    speedDisplay: (rate: number) => `${rate}x`,
     soundOn: 'sound cues on',
     soundMuted: 'sound cues muted',
     techNote: 'web speech + timer cues',
@@ -261,6 +277,18 @@ export const COPY = {
     stepAnnouncement: (stepNum: number, total: number, title: string, details: string) =>
       `Step ${stepNum} of ${total}: ${title}. ${details}`,
     safetyReminder: (rule: string) => `Safety reminder: ${rule}`,
+    secondsRemaining: '10 seconds remaining.',
+    readyToBegin: 'Ready to begin.',
+    script: {
+      timedHoldDetail: (sets: number, seconds: number, detail: string) =>
+        `${sets} sets with a ${seconds} second hold. ${detail}.`,
+      repsDetail: (sets: number, reps: number, detail: string) =>
+        `${sets} sets of ${reps} repetitions. ${detail}.`,
+      dosageDetail: (sets: number, unit: string, dose: string, detail: string) =>
+        `${sets} ${unit}${dose}. ${detail}.`,
+      defaultDosesUnit: 'doses',
+      prescribedTempo: (tempo: string) => ` Prescribed tempo is ${tempo}.`
+    },
     holdCountdownStart: (seconds: number) => `Begin hold for ${seconds} seconds. 3, 2, 1, start.`,
     holdFinished: 'Hold complete. Relax.',
     finishedAllSteps: 'Great work! You have completed all prescribed protocol steps for today.',
@@ -331,7 +359,8 @@ export const COPY = {
       onDeviceBadge: 'on-device (0ms · private)',
       cloudBadge: 'cloud AI',
       localBadge: 'offline matcher',
-      activeEngineLabel: 'ai engine:'
+      activeEngineLabel: 'ai engine:',
+      onDeviceGemmaSource: 'On-Device Gemma (Chrome Built-in AI)'
     },
     backToToday: 'back to today',
     meta: {
@@ -403,7 +432,15 @@ export const COPY = {
       'This paper appears to be theoretical physics, mathematics, or cosmology without human subject testing. Protocol Engine is specialized for human clinical, rehabilitation, and lifestyle interventions.',
     errorTitle: 'extraction failed',
     errorGeneral:
-      'Could not extract a protocol from this document. Please verify it is an interventional study or try another PDF.'
+      'Could not extract a protocol from this document. Please verify it is an interventional study or try another PDF.',
+    protocolReady: (title: string) => `Protocol ready: ${title}`,
+    failedWithStatus: (status: number) => `Extraction failed with HTTP ${status}`,
+    matchedBannedKeyword: (keyword: string, version: string) =>
+      `Paper declined: Matched restricted non-human / theoretical policy criterion ("${keyword}"). Protocol Engine enforces interventional human science only per clinical policy v${version}.`,
+    declinedAnimalReason:
+      'Declined: Non-human animal or in-vitro study. Protocol Engine specializes strictly in interventional studies with human participants (clinical rehab, pharmacology, nutrition, sleep, cognitive habits).',
+    declinedTheoreticalReason:
+      'Declined: Theoretical physics, mathematics, or non-interventional topic. Protocol Engine only builds executable protocols from interventional studies conducted on human participants.'
   },
   landing: {
     badge: 'google ai builder cup · media & digital experiences',
@@ -518,6 +555,13 @@ export const COPY = {
     dailyTag: 'Daily Metric',
     saveEntry: 'Save measurement to protocol',
     savedToast: (name: string) => `${name} recorded successfully`,
+    values: {
+      present: 'Present',
+      absent: 'Absent',
+      photoAttached: 'Clinical Photo Attached',
+      fieldConfirmation: (fieldName: string, day: number, displayVal: string) =>
+        `${fieldName} recorded for Day ${day} (${displayVal}).`
+    },
     widgets: {
       evaluationRule: 'Evaluation Rule: ',
       measurementCriteria: 'Measurement Criteria: ',
@@ -607,12 +651,14 @@ export const COPY = {
       'Policies resolve dynamically from Cloud Firestore across all Gemini extraction calls, Edge Gemma sessions, and client load-reduction triggers without container redeployment.',
     thresholdLabel: 'Adverse Escalation Threshold',
     thresholdDesc: 'Progression freezes when patient discomfort exceeds this level',
+    thresholdDisplay: (threshold: number) => `${threshold} / 10`,
     mildLabel: '1 (mild)',
     severeLabel: '10 (severe)',
     reductionLabel: 'Recommended Load Reduction',
     reductionDesc: 'Training load / dose reduction applied when threshold is exceeded',
     reductionMinLabel: '10%',
     reductionMaxLabel: '50%',
+    loadReductionDisplay: (reduction: number) => `${reduction}%`,
     bannedLabel: 'Automated Gatekeeper Banned Criteria',
     bannedDesc: 'Studies matching these keywords are immediately rejected by Gemini',
     syncActive: 'Live Cloud Firestore sync active',
@@ -627,5 +673,37 @@ export const COPY = {
     toastNetworkError: 'Network error updating policy ledger',
     toastReset: 'Guardrails reset to baseline clinical standards',
     toastResetError: 'Failed to reset guardrails'
+  },
+  api: {
+    guardrails: {
+      retrieveError: 'Failed to retrieve guardrail policy ledger status',
+      invalidThreshold: 'painEscalationThreshold must be a number between 1 and 10',
+      invalidReduction: 'loadReductionPercent must be a percentage between 5 and 90',
+      updatedSuccess: 'Clinical guardrail policy ledger updated successfully',
+      updateError: 'Failed to update guardrail policy',
+      resetSuccess: 'Guardrail policy ledger reset to baseline clinical standards',
+      resetError: 'Failed to reset guardrail policy'
+    },
+    assistant: {
+      questionRequired: 'Question is required',
+      internalError: 'Internal Server Error'
+    },
+    extract: {
+      inputRequired: 'PDF file or paper URL/DOI is required',
+      fileSizeExceeded: 'File size exceeds maximum limit of 20MB',
+      invalidFormat: 'Invalid file format. Only PDF files are supported.',
+      internalError: 'Internal Server Error during extraction'
+    },
+    tts: {
+      invalidJson: 'Invalid JSON payload',
+      textRequired: 'The "text" field is required and must be a non-empty string.',
+      textExceeded: (max: number) => `Text length exceeds maximum allowed limit of ${max} characters.`,
+      synthesisFailed: 'Failed to process speech synthesis request.'
+    },
+    userSync: {
+      userIdRequired: 'User ID is required',
+      internalError: 'Internal Server Error during user sync',
+      fetchError: 'Internal Server Error fetching user sync'
+    }
   }
 } as const;
