@@ -1,9 +1,12 @@
+export type UserRole = 'admin' | 'user';
+
 export interface User {
   id: string;
   name: string;
   email: string;
   initials: string;
   isGuest: boolean;
+  role?: UserRole;
   avatarUrl?: string;
   createdAt: number;
 }
@@ -13,9 +16,11 @@ export interface AuthState {
   isLoading: boolean;
   isAuthenticated: boolean;
   isGuest: boolean;
+  isAdmin: boolean;
   loginAsGuest: () => void;
-  loginWithEmail: (email: string, password?: string) => Promise<void>;
+  loginAsAdmin: () => void;
+  loginWithEmail: (email: string, password?: string, asAdmin?: boolean) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
-  signupWithEmail: (name: string, email: string, password?: string) => Promise<void>;
+  signupWithEmail: (name: string, email: string, password?: string, asAdmin?: boolean) => Promise<void>;
   logout: () => void;
 }
