@@ -1,6 +1,6 @@
 import React from 'react';
 import { COPY } from '../../../data/copy';
-import type { AIEngineType } from '../../../types/protocol';
+import type { AIEngineType } from '../../../types/routine';
 
 interface AnswerBubbleProps {
   content: string;

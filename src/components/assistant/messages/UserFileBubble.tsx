@@ -1,6 +1,6 @@
 import React from 'react';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import type { ChatMessage } from '../../../types/protocol';
+import type { ChatMessage } from '../../../types/routine';
 import { Icon } from '../../ui/Icon';
 import { IconTile } from '../../ui/IconTile';
 
