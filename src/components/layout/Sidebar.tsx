@@ -7,7 +7,7 @@ import { TodaySummaryCard } from './TodaySummaryCard';
 export function Sidebar() {
   return (
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-ink/10 px-7 py-8 lg:flex">
-      <Link href={ROUTES.landing} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+      <Link href={ROUTES.routine} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
         <span aria-hidden="true" className="text-xl font-medium italic tracking-tighter">
           {COPY.brand.mark}
         </span>

@@ -21,7 +21,7 @@ export function AuthView({ mode }: AuthViewProps) {
   const [activeMode, setActiveMode] = useState<'login' | 'signup'>(mode);
   const isLogin = activeMode === 'login';
   const router = useRouter();
-  const { loginWithEmail, loginWithGoogle, signupWithEmail, loginAsGuest } = useAuth();
+  const { isAuthenticated, loginWithEmail, loginWithGoogle, signupWithEmail, loginAsGuest } = useAuth();
 
   useEffect(() => {
     setActiveMode(mode);
@@ -30,6 +30,12 @@ export function AuthView({ mode }: AuthViewProps) {
   useEffect(() => {
     router.prefetch(ROUTES.routine);
   }, [router]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace(ROUTES.routine);
+    }
+  }, [isAuthenticated, router]);
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

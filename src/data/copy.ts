@@ -505,6 +505,11 @@ export const COPY = {
     ctaGuest: 'try as guest (instant demo)',
     ctaLogin: 'sign in with account',
     ctaSignup: 'create account',
+    ctaGoToApp: 'go to your plan',
+    ctaContinueAsUser: (name: string) => `continue as ${name}`,
+    ctaSignOut: 'sign out',
+    loggedInBadge: (name: string) => `signed in as ${name}`,
+    guestBadge: 'guest session',
     scopeBadge: 'strictly interventional human research',
     scopeNote:
       'We validate clinical trials, rehabilitation plans, nutrition, sleep, and pharmacology. Pure theory, non-human animal models, and observational studies are safely filtered out.',

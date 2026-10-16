@@ -14,22 +14,25 @@ import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
 import { COPY } from '../data/copy';
 import { ROUTES } from '../data/navigation';
+import { Avatar } from '../components/ui/Avatar';
 import { Icon } from '../components/ui/Icon';
 import { PillButton } from '../components/ui/PillButton';
 
 export function LandingPage() {
   const router = useRouter();
-  const { loginAsGuest } = useAuth();
+  const { user, isLoading, loginAsGuest, logout } = useAuth();
   const [isNavigating, setIsNavigating] = useState(false);
 
   useEffect(() => {
     router.prefetch(ROUTES.routine);
   }, [router]);
 
-  const handleLaunchGuest = () => {
+  const handleLaunch = () => {
     setIsNavigating(true);
-    loginAsGuest();
-    toast.info(COPY.auth.toastGuestEntered);
+    if (!user) {
+      loginAsGuest();
+      toast.info(COPY.auth.toastGuestEntered);
+    }
     router.push(ROUTES.routine);
   };
 
@@ -57,17 +60,43 @@ export function LandingPage() {
             </a>
           </nav>
 
-          <div className="flex items-center gap-3">
-            <Link
-              href={ROUTES.login}
-              className="text-xs lowercase font-medium text-ink/70 hover:text-ink px-3 py-1.5 transition-colors"
-            >
-              {COPY.landing.ctaLogin}
-            </Link>
-            <PillButton size="sm" onClick={handleLaunchGuest} loading={isNavigating}>
-              {COPY.landing.ctaGuest}
-            </PillButton>
-          </div>
+          {!isLoading && user ? (
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Avatar initials={user.initials} />
+                <div className="hidden sm:block text-left leading-tight">
+                  <p className="text-xs font-medium lowercase text-ink">{user.name}</p>
+                  <p className="text-2xs lowercase text-ink/50">
+                    {user.isGuest ? COPY.auth.guestBadge : (user.email || COPY.auth.cloudSyncedBadge)}
+                  </p>
+                </div>
+              </div>
+              <PillButton size="sm" onClick={handleLaunch} loading={isNavigating}>
+                {COPY.landing.ctaGoToApp}
+              </PillButton>
+              <button
+                type="button"
+                onClick={logout}
+                className="text-xs lowercase text-ink/60 hover:text-ink transition-colors px-2 py-1 focus:outline-none focus-visible:underline"
+              >
+                {COPY.auth.signOut}
+              </button>
+            </div>
+          ) : !isLoading ? (
+            <div className="flex items-center gap-3">
+              <Link
+                href={ROUTES.login}
+                className="text-xs lowercase font-medium text-ink/70 hover:text-ink px-3 py-1.5 transition-colors"
+              >
+                {COPY.landing.ctaLogin}
+              </Link>
+              <PillButton size="sm" onClick={handleLaunch} loading={isNavigating}>
+                {COPY.landing.ctaGuest}
+              </PillButton>
+            </div>
+          ) : (
+            <div className="h-9 w-28 animate-pulse rounded-full bg-ink/5" />
+          )}
         </div>
       </header>
 
@@ -78,6 +107,15 @@ export function LandingPage() {
           {COPY.landing.badge}
         </div>
 
+        {user && (
+          <div className="mt-4 block">
+            <span className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-mint/50 px-3.5 py-1 text-2xs lowercase font-medium text-ink">
+              <span className="h-1.5 w-1.5 rounded-full bg-ink" aria-hidden="true" />
+              <span>{COPY.landing.loggedInBadge(user.name)}</span>
+            </span>
+          </div>
+        )}
+
         <h1 className="mt-6 text-4xl font-normal lowercase tracking-tight text-ink sm:text-5xl lg:text-6xl">
           {COPY.landing.heroTitle}
         </h1>
@@ -87,15 +125,23 @@ export function LandingPage() {
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <PillButton size="lg" onClick={handleLaunchGuest} loading={isNavigating} className="gap-2 text-sm">
-            <span>{COPY.landing.ctaGuest}</span>
+          <PillButton size="lg" onClick={handleLaunch} loading={isNavigating} className="gap-2 text-sm">
+            <span>{user ? COPY.landing.ctaGoToApp : COPY.landing.ctaGuest}</span>
             <Icon icon={ArrowForwardIcon} size="sm" />
           </PillButton>
-          <Link href={ROUTES.signup}>
-            <PillButton variant="outline" size="lg" className="text-sm">
-              {COPY.landing.ctaSignup}
-            </PillButton>
-          </Link>
+          {user ? (
+            <Link href={ROUTES.dashboard}>
+              <PillButton variant="outline" size="lg" className="text-sm">
+                {COPY.nav.stats}
+              </PillButton>
+            </Link>
+          ) : (
+            <Link href={ROUTES.signup}>
+              <PillButton variant="outline" size="lg" className="text-sm">
+                {COPY.landing.ctaSignup}
+              </PillButton>
+            </Link>
+          )}
         </div>
 
         {/* Scope Guardrail Callout */}
@@ -232,8 +278,8 @@ export function LandingPage() {
               {COPY.landing.demoSubtitle}
             </p>
             <div className="mt-6 flex justify-center">
-              <PillButton variant="inverse" size="lg" onClick={handleLaunchGuest} loading={isNavigating} className="text-sm">
-                {COPY.landing.ctaGuest}
+              <PillButton variant="inverse" size="lg" onClick={handleLaunch} loading={isNavigating} className="text-sm">
+                {user ? COPY.landing.ctaGoToApp : COPY.landing.ctaGuest}
               </PillButton>
             </div>
           </div>
@@ -245,8 +291,17 @@ export function LandingPage() {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 sm:flex-row lg:px-8">
           <p>{COPY.landing.footerTagline}</p>
           <div className="flex items-center gap-4">
-            <Link href={ROUTES.login} className="hover:text-ink">{COPY.landing.footerSignIn}</Link>
-            <Link href={ROUTES.signup} className="hover:text-ink">{COPY.landing.footerCreateAccount}</Link>
+            {user ? (
+              <>
+                <Link href={ROUTES.routine} className="hover:text-ink">{COPY.landing.ctaGoToApp}</Link>
+                <button type="button" onClick={logout} className="hover:text-ink">{COPY.auth.signOut}</button>
+              </>
+            ) : (
+              <>
+                <Link href={ROUTES.login} className="hover:text-ink">{COPY.landing.footerSignIn}</Link>
+                <Link href={ROUTES.signup} className="hover:text-ink">{COPY.landing.footerCreateAccount}</Link>
+              </>
+            )}
             <a
               href="https://github.com/bayu1711/viskotun1-mono"
               target="_blank"
