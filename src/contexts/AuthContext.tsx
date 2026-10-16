@@ -26,6 +26,8 @@ function formatFirebaseAuthError(err: unknown): Error {
   if (typeof err === 'object' && err !== null && 'code' in err) {
     const code = String((err as { code: unknown }).code);
     switch (code) {
+      case 'auth/operation-not-allowed':
+        return new Error(COPY.auth.toastOperationNotAllowed);
       case 'auth/email-already-in-use':
         return new Error(COPY.auth.toastEmailInUse);
       case 'auth/invalid-email':

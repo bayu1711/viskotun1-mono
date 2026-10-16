@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import clsx from 'clsx';
 import GoogleIcon from '@mui/icons-material/Google';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { toast } from 'sonner';
@@ -17,9 +18,14 @@ interface AuthViewProps {
 }
 
 export function AuthView({ mode }: AuthViewProps) {
-  const isLogin = mode === 'login';
+  const [activeMode, setActiveMode] = useState<'login' | 'signup'>(mode);
+  const isLogin = activeMode === 'login';
   const router = useRouter();
   const { loginWithEmail, loginWithGoogle, signupWithEmail, loginAsGuest } = useAuth();
+
+  useEffect(() => {
+    setActiveMode(mode);
+  }, [mode]);
 
   useEffect(() => {
     router.prefetch(ROUTES.routine);
@@ -88,6 +94,30 @@ export function AuthView({ mode }: AuthViewProps) {
       </Link>
 
       <div className="w-full max-w-md rounded-card border border-ink/15 bg-white p-7 shadow-sm sm:p-8">
+        {/* Mode Switcher Tabs */}
+        <div className="mb-6 flex rounded-full border border-ink/10 bg-canvas p-1">
+          <button
+            type="button"
+            onClick={() => setActiveMode('login')}
+            className={clsx(
+              'flex-1 rounded-full py-1.5 text-xs lowercase font-medium transition-colors',
+              isLogin ? 'bg-white text-ink shadow-2xs' : 'text-ink/60 hover:text-ink'
+            )}
+          >
+            {COPY.auth.tabSignIn}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveMode('signup')}
+            className={clsx(
+              'flex-1 rounded-full py-1.5 text-xs lowercase font-medium transition-colors',
+              !isLogin ? 'bg-white text-ink shadow-2xs' : 'text-ink/60 hover:text-ink'
+            )}
+          >
+            {COPY.auth.tabCreateAccount}
+          </button>
+        </div>
+
         <div className="text-center">
           <h1 className="text-2xl font-normal lowercase tracking-tight">
             {isLogin ? COPY.auth.loginTitle : COPY.auth.signupTitle}
@@ -185,13 +215,21 @@ export function AuthView({ mode }: AuthViewProps) {
       {/* Switch between Login and Signup */}
       <p className="mt-6 text-xs lowercase text-ink/60">
         {isLogin ? (
-          <Link href={ROUTES.signup} className="hover:text-ink underline underline-offset-2">
+          <button
+            type="button"
+            onClick={() => setActiveMode('signup')}
+            className="hover:text-ink underline underline-offset-2"
+          >
             {COPY.auth.needAccount}
-          </Link>
+          </button>
         ) : (
-          <Link href={ROUTES.login} className="hover:text-ink underline underline-offset-2">
+          <button
+            type="button"
+            onClick={() => setActiveMode('login')}
+            className="hover:text-ink underline underline-offset-2"
+          >
             {COPY.auth.haveAccount}
-          </Link>
+          </button>
         )}
       </p>
     </div>
