@@ -1,7 +1,7 @@
-import type { Protocol } from '../types/protocol';
-import { achillesProtocol } from './protocols/achilles';
-import { hairLossProtocol } from './protocols/hairLoss';
-import { FALLBACK_CREATINE_SLEEP } from '../server/fallbackProtocols';
+import type { Routine, Protocol } from '../types/routine';
+import { achillesProtocol } from './routines/achilles';
+import { hairLossProtocol } from './routines/hairLoss';
+import { FALLBACK_CREATINE_SLEEP } from '../server/fallbackRoutines';
 
 export interface SamplePaper {
   id: string;
@@ -18,7 +18,8 @@ export interface SamplePaper {
   pdfUrl: string;
   summary: string;
   featuresTested: string[];
-  protocolId?: string; // Pre-calibrated protocol available for instant 1-click loading
+  routineId?: string; // Pre-calibrated routine available for instant 1-click loading
+  protocolId?: string; // Pre-calibrated protocol available for instant 1-click loading (alias)
   isGuardrailRejectionTest?: boolean;
 }
 
@@ -44,6 +45,7 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
       '0–10 Tendon discomfort slider',
       'Dynamic 20% load reduction when threshold exceeded'
     ],
+    routineId: 'achilles',
     protocolId: 'achilles'
   },
   {
@@ -67,6 +69,7 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
       'Morphing split photo comparison visualizer',
       'Scalp irritation & erythema biofeedback'
     ],
+    routineId: 'hair-loss',
     protocolId: 'hair-loss'
   },
   {
@@ -90,6 +93,7 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
       'Stanford Sleepiness scale (multichoice chip selector)',
       'GI distress biofeedback & split dose rule'
     ],
+    routineId: 'creatine-sleep',
     protocolId: 'creatine-sleep'
   },
   {
@@ -150,7 +154,7 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     openAccessUrl: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8465477/',
     pdfUrl: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8465477/pdf/41598_2021_98555-5.pdf',
     summary:
-      'Preclinical in vivo study in mice evaluating hypertrophy from weighted wheel pulling. Used to test the Protocol Engine AI safety gatekeeper.',
+      'Preclinical in vivo study in mice evaluating hypertrophy from weighted wheel pulling. Used to test the ViskotuN1 AI safety gatekeeper.',
     featuresTested: [
       'Triggers automated Gatekeeper rejection',
       'Firestore Policy Ledger keyword detection (rodent / mouse)',
@@ -160,8 +164,10 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
   }
 ];
 
-export const PRECALIBRATED_SAMPLE_PROTOCOLS: Record<string, Protocol> = {
+export const PRECALIBRATED_SAMPLE_ROUTINES: Record<string, Routine> = {
   achilles: achillesProtocol,
   'hair-loss': hairLossProtocol,
   'creatine-sleep': FALLBACK_CREATINE_SLEEP
 };
+
+export const PRECALIBRATED_SAMPLE_PROTOCOLS: Record<string, Protocol> = PRECALIBRATED_SAMPLE_ROUTINES;
