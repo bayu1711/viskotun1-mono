@@ -485,6 +485,7 @@ export const COPY = {
     defaultClinicalUser: 'Verified Clinical User',
     defaultGoogleUser: 'Google User',
     googleResearcher: 'Google Researcher',
+    defaultInvestigator: 'Clinical Investigator',
     toastValidEmail: 'please enter a valid email address.',
     toastPasswordRequired: 'please enter a password.',
     toastEmailInUse: 'an account with this email already exists.',
