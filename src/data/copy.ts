@@ -90,7 +90,11 @@ export const COPY = {
       customMessage ||
       `${name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Symptom'} threshold exceeded. Escalation paused. Recommendation: Reduce load/dose by ${LOAD_REDUCTION_PERCENT}% tomorrow or consult your specialist.`,
     escalationShort: `escalation paused — load/dose reduced ${LOAD_REDUCTION_PERCENT}% for tomorrow`,
-    pausedRecommendation: `Paused — reduce load/dose by ${LOAD_REDUCTION_PERCENT}% tomorrow.`
+    pausedRecommendation: `Paused — reduce load/dose by ${LOAD_REDUCTION_PERCENT}% tomorrow.`,
+    clinicalDisclaimer:
+      'Medical Disclaimer: Protocol Engine provides educational protocol extraction grounded strictly in human interventional clinical literature. It does not provide medical diagnosis, prescription, or replace personalized clinical supervision from a licensed physician or physical therapist.',
+    baselineEscalationAlert:
+      `Pain threshold exceeded. Escalation paused. Recommendation: Reduce load by ${LOAD_REDUCTION_PERCENT}% tomorrow or consult your therapist.`
   },
   calendar: {
     listLabel: 'Protocol day history',
@@ -148,6 +152,8 @@ export const COPY = {
     targetStatLabel: 'target:',
     perSetHold: (seconds: number) => `× ${seconds}s hold`,
     perSetReps: (reps: number) => `× ${reps} reps`,
+    singleUnitPerSet: (label: string) => `× 1 ${label}`,
+    singleUnitStat: (label: string) => `1 ${label}`,
     holdValue: (seconds: number) => `${seconds}s`,
     holdSummary: (seconds: number) => `${seconds}s hold`,
     repsSummary: (reps: number) => `${reps} reps`
