@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Protocol Engine — Seed GitHub Issues & Action Items (Granular Slices)
+# ViskotuN1 — Seed GitHub Issues & Action Items (Granular Slices)
 # ==============================================================================
 # Usage:
 #   1. Sign in to GitHub CLI: gh auth login
@@ -11,7 +11,7 @@ set -euo pipefail
 
 REPO="bayu1711/viskotun1-mono"
 
-echo "=== Protocol Engine: Granular GitHub Issue Sync ==="
+echo "=== ViskotuN1: Granular GitHub Issue Sync ==="
 
 if ! gh auth status >/dev/null 2>&1; then
   echo "Error: You are not authenticated with GitHub CLI."

@@ -1,5 +1,5 @@
 # ==============================================================================
-# Protocol Engine — Multi-Stage Production Dockerfile
+# ViskotuN1 — Multi-Stage Production Dockerfile
 # Optimized for Google Cloud Run (Next.js 14 Standalone Mode)
 # ==============================================================================
 
