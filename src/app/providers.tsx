@@ -6,7 +6,7 @@ import { AppShell } from '../components/layout/AppShell';
 import { AssistantProvider } from '../contexts/AssistantContext';
 import { AuthProvider } from '../contexts/AuthContext';
 import { PolicyLedgerProvider } from '../contexts/PolicyLedgerContext';
-import { ProtocolProvider } from '../contexts/ProtocolContext';
+import { RoutineProvider } from '../contexts/RoutineContext';
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -15,14 +15,14 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <AuthProvider>
-      <ProtocolProvider missingDataFlagEnabled={true}>
+      <RoutineProvider missingDataFlagEnabled={true}>
         <AssistantProvider>
           <PolicyLedgerProvider>
             <AppShell>{children}</AppShell>
             <Toaster position="top-center" />
           </PolicyLedgerProvider>
         </AssistantProvider>
-      </ProtocolProvider>
+      </RoutineProvider>
     </AuthProvider>
   );
 }
