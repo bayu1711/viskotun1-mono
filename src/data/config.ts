@@ -1,3 +1,5 @@
+import { COPY } from './copy';
+
 /** Subjective feedback & safety score configuration */
 export const FEEDBACK_SCORE_MIN = 0;
 export const FEEDBACK_SCORE_MAX = 10;
@@ -11,12 +13,12 @@ export const DEFAULT_CONFIRMATION_SCORE = 1;
 
 /** Default feedback metric when paper omits custom subjective measures */
 export const DEFAULT_FEEDBACK_METRIC = {
-  name: 'biofeedback',
-  label: 'symptom / exertion score',
-  eyebrow: 'feedback',
-  logTitle: 'log check-in',
-  minLabel: '0 · none',
-  maxLabel: '10 · severe',
+  name: COPY.feedbackDrawer.defaultMetric.name,
+  label: COPY.feedbackDrawer.defaultMetric.label,
+  eyebrow: COPY.feedbackDrawer.defaultMetric.eyebrow,
+  logTitle: COPY.feedbackDrawer.defaultMetric.logTitle,
+  minLabel: COPY.feedbackDrawer.defaultMetric.minLabel,
+  maxLabel: COPY.feedbackDrawer.defaultMetric.maxLabel,
   maxScore: FEEDBACK_SCORE_MAX,
   escalationThreshold: FEEDBACK_ESCALATION_THRESHOLD
 } as const;

@@ -557,20 +557,20 @@ export function generateFallbackProtocol(source: string): Protocol {
     title: cleanTitle,
     shortTitle: cleanTitle.split(' ').slice(0, 2).join(' ').toLowerCase(),
     icon: 'science',
-    phase: 'Phase 1: Week 1–2',
-    phaseLabel: 'week 1',
+    phase: COPY.fallbackProtocol.phase,
+    phaseLabel: COPY.fallbackProtocol.phaseLabel,
     totalDays: 14,
     currentDay: 1,
     streak: 1,
     paper: {
       title: cleanTitle,
       fileName: source.endsWith('.pdf') ? source : `${slug}.pdf`,
-      authors: 'Research Collaborative & Clinical Investigators',
+      authors: COPY.fallbackProtocol.authors,
       year: 2024,
-      journal: 'Journal of Interventional Human Science',
+      journal: COPY.fallbackProtocol.journal,
       doi: `10.1016/j.jihs.${slug.slice(0, 8)}`,
       sampleSize: 44,
-      trialType: 'Randomized Controlled Trial',
+      trialType: COPY.fallbackProtocol.trialType,
       evidenceBadges: ['rct', 'missing-parameters'],
       pages: 10
     },
@@ -579,26 +579,25 @@ export function generateFallbackProtocol(source: string): Protocol {
         id: `${slug}-1`,
         tone: 'ink',
         icon: 'science',
-        action: 'Primary Prescribed Intervention',
-        detail: 'Standardized experimental dosage/repetition protocol under controlled observation.',
+        action: COPY.fallbackProtocol.step1Action,
+        detail: COPY.fallbackProtocol.step1Detail,
         sets: 1,
         reps: 1,
-        frequency: '1x Daily',
-        setLabel: 'dose / round',
-        perSetLabel: '1 protocol round',
-        statLabel: 'target:',
-        statValue: '1 daily session'
+        frequency: COPY.fallbackProtocol.step1Frequency,
+        setLabel: COPY.fallbackProtocol.step1SetLabel,
+        perSetLabel: COPY.fallbackProtocol.step1PerSetLabel,
+        statLabel: COPY.fallbackProtocol.step1StatLabel,
+        statValue: COPY.fallbackProtocol.step1StatValue
       },
       {
         id: `${slug}-2`,
         tone: 'cream',
         icon: 'timer',
-        action: 'Sustained Adaptation Hold',
-        detail:
-          'Authors reported adaptation timing without specifying exact hold duration. Conservative 30s baseline applied.',
+        action: COPY.fallbackProtocol.step2Action,
+        detail: COPY.fallbackProtocol.step2Detail,
         sets: 3,
         reps: 1,
-        frequency: '1x Daily',
+        frequency: COPY.fallbackProtocol.step2Frequency,
         durationSeconds: 30,
         inferred: true
       }
@@ -606,31 +605,31 @@ export function generateFallbackProtocol(source: string): Protocol {
     progressionRules: [
       {
         id: `${slug}-rule-1`,
-        condition: 'Compliance rate ≥ 85% with adverse symptom score ≤ 2/10 for 5 consecutive days',
-        action: 'Progress load or duration by 10% in Phase 2'
+        condition: COPY.fallbackProtocol.progressionCondition,
+        action: COPY.fallbackProtocol.progressionAction
       }
     ],
     contraindications: [
       {
         id: `${slug}-c-1`,
-        text: 'Stop immediately if sharp acute discomfort or unexpected adverse symptoms occur.',
+        text: COPY.fallbackProtocol.contraindicationText,
         severity: 'stop'
       }
     ],
     missingDataFlags: [
       {
         stepId: `${slug}-2`,
-        parameter: 'Rest interval and hold duration',
-        fallback: 'Conservative baseline: 3 × 30s with 60s recovery'
+        parameter: COPY.fallbackProtocol.missingParameter,
+        fallback: COPY.fallbackProtocol.missingFallback
       }
     ],
     dayHistory: [],
     initialSetsDone: { [`${slug}-1`]: 1, [`${slug}-2`]: 0 },
     feedbackMetric: {
-      name: 'tolerability',
-      label: 'symptom / tolerability',
-      eyebrow: 'symptom',
-      logTitle: 'log',
+      name: COPY.fallbackProtocol.metricName,
+      label: COPY.fallbackProtocol.metricLabel,
+      eyebrow: COPY.fallbackProtocol.eyebrow,
+      logTitle: COPY.fallbackProtocol.logTitle,
       minLabel: COPY.feedbackDrawer.minLabel(0),
       maxLabel: COPY.feedbackDrawer.maxLabel(10),
       maxScore: 10,
@@ -666,7 +665,7 @@ export function generateFallbackProtocol(source: string): Protocol {
       realWorldEfficacy: 76,
       userCount: 320,
       medianAdherence: 78,
-      dropOffUnit: 'day',
+      dropOffUnit: COPY.fallbackProtocol.dropOffUnit,
       peakPeriod: 7,
       dropOff: [
         { period: 1, dropOff: 4 },
@@ -674,25 +673,24 @@ export function generateFallbackProtocol(source: string): Protocol {
         { period: 7, dropOff: 35 },
         { period: 14, dropOff: 10 }
       ],
-      insightLead: 'Common drop-off peak at Day 7',
-      insightRest: 'due to habit formation fatigue. Keep your sets consistent.',
+      insightLead: COPY.community.fallbackInsightLead,
+      insightRest: COPY.community.fallbackInsightRest,
       reviews: [
         {
           id: `${slug}-rev-1`,
-          handle: 'Participant · 30M',
+          handle: COPY.community.fallbackReviewHandle,
           day: 7,
           outcome: 'improved',
-          text: 'Noticeable progression by strictly adhering to the daily prescribed sets.',
+          text: COPY.community.fallbackReviewText,
           adherence: 90
         }
       ]
     },
     faqs: [
       {
-        question: 'what is the evidence grade for this protocol?',
+        question: COPY.assistant.fallbackFaqQuestion,
         keywords: ['evidence', 'grade', 'rct', 'trial'],
-        answer:
-          'The paper was evaluated as a randomized human intervention trial. Inferred parameters are explicitly flagged in the protocol.'
+        answer: COPY.assistant.fallbackFaqAnswer
       }
     ]
   };

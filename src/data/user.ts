@@ -1,4 +1,3 @@
-export const currentUser = {
-  name: 'Alex Rivera',
-  initials: 'ar'
-};
+import { COPY } from './copy';
+
+export const currentUser = COPY.auth.currentUser;

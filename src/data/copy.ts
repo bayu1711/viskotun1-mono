@@ -1,4 +1,4 @@
-import { LOAD_REDUCTION_PERCENT } from './config';
+const DEFAULT_LOAD_REDUCTION_PERCENT = 20;
 
 /** Centralized UI copy. Protocol-specific content lives in data/protocols. */
 export const COPY = {
@@ -88,16 +88,16 @@ export const COPY = {
     logFeedback: (name?: string) => (name ? `log ${name}` : 'log feedback')
   },
   safety: {
-    escalationAlert: `Feedback threshold exceeded. Escalation paused. Recommendation: Reduce load/dose by ${LOAD_REDUCTION_PERCENT}% tomorrow or consult a specialist.`,
+    escalationAlert: `Feedback threshold exceeded. Escalation paused. Recommendation: Reduce load/dose by ${DEFAULT_LOAD_REDUCTION_PERCENT}% tomorrow or consult a specialist.`,
     dynamicEscalationAlert: (name?: string, customMessage?: string) =>
       customMessage ||
-      `${name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Symptom'} threshold exceeded. Escalation paused. Recommendation: Reduce load/dose by ${LOAD_REDUCTION_PERCENT}% tomorrow or consult your specialist.`,
-    escalationShort: `escalation paused — load/dose reduced ${LOAD_REDUCTION_PERCENT}% for tomorrow`,
-    pausedRecommendation: `Paused — reduce load/dose by ${LOAD_REDUCTION_PERCENT}% tomorrow.`,
+      `${name ? name.charAt(0).toUpperCase() + name.slice(1) : 'Symptom'} threshold exceeded. Escalation paused. Recommendation: Reduce load/dose by ${DEFAULT_LOAD_REDUCTION_PERCENT}% tomorrow or consult your specialist.`,
+    escalationShort: `escalation paused — load/dose reduced ${DEFAULT_LOAD_REDUCTION_PERCENT}% for tomorrow`,
+    pausedRecommendation: `Paused — reduce load/dose by ${DEFAULT_LOAD_REDUCTION_PERCENT}% tomorrow.`,
     clinicalDisclaimer:
       'Medical Disclaimer: Protocol Engine provides educational protocol extraction grounded strictly in human interventional clinical literature. It does not provide medical diagnosis, prescription, or replace personalized clinical supervision from a licensed physician or physical therapist.',
     baselineEscalationAlert:
-      `Pain threshold exceeded. Escalation paused. Recommendation: Reduce load by ${LOAD_REDUCTION_PERCENT}% tomorrow or consult your therapist.`
+      `Pain threshold exceeded. Escalation paused. Recommendation: Reduce load by ${DEFAULT_LOAD_REDUCTION_PERCENT}% tomorrow or consult your therapist.`
   },
   calendar: {
     listLabel: 'Protocol day history',
