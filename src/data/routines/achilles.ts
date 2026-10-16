@@ -1,6 +1,6 @@
 import type { Routine, Protocol } from '../../types/routine';
 
-export const achillesProtocol: Routine = {
+export const achillesRoutine: Routine = {
   id: 'achilles',
   title: 'Achilles Tendinopathy Rehab',
   shortTitle: 'achilles rehab',
@@ -153,7 +153,7 @@ export const achillesProtocol: Routine = {
     'Parsed 14 pages and isolated the Methods & Interventions section. Background theory and discussion were ignored.',
     timestamp: '9:02 AM'
   },
-  { id: 'ach-msg-3', role: 'ai', kind: 'protocol', content: 'achilles', timestamp: '9:03 AM' }],
+  { id: 'ach-msg-3', role: 'ai', kind: 'routine', content: 'achilles', timestamp: '9:03 AM' }],
 
   community: {
     studyEfficacy: 80,
@@ -231,4 +231,4 @@ export const achillesProtocol: Routine = {
   ]
 };
 
-export const achillesRoutine = achillesProtocol;
+export const achillesProtocol = achillesRoutine;

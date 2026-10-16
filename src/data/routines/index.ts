@@ -1,7 +1,9 @@
 import type { Routine, Protocol, QueuedPaper } from '../../types/routine';
-import { achillesProtocol, achillesRoutine } from './achilles';
-import { hairLossProtocol, hairLossRoutine } from './hairLoss';
+import { achillesRoutine, achillesProtocol } from './achilles';
+import { hairLossRoutine, hairLossProtocol } from './hairLoss';
 import { FALLBACK_CREATINE_SLEEP } from '../../server/fallbackRoutines';
+
+export { achillesRoutine, achillesProtocol, hairLossRoutine, hairLossProtocol };
 
 /** Pre-calibrated sample routines available on demand via the How-To guide */
 export const sampleRoutines: Routine[] = [

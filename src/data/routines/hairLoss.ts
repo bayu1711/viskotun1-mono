@@ -1,6 +1,6 @@
 import type { Routine, Protocol } from '../../types/routine';
 
-export const hairLossProtocol: Routine = {
+export const hairLossRoutine: Routine = {
   id: 'hair-loss',
   title: 'Androgenetic Alopecia Regrowth',
   shortTitle: 'hair regrowth',
@@ -177,7 +177,7 @@ export const hairLossProtocol: Routine = {
     'Parsed 11 pages and isolated the treatment arm used in the Methods section. All parameters were reported — nothing had to be defaulted.',
     timestamp: 'Sep 21'
   },
-  { id: 'hair-msg-3', role: 'ai', kind: 'protocol', content: 'hair-loss', timestamp: 'Sep 21' }],
+  { id: 'hair-msg-3', role: 'ai', kind: 'routine', content: 'hair-loss', timestamp: 'Sep 21' }],
 
   community: {
     studyEfficacy: 82,
@@ -255,4 +255,4 @@ export const hairLossProtocol: Routine = {
 
 };
 
-export const hairLossRoutine = hairLossProtocol;
+export const hairLossProtocol = hairLossRoutine;

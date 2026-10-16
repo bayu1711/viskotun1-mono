@@ -1,6 +1,6 @@
 import type { Routine, Protocol } from '../types/routine';
-import { achillesProtocol } from './routines/achilles';
-import { hairLossProtocol } from './routines/hairLoss';
+import { achillesRoutine } from './routines/achilles';
+import { hairLossRoutine } from './routines/hairLoss';
 import { FALLBACK_CREATINE_SLEEP } from '../server/fallbackRoutines';
 
 export interface SamplePaper {
@@ -165,8 +165,8 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
 ];
 
 export const PRECALIBRATED_SAMPLE_ROUTINES: Record<string, Routine> = {
-  achilles: achillesProtocol,
-  'hair-loss': hairLossProtocol,
+  achilles: achillesRoutine,
+  'hair-loss': hairLossRoutine,
   'creatine-sleep': FALLBACK_CREATINE_SLEEP
 };
 
