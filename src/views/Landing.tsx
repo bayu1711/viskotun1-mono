@@ -36,18 +36,18 @@ export function LandingPage() {
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-xs font-semibold text-white">
               pe
             </span>
-            <span className="text-lg lowercase font-medium">protocol engine</span>
+            <span className="text-lg lowercase font-medium">{COPY.brand.name}</span>
           </Link>
 
           <nav className="hidden items-center gap-6 text-sm lowercase text-ink/70 md:flex">
             <a href="#how-it-works" className="hover:text-ink transition-colors">
-              how it works
+              {COPY.landing.nav.howItWorks}
             </a>
             <a href="#gatekeeper" className="hover:text-ink transition-colors">
-              scientific gatekeeper
+              {COPY.landing.nav.gatekeeper}
             </a>
             <a href="#features" className="hover:text-ink transition-colors">
-              features
+              {COPY.landing.nav.features}
             </a>
           </nav>
 
@@ -108,8 +108,8 @@ export function LandingPage() {
       <section id="how-it-works" className="border-t border-ink/10 bg-white/50 py-20">
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
           <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-widest text-ink/45">Architecture</p>
-            <h2 className="mt-2 text-3xl lowercase">how protocol engine works</h2>
+            <p className="text-xs font-semibold uppercase tracking-widest text-ink/45">{COPY.landing.architecture}</p>
+            <h2 className="mt-2 text-3xl lowercase">{COPY.landing.architectureTitle}</h2>
           </div>
 
           <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -117,10 +117,10 @@ export function LandingPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cream text-ink">
                 <Icon icon={DescriptionOutlinedIcon} size="md" />
               </div>
-              <p className="mt-4 text-xs font-mono lowercase text-ink/40">Step 01</p>
-              <h3 className="mt-1 text-lg font-medium lowercase">Multimodal Ingestion</h3>
+              <p className="mt-4 text-xs font-mono lowercase text-ink/40">{COPY.landing.steps.step1Number}</p>
+              <h3 className="mt-1 text-lg font-medium lowercase">{COPY.landing.steps.step1Title}</h3>
               <p className="mt-2 text-xs leading-relaxed lowercase text-ink/60">
-                Drop any clinical research PDF. Gemini 1.5 processes document bytes natively without fragile text scraping.
+                {COPY.landing.steps.step1Body}
               </p>
             </div>
 
@@ -128,10 +128,10 @@ export function LandingPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-mint text-ink">
                 <Icon icon={ScienceOutlinedIcon} size="md" />
               </div>
-              <p className="mt-4 text-xs font-mono lowercase text-ink/40">Step 02</p>
-              <h3 className="mt-1 text-lg font-medium lowercase">Scientific Gatekeeper</h3>
+              <p className="mt-4 text-xs font-mono lowercase text-ink/40">{COPY.landing.steps.step2Number}</p>
+              <h3 className="mt-1 text-lg font-medium lowercase">{COPY.landing.steps.step2Title}</h3>
               <p className="mt-2 text-xs leading-relaxed lowercase text-ink/60">
-                Verifies human interventional criteria. Theoretical physics or non-human animal assays are rejected with educational guidance.
+                {COPY.landing.steps.step2Body}
               </p>
             </div>
 
@@ -139,10 +139,10 @@ export function LandingPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blush text-ink">
                 <Icon icon={ShieldOutlinedIcon} size="md" />
               </div>
-              <p className="mt-4 text-xs font-mono lowercase text-ink/40">Step 03</p>
-              <h3 className="mt-1 text-lg font-medium lowercase">Parameter Auditing</h3>
+              <p className="mt-4 text-xs font-mono lowercase text-ink/40">{COPY.landing.steps.step3Number}</p>
+              <h3 className="mt-1 text-lg font-medium lowercase">{COPY.landing.steps.step3Title}</h3>
               <p className="mt-2 text-xs leading-relaxed lowercase text-ink/60">
-                Detects omitted dosages, hold times, or execution parameters. Flags them as conservative clinical baselines with zero hallucinated gaps.
+                {COPY.landing.steps.step3Body}
               </p>
             </div>
 
@@ -150,10 +150,10 @@ export function LandingPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-white">
                 <Icon icon={HealthAndSafetyOutlinedIcon} size="md" />
               </div>
-              <p className="mt-4 text-xs font-mono lowercase text-white/50">Step 04</p>
-              <h3 className="mt-1 text-lg font-medium lowercase">Adaptive Routine & Q&A</h3>
+              <p className="mt-4 text-xs font-mono lowercase text-white/50">{COPY.landing.steps.step4Number}</p>
+              <h3 className="mt-1 text-lg font-medium lowercase">{COPY.landing.steps.step4Title}</h3>
               <p className="mt-2 text-xs leading-relaxed lowercase text-white/70">
-                Executes daily sets, progression rules, safety & biofeedback thresholds, and answers questions strictly cited from the Methods.
+                {COPY.landing.steps.step4Body}
               </p>
             </div>
           </div>
@@ -164,8 +164,8 @@ export function LandingPage() {
       <section id="features" className="py-20">
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
           <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-widest text-ink/45">Capabilities</p>
-            <h2 className="mt-2 text-3xl lowercase">built for clinical rigour</h2>
+            <p className="text-xs font-semibold uppercase tracking-widest text-ink/45">{COPY.landing.capabilities}</p>
+            <h2 className="mt-2 text-3xl lowercase">{COPY.landing.capabilitiesTitle}</h2>
           </div>
 
           <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -237,17 +237,17 @@ export function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-ink/10 bg-canvas py-8 text-center text-xs text-ink/45 lowercase">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 sm:flex-row lg:px-8">
-          <p>protocol engine · interventional human research intelligence</p>
+          <p>{COPY.landing.footerTagline}</p>
           <div className="flex items-center gap-4">
-            <Link href={ROUTES.login} className="hover:text-ink">sign in</Link>
-            <Link href={ROUTES.signup} className="hover:text-ink">create account</Link>
+            <Link href={ROUTES.login} className="hover:text-ink">{COPY.landing.footerSignIn}</Link>
+            <Link href={ROUTES.signup} className="hover:text-ink">{COPY.landing.footerCreateAccount}</Link>
             <a
               href="https://github.com/bayu1711/viskotun1-mono"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-ink underline underline-offset-2"
             >
-              github
+              {COPY.landing.footerGithub}
             </a>
           </div>
         </div>

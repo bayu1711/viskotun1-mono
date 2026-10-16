@@ -75,7 +75,7 @@ export function AuthView({ mode }: AuthViewProps) {
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white">
           pe
         </span>
-        <span className="text-xl lowercase font-medium">protocol engine</span>
+        <span className="text-xl lowercase font-medium">{COPY.brand.name}</span>
       </Link>
 
       <div className="w-full max-w-md rounded-card border border-ink/15 bg-white p-7 shadow-sm sm:p-8">
