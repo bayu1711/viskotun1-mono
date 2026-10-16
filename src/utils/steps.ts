@@ -15,12 +15,12 @@ export function getStepDisplay(step: ProtocolStep): StepDisplay {
   const seconds = step.durationSeconds ?? 0;
   const isTimed = seconds > 0;
   const setLabel = step.setLabel ?? COPY.task.defaultSetLabel;
-  const isSingleUnit = step.reps === 1 && step.setLabel && step.setLabel !== 'sets';
+  const isSingleUnit = step.reps === 1 && step.setLabel && step.setLabel !== COPY.task.defaultSetLabel;
 
   const defaultPerSet = isTimed
     ? COPY.task.perSetHold(seconds)
     : isSingleUnit
-    ? `× 1 ${setLabel}`
+    ? COPY.task.singleUnitPerSet(setLabel)
     : COPY.task.perSetReps(step.reps);
 
   const defaultStatLabel = isTimed
@@ -32,11 +32,11 @@ export function getStepDisplay(step: ProtocolStep): StepDisplay {
   const defaultStatValue = isTimed
     ? COPY.task.holdValue(seconds)
     : isSingleUnit
-    ? `1 ${setLabel}`
+    ? COPY.task.singleUnitStat(setLabel)
     : String(step.reps);
 
   const summaryValue =
-    step.statValue ?? (isTimed ? COPY.task.holdSummary(seconds) : isSingleUnit ? `1 ${setLabel}` : COPY.task.repsSummary(step.reps));
+    step.statValue ?? (isTimed ? COPY.task.holdSummary(seconds) : isSingleUnit ? COPY.task.singleUnitStat(setLabel) : COPY.task.repsSummary(step.reps));
 
   return {
     setLabel,

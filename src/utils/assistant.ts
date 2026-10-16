@@ -42,7 +42,7 @@ export function answerFor(protocol: Protocol, question: string): string {
   const routineKeywords = ['routine', 'step', 'sets', 'reps', 'dosage', 'dose', 'frequency', 'how to', 'how many', 'daily', 'schedule', 'cadence'];
   if (routineKeywords.some((k) => text.includes(k)) && Array.isArray(protocol.steps) && protocol.steps.length > 0) {
     const stepSummary = protocol.steps
-      .map((s) => `${s.action} (${s.sets} ${s.setLabel || 'sets'}, ${s.frequency}${s.perSetLabel ? ' ' + s.perSetLabel : ''})`)
+      .map((s) => `${s.action} (${s.sets} ${s.setLabel || COPY.task.defaultSetLabel}, ${s.frequency}${s.perSetLabel ? ' ' + s.perSetLabel : ''})`)
       .join('; ');
     return COPY.assistant.offlineAnswers.prescribedDailyRoutine(stepSummary);
   }
