@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import GoogleIcon from '@mui/icons-material/Google';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
 import { COPY } from '../data/copy';
@@ -21,7 +22,7 @@ export function AuthView({ mode }: AuthViewProps) {
   const [activeMode, setActiveMode] = useState<'login' | 'signup'>(mode);
   const isLogin = activeMode === 'login';
   const router = useRouter();
-  const { isAuthenticated, loginWithEmail, loginWithGoogle, signupWithEmail, loginAsGuest } = useAuth();
+  const { isAuthenticated, loginWithEmail, loginWithGoogle, signupWithEmail, loginAsGuest, loginAsAdmin } = useAuth();
 
   useEffect(() => {
     setActiveMode(mode);
@@ -40,6 +41,7 @@ export function AuthView({ mode }: AuthViewProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [asAdmin, setAsAdmin] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -55,11 +57,11 @@ export function AuthView({ mode }: AuthViewProps) {
     setIsSubmitting(true);
     try {
       if (isLogin) {
-        await loginWithEmail(email, password);
-        toast.success(COPY.auth.toastWelcomeBack);
+        await loginWithEmail(email, password, asAdmin);
+        toast.success(asAdmin || email.toLowerCase().includes('admin') ? COPY.auth.toastAdminEntered : COPY.auth.toastWelcomeBack);
       } else {
-        await signupWithEmail(name, email, password);
-        toast.success(COPY.auth.toastAccountCreated);
+        await signupWithEmail(name, email, password, asAdmin);
+        toast.success(asAdmin || email.toLowerCase().includes('admin') ? COPY.auth.toastAdminEntered : COPY.auth.toastAccountCreated);
       }
       router.push(ROUTES.routine);
     } catch (err: unknown) {
@@ -81,6 +83,12 @@ export function AuthView({ mode }: AuthViewProps) {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleAdminContinue = () => {
+    loginAsAdmin();
+    toast.success(COPY.auth.toastAdminEntered);
+    router.push(ROUTES.routine);
   };
 
   const handleGuestContinue = () => {
@@ -197,24 +205,50 @@ export function AuthView({ mode }: AuthViewProps) {
             />
           </div>
 
+          <label className="flex items-center gap-2 cursor-pointer pt-1 text-2xs text-ink/70">
+            <input
+              type="checkbox"
+              checked={asAdmin}
+              onChange={(e) => setAsAdmin(e.target.checked)}
+              className="h-3.5 w-3.5 rounded border-ink/20 text-ink accent-ink focus:ring-0"
+            />
+            <span>{COPY.auth.adminCheckboxLabel}</span>
+          </label>
+
           <PillButton type="submit" size="md" fullWidth loading={isSubmitting} className="mt-2 text-xs">
             {isLogin ? COPY.auth.loginButton : COPY.auth.signupButton}
           </PillButton>
         </form>
 
-        {/* Guest Mode Fallback */}
-        <div className="mt-6 border-t border-ink/10 pt-5 text-center">
-          <button
-            type="button"
-            onClick={handleGuestContinue}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-ink/75 hover:text-ink underline underline-offset-4"
-          >
-            <span>{COPY.auth.guestButton}</span>
-            <Icon icon={ArrowForwardIcon} size="xs" />
-          </button>
-          <p className="mt-2 text-2xs leading-relaxed text-ink/40">
-            {COPY.auth.guestNotice}
-          </p>
+        {/* Quick Access Modes */}
+        <div className="mt-6 border-t border-ink/10 pt-5 space-y-4 text-center">
+          <div>
+            <button
+              type="button"
+              onClick={handleAdminContinue}
+              className="inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-cream px-3.5 py-1.5 text-xs font-semibold lowercase text-ink transition-colors hover:bg-mint"
+            >
+              <Icon icon={ShieldOutlinedIcon} size="xs" />
+              <span>{COPY.auth.adminButton}</span>
+            </button>
+            <p className="mt-1 text-2xs leading-relaxed text-ink/40">
+              {COPY.auth.adminNotice}
+            </p>
+          </div>
+
+          <div>
+            <button
+              type="button"
+              onClick={handleGuestContinue}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-ink/75 hover:text-ink underline underline-offset-4"
+            >
+              <span>{COPY.auth.guestButton}</span>
+              <Icon icon={ArrowForwardIcon} size="xs" />
+            </button>
+            <p className="mt-1 text-2xs leading-relaxed text-ink/40">
+              {COPY.auth.guestNotice}
+            </p>
+          </div>
         </div>
       </div>
 

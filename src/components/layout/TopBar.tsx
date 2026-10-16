@@ -19,7 +19,7 @@ import { Icon } from '../ui/Icon';
 export function TopBar() {
   const { streak, resetToDefaults, openHowTo } = useRoutine();
   const { openAssistant } = useAssistant();
-  const { user, isGuest, logout } = useAuth();
+  const { user, isGuest, isAdmin, logout } = useAuth();
   const { openPolicyDrawer, isLiveFirestore } = usePolicyLedger();
 
   const displayName = user?.name || COPY.auth.defaultGuestName;
@@ -40,6 +40,11 @@ export function TopBar() {
               >
                 {COPY.auth.signInToSyncBadge}
               </Link>
+            ) : isAdmin ? (
+              <span className="flex items-center gap-1 rounded-full border border-ink/20 bg-cream px-2 py-0.5 text-2xs font-semibold lowercase text-ink">
+                <span className="h-1.5 w-1.5 rounded-full bg-ink" />
+                {COPY.auth.adminBadge}
+              </span>
             ) : (
               <span className="rounded-full border border-ink/15 bg-mint px-2 py-0.5 text-2xs font-medium text-ink">
                 {COPY.auth.cloudSyncedBadge}
@@ -60,15 +65,17 @@ export function TopBar() {
           <Icon icon={HelpOutlineOutlinedIcon} size="md" />
         </CircleButton>
 
-        <CircleButton label={COPY.policyLedger.dialogLabel} onClick={openPolicyDrawer} size={38} className="relative">
-          <Icon icon={ShieldOutlinedIcon} size="md" />
-          {isLiveFirestore && (
-            <span
-              className="absolute right-1 top-1 h-2 w-2 rounded-full border border-ink bg-mint"
-              aria-hidden="true"
-            />
-          )}
-        </CircleButton>
+        {isAdmin && (
+          <CircleButton label={COPY.policyLedger.dialogLabel} onClick={openPolicyDrawer} size={38} className="relative">
+            <Icon icon={ShieldOutlinedIcon} size="md" />
+            {isLiveFirestore && (
+              <span
+                className="absolute right-1 top-1 h-2 w-2 rounded-full border border-ink bg-mint"
+                aria-hidden="true"
+              />
+            )}
+          </CircleButton>
+        )}
 
         <CircleButton label={COPY.shell.resetDemo} onClick={resetToDefaults} size={38}>
           <Icon icon={RestartAltOutlinedIcon} size="md" />

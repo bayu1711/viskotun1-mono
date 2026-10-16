@@ -8,6 +8,7 @@ import CloudOffOutlinedIcon from '@mui/icons-material/CloudOffOutlined';
 import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
+import { useAuth } from '../../contexts/AuthContext';
 import { usePolicyLedger } from '../../contexts/PolicyLedgerContext';
 import { MOTION } from '../../data/config';
 import { COPY } from '../../data/copy';
@@ -17,6 +18,7 @@ import { Icon } from '../ui/Icon';
 import { PillButton } from '../ui/PillButton';
 
 export function PolicyLedgerDrawer() {
+  const { isAdmin } = useAuth();
   const {
     policy,
     isLiveFirestore,
@@ -68,6 +70,8 @@ export function PolicyLedgerDrawer() {
     await resetPolicy();
     setHasChanges(false);
   };
+
+  if (!isAdmin) return null;
 
   return (
     <AnimatePresence>

@@ -67,7 +67,7 @@ export function LandingPage() {
                 <div className="hidden sm:block text-left leading-tight">
                   <p className="text-xs font-medium text-ink">{user.name}</p>
                   <p className="text-2xs text-ink/50">
-                    {user.isGuest ? COPY.auth.guestBadge : (user.email || COPY.auth.cloudSyncedBadge)}
+                    {user.isGuest ? COPY.auth.guestBadge : (user.role === 'admin' ? COPY.auth.adminBadge : (user.email || COPY.auth.cloudSyncedBadge))}
                   </p>
                 </div>
               </div>

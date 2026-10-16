@@ -54,6 +54,17 @@ const GUEST_USER: User = {
   email: '',
   initials: COPY.auth.initials.guest,
   isGuest: true,
+  role: 'user',
+  createdAt: Date.now()
+};
+
+const ADMIN_USER: User = {
+  id: 'usr-admin-evelyn',
+  name: COPY.auth.defaultAdminName,
+  email: 'admin@viskotun1.internal',
+  initials: COPY.auth.initials.admin,
+  isGuest: false,
+  role: 'admin',
   createdAt: Date.now()
 };
 
@@ -86,7 +97,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         prev.id === nextUser.id &&
         prev.name === nextUser.name &&
         prev.email === nextUser.email &&
-        prev.isGuest === nextUser.isGuest
+        prev.isGuest === nextUser.isGuest &&
+        prev.role === nextUser.role
       ) {
         return prev;
       }
@@ -112,12 +124,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
       if (fbUser) {
         const name = fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultClinicalUser;
+        const isAdminRole = Boolean(fbUser.email?.toLowerCase().includes('admin'));
         const authenticatedUser: User = {
           id: fbUser.uid,
           name,
           email: fbUser.email || '',
           initials: deriveInitials(name, COPY.auth.initials.clinicalUser),
           isGuest: false,
+          role: isAdminRole ? 'admin' : 'user',
           createdAt: Date.now()
         };
         persistUser(authenticatedUser);
@@ -131,8 +145,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     persistUser(GUEST_USER);
   }, [persistUser]);
 
+  const loginAsAdmin = useCallback(() => {
+    persistUser(ADMIN_USER);
+  }, [persistUser]);
+
   const loginWithEmail = useCallback(
-    async (email: string, password?: string) => {
+    async (email: string, password?: string, asAdmin?: boolean) => {
+      const isTargetAdmin = Boolean(asAdmin || email.toLowerCase().includes('admin'));
       const { auth } = getFirebaseAuth();
 
       if (auth) {
@@ -149,6 +168,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: fbUser.email || email.trim(),
             initials: deriveInitials(name, COPY.auth.initials.clinicalUser),
             isGuest: false,
+            role: isTargetAdmin ? 'admin' : 'user',
             createdAt: Date.now()
           };
           persistUser(authenticatedUser);
@@ -167,6 +187,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: email.trim(),
         initials: deriveInitials(formattedName, COPY.auth.initials.clinicalUser),
         isGuest: false,
+        role: isTargetAdmin ? 'admin' : 'user',
         createdAt: Date.now()
       };
       persistUser(fallbackUser);
@@ -182,12 +203,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const result = await signInWithPopup(auth, googleProvider);
         const fbUser = result.user;
         const name = fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultGoogleUser;
+        const isAdminRole = Boolean(fbUser.email?.toLowerCase().includes('admin'));
         const authenticatedUser: User = {
           id: fbUser.uid,
           name,
           email: fbUser.email || '',
           initials: deriveInitials(name, COPY.auth.initials.googleUser),
           isGuest: false,
+          role: isAdminRole ? 'admin' : 'user',
           createdAt: Date.now()
         };
         persistUser(authenticatedUser);
@@ -204,13 +227,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: 'researcher@gmail.com',
       initials: COPY.auth.initials.googleResearcher,
       isGuest: false,
+      role: 'user',
       createdAt: Date.now()
     };
     persistUser(googleUser);
   }, [persistUser]);
 
   const signupWithEmail = useCallback(
-    async (name: string, email: string, password?: string) => {
+    async (name: string, email: string, password?: string, asAdmin?: boolean) => {
+      const isTargetAdmin = Boolean(asAdmin || email.toLowerCase().includes('admin'));
       const { auth } = getFirebaseAuth();
 
       if (auth) {
@@ -235,6 +260,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: fbUser.email || email.trim(),
             initials: deriveInitials(displayName, COPY.auth.initials.clinicalUser),
             isGuest: false,
+            role: isTargetAdmin ? 'admin' : 'user',
             createdAt: Date.now()
           };
           persistUser(authenticatedUser);
@@ -252,6 +278,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: email.trim(),
         initials: deriveInitials(trimmedName, COPY.auth.initials.investigator),
         isGuest: false,
+        role: isTargetAdmin ? 'admin' : 'user',
         createdAt: Date.now()
       };
       persistUser(newUser);
@@ -271,19 +298,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     persistUser(null);
   }, [persistUser]);
 
+  const isAdmin = Boolean(
+    user &&
+    !user.isGuest &&
+    (user.role === 'admin' || user.email.toLowerCase().includes('admin'))
+  );
+
   const value = useMemo<AuthState>(
     () => ({
       user,
       isLoading,
       isAuthenticated: Boolean(user && !user.isGuest),
       isGuest: Boolean(user?.isGuest),
+      isAdmin,
       loginAsGuest,
+      loginAsAdmin,
       loginWithEmail,
       loginWithGoogle,
       signupWithEmail,
       logout
     }),
-    [user, isLoading, loginAsGuest, loginWithEmail, loginWithGoogle, signupWithEmail, logout]
+    [user, isLoading, isAdmin, loginAsGuest, loginAsAdmin, loginWithEmail, loginWithGoogle, signupWithEmail, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
