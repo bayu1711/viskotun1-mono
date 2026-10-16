@@ -13,7 +13,8 @@ import { COPY } from '../data/copy';
 import { getFirebaseAuth } from '../lib/firebase';
 import type { AuthState, User } from '../types/auth';
 
-const STORAGE_KEY = 'protocol_engine_auth_user';
+const STORAGE_KEY = 'viskotun1_auth_user';
+const LEGACY_STORAGE_KEY = 'protocol_engine_auth_user';
 
 function deriveInitials(name: string, fallback: string = COPY.auth.initials.fallback): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -65,9 +66,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Safe client hydration from localStorage
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem(STORAGE_KEY);
+      const saved = window.localStorage.getItem(STORAGE_KEY) || window.localStorage.getItem(LEGACY_STORAGE_KEY);
       if (saved) {
         setUser(JSON.parse(saved));
+        window.localStorage.setItem(STORAGE_KEY, saved);
       }
     } catch {
       // Fallback silently if localStorage is restricted
@@ -95,6 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextUser));
       } else {
         window.localStorage.removeItem(STORAGE_KEY);
+        window.localStorage.removeItem(LEGACY_STORAGE_KEY);
       }
     } catch {
       // Ignore storage write issues
