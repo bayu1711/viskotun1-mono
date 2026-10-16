@@ -27,7 +27,7 @@ export function CommunityPage() {
 
     async function fetchLiveMetrics() {
       try {
-        const res = await fetch(`/api/community/metrics?protocolId=${encodeURIComponent(protocol.id)}`);
+        const res = await fetch(`/api/community/metrics?routineId=${encodeURIComponent(protocol.id)}`);
         if (res.ok) {
           const data = await res.json();
           if (isMounted && data.metrics) {

@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { COPY } from '../data/copy';
-import type { Protocol } from '../types/protocol';
-import { generateFallbackProtocol, isTheoreticalOrNonHuman } from './fallbackProtocols';
+import type { Routine, Protocol } from '../types/routine';
+import { generateFallbackRoutine, isTheoreticalOrNonHuman } from './fallbackRoutines';
 import { getEffectiveGuardrails } from './guardrailLedger';
 
 export interface ExtractInput {
@@ -14,12 +14,13 @@ export interface ExtractResult {
   success: boolean;
   eligible: boolean;
   rejectionReason?: string;
-  protocol?: Protocol;
+  routine?: Routine;
+  protocol?: Routine;
   source: string;
 }
 
-const SYSTEM_PROMPT = `You are Protocol Engine, an expert clinical & scientific protocol extraction AI.
-Your role is to transform dense peer-reviewed research papers into executable, adaptive daily protocols with zero hallucinated gaps.
+const SYSTEM_PROMPT = `You are ViskotuN1, an expert clinical & scientific routine extraction AI.
+Your role is to transform dense peer-reviewed research papers into executable, adaptive daily routines with zero hallucinated gaps.
 
 ### STRICT GATEKEEPER CRITERIA:
 1. ELIGIBILITY:
@@ -292,6 +293,7 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
         return {
           success: true,
           eligible: true,
+          routine: protocol,
           protocol,
           source: sourceName
         };
@@ -301,11 +303,11 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
     }
   }
 
-  // Development / fallback mode: provides instant, calibrated protocol extraction
-  const fallbackProtocol = generateFallbackProtocol(sourceName);
-  if (fallbackProtocol.feedbackMetric) {
-    fallbackProtocol.feedbackMetric = {
-      ...fallbackProtocol.feedbackMetric,
+  // Development / fallback mode: provides instant, calibrated routine extraction
+  const fallbackRoutine = generateFallbackRoutine(sourceName);
+  if (fallbackRoutine.feedbackMetric) {
+    fallbackRoutine.feedbackMetric = {
+      ...fallbackRoutine.feedbackMetric,
       escalationThreshold: activePolicy.painEscalationThreshold,
       escalationMessage: activePolicy.escalationAlertMessage
     };
@@ -314,7 +316,8 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
   return {
     success: true,
     eligible: true,
-    protocol: fallbackProtocol,
+    routine: fallbackRoutine,
+    protocol: fallbackRoutine,
     source: sourceName
   };
 }

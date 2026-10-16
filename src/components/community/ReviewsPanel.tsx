@@ -31,7 +31,7 @@ export function ReviewsPanel() {
     async function fetchLiveReviews() {
       setIsLoading(true);
       try {
-        const res = await fetch(`/api/community/reviews?protocolId=${encodeURIComponent(protocol.id)}`);
+        const res = await fetch(`/api/community/reviews?routineId=${encodeURIComponent(protocol.id)}`);
         if (res.ok) {
           const data = await res.json();
           if (isMounted && Array.isArray(data.reviews) && data.reviews.length > 0) {

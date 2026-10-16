@@ -7,20 +7,21 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const protocolId = searchParams.get('protocolId');
+    const routineId = searchParams.get('routineId') || searchParams.get('protocolId');
 
-    if (!protocolId) {
+    if (!routineId) {
       return NextResponse.json(
         { error: COPY.api.community.protocolIdRequired },
         { status: 400 }
       );
     }
 
-    const metrics = await getCommunityMetrics(protocolId);
+    const metrics = await getCommunityMetrics(routineId);
 
     return NextResponse.json({
       success: true,
-      protocolId,
+      routineId,
+      protocolId: routineId,
       metrics
     });
   } catch (error) {
