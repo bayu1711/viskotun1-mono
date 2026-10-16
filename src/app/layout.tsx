@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang={COPY.metadata.lang} className={inter.variable}>
       <body className="min-h-screen bg-canvas font-sans text-ink antialiased">
         <Providers>{children}</Providers>
       </body>

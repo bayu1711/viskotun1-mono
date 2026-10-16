@@ -112,7 +112,7 @@ export function PolicyLedgerDrawer() {
                     )}
                   </div>
                   <p className="text-xs lowercase text-ink/50">
-                    {COPY.policyLedger.versionLabel(policy?.version || 'baseline')}
+                    {COPY.policyLedger.versionLabel(policy?.version || COPY.policyLedger.versionFallback)}
                   </p>
                 </div>
               </div>

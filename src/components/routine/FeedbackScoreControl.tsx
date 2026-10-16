@@ -28,7 +28,7 @@ export function FeedbackScoreControl({ score, tone, onChange, metric }: Feedback
   const sliderId = useId();
   const maxScore = metric?.maxScore ?? FEEDBACK_SCORE_MAX;
   const minScore = FEEDBACK_SCORE_MIN;
-  const metricName = metric?.name ?? 'feedback';
+  const metricName = metric?.name ?? COPY.feedbackDrawer.defaultMetricName;
   const fillRatio = (score - minScore) / (maxScore - minScore);
   const stepBy = (delta: number) => onChange(clampFeedbackScore(score + delta, maxScore, minScore));
 

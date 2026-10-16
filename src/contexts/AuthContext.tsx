@@ -15,7 +15,7 @@ import type { AuthState, User } from '../types/auth';
 
 const STORAGE_KEY = 'protocol_engine_auth_user';
 
-function deriveInitials(name: string, fallback = 'us'): string {
+function deriveInitials(name: string, fallback: string = COPY.auth.initials.fallback): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return fallback;
   if (parts.length === 1) return parts[0].slice(0, 2).toLowerCase();
@@ -51,7 +51,7 @@ const GUEST_USER: User = {
   id: 'guest-explorer',
   name: COPY.auth.defaultGuestName,
   email: '',
-  initials: 'ge',
+  initials: COPY.auth.initials.guest,
   isGuest: true,
   createdAt: Date.now()
 };
@@ -113,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: fbUser.uid,
           name,
           email: fbUser.email || '',
-          initials: deriveInitials(name, 'cu'),
+          initials: deriveInitials(name, COPY.auth.initials.clinicalUser),
           isGuest: false,
           createdAt: Date.now()
         };
@@ -144,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             id: fbUser.uid,
             name,
             email: fbUser.email || email.trim(),
-            initials: deriveInitials(name, 'cu'),
+            initials: deriveInitials(name, COPY.auth.initials.clinicalUser),
             isGuest: false,
             createdAt: Date.now()
           };
@@ -162,7 +162,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: `usr-${Date.now()}`,
         name: formattedName || COPY.auth.defaultClinicalUser,
         email: email.trim(),
-        initials: deriveInitials(formattedName, 'cu'),
+        initials: deriveInitials(formattedName, COPY.auth.initials.clinicalUser),
         isGuest: false,
         createdAt: Date.now()
       };
@@ -183,7 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: fbUser.uid,
           name,
           email: fbUser.email || '',
-          initials: deriveInitials(name, 'gu'),
+          initials: deriveInitials(name, COPY.auth.initials.googleUser),
           isGuest: false,
           createdAt: Date.now()
         };
@@ -199,7 +199,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       id: `usr-google-${Date.now()}`,
       name: COPY.auth.googleResearcher,
       email: 'researcher@gmail.com',
-      initials: 'gr',
+      initials: COPY.auth.initials.googleResearcher,
       isGuest: false,
       createdAt: Date.now()
     };
@@ -230,7 +230,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             id: fbUser.uid,
             name: displayName,
             email: fbUser.email || email.trim(),
-            initials: deriveInitials(displayName, 'cu'),
+            initials: deriveInitials(displayName, COPY.auth.initials.clinicalUser),
             isGuest: false,
             createdAt: Date.now()
           };
@@ -247,7 +247,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: `usr-${Date.now()}`,
         name: trimmedName,
         email: email.trim(),
-        initials: deriveInitials(trimmedName, 'ci'),
+        initials: deriveInitials(trimmedName, COPY.auth.initials.investigator),
         isGuest: false,
         createdAt: Date.now()
       };
