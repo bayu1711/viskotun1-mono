@@ -39,7 +39,7 @@ export function answerFor(protocol: Protocol, question: string): string {
   }
 
   // 4. Routine, dosage, steps, sets, reps, frequency
-  const routineKeywords = ['routine', 'step', 'sets', 'reps', 'dosage', 'dose', 'frequency', 'how to', 'how many', 'daily', 'schedule', 'cadence'];
+  const routineKeywords = ['routine', 'plan', 'step', 'sets', 'reps', 'dosage', 'dose', 'frequency', 'how to', 'how many', 'daily', 'schedule', 'cadence'];
   if (routineKeywords.some((k) => text.includes(k)) && Array.isArray(protocol.steps) && protocol.steps.length > 0) {
     const stepSummary = protocol.steps
       .map((s) => `${s.action} (${s.sets} ${s.setLabel || COPY.task.defaultSetLabel}, ${s.frequency}${s.perSetLabel ? ' ' + s.perSetLabel : ''})`)
