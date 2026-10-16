@@ -2,6 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
+import { COPY } from '../data/copy';
 import { getFirebaseAuth } from '../lib/firebase';
 import type { AuthState, User } from '../types/auth';
 
@@ -9,7 +10,7 @@ const STORAGE_KEY = 'protocol_engine_auth_user';
 
 const GUEST_USER: User = {
   id: 'guest-explorer',
-  name: 'Guest Explorer',
+  name: COPY.auth.defaultGuestName,
   email: '',
   initials: 'ge',
   isGuest: true,
@@ -59,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const formattedName = derivedName.charAt(0).toUpperCase() + derivedName.slice(1);
       const authenticatedUser: User = {
         id: `usr-${Date.now()}`,
-        name: formattedName || 'Verified Clinical User',
+        name: formattedName || COPY.auth.defaultClinicalUser,
         email,
         initials: email.slice(0, 2).toLowerCase(),
         isGuest: false,
@@ -77,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const result = await signInWithPopup(auth, googleProvider);
         const fbUser = result.user;
-        const name = fbUser.displayName || fbUser.email?.split('@')[0] || 'Google User';
+        const name = fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultGoogleUser;
         const initials =
           name
             .split(' ')
@@ -104,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Evaluation profile fallback if Firebase keys are unconfigured
     const googleUser: User = {
       id: `usr-google-${Date.now()}`,
-      name: 'Google Researcher',
+      name: COPY.auth.googleResearcher,
       email: 'researcher@gmail.com',
       initials: 'gr',
       isGuest: false,
