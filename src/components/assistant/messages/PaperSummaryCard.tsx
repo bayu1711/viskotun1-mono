@@ -1,7 +1,7 @@
 import React from 'react';
-import { useProtocol } from '../../../contexts/ProtocolContext';
+import { useRoutine } from '../../../contexts/RoutineContext';
 import { COPY } from '../../../data/copy';
-import { isRandomizedTrial } from '../../../utils/protocolMetrics';
+import { isRandomizedTrial } from '../../../utils/routineMetrics';
 import { EvidenceBadgeChip } from '../../ui/EvidenceBadgeChip';
 import { MetaItem } from './MetaItem';
 
@@ -10,8 +10,8 @@ interface PaperSummaryCardProps {
 }
 
 export function PaperSummaryCard({ intro }: PaperSummaryCardProps) {
-  const { protocol } = useProtocol();
-  const { paper } = protocol;
+  const { routine, protocol = routine } = useRoutine();
+  const { paper } = routine || protocol;
   const meta = [
   { label: COPY.assistant.meta.sample, value: COPY.assistant.meta.sampleValue(paper.sampleSize) },
   {
