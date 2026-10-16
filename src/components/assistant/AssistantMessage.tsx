@@ -3,8 +3,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MOTION } from '../../data/config';
-import type { ChatMessage } from '../../types/protocol';
-import { ProtocolCard } from '../protocol/ProtocolCard';
+import type { ChatMessage } from '../../types/routine';
+import { RoutineCard } from '../routine/RoutineCard';
 import { AlertCard } from './messages/AlertCard';
 import { AnswerBubble } from './messages/AnswerBubble';
 import { ConfirmationCard } from './messages/ConfirmationCard';
@@ -41,8 +41,9 @@ function renderAiMessage(message: ChatMessage) {
   switch (message.kind) {
     case 'text':
       return <PaperSummaryCard intro={message.content} />;
+    case 'routine':
     case 'protocol':
-      return <ProtocolCard />;
+      return <RoutineCard />;
     case 'processing':
       return <ProcessingCard source={message.content} createdAt={message.createdAt ?? 0} />;
     case 'answer':
