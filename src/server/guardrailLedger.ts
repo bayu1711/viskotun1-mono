@@ -18,6 +18,7 @@ import {
   PROGRESSION_WINDOW_LOGS,
   PROGRESSION_MAX_SCORE
 } from '../data/config';
+import { COPY } from '../data/copy';
 
 const POLICY_COLLECTION = 'policies';
 const POLICY_DOC_ID = 'clinical_guardrails';
@@ -45,9 +46,8 @@ export const BASELINE_GUARDRAIL_POLICY: GuardrailPolicy = {
     'econometrics',
     'pure mathematics'
   ],
-  clinicalDisclaimer:
-    'Medical Disclaimer: Protocol Engine provides educational protocol extraction grounded strictly in human interventional clinical literature. It does not provide medical diagnosis, prescription, or replace personalized clinical supervision from a licensed physician or physical therapist.',
-  escalationAlertMessage: `Pain threshold exceeded. Escalation paused. Recommendation: Reduce load by ${LOAD_REDUCTION_PERCENT}% tomorrow or consult your therapist.`,
+  clinicalDisclaimer: COPY.safety.clinicalDisclaimer,
+  escalationAlertMessage: COPY.safety.baselineEscalationAlert,
   version: '2026.10-baseline',
   updatedAt: new Date().toISOString(),
   source: 'hardcoded-baseline'
