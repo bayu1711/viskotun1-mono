@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { extractPaperProtocol } from '../../../server/geminiExtraction';
+import { saveCanonicalProtocol } from '../../../server/protocolRegistry';
 import { COPY } from '../../../data/copy';
 
 export async function POST(request: Request) {
@@ -26,6 +27,16 @@ export async function POST(request: Request) {
     }
 
     const result = await extractPaperProtocol({ file, url, text });
+
+    if (result.success && result.protocol) {
+      const { protocol: canonicalProtocol, isNew } = await saveCanonicalProtocol(result.protocol);
+      return NextResponse.json({
+        ...result,
+        protocol: canonicalProtocol,
+        isExistingCanonical: !isNew
+      });
+    }
+
     return NextResponse.json(result);
   } catch (error) {
     console.error('Extraction error:', error);

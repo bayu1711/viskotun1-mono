@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { Protocol, ProtocolRuntime } from '../../../../types/protocol';
 import { getFirestore } from '../../../../server/guardrailLedger';
+import { saveCanonicalProtocol } from '../../../../server/protocolRegistry';
 import { COPY } from '../../../../data/copy';
 
 interface UserSyncPayload {
@@ -43,6 +44,13 @@ export async function POST(request: Request) {
     if (db) {
       try {
         await db.collection('users').doc(userId).set(payload, { merge: true });
+
+        // Ensure each protocol is registered canonically in Firestore
+        if (protocols && protocols.length > 0) {
+          for (const proto of protocols) {
+            await saveCanonicalProtocol(proto).catch(() => {});
+          }
+        }
       } catch (firestoreErr: any) {
         console.warn('[UserSyncRoute] Could not persist to Firestore, stored in memory cache:', firestoreErr?.message || firestoreErr);
       }
