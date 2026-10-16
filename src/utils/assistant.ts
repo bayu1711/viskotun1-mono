@@ -21,18 +21,21 @@ export function answerFor(protocol: Protocol, question: string): string {
     const stopRule = protocol.contraindications.find((item) => item.severity === 'stop');
     const cautions = protocol.contraindications.filter((item) => item.severity === 'caution');
     if (stopRule) {
-      const cautionText = cautions.length > 0 ? ` Additional study precaution: ${cautions.map((c) => c.text).join(' ')}` : '';
-      return `Safety stop rule: ${stopRule.text}${cautionText}`;
+      const cautionText = cautions.length > 0
+        ? COPY.assistant.offlineAnswers.additionalPrecaution(cautions.map((c) => c.text).join(' '))
+        : '';
+      return COPY.assistant.offlineAnswers.safetyStopRule(stopRule.text, cautionText);
     }
     if (cautions.length > 0) {
-      return `Study precautions: ${cautions.map((c) => c.text).join(' ')}`;
+      return COPY.assistant.offlineAnswers.studyPrecautions(cautions.map((c) => c.text).join(' '));
     }
   }
 
   // 3. Progression and advancement rules
   const progressionKeywords = ['progression', 'advance', 'progress', 'increase', 'load', 'level up', 'next phase', 'criteria', 'when to increase'];
   if (progressionKeywords.some((k) => text.includes(k)) && Array.isArray(protocol.progressionRules) && protocol.progressionRules.length > 0) {
-    return `Progression criteria: ${protocol.progressionRules.map((rule) => `${rule.condition} → ${rule.action}`).join('; ')}.`;
+    const rulesText = protocol.progressionRules.map((rule) => `${rule.condition} → ${rule.action}`).join('; ');
+    return COPY.assistant.offlineAnswers.progressionCriteria(rulesText);
   }
 
   // 4. Routine, dosage, steps, sets, reps, frequency
@@ -41,7 +44,7 @@ export function answerFor(protocol: Protocol, question: string): string {
     const stepSummary = protocol.steps
       .map((s) => `${s.action} (${s.sets} ${s.setLabel || 'sets'}, ${s.frequency}${s.perSetLabel ? ' ' + s.perSetLabel : ''})`)
       .join('; ');
-    return `Prescribed daily routine: ${stepSummary}.`;
+    return COPY.assistant.offlineAnswers.prescribedDailyRoutine(stepSummary);
   }
 
   // 5. Biofeedback tracking & escalation thresholds
@@ -49,13 +52,25 @@ export function answerFor(protocol: Protocol, question: string): string {
   if (feedbackKeywords.some((k) => text.includes(k)) && protocol.feedbackMetric) {
     const metric = protocol.feedbackMetric;
     const alertMsg = metric.escalationMessage ? ` ${metric.escalationMessage}` : '';
-    return `Daily biofeedback metric: ${metric.name} (scale 0–${metric.maxScore ?? 10}). Escalation threshold is ≥ ${metric.escalationThreshold ?? 4}/10.${alertMsg}`;
+    return COPY.assistant.offlineAnswers.biofeedbackMetric(
+      metric.name,
+      metric.maxScore ?? 10,
+      metric.escalationThreshold ?? 4,
+      alertMsg
+    );
   }
 
   // 6. Paper evidence, methodology, and citation
   const paperKeywords = ['paper', 'doi', 'authors', 'journal', 'study', 'evidence', 'participants', 'sample'];
   if (paperKeywords.some((k) => text.includes(k)) && protocol.paper) {
-    return `Study: "${protocol.paper.title}" published in ${protocol.paper.journal} (${protocol.paper.year}) by ${protocol.paper.authors}. Sample size: N = ${protocol.paper.sampleSize} (${protocol.paper.trialType}).`;
+    return COPY.assistant.offlineAnswers.paperCitation(
+      protocol.paper.title,
+      protocol.paper.journal,
+      protocol.paper.year,
+      protocol.paper.authors,
+      protocol.paper.sampleSize,
+      protocol.paper.trialType
+    );
   }
 
   return COPY.assistant.noAnswer(protocol.shortTitle);
