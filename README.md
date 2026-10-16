@@ -185,38 +185,87 @@ docker run -p 3000:3000 -e GEMINI_API_KEY="your-gemini-api-key" protocol-engine:
 
 ---
 
+### Environment Variables
+
+Copy `.env.example` to `.env.local` to configure your local development environment:
+
+```bash
+cp .env.example .env.local
+```
+
+| Variable | Required | Description |
+| :--- | :--- | :--- |
+| `GEMINI_API_KEY` | Recommended | Gemini API key from Google AI Studio for paper extraction and Q&A. If omitted, high-fidelity offline mock protocols are used. |
+| `GEMINI_MODEL` | Optional | Gemini model name (default: `gemini-1.5-flash` or `gemini-2.0-flash`). |
+| `GOOGLE_CLOUD_PROJECT` | Optional | Google Cloud Project ID for Cloud Run deployment and Firestore integration. |
+| `FIRESTORE_DATABASE_ID` | Optional | Dedicated Firestore database ID (configured: `viskotun1-database`). |
+| `NEXT_PUBLIC_FIREBASE_*` | Optional | Firebase Web Client SDK parameters for live Google OAuth and Email authentication. |
+| `GEMMA_ENDPOINT_URL` | Optional | URL to a self-hosted Gemma 2 instance (e.g. Ollama or Vertex AI Model Garden). |
+
+---
+
 ## Project Structure
 
 ```text
 ├── src/
-│   ├── app/                    # Next.js App Router (pages & layout)
-│   │   ├── api/                # API Route Handlers (Vertex AI & PDF extract)
-│   │   ├── community/          # Community evidence insights route
-│   │   ├── dashboard/          # Protocol tracking & metrics route
-│   │   ├── layout.tsx          # Root layout & font configuration
-│   │   ├── page.tsx            # Main daily routine route
-│   │   └── providers.tsx       # Client context providers
-│   ├── components/             # Reusable UI & domain components
-│   │   ├── assistant/          # AI Paper Assistant sheet & message bubbles
-│   │   ├── community/          # Adherence & drop-off charts
-│   │   ├── dashboard/          # Stat cards & progression panels
-│   │   ├── feedback/           # Error boundary, fallbacks, callouts
-│   │   ├── layout/             # Shell, sidebar, topbar, mobile nav
-│   │   ├── protocol/           # Step rows, paper pickers, switchers
-│   │   ├── routine/            # Set counters, biofeedback scale slider, calendar
-│   │   └── ui/                 # Atomic design tokens (buttons, badges, icons)
-│   ├── contexts/               # React Contexts (ProtocolState, AssistantState)
-│   ├── data/                   # Centralized copy, config, and study data
-│   ├── hooks/                  # Custom hooks (a11y, file drop, timers)
-│   ├── types/                  # Domain TypeScript interfaces
-│   └── utils/                  # Safe math, metrics, time, and class utilities
-├── next.config.mjs             # Next.js standalone container configuration
-├── tailwind.config.js          # Design system color & typography tokens
-└── tsconfig.json               # TypeScript path alias configuration
+│   ├── app/                        # Next.js 14 App Router
+│   │   ├── api/                    # Server Route Handlers
+│   │   │   ├── admin/guardrails/   # Dynamic Firestore policy ledger API
+│   │   │   ├── assistant/          # Hybrid AI Q&A endpoint
+│   │   │   ├── extract/            # Multimodal PDF extraction endpoint
+│   │   │   ├── tts/                # Google Cloud Text-to-Speech audio streaming
+│   │   │   └── user/sync/          # User protocol cloud persistence endpoint
+│   │   ├── community/              # Community evidence insights route (/community)
+│   │   ├── dashboard/              # Protocol tracking & metrics route (/dashboard)
+│   │   ├── login/                  # Authentication sign-in route (/login)
+│   │   ├── routine/                # Main daily protocol routine route (/routine)
+│   │   ├── signup/                 # Authentication registration route (/signup)
+│   │   ├── layout.tsx              # Root server layout & font configuration
+│   │   ├── page.tsx                # Public scientific landing page (/)
+│   │   └── providers.tsx           # Client context providers
+│   ├── components/                 # Reusable UI & domain components
+│   │   ├── admin/                  # Policy ledger drawer & threshold inspector
+│   │   ├── assistant/              # AI Paper Assistant sheet & hybrid badge tags
+│   │   ├── community/              # Adherence & drop-off charts (Recharts SSR-safe)
+│   │   ├── dashboard/              # Stat cards, photo comparisons & biomarker curves
+│   │   ├── feedback/               # Error boundary, fallbacks, callouts
+│   │   ├── layout/                 # Shell, sidebar, topbar, mobile nav
+│   │   ├── protocol/               # Step rows, paper pickers, switchers
+│   │   ├── routine/                # Set counters, calendar, voice coach
+│   │   │   └── widgets/            # Polymorphic morphing widgets (scale, photo, numeric, timer, etc.)
+│   │   └── ui/                     # Atomic design tokens (buttons, badges, icons, panels)
+│   ├── contexts/                   # React Contexts (ProtocolState, AssistantState, Auth, PolicyLedger)
+│   ├── data/                       # Centralized copy (copy.ts), config, and benchmark studies
+│   ├── hooks/                      # Custom hooks (a11y, file drop, timers, voice, protocol state)
+│   ├── server/                     # Server-only logic (Gemini, Firestore ledger, fallbacks)
+│   ├── types/                      # Domain TypeScript interfaces (protocol, auth, guardrails)
+│   └── utils/                      # Safe math, metrics, time, and class utilities
+├── next.config.mjs                 # Next.js standalone container configuration
+├── tailwind.config.js              # Design system color & typography tokens
+├── tsconfig.json                   # TypeScript path alias configuration
+├── Dockerfile                      # Production multi-stage Docker build
+└── AGENTS.md                       # Engineering rulebook & architectural guidelines
 ```
+
+---
+
+## Teammate Collaboration & Development Guidelines
+
+Welcome to the team! Before pushing code, please review [`AGENTS.md`](./AGENTS.md):
+
+1. **Verify Before Committing**:
+   - Always run `npm run lint` and `npm run build` before pushing. Zero warnings and zero errors are required.
+2. **Strict DRY & Centralized Copy**:
+   - Modals and drawers must be mounted once in `AppShell.tsx` and controlled via shared Context.
+   - All user-facing strings must be declared in [`src/data/copy.ts`](./src/data/copy.ts).
+3. **Atomic Commit Slicing**:
+   - Slice commits by layer: `feat(api): ...`, `feat(ui): ...`, `feat(copy): ...`, `fix(...): ...`.
+4. **Zero Secrets on Client**:
+   - Cloud keys and service account tokens must only reside in server route handlers (`src/app/api/...` or `src/server/...`).
 
 ---
 
 ## License
 
-Private / Proprietary.
+Private / Proprietary. Built for the Google AI Builder Cup.
+
