@@ -4,7 +4,8 @@ import { LOAD_REDUCTION_PERCENT } from './config';
 export const COPY = {
   brand: {
     mark: '//',
-    name: 'protocol engine'
+    name: 'protocol engine',
+    initials: 'pe'
   },
   greeting: {
     morning: 'morning,',
@@ -229,7 +230,15 @@ export const COPY = {
     standardMonitoringFallback: 'Standard clinical monitoring; pause if severe discomfort occurs.',
     dayUnit: (count: number) => (count === 1 ? 'day' : 'days'),
     sampleSize: (sampleSize: number | string) => `Sample Size: N = ${sampleSize}`,
-    dayRatio: (current: number, total: number) => `Day ${current} / ${total}`
+    dayRatio: (current: number, total: number) => `Day ${current} / ${total}`,
+    briefBadge: 'Shareable Protocol Brief',
+    phasePrefix: 'Phase:',
+    studyYear: (year: number | string) => `Study Year: ${year}`,
+    doi: (doi: string) => `DOI: ${doi}`,
+    dayValue: (day: number) => `Day ${day}`,
+    totalDaysValue: (total: number) => `/ ${total}`,
+    logScoreMeta: (day: number, score: number) => `Day ${day} · Score ${score}/10`,
+    footerAudit: (doi: string) => `Protocol Engine • Interventional Human Science • Source: ${doi}`
   },
   voiceCoach: {
     eyebrow: 'hands-free',
@@ -336,11 +345,34 @@ export const COPY = {
     confirmLogged: (day: number, score: number) =>
     `Logged Day ${day}. Biofeedback score ${score}/10. Ready for tomorrow's target.`,
     confirmSafe: (day: number, score: number) =>
-    `Logged Day ${day}. Biofeedback score ${score}/10. Within the study's safe range — progression stays on track.`
+    `Logged Day ${day}. Biofeedback score ${score}/10. Within the study's safe range — progression stays on track.`,
+    serverGemmaSource: 'Gemma 2 (Private Endpoint)',
+    methodsSectionSource: 'Methods & Interventions Section',
+    timestampJustNow: 'Just now',
+    parsedSummary: (pages: number | string) =>
+      `Parsed ${pages} pages and isolated the Methods & Interventions section. Non-interventional sections and theoretical discussions were safely excluded.`,
+    offlineAnswers: {
+      safetyStopRule: (stopText: string, cautionText = '') =>
+        `Safety stop rule: ${stopText}${cautionText}`,
+      additionalPrecaution: (cautions: string) =>
+        ` Additional study precaution: ${cautions}`,
+      studyPrecautions: (cautions: string) =>
+        `Study precautions: ${cautions}`,
+      progressionCriteria: (rules: string) =>
+        `Progression criteria: ${rules}.`,
+      prescribedDailyRoutine: (summary: string) =>
+        `Prescribed daily routine: ${summary}.`,
+      biofeedbackMetric: (name: string, maxScore: number, threshold: number, alertMsg = '') =>
+        `Daily biofeedback metric: ${name} (scale 0–${maxScore}). Escalation threshold is ≥ ${threshold}/10.${alertMsg}`,
+      paperCitation: (title: string, journal: string, year: number | string, authors: string, sampleSize: number | string, trialType: string) =>
+        `Study: "${title}" published in ${journal} (${year}) by ${authors}. Sample size: N = ${sampleSize} (${trialType}).`
+    }
   },
   processing: {
     queued: 'extraction queued',
     extracting: 'extracting',
+    rejectionFallback:
+      'Paper declined: The study does not describe an executable intervention with human participants.',
     stages: [
     'reading the paper',
     'isolating methods & interventions',
@@ -447,6 +479,8 @@ export const COPY = {
     guestBadge: 'guest mode',
     saveNotice: 'sign in to sync your papers to the cloud',
     orWithEmail: 'or with email',
+    signInToSyncBadge: 'sign in to sync',
+    cloudSyncedBadge: 'cloud synced',
     defaultGuestName: 'Guest Explorer',
     defaultClinicalUser: 'Verified Clinical User',
     defaultGoogleUser: 'Google User',
@@ -510,7 +544,9 @@ export const COPY = {
         reset: 'Reset',
         complete: 'Test complete!',
         targetDuration: (seconds: number) => `Target duration: ${seconds}s`,
-        secondsElapsed: (seconds: number) => `${seconds} seconds elapsed`
+        secondsElapsed: (seconds: number) => `${seconds} seconds elapsed`,
+        elapsedSummary: (seconds: number, max?: number) =>
+          `${seconds} seconds elapsed${max ? ` · Target duration: ${max}s` : ''}`
       },
       multichoice: {
         selectOne: 'Select clinical classification:',
