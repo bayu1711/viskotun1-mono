@@ -37,7 +37,7 @@ export function NumericWidget({ field, value, onChange }: NumericWidgetProps) {
     <div className="w-full text-center">
       <div className="mt-6 flex items-center justify-center gap-6">
         <CircleButton
-          label={`Decrease ${field.name}`}
+          label={COPY.morphing.widgets.numeric.decrease(field.name)}
           onClick={() => handleStep(-step)}
           disabled={currentVal <= min}
           size={40}
@@ -61,7 +61,7 @@ export function NumericWidget({ field, value, onChange }: NumericWidgetProps) {
         </div>
 
         <CircleButton
-          label={`Increase ${field.name}`}
+          label={COPY.morphing.widgets.numeric.increase(field.name)}
           variant="solid"
           onClick={() => handleStep(step)}
           disabled={currentVal >= max}
@@ -77,7 +77,7 @@ export function NumericWidget({ field, value, onChange }: NumericWidgetProps) {
 
       {field.instructions && (
         <p className="mt-3 rounded-tile bg-ink/5 p-3 text-2xs text-ink/70 leading-relaxed text-left">
-          <strong className="text-ink font-medium">Protocol Note: </strong>
+          <strong className="text-ink font-medium">{COPY.morphing.widgets.protocolNote}</strong>
           {field.instructions}
         </p>
       )}

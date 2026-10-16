@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { COPY } from '../../../data/copy';
 import type { DataCollectionField } from '../../../types/protocol';
 import { severityTone } from '../../../utils/tones';
 import { FeedbackScoreControl } from '../FeedbackScoreControl';
@@ -18,8 +19,8 @@ export function ScaleWidget({ field, value, onChange }: ScaleWidgetProps) {
   const metricAdapter = {
     name: field.name,
     label: field.label,
-    minLabel: `${field.min ?? 0} · minimal`,
-    maxLabel: `${field.max ?? 10} · severe`,
+    minLabel: `${field.min ?? 0} ${COPY.morphing.widgets.scale.minimalSuffix}`,
+    maxLabel: `${field.max ?? 10} ${COPY.morphing.widgets.scale.severeSuffix}`,
     maxScore: field.max ?? 10,
     escalationThreshold: field.escalationThreshold,
     escalationMessage: field.escalationMessage

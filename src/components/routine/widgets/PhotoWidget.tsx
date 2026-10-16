@@ -64,7 +64,7 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
             />
             <div className="absolute right-2 top-2">
               <CircleButton
-                label="Remove photo"
+                label={COPY.morphing.widgets.photo.removePhoto}
                 size={36}
                 onClick={() => onChange('')}
                 className="bg-white/90 backdrop-blur"
@@ -74,7 +74,7 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
             </div>
           </div>
           <p className="mt-2 text-2xs text-ink/45 lowercase">
-            ✓ photo attached to milestone record
+            {COPY.morphing.widgets.photo.attached}
           </p>
         </div>
       ) : (
@@ -113,7 +113,7 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
               }}
             >
               <Icon icon={UploadFileOutlinedIcon} size="sm" className="mr-1 inline" />
-              Upload file
+              {COPY.morphing.widgets.photo.uploadButton}
             </PillButton>
             <PillButton
               type="button"
@@ -124,7 +124,7 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
                 onChange(DEFAULT_DEMO_PHOTO);
               }}
             >
-              Load Demo Capture
+              {COPY.morphing.widgets.photo.demoCaptureButton}
             </PillButton>
           </div>
         </div>

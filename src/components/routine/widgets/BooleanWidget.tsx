@@ -51,7 +51,7 @@ export function BooleanWidget({ field, value, onChange }: BooleanWidgetProps) {
 
       {field.instructions && (
         <p className="mt-4 rounded-tile bg-ink/5 p-3 text-2xs text-ink/75 leading-relaxed text-left">
-          <strong className="text-ink font-medium">Evaluation Rule: </strong>
+          <strong className="text-ink font-medium">{COPY.morphing.widgets.evaluationRule}</strong>
           {field.instructions}
         </p>
       )}

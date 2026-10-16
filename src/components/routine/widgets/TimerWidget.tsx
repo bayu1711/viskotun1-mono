@@ -69,11 +69,11 @@ export function TimerWidget({ field, value, onChange }: TimerWidgetProps) {
           {formatTime(seconds)}
         </p>
         <span className="mt-1 text-xs text-ink/50 lowercase">
-          {seconds} seconds elapsed {field.max ? `· ${COPY.morphing.widgets.timer.targetDuration(field.max)}` : ''}
+          {COPY.morphing.widgets.timer.secondsElapsed(seconds)} {field.max ? `· ${COPY.morphing.widgets.timer.targetDuration(field.max)}` : ''}
         </span>
 
         <div className="mt-6 flex items-center justify-center gap-4">
-          <CircleButton label="Reset timer" onClick={resetTimer} size={40}>
+          <CircleButton label={COPY.morphing.widgets.timer.reset} onClick={resetTimer} size={40}>
             <Icon icon={RotateLeftIcon} size="md" />
           </CircleButton>
 
@@ -103,7 +103,7 @@ export function TimerWidget({ field, value, onChange }: TimerWidgetProps) {
 
       {field.instructions && (
         <p className="mt-5 rounded-tile bg-ink/5 p-3 text-2xs text-ink/75 leading-relaxed text-left">
-          <strong className="text-ink font-medium">Protocol Test Guidelines: </strong>
+          <strong className="text-ink font-medium">{COPY.morphing.widgets.protocolGuidelines}</strong>
           {field.instructions}
         </p>
       )}

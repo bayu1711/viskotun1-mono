@@ -164,7 +164,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
         <p className="truncate" aria-live="polite">
           {statusText}
         </p>
-        <span className="shrink-0 text-3xs lowercase text-ink/35">web speech + timer cues</span>
+        <span className="shrink-0 text-3xs lowercase text-ink/35">{COPY.voiceCoach.techNote}</span>
       </div>
     </section>
   );

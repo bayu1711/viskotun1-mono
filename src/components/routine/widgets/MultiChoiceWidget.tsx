@@ -16,7 +16,7 @@ interface MultiChoiceWidgetProps {
 export function MultiChoiceWidget({ field, value, onChange }: MultiChoiceWidgetProps) {
   const options = field.options && field.options.length > 0
     ? field.options
-    : ['Mild', 'Moderate', 'Severe'];
+    : (COPY.morphing.widgets.multichoice.defaultOptions as readonly string[]);
 
   const currentSelection = typeof value === 'string' ? value : '';
 
@@ -54,7 +54,7 @@ export function MultiChoiceWidget({ field, value, onChange }: MultiChoiceWidgetP
 
       {field.instructions && (
         <p className="mt-4 rounded-tile bg-ink/5 p-3 text-2xs text-ink/75 leading-relaxed">
-          <strong className="text-ink font-medium">Measurement Criteria: </strong>
+          <strong className="text-ink font-medium">{COPY.morphing.widgets.measurementCriteria}</strong>
           {field.instructions}
         </p>
       )}
