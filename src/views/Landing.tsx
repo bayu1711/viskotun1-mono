@@ -40,7 +40,7 @@ export function LandingPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 lg:px-8">
           <Link href={ROUTES.landing} className="flex items-center gap-2.5 font-medium tracking-tight">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-xs font-semibold text-white">
-              pe
+              {COPY.brand.initials}
             </span>
             <span className="text-lg lowercase font-medium">{COPY.brand.name}</span>
           </Link>

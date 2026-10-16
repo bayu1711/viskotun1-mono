@@ -122,22 +122,22 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                       {COPY.brand.mark}
                     </span>
                     <span className="text-sm font-semibold uppercase tracking-wider text-ink">
-                      Protocol Engine
+                      {COPY.brand.name}
                     </span>
                     <span className="rounded bg-ink/10 px-2 py-0.5 text-2xs uppercase tracking-wide text-ink/70">
-                      Shareable Protocol Brief
+                      {COPY.shareableSummary.briefBadge}
                     </span>
                   </div>
                   <h1 className="mt-2 text-2xl font-bold tracking-tight text-ink sm:text-3xl">
                     {protocol.title}
                   </h1>
                   <p className="mt-0.5 text-xs text-ink/60">
-                    Phase: <span className="font-medium text-ink">{protocol.phase}</span>
+                    {COPY.shareableSummary.phasePrefix} <span className="font-medium text-ink">{protocol.phase}</span>
                   </p>
                 </div>
                 <div className="text-right text-xs text-ink/50">
                   <p className="font-medium text-ink">{COPY.shareableSummary.generatedOn(todayFormatted)}</p>
-                  <p>Study Year: {protocol.paper.year}</p>
+                  <p>{COPY.shareableSummary.studyYear(protocol.paper.year)}</p>
                 </div>
               </div>
 
@@ -153,7 +153,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                   {protocol.paper.authors} — <span className="italic">{protocol.paper.journal}</span> ({protocol.paper.year})
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-2xs">
-                  <span className="font-mono text-ink/60">DOI: {protocol.paper.doi}</span>
+                  <span className="font-mono text-ink/60">{COPY.shareableSummary.doi(protocol.paper.doi)}</span>
                   <span>•</span>
                   <span>{protocol.paper.trialType}</span>
                   <span>•</span>
@@ -171,7 +171,8 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                 <div className="rounded-tile border border-ink/10 bg-canvas/40 p-3 print:bg-white">
                   <p className="text-2xs lowercase text-ink/50">{COPY.shareableSummary.timelineProgress}</p>
                   <p className="mt-1 text-lg font-bold text-ink">
-                    Day {currentDay} <span className="text-xs font-normal text-ink/50">/ {totalDays}</span>
+                    {COPY.shareableSummary.dayValue(currentDay)}{' '}
+                    <span className="text-xs font-normal text-ink/50">{COPY.shareableSummary.totalDaysValue(totalDays)}</span>
                   </p>
                 </div>
                 <div className="rounded-tile border border-ink/10 bg-cream/30 p-3 print:bg-white">
@@ -286,7 +287,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                       >
                         <div>
                           <p className="font-medium text-ink">
-                            Day {log.day} · Score {log.score}/10
+                            {COPY.shareableSummary.logScoreMeta(log.day, log.score)}
                           </p>
                           {log.note && <p className="text-2xs text-ink/60 italic">{log.note}</p>}
                         </div>
@@ -301,7 +302,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
               <div className="mt-8 border-t border-ink/10 pt-4 text-center text-3xs leading-relaxed text-ink/45">
                 <p>{COPY.shareableSummary.disclaimer}</p>
                 <p className="mt-1 font-mono">
-                  Protocol Engine • Interventional Human Science • Source: {protocol.paper.doi}
+                  {COPY.shareableSummary.footerAudit(protocol.paper.doi)}
                 </p>
               </div>
             </div>

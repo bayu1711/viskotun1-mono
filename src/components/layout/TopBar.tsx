@@ -21,8 +21,8 @@ export function TopBar() {
   const { user, isGuest, logout } = useAuth();
   const { openPolicyDrawer, isLiveFirestore } = usePolicyLedger();
 
-  const displayName = user?.name || 'Guest Explorer';
-  const displayInitials = user?.initials || 'ge';
+  const displayName = user?.name || COPY.auth.defaultGuestName;
+  const displayInitials = user?.initials || COPY.brand.initials;
 
   return (
     <header className="mx-auto w-full max-w-6xl px-5 pt-5 lg:px-10 lg:pt-8">
@@ -37,11 +37,11 @@ export function TopBar() {
                 href={ROUTES.login}
                 className="rounded-full border border-ink/15 bg-cream px-2 py-0.5 text-2xs font-medium lowercase text-ink transition-colors hover:bg-mint"
               >
-                sign in to sync
+                {COPY.auth.signInToSyncBadge}
               </Link>
             ) : (
               <span className="rounded-full border border-ink/15 bg-mint px-2 py-0.5 text-2xs font-medium lowercase text-ink">
-                cloud synced
+                {COPY.auth.cloudSyncedBadge}
               </span>
             )}
           </div>

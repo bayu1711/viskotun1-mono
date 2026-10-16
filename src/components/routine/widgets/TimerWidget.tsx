@@ -69,7 +69,7 @@ export function TimerWidget({ field, value, onChange }: TimerWidgetProps) {
           {formatTime(seconds)}
         </p>
         <span className="mt-1 text-xs text-ink/50 lowercase">
-          {COPY.morphing.widgets.timer.secondsElapsed(seconds)} {field.max ? `· ${COPY.morphing.widgets.timer.targetDuration(field.max)}` : ''}
+          {COPY.morphing.widgets.timer.elapsedSummary(seconds, field.max)}
         </span>
 
         <div className="mt-6 flex items-center justify-center gap-4">
