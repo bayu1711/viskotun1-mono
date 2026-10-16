@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { COPY } from '@/data/copy';
+import { COPY } from '../../../data/copy';
 
 interface TTSRequestBody {
   text?: string;

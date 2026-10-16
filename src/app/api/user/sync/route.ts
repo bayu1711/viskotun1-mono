@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import type { Protocol, ProtocolRuntime } from '@/types/protocol';
-import { getFirestore } from '@/server/guardrailLedger';
-import { COPY } from '@/data/copy';
+import type { Protocol, ProtocolRuntime } from '../../../../types/protocol';
+import { getFirestore } from '../../../../server/guardrailLedger';
+import { COPY } from '../../../../data/copy';
 
 interface UserSyncPayload {
   userId: string;

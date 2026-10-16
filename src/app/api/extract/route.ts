@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { extractPaperProtocol } from '@/server/geminiExtraction';
-import { COPY } from '@/data/copy';
+import { extractPaperProtocol } from '../../../server/geminiExtraction';
+import { COPY } from '../../../data/copy';
 
 export async function POST(request: Request) {
   try {

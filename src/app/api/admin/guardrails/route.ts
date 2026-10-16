@@ -3,9 +3,9 @@ import {
   getGuardrailLedgerStatus,
   updateGuardrailPolicy,
   resetGuardrailPolicy
-} from '@/server/guardrailLedger';
-import type { GuardrailUpdateRequest } from '@/types/guardrails';
-import { COPY } from '@/data/copy';
+} from '../../../../server/guardrailLedger';
+import type { GuardrailUpdateRequest } from '../../../../types/guardrails';
+import { COPY } from '../../../../data/copy';
 
 /** GET: Inspect live guardrail policy and Cloud Firestore ledger status */
 export async function GET() {
