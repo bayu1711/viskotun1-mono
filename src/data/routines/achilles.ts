@@ -1,6 +1,6 @@
-import type { Protocol } from '../../types/protocol';
+import type { Routine, Protocol } from '../../types/routine';
 
-export const achillesProtocol: Protocol = {
+export const achillesProtocol: Routine = {
   id: 'achilles',
   title: 'Achilles Tendinopathy Rehab',
   shortTitle: 'achilles rehab',

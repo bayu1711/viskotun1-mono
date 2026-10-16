@@ -1,4 +1,4 @@
-import type { ReviewFilter } from '../types/protocol';
+import type { ReviewFilter } from '../types/routine';
 import { COPY } from './copy';
 
 export const reviewFilters: {id: ReviewFilter;label: string;}[] = [

@@ -1,6 +1,6 @@
-import type { Protocol } from '../../types/protocol';
+import type { Routine, Protocol } from '../../types/routine';
 
-export const hairLossProtocol: Protocol = {
+export const hairLossProtocol: Routine = {
   id: 'hair-loss',
   title: 'Androgenetic Alopecia Regrowth',
   shortTitle: 'hair regrowth',
