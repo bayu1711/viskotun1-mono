@@ -1,6 +1,6 @@
-# Protocol Engine
+# ViskotuN1
 
-An AI-powered digital experience transforming complex peer-reviewed research papers into executable, adaptive, and personalized health and rehabilitation protocols.
+An AI-powered digital experience transforming complex peer-reviewed research papers into executable, adaptive, and personalized health and rehabilitation routines.
 
 Built with **Next.js 14 (App Router)**, **TypeScript**, and **Tailwind CSS**, designed for deployment to **Google Cloud Run** and integration with **Gemini on Vertex AI**.
 
@@ -8,7 +8,7 @@ Built with **Next.js 14 (App Router)**, **TypeScript**, and **Tailwind CSS**, de
 
 ## Overview
 
-Peer-reviewed clinical literature is notoriously dense and difficult for patients and athletes to follow safely. **Protocol Engine** bridges this gap by:
+Peer-reviewed clinical literature is notoriously dense and difficult for patients and athletes to follow safely. **ViskotuN1** bridges this gap by:
 - Ingesting scientific PDFs and isolating actionable methods, dosing, tempo, and contraindications.
 - **The "Morphing" Pipeline (Schema-Driven Adaptive UI)**: Dynamically generating bespoke data collection widgets and dashboard analytics tailored to the study's endpoints (photo uploads for dermatology/posture, numeric biomarker steppers for blood glucose, reaction timers for cognitive trials, or 0–10 sliders for physical therapy).
 - Translating trial parameters into personalized daily routines with live set tracking and smart biofeedback scoring.
@@ -19,7 +19,7 @@ Peer-reviewed clinical literature is notoriously dense and difficult for patient
 
 ## The "Morphing" Pipeline (Schema-Driven Adaptive UI)
 
-A core innovation of Protocol Engine is **Schema-Driven Adaptive UI** (Generative UI). Instead of forcing every clinical study into an identical generic slider or checkbox, the research paper dynamically constructs its own user interface:
+A core innovation of ViskotuN1 is **Schema-Driven Adaptive UI** (Generative UI). Instead of forcing every clinical study into an identical generic slider or checkbox, the research paper dynamically constructs its own user interface:
 
 ```text
 Research Paper (PDF)
@@ -51,7 +51,7 @@ Research Paper (PDF)
 
 ## Hybrid AI Architecture: Cloud Gemini + Edge Gemma
 
-Protocol Engine employs a **Hybrid AI Tiering** model designed to optimize cost, latency, and patient privacy:
+ViskotuN1 employs a **Hybrid AI Tiering** model designed to optimize cost, latency, and patient privacy:
 
 ```text
                                   User Action
@@ -80,7 +80,7 @@ Protocol Engine employs a **Hybrid AI Tiering** model designed to optimize cost,
 
 ## Dynamic Guardrail Policy Ledger (Google Cloud Firestore)
 
-In safety-critical clinical and health applications, hardcoded thresholds in code are insufficient when medical advisory guidelines or contraindications update. Protocol Engine features a **Dynamic Guardrail Policy Ledger** backed by **Google Cloud Firestore**:
+In safety-critical clinical and health applications, hardcoded thresholds in code are insufficient when medical advisory guidelines or contraindications update. ViskotuN1 features a **Dynamic Guardrail Policy Ledger** backed by **Google Cloud Firestore**:
 
 ```text
                                   ┌───────────────────────────────┐
@@ -158,13 +158,13 @@ npm run start
 
 ### Google Cloud Run Deployment
 
-Protocol Engine uses Next.js 14 `output: 'standalone'` and a multi-stage Dockerfile producing a minimal (<150MB) production container image.
+ViskotuN1 uses Next.js 14 `output: 'standalone'` and a multi-stage Dockerfile producing a minimal (<150MB) production container image.
 
 #### 1. One-Click Deploy via Google Cloud Run
 Deploy directly from local source to Google Cloud Run using Cloud Build:
 
 ```bash
-gcloud run deploy protocol-engine \
+gcloud run deploy viskotun1 \
   --source . \
   --platform managed \
   --region us-central1 \
@@ -177,10 +177,10 @@ You can build and test the container image locally with Docker:
 
 ```bash
 # Build the production image
-docker build -t protocol-engine:latest .
+docker build -t viskotun1:latest .
 
 # Run container locally on port 3000
-docker run -p 3000:3000 -e GEMINI_API_KEY="your-gemini-api-key" protocol-engine:latest
+docker run -p 3000:3000 -e GEMINI_API_KEY="your-gemini-api-key" viskotun1:latest
 ```
 
 ---
@@ -195,7 +195,7 @@ cp .env.example .env.local
 
 | Variable | Required | Description |
 | :--- | :--- | :--- |
-| `GEMINI_API_KEY` | Recommended | Gemini API key from Google AI Studio for paper extraction and Q&A. If omitted, high-fidelity offline mock protocols are used. |
+| `GEMINI_API_KEY` | Recommended | Gemini API key from Google AI Studio for paper extraction and Q&A. If omitted, high-fidelity offline mock routines are used. |
 | `GEMINI_MODEL` | Optional | Gemini model name (default: `gemini-1.5-flash` or `gemini-2.0-flash`). |
 | `GOOGLE_CLOUD_PROJECT` | Optional | Google Cloud Project ID for Cloud Run deployment and Firestore integration. |
 | `FIRESTORE_DATABASE_ID` | Optional | Dedicated Firestore database ID (configured: `viskotun1-database`). |
@@ -214,11 +214,11 @@ cp .env.example .env.local
 │   │   │   ├── assistant/          # Hybrid AI Q&A endpoint
 │   │   │   ├── extract/            # Multimodal PDF extraction endpoint
 │   │   │   ├── tts/                # Google Cloud Text-to-Speech audio streaming
-│   │   │   └── user/sync/          # User protocol cloud persistence endpoint
+│   │   │   └── user/sync/          # User routine cloud persistence endpoint
 │   │   ├── community/              # Community evidence insights route (/community)
-│   │   ├── dashboard/              # Protocol tracking & metrics route (/dashboard)
+│   │   ├── dashboard/              # Routine tracking & metrics route (/dashboard)
 │   │   ├── login/                  # Authentication sign-in route (/login)
-│   │   ├── routine/                # Main daily protocol routine route (/routine)
+│   │   ├── routine/                # Main daily routine route (/routine)
 │   │   ├── signup/                 # Authentication registration route (/signup)
 │   │   ├── layout.tsx              # Root server layout & font configuration
 │   │   ├── page.tsx                # Public scientific landing page (/)
@@ -230,15 +230,14 @@ cp .env.example .env.local
 │   │   ├── dashboard/              # Stat cards, photo comparisons & biomarker curves
 │   │   ├── feedback/               # Error boundary, fallbacks, callouts
 │   │   ├── layout/                 # Shell, sidebar, topbar, mobile nav
-│   │   ├── protocol/               # Step rows, paper pickers, switchers
-│   │   ├── routine/                # Set counters, calendar, voice coach
+│   │   ├── routine/                # Set counters, calendar, voice coach, step rows, switchers
 │   │   │   └── widgets/            # Polymorphic morphing widgets (scale, photo, numeric, timer, etc.)
 │   │   └── ui/                     # Atomic design tokens (buttons, badges, icons, panels)
-│   ├── contexts/                   # React Contexts (ProtocolState, AssistantState, Auth, PolicyLedger)
+│   ├── contexts/                   # React Contexts (RoutineContext, AssistantState, Auth, PolicyLedger)
 │   ├── data/                       # Centralized copy (copy.ts), config, and benchmark studies
-│   ├── hooks/                      # Custom hooks (a11y, file drop, timers, voice, protocol state)
-│   ├── server/                     # Server-only logic (Gemini, Firestore ledger, fallbacks)
-│   ├── types/                      # Domain TypeScript interfaces (protocol, auth, guardrails)
+│   ├── hooks/                      # Custom hooks (a11y, file drop, timers, voice, routine state)
+│   ├── server/                     # Server-only logic (Gemini, Firestore ledger, routine registry, fallbacks)
+│   ├── types/                      # Domain TypeScript interfaces (routine, auth, guardrails)
 │   └── utils/                      # Safe math, metrics, time, and class utilities
 ├── next.config.mjs                 # Next.js standalone container configuration
 ├── tailwind.config.js              # Design system color & typography tokens

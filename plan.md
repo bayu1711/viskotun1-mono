@@ -1,8 +1,8 @@
 # Architectural Plan: The "Morphing" Pipeline (Schema-Driven Adaptive UI)
 
 > **Document Version**: 1.0.0  
-> **Target Project**: Protocol Engine — Google AI Builder Cup (*Media, Content & Digital Experiences*)  
-> **Objective**: Transform Protocol Engine from a static 0–10 pain logging app into a **Universal Clinical Trial Engine** where the ingested research paper dynamically generates its own logging widgets, milestone schedules, and dashboard visualizers.
+> **Target Project**: ViskotuN1 — Google AI Builder Cup (*Media, Content & Digital Experiences*)  
+> **Objective**: Transform ViskotuN1 from a static 0–10 pain logging app into a **Universal Clinical Trial Engine** where the ingested research paper dynamically generates its own logging widgets, milestone schedules, and dashboard visualizers.
 
 ---
 
@@ -16,7 +16,7 @@ Traditional health and clinical adherence applications force every research stud
 - A **neurological or cognitive study** measures **reaction time (milliseconds)** or **timed functional tests** (e.g., 30-second sit-to-stand).
 
 ### The Solution: The "Morphing" Pipeline
-Protocol Engine introduces a **Schema-Driven Adaptive UI** (Generative UI):
+ViskotuN1 introduces a **Schema-Driven Adaptive UI** (Generative UI):
 1. **Gemini** reads the trial's *Methods*, *Outcomes*, and *Data Collection* sections to isolate the exact study endpoints.
 2. Gemini outputs a declarative **`dataCollectionSpec`** alongside the daily physical steps.
 3. The frontend **Component Factory** dynamically mounts the exact UI widgets required by the paper (e.g., photo capture, biomarker steppers, multi-choice chips).

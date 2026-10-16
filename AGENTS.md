@@ -1,6 +1,6 @@
-# Protocol Engine — AI Agent Guidelines (`AGENTS.md`)
+# ViskotuN1 — AI Agent Guidelines (`AGENTS.md`)
 
-This document establishes the architectural principles, engineering standards, and operational guidelines for any AI agent or developer working on the **Protocol Engine** codebase.
+This document establishes the architectural principles, engineering standards, and operational guidelines for any AI agent or developer working on the **ViskotuN1** codebase.
 
 ---
 
@@ -8,7 +8,7 @@ This document establishes the architectural principles, engineering standards, a
 
 ### A. Strict DRY (Don't Repeat Yourself)
 - **Single Source of Truth for State & Modals**: Never mount duplicate modal dialogs or drawers across different views. Shared modals (such as `FeedbackDrawer`, `AssistantSheet`) must be mounted **once** in [`AppShell.tsx`](file:///src/components/layout/AppShell.tsx) and controlled via shared Context.
-- **No Prop Drilling for Global Actions**: Actions like opening a drawer (`openFeedbackDrawer`) or triggering the assistant must be exposed via React Context (`useProtocol`, `useAssistant`), not passed down through multiple component levels.
+- **No Prop Drilling for Global Actions**: Actions like opening a drawer (`openFeedbackDrawer`) or triggering the assistant must be exposed via React Context (`useRoutine` / `useProtocol`, `useAssistant`), not passed down through multiple component levels.
 - **No Lossy Round-Trip Calculations**: When derived metrics exist as raw ratios (e.g. `todayFraction: 0–1`), export and consume them directly. Never round-trip them into display integers and back (`ratio -> toPercent -> toFraction`).
 - **Centralized Design Tokens & Tones**: Use the established semantic palette (`ink`, `mint`, `cream`, `blush`, `white`). Do not invent ad-hoc hex colors or duplicate variant dictionaries across components without using the shared utilities in `src/utils/tones.ts`.
 - **Centralized UI Copy**: All user-facing strings, button labels, and system messages must be declared in [`src/data/copy.ts`](file:///src/data/copy.ts) for consistency and future localization.
@@ -25,8 +25,8 @@ This document establishes the architectural principles, engineering standards, a
   - Window- or canvas-measuring libraries (such as Recharts in [`DropOffChart.tsx`](file:///src/components/community/DropOffChart.tsx)) must be loaded with `dynamic(() => import(...), { ssr: false })` to avoid hydration mismatches.
 
 ### C. Domain Modeling: Interventional Human Science Only
-- **Scope Guardrail**: Protocol Engine specializes strictly in **Interventional Human Research** (clinical rehabilitation, pharmacology, sleep hygiene, nutrition/fasting, cognitive focus, ergonomics).
-- **Reject Non-Actionable Papers**: Do not generate hallucinated routines for theoretical physics, macroeconomics, or pure math. The system must gracefully reject papers that lack an actionable protocol applied to human participants.
+- **Scope Guardrail**: ViskotuN1 specializes strictly in **Interventional Human Research** (clinical rehabilitation, pharmacology, sleep hygiene, nutrition/fasting, cognitive focus, ergonomics).
+- **Reject Non-Actionable Papers**: Do not generate hallucinated routines for theoretical physics, macroeconomics, or pure math. The system must gracefully reject papers that lack an actionable routine applied to human participants.
 
 ### D. React Lifecycle & Memory Safety
 - **Safe Timer Cleanup**: Any `setTimeout` or `setInterval` stored in a `useRef` must be safely cancelled in the `useEffect` cleanup function using `ref.current` directly to avoid memory leaks or unmounted state updates.
