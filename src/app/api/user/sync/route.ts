@@ -43,8 +43,8 @@ export async function POST(request: Request) {
     if (db) {
       try {
         await db.collection('users').doc(userId).set(payload, { merge: true });
-      } catch (firestoreErr) {
-        console.warn('[UserSyncRoute] Could not persist to Firestore, stored in memory cache:', firestoreErr);
+      } catch (firestoreErr: any) {
+        console.warn('[UserSyncRoute] Could not persist to Firestore, stored in memory cache:', firestoreErr?.message || firestoreErr);
       }
     }
 
@@ -84,8 +84,8 @@ export async function GET(request: Request) {
             });
           }
         }
-      } catch (firestoreErr) {
-        console.warn('[UserSyncRoute] Could not read from Firestore, falling back to memory cache:', firestoreErr);
+      } catch (firestoreErr: any) {
+        console.warn('[UserSyncRoute] Could not read from Firestore, falling back to memory cache:', firestoreErr?.message || firestoreErr);
       }
     }
 

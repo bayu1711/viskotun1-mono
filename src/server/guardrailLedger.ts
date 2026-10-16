@@ -6,6 +6,9 @@
  * to baseline clinical rules when Firestore credentials are not configured.
  */
 
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import { Firestore } from '@google-cloud/firestore';
 import type {
   GuardrailPolicy,
@@ -59,6 +62,60 @@ let lastCacheSync = 0;
 let firestoreInstance: Firestore | null = null;
 let firestoreStatus: 'connected' | 'unconfigured' | 'error' = 'unconfigured';
 
+/**
+ * Detect whether valid Google Cloud credentials or emulator are available.
+ * Prevents throwing NO_ADC_FOUND errors when only GOOGLE_CLOUD_PROJECT is specified in local dev.
+ */
+function hasFirestoreCredentials(): boolean {
+  // 1. Explicit emulator host configured
+  if (process.env.FIRESTORE_EMULATOR_HOST) {
+    return true;
+  }
+
+  // 2. Explicit service account JSON file path
+  if (
+    process.env.GOOGLE_APPLICATION_CREDENTIALS &&
+    fs.existsSync(process.env.GOOGLE_APPLICATION_CREDENTIALS)
+  ) {
+    return true;
+  }
+
+  // 3. Raw or base64-encoded service account key in environment
+  if (
+    process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON ||
+    process.env.GCP_SERVICE_ACCOUNT_KEY ||
+    process.env.FIREBASE_SERVICE_ACCOUNT_KEY
+  ) {
+    return true;
+  }
+
+  // 4. Managed Google Cloud environment (Cloud Run, Cloud Functions, GAE, GCE)
+  if (
+    process.env.K_SERVICE ||
+    process.env.FUNCTION_TARGET ||
+    process.env.GAE_ENV ||
+    process.env.CLOUD_RUN_JOB
+  ) {
+    return true;
+  }
+
+  // 5. Well-known local Application Default Credentials (created by `gcloud auth application-default login`)
+  try {
+    const defaultAdcPath =
+      process.platform === 'win32'
+        ? path.join(process.env.APPDATA || '', 'gcloud', 'application_default_credentials.json')
+        : path.join(os.homedir(), '.config', 'gcloud', 'application_default_credentials.json');
+
+    if (fs.existsSync(defaultAdcPath)) {
+      return true;
+    }
+  } catch {
+    // Filesystem access restricted or error
+  }
+
+  return false;
+}
+
 /** Get or initialize Firestore singleton with fail-safe error handling. */
 export function getFirestore(): Firestore | null {
   if (firestoreInstance) {
@@ -79,16 +136,42 @@ export function getFirestore(): Firestore | null {
     return null;
   }
 
+  // If no credentials or emulator are available, fail-safe to unconfigured local memory ledger
+  if (!hasFirestoreCredentials()) {
+    firestoreStatus = 'unconfigured';
+    return null;
+  }
+
   try {
+    let credentials: any = undefined;
+    const rawCredentials =
+      process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON ||
+      process.env.GCP_SERVICE_ACCOUNT_KEY ||
+      process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+
+    if (rawCredentials) {
+      try {
+        const trimmed = rawCredentials.trim();
+        const jsonStr = trimmed.startsWith('{')
+          ? trimmed
+          : Buffer.from(trimmed, 'base64').toString('utf-8');
+        credentials = JSON.parse(jsonStr);
+      } catch (parseErr) {
+        console.warn('[GuardrailLedger] Could not parse inline service account JSON credentials:', parseErr);
+      }
+    }
+
     firestoreInstance = new Firestore({
       projectId: projectId || undefined,
-      databaseId: databaseId || undefined
+      databaseId: databaseId || undefined,
+      credentials: credentials || undefined
     });
     firestoreStatus = 'connected';
     return firestoreInstance;
-  } catch (err) {
-    console.warn('[GuardrailLedger] Could not initialize Cloud Firestore, using fail-safe memory ledger:', err);
+  } catch (err: any) {
+    console.warn('[GuardrailLedger] Could not initialize Cloud Firestore, using fail-safe memory ledger:', err?.message || err);
     firestoreStatus = 'error';
+    firestoreInstance = null;
     return null;
   }
 }
@@ -138,9 +221,10 @@ export async function getEffectiveGuardrails(): Promise<GuardrailPolicy> {
     lastCacheSync = now;
     firestoreStatus = 'connected';
     return cachedPolicy;
-  } catch (err) {
-    console.warn('[GuardrailLedger] Firestore fetch error, falling back to cached ledger:', err);
+  } catch (err: any) {
+    console.warn('[GuardrailLedger] Firestore unavailable, falling back to cached ledger:', err?.message || err);
     firestoreStatus = 'error';
+    firestoreInstance = null;
     return cachedPolicy;
   }
 }
@@ -171,9 +255,10 @@ export async function updateGuardrailPolicy(
       const docRef = db.collection(POLICY_COLLECTION).doc(POLICY_DOC_ID);
       await docRef.set(newPolicy, { merge: true });
       firestoreStatus = 'connected';
-    } catch (err) {
-      console.error('[GuardrailLedger] Failed to persist update to Firestore:', err);
+    } catch (err: any) {
+      console.warn('[GuardrailLedger] Failed to persist update to Firestore, falling back to memory cache:', err?.message || err);
       firestoreStatus = 'error';
+      firestoreInstance = null;
     }
   }
 
