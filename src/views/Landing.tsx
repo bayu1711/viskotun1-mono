@@ -102,13 +102,8 @@ export function LandingPage() {
 
       {/* Hero Section */}
       <section className="mx-auto max-w-5xl px-5 pb-16 pt-16 text-center lg:px-8 lg:pt-24">
-        <div className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white/80 px-3.5 py-1 text-2xs font-medium text-ink/70 backdrop-blur">
-          <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
-          {COPY.landing.badge}
-        </div>
-
         {user && (
-          <div className="mt-4 block">
+          <div className="mb-6 block">
             <span className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-mint/50 px-3.5 py-1 text-2xs font-medium text-ink">
               <span className="h-1.5 w-1.5 rounded-full bg-ink" aria-hidden="true" />
               <span>{COPY.landing.loggedInBadge(user.name)}</span>
@@ -116,7 +111,7 @@ export function LandingPage() {
           </div>
         )}
 
-        <h1 className="mt-6 text-4xl font-normal tracking-tight text-ink sm:text-5xl lg:text-6xl">
+        <h1 className="text-4xl font-normal tracking-tight text-ink sm:text-5xl lg:text-6xl">
           {COPY.landing.heroTitle}
         </h1>
 

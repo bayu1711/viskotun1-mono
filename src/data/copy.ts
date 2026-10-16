@@ -510,7 +510,6 @@ export const COPY = {
       'Declined: Theoretical physics, mathematics, or non-interventional topic. ViskotuN1 only builds executable routines from interventional studies conducted on human participants.'
   },
   landing: {
-    badge: 'Google AI Builder Cup · Media & Digital Experiences',
     heroEyebrow: 'Evidence into action',
     heroTitle: 'Transform clinical trials into executable daily routines.',
     heroSubtitle:
