@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -10,6 +10,7 @@ import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import HealthAndSafetyOutlinedIcon from '@mui/icons-material/HealthAndSafetyOutlined';
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
+import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
 import { COPY } from '../data/copy';
 import { ROUTES } from '../data/navigation';
@@ -18,12 +19,17 @@ import { PillButton } from '../components/ui/PillButton';
 
 export function LandingPage() {
   const router = useRouter();
-  const { loginAsGuest, isAuthenticated } = useAuth();
+  const { loginAsGuest } = useAuth();
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  useEffect(() => {
+    router.prefetch(ROUTES.routine);
+  }, [router]);
 
   const handleLaunchGuest = () => {
-    if (!isAuthenticated) {
-      loginAsGuest();
-    }
+    setIsNavigating(true);
+    loginAsGuest();
+    toast.info(COPY.auth.toastGuestEntered);
     router.push(ROUTES.routine);
   };
 
@@ -58,7 +64,7 @@ export function LandingPage() {
             >
               {COPY.landing.ctaLogin}
             </Link>
-            <PillButton size="sm" onClick={handleLaunchGuest}>
+            <PillButton size="sm" onClick={handleLaunchGuest} loading={isNavigating}>
               {COPY.landing.ctaGuest}
             </PillButton>
           </div>
@@ -81,7 +87,7 @@ export function LandingPage() {
         </p>
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <PillButton size="lg" onClick={handleLaunchGuest} className="gap-2 text-sm">
+          <PillButton size="lg" onClick={handleLaunchGuest} loading={isNavigating} className="gap-2 text-sm">
             <span>{COPY.landing.ctaGuest}</span>
             <Icon icon={ArrowForwardIcon} size="sm" />
           </PillButton>
@@ -226,7 +232,7 @@ export function LandingPage() {
               {COPY.landing.demoSubtitle}
             </p>
             <div className="mt-6 flex justify-center">
-              <PillButton variant="inverse" size="lg" onClick={handleLaunchGuest} className="text-sm">
+              <PillButton variant="inverse" size="lg" onClick={handleLaunchGuest} loading={isNavigating} className="text-sm">
                 {COPY.landing.ctaGuest}
               </PillButton>
             </div>

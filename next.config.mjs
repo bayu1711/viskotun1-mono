@@ -5,6 +5,12 @@ const nextConfig = {
   transpilePackages: ['@mui/icons-material'],
   experimental: {
     serverComponentsExternalPackages: ['@google-cloud/firestore']
+  },
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.cache = false;
+    }
+    return config;
   }
 };
 
