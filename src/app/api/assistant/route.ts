@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { answerFor } from '../../../utils/assistant';
+import { COPY } from '../../../data/copy';
 import type { Protocol } from '../../../types/protocol';
 import { getEffectiveGuardrails } from '@/server/guardrailLedger';
 
@@ -64,7 +65,7 @@ Instructions:
           if (gemmaJson?.response) {
             return NextResponse.json({
               answer: gemmaJson.response.trim(),
-              source: 'Gemma 2 (Private Endpoint)',
+              source: COPY.assistant.serverGemmaSource,
               engine: 'server-gemma'
             });
           }
@@ -87,7 +88,7 @@ Instructions:
         const res = await model.generateContent(question);
         return NextResponse.json({
           answer: res.response.text().trim(),
-          source: 'Methods & Interventions Section',
+          source: COPY.assistant.methodsSectionSource,
           engine: 'cloud-gemini'
         });
       } catch (err) {
@@ -110,7 +111,7 @@ Instructions:
     const answer = answerFor(proto, question);
     return NextResponse.json({
       answer,
-      source: 'Methods & Interventions Section',
+      source: COPY.assistant.methodsSectionSource,
       engine: 'local-rules'
     });
   } catch (error) {

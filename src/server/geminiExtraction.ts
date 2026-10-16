@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { COPY } from '../data/copy';
 import type { Protocol } from '../types/protocol';
 import { generateFallbackProtocol, isTheoreticalOrNonHuman } from './fallbackProtocols';
 import { getEffectiveGuardrails } from './guardrailLedger';
@@ -245,8 +246,7 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
           success: true,
           eligible: false,
           rejectionReason:
-            parsed.rejectionReason ||
-            'Paper declined: The study does not describe an executable intervention with human participants.',
+            parsed.rejectionReason || COPY.processing.rejectionFallback,
           source: sourceName
         };
       }
@@ -270,21 +270,21 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
               role: 'user',
               kind: 'file',
               content: sourceName,
-              timestamp: 'Just now'
+              timestamp: COPY.assistant.timestampJustNow
             },
             {
               id: `${parsed.protocol.id}-msg-2`,
               role: 'ai',
               kind: 'text',
-              content: `Parsed ${parsed.protocol.paper?.pages ?? 'the'} pages and isolated the Methods & Interventions section. Non-interventional sections and theoretical discussions were safely excluded.`,
-              timestamp: 'Just now'
+              content: COPY.assistant.parsedSummary(parsed.protocol.paper?.pages ?? 'the'),
+              timestamp: COPY.assistant.timestampJustNow
             },
             {
               id: `${parsed.protocol.id}-msg-3`,
               role: 'ai',
               kind: 'protocol',
               content: parsed.protocol.id,
-              timestamp: 'Just now'
+              timestamp: COPY.assistant.timestampJustNow
             }
           ]
         };
