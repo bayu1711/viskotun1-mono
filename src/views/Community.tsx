@@ -54,9 +54,9 @@ export function CommunityPage() {
       <PageContainer>
         <PageHeader eyebrow={COPY.nav.community} title={COPY.nav.community} />
         <div className="mt-8 rounded-card border border-ink/10 bg-white p-8 text-center max-w-md mx-auto space-y-4">
-          <p className="text-sm font-medium text-ink">{COPY.onboarding.noActiveProtocol}</p>
+          <p className="text-sm font-medium text-ink">{COPY.onboarding.noActiveRoutine}</p>
           <p className="text-xs text-ink/65 leading-relaxed">
-            {COPY.onboarding.noActiveProtocolDesc}
+            {COPY.onboarding.noActiveRoutineDesc}
           </p>
           <div className="flex items-center justify-center gap-3 pt-2">
             <PillButton size="sm" onClick={openHowTo}>

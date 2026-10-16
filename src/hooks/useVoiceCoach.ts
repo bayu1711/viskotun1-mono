@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { COPY } from '../data/copy';
-import type { RoutineStep, ProtocolStep } from '../types/routine';
+import type { RoutineStep } from '../types/routine';
 
 interface UseVoiceCoachOptions {
-  steps: (RoutineStep | ProtocolStep)[];
+  steps: RoutineStep[];
   onStepComplete?: (stepIndex: number) => void;
   safetyRule?: string;
 }
@@ -125,7 +125,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
     [cancelSpeech, isSupported, speed]
   );
 
-  const buildStepScript = useCallback((step: ProtocolStep, index: number, total: number) => {
+  const buildStepScript = useCallback((step: RoutineStep, index: number, total: number) => {
     const stepNum = index + 1;
     let details = '';
 

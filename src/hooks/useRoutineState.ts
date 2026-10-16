@@ -754,6 +754,8 @@ export function useRoutineState() {
     setActiveProtocol(newProtocol.id);
   }, []);
 
+  const addRoutine = addProtocol;
+
   const uploadPaper = useCallback(
     async (source: string | File, extractedProtocol?: Protocol) => {
       if (extractedProtocol) {
@@ -792,8 +794,10 @@ export function useRoutineState() {
 
         const result = await res.json();
 
-        if (result.eligible && result.protocol) {
-          addProtocol(result.protocol);
+        const extractedRoutine = result.routine || result.protocol;
+
+        if (result.eligible && extractedRoutine) {
+          addRoutine(extractedRoutine);
 
           // Persist uploaded paper to unified Firebase papers collection
           fetch('/api/papers', {
@@ -801,24 +805,26 @@ export function useRoutineState() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               paper: {
-                id: result.protocol.id,
-                title: result.protocol.paper?.title || result.protocol.title,
-                shortTitle: result.protocol.shortTitle,
-                domain: result.protocol.phase || 'Clinical Research',
+                id: extractedRoutine.id,
+                title: extractedRoutine.paper?.title || extractedRoutine.title,
+                shortTitle: extractedRoutine.shortTitle,
+                domain: extractedRoutine.phase || 'Clinical Research',
                 category: 'rehab',
-                authors: result.protocol.paper?.authors || 'Unknown Authors',
-                journal: result.protocol.paper?.journal || 'Clinical Trial',
-                year: result.protocol.paper?.year || new Date().getFullYear(),
-                doi: result.protocol.paper?.doi || '',
-                openAccessUrl: result.protocol.paper?.doi ? `https://doi.org/${result.protocol.paper?.doi}` : '',
+                authors: extractedRoutine.paper?.authors || 'Unknown Authors',
+                journal: extractedRoutine.paper?.journal || 'Clinical Trial',
+                year: extractedRoutine.paper?.year || new Date().getFullYear(),
+                doi: extractedRoutine.paper?.doi || '',
+                openAccessUrl: extractedRoutine.paper?.doi ? `https://doi.org/${extractedRoutine.paper?.doi}` : '',
                 pdfUrl: typeof source === 'string' ? source : '',
-                summary: result.protocol.steps?.map((s: ProtocolStep) => s.action).join('. ') || '',
-                featuresTested: result.protocol.steps?.map((s: ProtocolStep) => s.action) || [],
-                protocolId: result.protocol.id,
+                summary: extractedRoutine.steps?.map((s: RoutineStep) => s.action).join('. ') || '',
+                featuresTested: extractedRoutine.steps?.map((s: RoutineStep) => s.action) || [],
+                routineId: extractedRoutine.id,
+                protocolId: extractedRoutine.id,
                 isSample: false,
                 userId: userId || 'guest'
               },
-              protocol: result.protocol
+              routine: extractedRoutine,
+              protocol: extractedRoutine
             })
           }).catch((err) => {
             console.warn('[uploadPaper] Could not persist to Firebase papers collection:', err);
@@ -829,12 +835,12 @@ export function useRoutineState() {
             ...prev,
             messages: prev.messages.map((m) =>
               m.id === procId
-                ? { ...m, kind: 'confirmation', content: COPY.extraction.protocolReady(result.protocol.title) }
+                ? { ...m, kind: 'confirmation', content: COPY.extraction.routineReady(extractedRoutine.title) }
                 : m
             )
           }));
           if (result.isExistingCanonical) {
-            toast.success(COPY.community.existingCanonicalFound(result.protocol.title));
+            toast.success(COPY.community.existingCanonicalFound(extractedRoutine.title));
           } else {
             toast.success(COPY.extraction.success);
           }
@@ -865,7 +871,7 @@ export function useRoutineState() {
         toast.error(COPY.extraction.errorGeneral);
       }
     },
-    [protocol?.id, addProtocol, pushMessages, updateRuntime, userId]
+    [protocol?.id, addProtocol, addRoutine, pushMessages, updateRuntime, userId]
   );
 
   const openFeedbackDrawer = useCallback((fieldId?: string) => {

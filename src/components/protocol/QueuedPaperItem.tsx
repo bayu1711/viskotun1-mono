@@ -1,6 +1,6 @@
 import React from 'react';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import type { QueuedPaper } from '../../types/protocol';
+import type { QueuedPaper } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { Icon } from '../ui/Icon';
 import { IconTile } from '../ui/IconTile';
