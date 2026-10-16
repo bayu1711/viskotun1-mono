@@ -11,6 +11,7 @@ import { isPdfFile } from '../../utils/files';
 import { AssistantSheet } from '../assistant/AssistantSheet';
 import { ErrorBoundary } from '../feedback/ErrorBoundary';
 import { FeedbackDrawer } from '../routine/FeedbackDrawer';
+import { CommunityReviewDrawer } from '../community/CommunityReviewDrawer';
 import { PolicyLedgerDrawer } from '../admin/PolicyLedgerDrawer';
 import { HowToModal } from '../howto/HowToModal';
 import { AssistantFab } from './AssistantFab';
@@ -47,6 +48,7 @@ export function AppShell({ children }: AppShellProps) {
         </main>
         <AssistantSheet />
         <FeedbackDrawer />
+        <CommunityReviewDrawer />
         <PolicyLedgerDrawer />
         <HowToModal />
         <FileDropOverlay visible={isDragging} />
@@ -69,6 +71,7 @@ export function AppShell({ children }: AppShellProps) {
 
       <AssistantSheet />
       <FeedbackDrawer />
+      <CommunityReviewDrawer />
       <PolicyLedgerDrawer />
       <HowToModal />
       <FileDropOverlay visible={isDragging} />

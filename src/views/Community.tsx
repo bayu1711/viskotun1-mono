@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { DropOffPanel } from '../components/community/DropOffPanel';
 import { EfficacyCard } from '../components/community/EfficacyCard';
 import { ReviewsPanel } from '../components/community/ReviewsPanel';
@@ -10,10 +10,44 @@ import { useAssistant } from '../contexts/AssistantContext';
 import { useProtocol } from '../contexts/ProtocolContext';
 import { COPY } from '../data/copy';
 import { PillButton } from '../components/ui/PillButton';
+import type { CommunityInsights } from '../types/protocol';
 
 export function CommunityPage() {
   const { protocol, openHowTo } = useProtocol();
   const { openAssistant } = useAssistant();
+  const [liveMetrics, setLiveMetrics] = useState<CommunityInsights | null>(
+    protocol?.community || null
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+    if (!protocol?.id) return;
+
+    setLiveMetrics(protocol.community);
+
+    async function fetchLiveMetrics() {
+      try {
+        const res = await fetch(`/api/community/metrics?protocolId=${encodeURIComponent(protocol.id)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted && data.metrics) {
+            setLiveMetrics((prev) => ({
+              ...(prev || protocol.community),
+              ...data.metrics
+            }));
+          }
+        }
+      } catch (err) {
+        console.warn('[CommunityPage] Failed to fetch live metrics, using baseline:', err);
+      }
+    }
+
+    fetchLiveMetrics();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [protocol?.id, protocol?.community]);
 
   if (!protocol) {
     return (
@@ -37,11 +71,24 @@ export function CommunityPage() {
     );
   }
 
-  const insights = protocol.community;
+  const insights = liveMetrics || protocol.community;
 
   return (
     <PageContainer>
       <PageHeader eyebrow={COPY.community.eyebrow} title={COPY.community.title} />
+
+      {/* Canonical Paper Deduplication & Shared Community Badge */}
+      <div className="mt-2 flex items-center gap-2 text-xs text-ink/60">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/30 px-2.5 py-0.5 font-medium text-ink">
+          <span className="h-1.5 w-1.5 rounded-full bg-mint ring-1 ring-ink/20" />
+          {COPY.community.canonicalPaperBadge}
+        </span>
+        {protocol.paper?.doi ? (
+          <span className="font-mono text-ink/50">DOI: {protocol.paper.doi}</span>
+        ) : (
+          <span className="text-ink/40">{protocol.title}</span>
+        )}
+      </div>
 
       <section aria-label={COPY.community.comparisonLabel} className="mt-6 grid grid-cols-2 gap-2.5">
         <EfficacyCard

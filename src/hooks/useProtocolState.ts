@@ -78,6 +78,7 @@ export function useProtocolState() {
   const [activeProtocolId, setActiveProtocol] = useState<string>(initialProtocols[0]?.id ?? '');
   const [queuedPapers, setQueuedPapers] = useState<QueuedPaper[]>(initialQueuedPapers);
   const [isFeedbackDrawerOpen, setIsFeedbackDrawerOpen] = useState(false);
+  const [isReviewDrawerOpen, setIsReviewDrawerOpen] = useState(false);
   const [isHowToOpen, setIsHowToOpen] = useState(false);
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
   const [runtime, setRuntime] = useState<Record<string, ProtocolRuntime>>(() => createInitialRuntime(initialProtocols));
@@ -810,7 +811,11 @@ export function useProtocolState() {
                 : m
             )
           }));
-          toast.success(COPY.extraction.success);
+          if (result.isExistingCanonical) {
+            toast.success(COPY.community.existingCanonicalFound(result.protocol.title));
+          } else {
+            toast.success(COPY.extraction.success);
+          }
         } else {
           const reason = result.rejectionReason || COPY.extraction.declinedNonHuman;
           setQueuedPapers((prev) => prev.filter((p) => p.id !== queuedId));
@@ -851,6 +856,76 @@ export function useProtocolState() {
     setIsFeedbackDrawerOpen(false);
     setActiveFieldId(null);
   }, []);
+
+  const openReviewDrawer = useCallback(() => {
+    setIsReviewDrawerOpen(true);
+  }, []);
+
+  const closeReviewDrawer = useCallback(() => {
+    setIsReviewDrawerOpen(false);
+  }, []);
+
+  const submitCommunityReview = useCallback(
+    async (reviewData: {
+      outcome: 'improved' | 'adjusted' | 'paused';
+      text: string;
+      handle?: string;
+      day?: number;
+      adherence?: number;
+    }) => {
+      if (!protocol) return;
+
+      const payload = {
+        protocolId: protocol.id,
+        outcome: reviewData.outcome,
+        text: reviewData.text,
+        handle: reviewData.handle,
+        day: reviewData.day ?? protocol.currentDay,
+        adherence: reviewData.adherence ?? adherenceRate,
+        userId: userId || undefined
+      };
+
+      try {
+        const res = await fetch('/api/community/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to submit review');
+        }
+
+        const data = await res.json();
+        if (data.success && data.review) {
+          setProtocolList((prev) =>
+            prev.map((p) => {
+              if (p.id !== protocol.id) return p;
+              const existingReviews = p.community?.reviews || [];
+              const updatedReviews = [
+                data.review,
+                ...existingReviews.filter((r) => r.id !== data.review.id)
+              ];
+              return {
+                ...p,
+                community: {
+                  ...p.community,
+                  ...(data.metrics || {}),
+                  reviews: updatedReviews
+                }
+              };
+            })
+          );
+          toast.success(COPY.community.reviewSuccessToast);
+          closeReviewDrawer();
+        }
+      } catch (err) {
+        console.error('[submitCommunityReview] Error:', err);
+        toast.error(COPY.community.reviewErrorToast);
+      }
+    },
+    [protocol, adherenceRate, userId, closeReviewDrawer]
+  );
 
   const updateGuardrailThreshold = useCallback(
     (threshold: number, message?: string) => {
@@ -919,6 +994,10 @@ export function useProtocolState() {
       isFeedbackDrawerOpen,
       openFeedbackDrawer,
       closeFeedbackDrawer,
+      isReviewDrawerOpen,
+      openReviewDrawer,
+      closeReviewDrawer,
+      submitCommunityReview,
       isHowToOpen,
       openHowTo,
       closeHowTo,
@@ -963,6 +1042,10 @@ export function useProtocolState() {
       isFeedbackDrawerOpen,
       openFeedbackDrawer,
       closeFeedbackDrawer,
+      isReviewDrawerOpen,
+      openReviewDrawer,
+      closeReviewDrawer,
+      submitCommunityReview,
       isHowToOpen,
       openHowTo,
       closeHowTo,
