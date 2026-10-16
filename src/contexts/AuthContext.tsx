@@ -1,12 +1,49 @@
 'use client';
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut as firebaseSignOut,
+  updateProfile
+} from 'firebase/auth';
 import { COPY } from '../data/copy';
 import { getFirebaseAuth } from '../lib/firebase';
 import type { AuthState, User } from '../types/auth';
 
 const STORAGE_KEY = 'protocol_engine_auth_user';
+
+function deriveInitials(name: string, fallback = 'us'): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return fallback;
+  if (parts.length === 1) return parts[0].slice(0, 2).toLowerCase();
+  return (parts[0][0] + parts[1][0]).toLowerCase();
+}
+
+function formatFirebaseAuthError(err: unknown): Error {
+  if (typeof err === 'object' && err !== null && 'code' in err) {
+    const code = String((err as { code: unknown }).code);
+    switch (code) {
+      case 'auth/email-already-in-use':
+        return new Error(COPY.auth.toastEmailInUse);
+      case 'auth/invalid-email':
+        return new Error(COPY.auth.toastValidEmail);
+      case 'auth/weak-password':
+        return new Error(COPY.auth.toastWeakPassword);
+      case 'auth/user-not-found':
+      case 'auth/wrong-password':
+      case 'auth/invalid-credential':
+        return new Error(COPY.auth.toastInvalidCredentials);
+      case 'auth/too-many-requests':
+        return new Error(COPY.auth.toastTooManyRequests);
+      default:
+        break;
+    }
+  }
+  return err instanceof Error ? err : new Error(COPY.auth.toastAuthFailed);
+}
 
 const GUEST_USER: User = {
   id: 'guest-explorer',
@@ -38,7 +75,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const persistUser = useCallback((nextUser: User | null) => {
-    setUser(nextUser);
+    setUser((prev) => {
+      if (
+        prev &&
+        nextUser &&
+        prev.id === nextUser.id &&
+        prev.name === nextUser.name &&
+        prev.email === nextUser.email &&
+        prev.isGuest === nextUser.isGuest
+      ) {
+        return prev;
+      }
+      return nextUser;
+    });
     try {
       if (nextUser) {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextUser));
@@ -50,23 +99,72 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Synchronize authenticated Firebase session if active
+  useEffect(() => {
+    const { auth } = getFirebaseAuth();
+    if (!auth) return;
+
+    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+      if (fbUser) {
+        const name = fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultClinicalUser;
+        const authenticatedUser: User = {
+          id: fbUser.uid,
+          name,
+          email: fbUser.email || '',
+          initials: deriveInitials(name, 'cu'),
+          isGuest: false,
+          createdAt: Date.now()
+        };
+        persistUser(authenticatedUser);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [persistUser]);
+
   const loginAsGuest = useCallback(() => {
     persistUser(GUEST_USER);
   }, [persistUser]);
 
   const loginWithEmail = useCallback(
-    async (email: string) => {
+    async (email: string, password?: string) => {
+      const { auth } = getFirebaseAuth();
+
+      if (auth) {
+        if (!password) {
+          throw new Error(COPY.auth.toastPasswordRequired);
+        }
+        try {
+          const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
+          const fbUser = credential.user;
+          const name = fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultClinicalUser;
+          const authenticatedUser: User = {
+            id: fbUser.uid,
+            name,
+            email: fbUser.email || email.trim(),
+            initials: deriveInitials(name, 'cu'),
+            isGuest: false,
+            createdAt: Date.now()
+          };
+          persistUser(authenticatedUser);
+          return;
+        } catch (err: unknown) {
+          throw formatFirebaseAuthError(err);
+        }
+      }
+
+      // Evaluation fallback if Firebase client is unconfigured
       const derivedName = email.split('@')[0].replace(/[._-]/g, ' ');
       const formattedName = derivedName.charAt(0).toUpperCase() + derivedName.slice(1);
-      const authenticatedUser: User = {
+      const fallbackUser: User = {
         id: `usr-${Date.now()}`,
         name: formattedName || COPY.auth.defaultClinicalUser,
-        email,
-        initials: email.slice(0, 2).toLowerCase(),
+        email: email.trim(),
+        initials: deriveInitials(formattedName, 'cu'),
         isGuest: false,
         createdAt: Date.now()
       };
-      persistUser(authenticatedUser);
+      persistUser(fallbackUser);
     },
     [persistUser]
   );
@@ -79,19 +177,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const result = await signInWithPopup(auth, googleProvider);
         const fbUser = result.user;
         const name = fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultGoogleUser;
-        const initials =
-          name
-            .split(' ')
-            .map((part) => part[0])
-            .slice(0, 2)
-            .join('')
-            .toLowerCase() || 'gu';
-
         const authenticatedUser: User = {
           id: fbUser.uid,
           name,
           email: fbUser.email || '',
-          initials,
+          initials: deriveInitials(name, 'gu'),
           isGuest: false,
           createdAt: Date.now()
         };
@@ -115,18 +205,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [persistUser]);
 
   const signupWithEmail = useCallback(
-    async (name: string, email: string) => {
-      const initials = name
-        .split(' ')
-        .map((part) => part[0])
-        .slice(0, 2)
-        .join('')
-        .toLowerCase() || 'us';
+    async (name: string, email: string, password?: string) => {
+      const { auth } = getFirebaseAuth();
+
+      if (auth) {
+        if (!password) {
+          throw new Error(COPY.auth.toastPasswordRequired);
+        }
+        try {
+          const credential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+          const fbUser = credential.user;
+          const trimmedName = name.trim();
+          if (trimmedName) {
+            try {
+              await updateProfile(fbUser, { displayName: trimmedName });
+            } catch (profileErr) {
+              console.warn('[AuthContext] Could not update displayName in Firebase profile:', profileErr);
+            }
+          }
+          const displayName = trimmedName || fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultClinicalUser;
+          const authenticatedUser: User = {
+            id: fbUser.uid,
+            name: displayName,
+            email: fbUser.email || email.trim(),
+            initials: deriveInitials(displayName, 'cu'),
+            isGuest: false,
+            createdAt: Date.now()
+          };
+          persistUser(authenticatedUser);
+          return;
+        } catch (err: unknown) {
+          throw formatFirebaseAuthError(err);
+        }
+      }
+
+      // Evaluation fallback if Firebase client is unconfigured
+      const trimmedName = name.trim() || COPY.auth.defaultInvestigator;
       const newUser: User = {
         id: `usr-${Date.now()}`,
-        name: name.trim() || 'Clinical Investigator',
-        email,
-        initials,
+        name: trimmedName,
+        email: email.trim(),
+        initials: deriveInitials(trimmedName, 'ci'),
         isGuest: false,
         createdAt: Date.now()
       };

@@ -36,6 +36,10 @@ export function AuthView({ mode }: AuthViewProps) {
       toast.error(COPY.auth.toastValidEmail);
       return;
     }
+    if (!password) {
+      toast.error(COPY.auth.toastPasswordRequired);
+      return;
+    }
     setIsSubmitting(true);
     try {
       if (isLogin) {
@@ -46,8 +50,9 @@ export function AuthView({ mode }: AuthViewProps) {
         toast.success(COPY.auth.toastAccountCreated);
       }
       router.push(ROUTES.routine);
-    } catch {
-      toast.error(COPY.auth.toastAuthFailed);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : COPY.auth.toastAuthFailed;
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -77,7 +82,7 @@ export function AuthView({ mode }: AuthViewProps) {
       {/* Brand logo */}
       <Link href={ROUTES.landing} className="mb-8 flex items-center gap-2.5 font-medium tracking-tight">
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white">
-          pe
+          {COPY.brand.initials}
         </span>
         <span className="text-xl lowercase font-medium">{COPY.brand.name}</span>
       </Link>
@@ -150,6 +155,8 @@ export function AuthView({ mode }: AuthViewProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={COPY.auth.passwordPlaceholder}
+              required
+              minLength={6}
               className="mt-1 w-full rounded-tile border border-ink/15 bg-canvas px-3.5 py-2 text-xs text-ink placeholder:text-ink/30 focus:border-ink focus:outline-none"
             />
           </div>
