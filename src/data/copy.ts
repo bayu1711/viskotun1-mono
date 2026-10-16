@@ -558,6 +558,7 @@ export const COPY = {
   morphing: {
     dialogTitle: (name: string, day: number) => `${name} · day ${day}`,
     milestoneTag: 'Milestone Assessment',
+    milestoneSuffix: ' (milestone)',
     dailyTag: 'Daily Metric',
     saveEntry: 'Save measurement to protocol',
     savedToast: (name: string) => `${name} recorded successfully`,
@@ -583,7 +584,10 @@ export const COPY = {
         removePhoto: 'Remove photo',
         attached: '✓ photo attached to milestone record',
         uploadButton: 'Upload file',
-        demoCaptureButton: 'Load Demo Capture'
+        demoCaptureButton: 'Load Demo Capture',
+        demoPhotoSvgText: 'Milestone Clinical Photograph',
+        demoPhotoSvg: (text: string) =>
+          `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="400" height="300" fill="%23f7f5f0"/><circle cx="200" cy="150" r="80" fill="%23eedcc6"/><ellipse cx="200" cy="140" rx="35" ry="25" fill="%23dfcaa9" opacity="0.8"/><text x="200" y="270" font-family="sans-serif" font-size="12" fill="%232b2927" text-anchor="middle">${text}</text></svg>`
       },
       numeric: {
         enterValue: 'Measured value',
@@ -642,7 +646,14 @@ export const COPY = {
       sliderAria: 'Split slider comparison percentage',
       dayPill: (day: number, hasLog: boolean) => `day ${day} ${hasLog ? '✓' : ''}`.trim(),
       previewBadge: ' (preview)',
-      dayTooltip: (day: number) => `Day ${day}`
+      dayTooltip: (day: number) => `Day ${day}`,
+      dayTick: (day: number) => `d${day}`,
+      baselineMockupSvgText: 'day 1 baseline · vertex thinning',
+      progressionMockupSvgText: 'day 28 milestone · increased terminal density',
+      baselineMockupSvg: (text: string) =>
+        `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450"><rect width="600" height="450" fill="%23f4f6f4"/><circle cx="300" cy="225" r="160" fill="%23dce3de" stroke="%232e3a34" stroke-width="2"/><ellipse cx="300" cy="210" rx="70" ry="80" fill="%23c2cdc5" opacity="0.85"/><text x="300" y="340" font-family="sans-serif" font-size="14" font-weight="500" text-anchor="middle" fill="%232e3a34" opacity="0.7">${text}</text><path d="M 270 200 Q 300 180 330 200" stroke="%232e3a34" stroke-width="1.5" fill="none" opacity="0.45"/><path d="M 280 220 Q 300 205 320 220" stroke="%232e3a34" stroke-width="1.5" fill="none" opacity="0.45"/></svg>`,
+      progressionMockupSvg: (text: string) =>
+        `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="450" viewBox="0 0 600 450"><rect width="600" height="450" fill="%23edf2ee"/><circle cx="300" cy="225" r="160" fill="%23d5ded8" stroke="%232e3a34" stroke-width="2"/><ellipse cx="300" cy="210" rx="90" ry="100" fill="%239eafa3" opacity="0.95"/><text x="300" y="340" font-family="sans-serif" font-size="14" font-weight="500" text-anchor="middle" fill="%232e3a34" opacity="0.85">${text}</text><path d="M 255 190 Q 300 165 345 190" stroke="%232e3a34" stroke-width="2.5" fill="none" opacity="0.7"/><path d="M 265 210 Q 300 185 335 210" stroke="%232e3a34" stroke-width="2.5" fill="none" opacity="0.7"/><path d="M 275 230 Q 300 205 325 230" stroke="%232e3a34" stroke-width="2.5" fill="none" opacity="0.7"/></svg>`
     }
   },
   policyLedger: {
