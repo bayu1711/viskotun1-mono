@@ -1,6 +1,8 @@
 'use client';
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
+import { getFirebaseAuth } from '../lib/firebase';
 import type { AuthState, User } from '../types/auth';
 
 const STORAGE_KEY = 'protocol_engine_auth_user';
@@ -69,8 +71,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const loginWithGoogle = useCallback(async () => {
-    // In production, triggers Google OAuth redirect.
-    // For local evaluation, immediately hydrates an authenticated Google profile.
+    const { auth, googleProvider } = getFirebaseAuth();
+
+    if (auth && googleProvider) {
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        const fbUser = result.user;
+        const name = fbUser.displayName || fbUser.email?.split('@')[0] || 'Google User';
+        const initials =
+          name
+            .split(' ')
+            .map((part) => part[0])
+            .slice(0, 2)
+            .join('')
+            .toLowerCase() || 'gu';
+
+        const authenticatedUser: User = {
+          id: fbUser.uid,
+          name,
+          email: fbUser.email || '',
+          initials,
+          isGuest: false,
+          createdAt: Date.now()
+        };
+        persistUser(authenticatedUser);
+        return;
+      } catch (err: unknown) {
+        console.warn('[AuthContext] Firebase popup closed or failed, using evaluation profile:', err);
+      }
+    }
+
+    // Evaluation profile fallback if Firebase keys are unconfigured
     const googleUser: User = {
       id: `usr-google-${Date.now()}`,
       name: 'Google Researcher',
@@ -103,7 +134,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [persistUser]
   );
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    const { auth } = getFirebaseAuth();
+    if (auth) {
+      try {
+        await firebaseSignOut(auth);
+      } catch {
+        // Silently continue
+      }
+    }
     persistUser(null);
   }, [persistUser]);
 
