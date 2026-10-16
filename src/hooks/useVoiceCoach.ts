@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { COPY } from '../data/copy';
-import type { ProtocolStep } from '../types/protocol';
+import type { RoutineStep, ProtocolStep } from '../types/routine';
 
 interface UseVoiceCoachOptions {
-  steps: ProtocolStep[];
+  steps: (RoutineStep | ProtocolStep)[];
   onStepComplete?: (stepIndex: number) => void;
   safetyRule?: string;
 }

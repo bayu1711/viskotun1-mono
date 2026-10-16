@@ -4,7 +4,7 @@
  * for 100% private, zero-latency, offline daily protocol safety Q&A.
  */
 
-import type { Protocol } from '../types/protocol';
+import type { Routine, Protocol } from '../types/routine';
 
 interface AICapabilities {
   available: 'readily' | 'after-download' | 'no';

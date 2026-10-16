@@ -1,6 +1,6 @@
 import { FEEDBACK_MILD_MAX, FEEDBACK_MODERATE_MAX } from '../data/config';
 import { COPY } from '../data/copy';
-import type { Tone } from '../types/protocol';
+import type { Tone } from '../types/routine';
 
 interface ToneStyle {
   card: string;

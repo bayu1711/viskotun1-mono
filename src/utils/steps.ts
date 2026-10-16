@@ -1,5 +1,5 @@
 import { COPY } from '../data/copy';
-import type { ProtocolStep } from '../types/protocol';
+import type { RoutineStep, ProtocolStep } from '../types/routine';
 
 export interface StepDisplay {
   setLabel: string;

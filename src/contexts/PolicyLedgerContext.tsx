@@ -8,7 +8,7 @@ import type {
   GuardrailUpdateRequest,
   GuardrailLedgerResponse
 } from '../types/guardrails';
-import { useProtocol } from './ProtocolContext';
+import { useRoutine } from './RoutineContext';
 
 interface PolicyLedgerContextValue {
   policy: GuardrailPolicy | null;
@@ -27,7 +27,7 @@ interface PolicyLedgerContextValue {
 const PolicyLedgerContext = createContext<PolicyLedgerContextValue | null>(null);
 
 export function PolicyLedgerProvider({ children }: { children: React.ReactNode }) {
-  const { updateGuardrailThreshold } = useProtocol();
+  const { updateGuardrailThreshold } = useRoutine();
   const [policy, setPolicy] = useState<GuardrailPolicy | null>(null);
   const [isLiveFirestore, setIsLiveFirestore] = useState(false);
   const [firestoreStatus, setFirestoreStatus] = useState<'connected' | 'unconfigured' | 'error'>('unconfigured');
