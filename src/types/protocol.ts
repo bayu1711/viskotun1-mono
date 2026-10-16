@@ -158,6 +158,17 @@ export interface CommunityReview {
   outcome: 'improved' | 'adjusted' | 'paused';
   text: string;
   adherence: number;
+  createdAt?: string;
+  userId?: string;
+}
+
+export interface NewCommunityReview {
+  handle?: string;
+  day: number;
+  outcome: 'improved' | 'adjusted' | 'paused';
+  text: string;
+  adherence: number;
+  userId?: string;
 }
 
 export interface DropOffPoint {
@@ -186,6 +197,8 @@ export interface PaperFaq {
 
 export interface Protocol {
   id: string;
+  canonicalId?: string;
+  isCanonical?: boolean;
   title: string;
   shortTitle: string;
   icon: StepIconKey;
