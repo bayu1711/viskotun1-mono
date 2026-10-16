@@ -1,28 +1,28 @@
 const DEFAULT_LOAD_REDUCTION_PERCENT = 20;
 
-/** Centralized UI copy. Protocol-specific content lives in data/protocols. */
+/** Centralized UI copy. Routine-specific content lives in data/routines. */
 export const COPY = {
   metadata: {
     lang: 'en',
-    title: 'Protocol Engine // AI Research & Health Plans',
+    title: 'ViskotuN1 // AI Research & Daily Routines',
     description:
-      'An AI-powered digital experience transforming complex peer-reviewed research papers into executable, adaptive, and personalized plans.',
+      'An AI-powered digital experience transforming complex peer-reviewed research papers into executable, adaptive, and personalized routines.',
     keywords: [
-      'health plans',
       'health routines',
+      'clinical routines',
       'AI research extraction',
       'clinical trials',
       'personalized medicine',
       'rehabilitation'
     ],
-    openGraphTitle: 'Protocol Engine // AI Research & Health Plans',
+    openGraphTitle: 'ViskotuN1 // AI Research & Daily Routines',
     openGraphDescription:
-      'Transforming complex research papers into executable daily plans with an adaptive AI safety assistant.'
+      'Transforming complex research papers into executable daily routines with an adaptive AI safety assistant.'
   },
   brand: {
     mark: '//',
-    name: 'protocol engine',
-    initials: 'pe'
+    name: 'viskotun1',
+    initials: 'vn'
   },
   greeting: {
     morning: 'morning,',
@@ -49,11 +49,12 @@ export const COPY = {
     resetDemo: 'reset to demo defaults',
     assistantFab: (title: string) => `ask about ${title} or drop a pdf`,
     todaySummaryLabel: "Today's progress",
-    noActiveProtocol: 'no active plan',
+    noActiveProtocol: 'no active routine',
+    noActiveRoutine: 'no active routine',
     dayOfTotal: (day: number, total: number) => `day ${day} / ${total}`,
     dropTitle: 'drop to extract',
-    dropSubtitle: "we'll isolate the methods & build a plan",
-    dropScope: 'interventional human research · clinical trials, RCTs & behavioral plans'
+    dropSubtitle: "we'll isolate the methods & build a routine",
+    dropScope: 'interventional human research · clinical trials, RCTs & behavioral routines'
   },
   switcher: {
     heading: 'your papers',
@@ -61,7 +62,7 @@ export const COPY = {
     meta: (day: number, total: number, percent: number) => `day ${day}/${total} · ${percent}% today`
   },
   papers: {
-    queuedNote: 'extracting plan…',
+    queuedNote: 'extracting routine…',
     initialQueuedPaperName: 'Evening Light Restriction & Sleep Latency',
     initialQueuedPaperNote: 'pilot trial · awaiting your review'
   },
@@ -69,7 +70,7 @@ export const COPY = {
     eyebrow: (day: number, total: number) => `day ${day} of ${total}`,
     title: (percent: number) => `${percent}% complete`,
     progressLabel: 'Daily progress',
-    historyEyebrow: 'plan',
+    historyEyebrow: 'routine',
     historyTitle: 'history',
     openDashboard: 'Open dashboard',
     feedbackEyebrow: 'feedback',
@@ -80,7 +81,7 @@ export const COPY = {
     noNotes: 'no notes',
     emptyFeedbackTitle: 'no feedback logged yet',
     emptyMetricTitle: (name?: string) => (name ? `no ${name} logged yet` : 'no feedback logged yet'),
-    emptyFeedbackBody: 'log how you feel after each session so the plan can adapt.',
+    emptyFeedbackBody: 'log how you feel after each session so the routine can adapt.',
     emptyStepsTitle: 'no steps extracted',
     emptyStepsBody: 'this paper did not report an executable routine.'
   },
@@ -97,12 +98,12 @@ export const COPY = {
     escalationShort: `escalation paused — load/dose reduced ${DEFAULT_LOAD_REDUCTION_PERCENT}% for tomorrow`,
     pausedRecommendation: `Paused — reduce load/dose by ${DEFAULT_LOAD_REDUCTION_PERCENT}% tomorrow.`,
     clinicalDisclaimer:
-      'Medical Disclaimer: Protocol Engine provides educational plan extraction grounded strictly in human interventional clinical literature. It does not provide medical diagnosis, prescription, or replace personalized clinical supervision from a licensed physician or physical therapist.',
+      'Medical Disclaimer: ViskotuN1 provides educational routine extraction grounded strictly in human interventional clinical literature. It does not provide medical diagnosis, prescription, or replace personalized clinical supervision from a licensed physician or physical therapist.',
     baselineEscalationAlert:
       `Pain threshold exceeded. Escalation paused. Recommendation: Reduce load by ${DEFAULT_LOAD_REDUCTION_PERCENT}% tomorrow or consult your therapist.`
   },
   calendar: {
-    listLabel: 'Plan day history',
+    listLabel: 'Routine day history',
     range: (start: number, end: number, total: number) => `days ${start}–${end} of ${total}`,
     upcoming: (day: number) => `Day ${day}, upcoming`,
     progress: (day: number, percent: number) => `Day ${day}, ${percent}% complete`,
@@ -173,9 +174,18 @@ export const COPY = {
     repsSummary: (reps: number) => `${reps} reps`
   },
   protocolCard: {
-    label: 'Extracted plan',
+    label: 'Extracted routine',
     eyebrow: (phase: string) => `extracted · ${phase}`,
-    title: 'your plan',
+    title: 'your routine',
+    openRoutine: "Open today's routine",
+    defaulted: ' · defaulted',
+    rulePrefix: 'rule: if',
+    ruleArrow: '→'
+  },
+  routineCard: {
+    label: 'Extracted routine',
+    eyebrow: (phase: string) => `extracted · ${phase}`,
+    title: 'your routine',
     openRoutine: "Open today's routine",
     defaulted: ' · defaulted',
     rulePrefix: 'rule: if',
@@ -189,7 +199,8 @@ export const COPY = {
     eyebrow: 'track',
     title: 'your experiments',
     metricsLabel: 'Key metrics',
-    activeProtocol: 'active plan',
+    activeProtocol: 'active routine',
+    activeRoutine: 'active routine',
     adherence: 'adherence',
     currentPhase: 'current phase',
     evidenceScore: 'evidence score',
@@ -211,7 +222,7 @@ export const COPY = {
     activeSuffix: ' · active',
     sourcePaper: 'source paper',
     emptyPapersTitle: 'no papers yet',
-    emptyPapersBody: 'drop a research pdf to extract your first plan.',
+    emptyPapersBody: 'drop a research pdf to extract your first routine.',
     progressionEyebrow: 'next step',
     progressionTitle: 'progression',
     progressionHolding: 'Holding until the progression rule threshold is met.',
@@ -225,7 +236,7 @@ export const COPY = {
   },
   shareableSummary: {
     eyebrow: 'shareable',
-    title: 'plan summary',
+    title: 'routine summary',
     cardTitle: '1-page brief',
     body: (title: string) =>
       `1-page brief of ${title}: trial citation, daily routine, adherence rate, and logs to share with your coach, specialist, or personal records.`,
@@ -239,7 +250,7 @@ export const COPY = {
     printButton: 'print / save as pdf',
     closeButton: 'close',
     disclaimer:
-      'Protocol Engine translates human interventional research into structured daily routines. This summary is intended for personal tracking, coaching, or clinical review and does not constitute medical advice.',
+      'ViskotuN1 translates human interventional research into structured daily routines. This summary is intended for personal tracking, coaching, or clinical review and does not constitute medical advice.',
     trialCitation: 'study citation & methodology',
     adherenceAndStreak: 'adherence & progression',
     prescribedRoutine: 'prescribed routine & methods',
@@ -247,7 +258,7 @@ export const COPY = {
     recentLogs: 'recent biofeedback logs',
     noLogsYet: 'no biofeedback logs recorded yet.',
     generatedOn: (date: string) => `generated on ${date}`,
-    dialogLabel: 'Shareable Plan Summary and Progress Brief',
+    dialogLabel: 'Shareable Routine Summary and Progress Brief',
     timelineProgress: 'Timeline Progress',
     adherenceRate: 'Adherence Rate',
     consistencyStreak: 'Consistency Streak',
@@ -266,14 +277,14 @@ export const COPY = {
     dayUnit: (count: number) => (count === 1 ? 'day' : 'days'),
     sampleSize: (sampleSize: number | string) => `Sample Size: N = ${sampleSize}`,
     dayRatio: (current: number, total: number) => `Day ${current} / ${total}`,
-    briefBadge: 'Shareable Plan Brief',
+    briefBadge: 'Shareable Routine Brief',
     phasePrefix: 'Phase:',
     studyYear: (year: number | string) => `Study Year: ${year}`,
     doi: (doi: string) => `DOI: ${doi}`,
     dayValue: (day: number) => `Day ${day}`,
     totalDaysValue: (total: number) => `/ ${total}`,
     logScoreMeta: (day: number, score: number) => `Day ${day} · Score ${score}/10`,
-    footerAudit: (doi: string) => `Protocol Engine • Interventional Human Science • Source: ${doi}`
+    footerAudit: (doi: string) => `ViskotuN1 • Interventional Human Science • Source: ${doi}`
   },
   voiceCoach: {
     eyebrow: 'hands-free',
@@ -352,15 +363,15 @@ export const COPY = {
     shareModalTitle: 'log clinical outcome',
     shareModalEyebrow: 'community contribution',
     shareModalDesc:
-      'Contribute your real-world progress to help participants on this research protocol know what to expect.',
+      'Contribute your real-world progress to help participants on this research routine know what to expect.',
     outcomeLabel: 'overall clinical response',
     outcomes: {
       improved: 'improved — noticeable symptom or target progress',
       adjusted: 'adjusted — modified load, volume, or pacing',
       paused: 'paused — temporarily halted due to discomfort or fatigue'
     },
-    dayLabel: 'current day in protocol',
-    adherenceLabel: 'protocol adherence',
+    dayLabel: 'current day in routine',
+    adherenceLabel: 'routine adherence',
     notesLabel: 'experience & practical observations',
     notesPlaceholder: 'e.g. Tendon discomfort dropped by day 5, eccentric tempo required strict focus…',
     handleLabel: 'demographic handle (optional, anonymous)',
@@ -431,9 +442,9 @@ export const COPY = {
     timestampJustNow: 'Just now',
     parsedSummary: (pages: number | string) =>
       `Parsed ${pages} pages and isolated the Methods & Interventions section. Non-interventional sections and theoretical discussions were safely excluded.`,
-    fallbackFaqQuestion: 'what is the evidence grade for this plan?',
+    fallbackFaqQuestion: 'what is the evidence grade for this routine?',
     fallbackFaqAnswer:
-      'The paper was evaluated as a randomized human intervention trial. Inferred parameters are explicitly flagged in the plan.',
+      'The paper was evaluated as a randomized human intervention trial. Inferred parameters are explicitly flagged in the routine.',
     offlineAnswers: {
       safetyStopRule: (stopText: string, cautionText = '') =>
         `Safety stop rule: ${stopText}${cautionText}`,
@@ -460,7 +471,7 @@ export const COPY = {
     'reading the paper',
     'isolating methods & interventions',
     'checking for missing parameters',
-    'building your plan draft'],
+    'building your routine draft'],
 
     ready:
     "Draft ready for review. It'll appear in your papers once you confirm the extracted parameters."
@@ -472,47 +483,48 @@ export const COPY = {
     invalidType: 'only pdf files are supported — please choose a .pdf',
     scopeBadge: 'human interventional studies only',
     scopeNote:
-      'Studies where researchers applied a measurable plan or intervention to human participants (clinical rehab, pharmacology, sleep, nutrition, cognitive habits). Non-human or theoretical papers without an executable plan will be declined.'
+      'Studies where researchers applied a measurable routine or intervention to human participants (clinical rehab, pharmacology, sleep, nutrition, cognitive habits). Non-human or theoretical papers without an executable routine will be declined.'
   },
   extraction: {
-    title: 'plan extraction',
+    title: 'routine extraction',
     parsing: 'analyzing paper with Gemini 1.5...',
-    success: 'plan successfully extracted and activated',
+    success: 'routine successfully extracted and activated',
     declinedTitle: 'paper declined by gatekeeper',
     declinedPrefix: 'Declined: ',
     declinedNonHuman:
-      'This study appears to be non-human (in vitro or animal model) or purely observational. Protocol Engine only builds executable plans from interventional studies conducted on human participants.',
+      'This study appears to be non-human (in vitro or animal model) or purely observational. ViskotuN1 only builds executable routines from interventional studies conducted on human participants.',
     declinedTheoretical:
-      'This paper appears to be theoretical physics, mathematics, or cosmology without human subject testing. Protocol Engine is specialized for human clinical, rehabilitation, and lifestyle interventions.',
+      'This paper appears to be theoretical physics, mathematics, or cosmology without human subject testing. ViskotuN1 is specialized for human clinical, rehabilitation, and lifestyle interventions.',
     errorTitle: 'extraction failed',
     errorGeneral:
-      'Could not extract a plan from this document. Please verify it is an interventional study or try another PDF.',
-    protocolReady: (title: string) => `Plan ready: ${title}`,
+      'Could not extract a routine from this document. Please verify it is an interventional study or try another PDF.',
+    protocolReady: (title: string) => `Routine ready: ${title}`,
+    routineReady: (title: string) => `Routine ready: ${title}`,
     failedWithStatus: (status: number) => `Extraction failed with HTTP ${status}`,
     matchedBannedKeyword: (keyword: string, version: string) =>
-      `Paper declined: Matched restricted non-human / theoretical policy criterion ("${keyword}"). Protocol Engine enforces interventional human science only per clinical policy v${version}.`,
+      `Paper declined: Matched restricted non-human / theoretical policy criterion ("${keyword}"). ViskotuN1 enforces interventional human science only per clinical policy v${version}.`,
     declinedAnimalReason:
-      'Declined: Non-human animal or in-vitro study. Protocol Engine specializes strictly in interventional studies with human participants (clinical rehab, pharmacology, nutrition, sleep, cognitive habits).',
+      'Declined: Non-human animal or in-vitro study. ViskotuN1 specializes strictly in interventional studies with human participants (clinical rehab, pharmacology, nutrition, sleep, cognitive habits).',
     declinedTheoreticalReason:
-      'Declined: Theoretical physics, mathematics, or non-interventional topic. Protocol Engine only builds executable plans from interventional studies conducted on human participants.'
+      'Declined: Theoretical physics, mathematics, or non-interventional topic. ViskotuN1 only builds executable routines from interventional studies conducted on human participants.'
   },
   landing: {
     badge: 'google ai builder cup · media & digital experiences',
     heroEyebrow: 'evidence into action',
     heroTitle: 'Transform clinical trials into executable daily routines.',
     heroSubtitle:
-      'Protocol Engine converts dense, peer-reviewed human interventional research into adaptive daily plans with zero hallucinated gaps and an evidence-grounded AI safety assistant.',
+      'ViskotuN1 converts dense, peer-reviewed human interventional research into adaptive daily routines with zero hallucinated gaps and an evidence-grounded AI safety assistant.',
     ctaGuest: 'try as guest (instant demo)',
     ctaLogin: 'sign in with account',
     ctaSignup: 'create account',
-    ctaGoToApp: 'go to your plan',
+    ctaGoToApp: 'go to your routine',
     ctaContinueAsUser: (name: string) => `continue as ${name}`,
     ctaSignOut: 'sign out',
     loggedInBadge: (name: string) => `signed in as ${name}`,
     guestBadge: 'guest session',
     scopeBadge: 'strictly interventional human research',
     scopeNote:
-      'We validate clinical trials, rehabilitation plans, nutrition, sleep, and pharmacology. Pure theory, non-human animal models, and observational studies are safely filtered out.',
+      'We validate clinical trials, rehabilitation routines, nutrition, sleep, and pharmacology. Pure theory, non-human animal models, and observational studies are safely filtered out.',
     features: {
       gatekeeperTitle: 'Scientific Gatekeeper',
       gatekeeperBody: 'Auto-filters non-human models and theoretical papers with educational feedback.',
@@ -524,9 +536,9 @@ export const COPY = {
       summaryBody: 'Export formatted adherence and biofeedback trends for your specialist or personal records.'
     },
     demoTitle: 'Try it right now',
-    demoSubtitle: 'Drop a research PDF or explore pre-loaded clinical plans with zero setup.',
+    demoSubtitle: 'Drop a research PDF or explore pre-loaded clinical routines with zero setup.',
     architecture: 'Architecture',
-    architectureTitle: 'how protocol engine works',
+    architectureTitle: 'how viskotun1 works',
     capabilities: 'Capabilities',
     capabilitiesTitle: 'built for clinical rigour',
     nav: {
@@ -548,14 +560,14 @@ export const COPY = {
       step4Title: 'Adaptive Routine & Q&A',
       step4Body: 'Executes daily sets, progression rules, safety & biofeedback thresholds, and answers questions strictly cited from the Methods.'
     },
-    footerTagline: 'protocol engine · interventional human research intelligence',
+    footerTagline: 'viskotun1 · interventional human research intelligence',
     footerSignIn: 'sign in',
     footerCreateAccount: 'create account',
     footerGithub: 'github'
   },
   auth: {
     loginTitle: 'welcome back',
-    loginSubtitle: 'sign in to access your persistent plans and saved research history.',
+    loginSubtitle: 'sign in to access your persistent routines and saved research history.',
     signupTitle: 'create your account',
     signupSubtitle: 'save and sync extracted research papers and daily progress across devices.',
     nameLabel: 'your full name',
@@ -568,7 +580,7 @@ export const COPY = {
     signupButton: 'create account',
     googleButton: 'continue with google',
     guestButton: 'continue as guest (no sign-up required)',
-    guestNotice: 'guest mode stores plans locally in your browser. sign in anytime to sync to the cloud.',
+    guestNotice: 'guest mode stores routines locally in your browser. sign in anytime to sync to the cloud.',
     haveAccount: 'already have an account? sign in',
     needAccount: "don't have an account? create one",
     signOut: 'sign out',
@@ -614,8 +626,10 @@ export const COPY = {
     boundaryTitle: 'something went wrong',
     boundaryBody: 'this view failed to load. your logs are safe.',
     retry: 'reload view',
-    noProtocolsTitle: 'no plans available',
-    noProtocolsBody: 'add a research paper to get started.'
+    noProtocolsTitle: 'no routines available',
+    noRoutinesTitle: 'no routines available',
+    noProtocolsBody: 'add a research paper to get started.',
+    noRoutinesBody: 'add a research paper to get started.'
   },
   demo: {
     resetSuccess: 'reset to demo defaults — storage cleared'
@@ -625,7 +639,7 @@ export const COPY = {
     milestoneTag: 'Milestone Assessment',
     milestoneSuffix: ' (milestone)',
     dailyTag: 'Daily Metric',
-    saveEntry: 'Save measurement to plan',
+    saveEntry: 'Save measurement to routine',
     savedToast: (name: string) => `${name} recorded successfully`,
     values: {
       present: 'Present',
@@ -637,14 +651,16 @@ export const COPY = {
     widgets: {
       evaluationRule: 'Evaluation Rule: ',
       measurementCriteria: 'Measurement Criteria: ',
-      protocolNote: 'Plan Note: ',
-      protocolGuidelines: 'Plan Test Guidelines: ',
+      protocolNote: 'Routine Note: ',
+      routineNote: 'Routine Note: ',
+      protocolGuidelines: 'Routine Test Guidelines: ',
+      routineGuidelines: 'Routine Test Guidelines: ',
       photo: {
         uploadPrompt: 'Capture or upload clinical photograph',
         dropHint: 'Drag & drop image file or click to select',
         changePhoto: 'Change photo',
         retake: 'Retake',
-        instructionsLabel: 'Standardized study plan guidelines:',
+        instructionsLabel: 'Standardized study routine guidelines:',
         previewAlt: 'Milestone clinical assessment photo',
         removePhoto: 'Remove photo',
         attached: '✓ photo attached to milestone record',
@@ -705,7 +721,7 @@ export const COPY = {
       targetReference: (target: string) => `Target: ${target}`,
       milestonePeriod: 'milestone period:',
       dragHint: 'drag split slider horizontally to inspect morphological progression',
-      overheadStandard: 'study protocol standardized 30cm overhead alignment',
+      overheadStandard: 'study routine standardized 30cm overhead alignment',
       baselineAlt: 'Baseline Day 1 assessment',
       milestoneAlt: (day: number) => `Day ${day} milestone assessment`,
       sliderAria: 'Split slider comparison percentage',
@@ -796,7 +812,8 @@ export const COPY = {
       saveSuccess: 'Paper saved to Firestore papers collection'
     },
     community: {
-      protocolIdRequired: 'Protocol ID is required',
+      protocolIdRequired: 'Routine ID is required',
+      routineIdRequired: 'Routine ID is required',
       invalidOutcome: 'Outcome must be one of: improved, adjusted, paused',
       textRequired: 'Review text is required',
       saveSuccess: 'Community review recorded',
@@ -811,10 +828,38 @@ export const COPY = {
     journal: 'Journal of Interventional Human Science',
     trialType: 'Randomized Controlled Trial',
     step1Action: 'Primary Prescribed Intervention',
-    step1Detail: 'Standardized experimental dosage/repetition plan under controlled observation.',
+    step1Detail: 'Standardized experimental dosage/repetition routine under controlled observation.',
     step1Frequency: '1x Daily',
     step1SetLabel: 'dose / round',
-    step1PerSetLabel: '1 plan round',
+    step1PerSetLabel: '1 routine round',
+    step1StatLabel: 'target:',
+    step1StatValue: '1 daily session',
+    step2Action: 'Sustained Adaptation Hold',
+    step2Detail:
+      'Authors reported adaptation timing without specifying exact hold duration. Conservative 30s baseline applied.',
+    step2Frequency: '1x Daily',
+    progressionCondition: 'Compliance rate ≥ 85% with adverse symptom score ≤ 2/10 for 5 consecutive days',
+    progressionAction: 'Progress load or duration by 10% in Phase 2',
+    contraindicationText: 'Stop immediately if sharp acute discomfort or unexpected adverse symptoms occur.',
+    missingParameter: 'Rest interval and hold duration',
+    missingFallback: 'Conservative baseline: 3 × 30s with 60s recovery',
+    metricName: 'tolerability',
+    metricLabel: 'symptom / tolerability',
+    eyebrow: 'symptom',
+    logTitle: 'log',
+    dropOffUnit: 'day'
+  },
+  fallbackRoutine: {
+    phase: 'Phase 1: Week 1–2',
+    phaseLabel: 'week 1',
+    authors: 'Research Collaborative & Clinical Investigators',
+    journal: 'Journal of Interventional Human Science',
+    trialType: 'Randomized Controlled Trial',
+    step1Action: 'Primary Prescribed Intervention',
+    step1Detail: 'Standardized experimental dosage/repetition routine under controlled observation.',
+    step1Frequency: '1x Daily',
+    step1SetLabel: 'dose / round',
+    step1PerSetLabel: '1 routine round',
     step1StatLabel: 'target:',
     step1StatValue: '1 daily session',
     step2Action: 'Sustained Adaptation Hold',
@@ -836,12 +881,12 @@ export const COPY = {
     buttonLabel: 'how to use & sample papers',
     buttonShort: 'how to',
     buttonExploreSamples: 'explore sample papers',
-    dialogLabel: 'How to use Protocol Engine & sample research papers',
-    title: 'How Protocol Engine Works',
+    dialogLabel: 'How to use ViskotuN1 & sample research papers',
+    title: 'How ViskotuN1 Works',
     eyebrow: 'user guide & clinical research papers',
     badge: 'Interactive Research Pipeline',
     intro:
-      'Protocol Engine converts dense, peer-reviewed human interventional research into executable daily plans with zero hallucinated gaps and an evidence-grounded AI safety assistant.',
+      'ViskotuN1 converts dense, peer-reviewed human interventional research into executable daily routines with zero hallucinated gaps and an evidence-grounded AI safety assistant.',
     tabs: {
       guide: 'how it works',
       samples: 'sample papers',
@@ -869,21 +914,21 @@ export const COPY = {
     ],
     samplesTitle: 'Curated Sample Research Papers',
     samplesSubtitle:
-      'Explore these pre-calibrated clinical plans or download the original open-access PDFs from PubMed Central (PMC) to test live extraction.',
+      'Explore these pre-calibrated clinical routines or download the original open-access PDFs from PubMed Central (PMC) to test live extraction.',
     firestoreSyncLive: 'Firebase Firestore live',
     firestoreSyncLocal: 'Local verified catalog',
     loadButton: 'Try this sample',
     loadedButton: 'Active in workspace',
     downloadPdfButton: 'Download Open-Access PDF',
     doiLabel: 'View on PMC / DOI',
-    loadedToast: (title: string) => `Loaded ${title} plan into your workspace`,
+    loadedToast: (title: string) => `Loaded ${title} routine into your workspace`,
     featuresHeader: 'Trial Endpoints & Morphing UI Tested:',
     scopeTitle: 'Strict Gatekeeper Scope',
     scopeSubtitle:
-      'Protocol Engine specializes strictly in Interventional Human Science. Theoretical topics and non-human animal models are safely rejected.',
+      'ViskotuN1 specializes strictly in Interventional Human Science. Theoretical topics and non-human animal models are safely rejected.',
     acceptedHeader: 'Accepted Topics (Eligible)',
     acceptedList: [
-      'Musculoskeletal & physical therapy rehabilitation plans',
+      'Musculoskeletal & physical therapy rehabilitation routines',
       'Pharmacological and nutritional human clinical trials',
       'Sleep scheduling, light therapy & circadian hygiene',
       'Dermatology and topical regenerative regimens',
@@ -906,14 +951,16 @@ export const COPY = {
     welcomeEyebrow: 'getting started',
     welcomeTitle: 'turn clinical research into daily routines',
     welcomeSubtitle:
-      'Protocol Engine ingests peer-reviewed clinical research and transforms it into executable, adaptive daily health plans. No pre-loaded dummy papers—start fresh with your own PDF or load a curated sample.',
+      'ViskotuN1 ingests peer-reviewed clinical research and transforms it into executable, adaptive daily health routines. No pre-loaded dummy papers—start fresh with your own PDF or load a curated sample.',
     ctaUpload: 'upload research paper',
     ctaHowTo: 'how to & sample papers',
     dropPrompt: 'drop a research pdf here to extract',
     dropSubtext: 'clinical trials, RCTs, rehabilitation, nutrition, sleep & pharmacology',
-    samplesHeading: 'or try a curated sample plan with one click:',
-    quickLoadButton: 'use plan',
-    noActiveProtocol: 'no active plan',
-    noActiveProtocolDesc: 'upload a research paper or load a sample from the guide to start tracking.'
+    samplesHeading: 'or try a curated sample routine with one click:',
+    quickLoadButton: 'use routine',
+    noActiveProtocol: 'no active routine',
+    noActiveRoutine: 'no active routine',
+    noActiveProtocolDesc: 'upload a research paper or load a sample from the guide to start tracking.',
+    noActiveRoutineDesc: 'upload a research paper or load a sample from the guide to start tracking.'
   }
 } as const;
