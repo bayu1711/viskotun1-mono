@@ -4,7 +4,7 @@ import React from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import { COPY } from '../../../data/copy';
-import type { DataCollectionField } from '../../../types/protocol';
+import type { DataCollectionField } from '../../../types/routine';
 import { cn } from '../../../utils/cn';
 import { Icon } from '../../ui/Icon';
 

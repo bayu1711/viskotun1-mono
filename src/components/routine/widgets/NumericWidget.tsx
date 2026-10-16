@@ -4,7 +4,7 @@ import React from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { COPY } from '../../../data/copy';
-import type { DataCollectionField } from '../../../types/protocol';
+import type { DataCollectionField } from '../../../types/routine';
 import { clamp } from '../../../utils/math';
 import { CircleButton } from '../../ui/CircleButton';
 import { Icon } from '../../ui/Icon';
@@ -71,7 +71,7 @@ export function NumericWidget({ field, value, onChange }: NumericWidgetProps) {
         </CircleButton>
       </div>
 
-      <p className="mt-3 text-xs text-ink/50 lowercase">
+      <p className="mt-3 text-xs text-ink/50">
         {COPY.morphing.widgets.numeric.referenceRange(min, max, field.unit)}
       </p>
 

@@ -4,7 +4,7 @@ import React from 'react';
 import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import EventAvailableOutlinedIcon from '@mui/icons-material/EventAvailableOutlined';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { Callout } from '../feedback/Callout';
 import { Icon } from '../ui/Icon';
@@ -13,7 +13,7 @@ import { PillButton } from '../ui/PillButton';
 
 export function MilestoneBanner() {
   const { currentDay, scheduledFields, isCurrentDayMilestone, morphingLogs, openFeedbackDrawer } =
-    useProtocol();
+    useRoutine();
 
   if (!isCurrentDayMilestone) return null;
 

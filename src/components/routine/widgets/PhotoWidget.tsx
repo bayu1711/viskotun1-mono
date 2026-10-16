@@ -5,7 +5,7 @@ import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import { COPY } from '../../../data/copy';
-import type { DataCollectionField } from '../../../types/protocol';
+import type { DataCollectionField } from '../../../types/routine';
 import { CircleButton } from '../../ui/CircleButton';
 import { Icon } from '../../ui/Icon';
 import { PillButton } from '../../ui/PillButton';
@@ -75,7 +75,7 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
               </CircleButton>
             </div>
           </div>
-          <p className="mt-2 text-2xs text-ink/45 lowercase">
+          <p className="mt-2 text-2xs text-ink/45">
             {COPY.morphing.widgets.photo.attached}
           </p>
         </div>

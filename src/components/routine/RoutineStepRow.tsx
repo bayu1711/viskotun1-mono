@@ -23,8 +23,8 @@ export function RoutineStepRow({ step }: RoutineStepRowProps) {
         <StepIcon icon={step.icon} size="md" />
       </IconTile>
       <div className="min-w-0 flex-1">
-        <p className={cn('text-sm lowercase leading-snug', complete && 'text-ink/40 line-through')}>{step.action}</p>
-        <p className="mt-0.5 text-xs lowercase text-ink/45">
+        <p className={cn('text-sm leading-snug', complete && 'text-ink/40 line-through')}>{step.action}</p>
+        <p className="mt-0.5 text-xs text-ink/45">
           {display.summary} · {step.frequency}
           {step.inferred && <span className="text-warning">{COPY.protocolCard.defaulted}</span>}
         </p>

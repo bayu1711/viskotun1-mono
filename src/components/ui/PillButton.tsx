@@ -42,7 +42,7 @@ export function PillButton({
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-full text-sm lowercase transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:cursor-default',
+        'inline-flex items-center justify-center gap-2 rounded-full text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:cursor-default',
         VARIANTS[variant],
         SIZES[size],
         fullWidth && 'w-full',

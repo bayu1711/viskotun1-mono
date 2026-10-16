@@ -24,14 +24,14 @@ export function StatCard({ label, value, caption, tone, icon }: StatCardProps) {
   const styles = TONES[tone];
   return (
     <article className={cn('flex min-h-stat flex-col rounded-card p-4 transition-colors sm:p-5', styles.card)}>
-      <h2 className="flex items-center gap-2 text-body lowercase">
+      <h2 className="flex items-center gap-2 text-body">
         <Icon icon={icon} size="sm" />
         {label}
       </h2>
-      <p className="mt-auto pt-6 text-display-sm font-light lowercase leading-none tracking-tight sm:text-display">
+      <p className="mt-auto pt-6 text-display-sm font-light leading-none tracking-tight sm:text-display">
         {value}
       </p>
-      <p className={cn('mt-2 text-xs lowercase', styles.muted)}>{caption}</p>
+      <p className={cn('mt-2 text-xs', styles.muted)}>{caption}</p>
     </article>);
 
 }

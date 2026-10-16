@@ -58,7 +58,7 @@ export function AssistantHeader({
       </div>
       <div className="pt-4">
         <div className="flex items-center justify-between">
-          <p className="text-sm lowercase leading-none text-ink/45">
+          <p className="text-sm leading-none text-ink/45">
             {isAsk ? protocolTitle : COPY.assistant.eyebrowUpload}
           </p>
           {isAsk && (
@@ -73,7 +73,7 @@ export function AssistantHeader({
             </span>
           )}
         </div>
-        <h2 id={titleId} className="mt-1 text-display-sm lowercase leading-tight tracking-tight">
+        <h2 id={titleId} className="mt-1 text-display-sm leading-tight tracking-tight">
           {isAsk ? COPY.assistant.titleAsk : COPY.assistant.titleUpload}
         </h2>
       </div>

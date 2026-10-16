@@ -1,13 +1,13 @@
 import React from 'react';
 import FitnessCenterOutlinedIcon from '@mui/icons-material/FitnessCenterOutlined';
 import { COPY } from '../../data/copy';
-import type { ProtocolStep } from '../../types/protocol';
+import type { RoutineStep, ProtocolStep } from '../../types/routine';
 import { isWideStep } from '../../utils/steps';
 import { EmptyState } from '../feedback/EmptyState';
 import { TaskCard } from './TaskCard';
 
 interface TaskGridProps {
-  steps: ProtocolStep[];
+  steps: (RoutineStep | ProtocolStep)[];
 }
 
 export function TaskGrid({ steps }: TaskGridProps) {

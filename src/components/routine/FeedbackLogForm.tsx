@@ -3,16 +3,16 @@
 import React, { type FormEvent, useEffect, useId, useMemo, useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { toast } from 'sonner';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import {
   FEEDBACK_ESCALATION_THRESHOLD,
   FEEDBACK_NOTE_MAX_LENGTH,
   FEEDBACK_SCORE_DEFAULT
 } from '../../data/config';
 import { COPY } from '../../data/copy';
-import type { DataCollectionField } from '../../types/protocol';
+import type { DataCollectionField } from '../../types/routine';
 import { cn } from '../../utils/cn';
-import { exceedsFeedbackThreshold } from '../../utils/protocolMetrics';
+import { exceedsFeedbackThreshold } from '../../utils/routineMetrics';
 import { severityTone } from '../../utils/tones';
 import { Callout } from '../feedback/Callout';
 import { CircleButton } from '../ui/CircleButton';
@@ -54,7 +54,7 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
     setActiveFieldId,
     logMorphingData,
     feedbackMetric
-  } = useProtocol();
+  } = useRoutine();
 
   const activeField = useMemo(
     () =>
@@ -108,7 +108,7 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
                 type="button"
                 onClick={() => setActiveFieldId(field.id)}
                 className={cn(
-                  'rounded-full px-3 py-1 text-2xs font-medium lowercase whitespace-nowrap transition-colors',
+                  'rounded-full px-3 py-1 text-2xs font-medium whitespace-nowrap transition-colors',
                   isSelected
                     ? 'bg-ink text-white shadow-sm'
                     : 'bg-white text-ink/65 border border-ink/15 hover:bg-ink/5'
@@ -134,7 +134,7 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
             <Icon icon={CloseIcon} size="md" />
           </CircleButton>
           <div className="text-center">
-            <h2 className="text-sm font-medium lowercase">
+            <h2 className="text-sm font-medium">
               {COPY.morphing.dialogTitle(activeField.name, currentDay)}
             </h2>
             <span className="text-3xs uppercase tracking-wider text-ink/50">

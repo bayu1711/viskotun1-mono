@@ -17,7 +17,7 @@ export function FaqSuggestions({ faqs, onSelect }: FaqSuggestionsProps) {
         key={faq.question}
         type="button"
         onClick={() => onSelect(faq.question)}
-        className="shrink-0 rounded-full border border-ink/20 bg-white px-3.5 py-1.5 text-xs lowercase transition-colors hover:border-ink focus:outline-none focus-visible:border-ink">
+        className="shrink-0 rounded-full border border-ink/20 bg-white px-3.5 py-1.5 text-xs transition-colors hover:border-ink focus:outline-none focus-visible:border-ink">
         
           {faq.question}
         </button>

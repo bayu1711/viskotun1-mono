@@ -45,10 +45,10 @@ export function LandingPage() {
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-xs font-semibold text-white">
               {COPY.brand.initials}
             </span>
-            <span className="text-lg lowercase font-medium">{COPY.brand.name}</span>
+            <span className="text-lg font-medium">{COPY.brand.name}</span>
           </Link>
 
-          <nav className="hidden items-center gap-6 text-sm lowercase text-ink/70 md:flex">
+          <nav className="hidden items-center gap-6 text-sm text-ink/70 md:flex">
             <a href="#how-it-works" className="hover:text-ink transition-colors">
               {COPY.landing.nav.howItWorks}
             </a>
@@ -65,8 +65,8 @@ export function LandingPage() {
               <div className="flex items-center gap-2">
                 <Avatar initials={user.initials} />
                 <div className="hidden sm:block text-left leading-tight">
-                  <p className="text-xs font-medium lowercase text-ink">{user.name}</p>
-                  <p className="text-2xs lowercase text-ink/50">
+                  <p className="text-xs font-medium text-ink">{user.name}</p>
+                  <p className="text-2xs text-ink/50">
                     {user.isGuest ? COPY.auth.guestBadge : (user.email || COPY.auth.cloudSyncedBadge)}
                   </p>
                 </div>
@@ -77,7 +77,7 @@ export function LandingPage() {
               <button
                 type="button"
                 onClick={logout}
-                className="text-xs lowercase text-ink/60 hover:text-ink transition-colors px-2 py-1 focus:outline-none focus-visible:underline"
+                className="text-xs text-ink/60 hover:text-ink transition-colors px-2 py-1 focus:outline-none focus-visible:underline"
               >
                 {COPY.auth.signOut}
               </button>
@@ -86,7 +86,7 @@ export function LandingPage() {
             <div className="flex items-center gap-3">
               <Link
                 href={ROUTES.login}
-                className="text-xs lowercase font-medium text-ink/70 hover:text-ink px-3 py-1.5 transition-colors"
+                className="text-xs font-medium text-ink/70 hover:text-ink px-3 py-1.5 transition-colors"
               >
                 {COPY.landing.ctaLogin}
               </Link>
@@ -102,25 +102,25 @@ export function LandingPage() {
 
       {/* Hero Section */}
       <section className="mx-auto max-w-5xl px-5 pb-16 pt-16 text-center lg:px-8 lg:pt-24">
-        <div className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white/80 px-3.5 py-1 text-2xs lowercase font-medium text-ink/70 backdrop-blur">
+        <div className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white/80 px-3.5 py-1 text-2xs font-medium text-ink/70 backdrop-blur">
           <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
           {COPY.landing.badge}
         </div>
 
         {user && (
           <div className="mt-4 block">
-            <span className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-mint/50 px-3.5 py-1 text-2xs lowercase font-medium text-ink">
+            <span className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-mint/50 px-3.5 py-1 text-2xs font-medium text-ink">
               <span className="h-1.5 w-1.5 rounded-full bg-ink" aria-hidden="true" />
               <span>{COPY.landing.loggedInBadge(user.name)}</span>
             </span>
           </div>
         )}
 
-        <h1 className="mt-6 text-4xl font-normal lowercase tracking-tight text-ink sm:text-5xl lg:text-6xl">
+        <h1 className="mt-6 text-4xl font-normal tracking-tight text-ink sm:text-5xl lg:text-6xl">
           {COPY.landing.heroTitle}
         </h1>
 
-        <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed lowercase text-ink/65 sm:text-lg">
+        <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-ink/65 sm:text-lg">
           {COPY.landing.heroSubtitle}
         </p>
 
@@ -146,11 +146,11 @@ export function LandingPage() {
 
         {/* Scope Guardrail Callout */}
         <div id="gatekeeper" className="mx-auto mt-12 max-w-2xl rounded-card border border-ink/15 bg-white p-5 text-left shadow-sm">
-          <div className="flex items-center gap-2 text-xs font-semibold lowercase tracking-wide text-ink">
+          <div className="flex items-center gap-2 text-xs font-semibold tracking-wide text-ink">
             <Icon icon={ShieldOutlinedIcon} size="sm" className="text-success" />
             <span>{COPY.landing.scopeBadge}</span>
           </div>
-          <p className="mt-2 text-xs leading-relaxed text-ink/60 lowercase">
+          <p className="mt-2 text-xs leading-relaxed text-ink/60">
             {COPY.landing.scopeNote}
           </p>
         </div>
@@ -161,7 +161,7 @@ export function LandingPage() {
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-ink/45">{COPY.landing.architecture}</p>
-            <h2 className="mt-2 text-3xl lowercase">{COPY.landing.architectureTitle}</h2>
+            <h2 className="mt-2 text-3xl">{COPY.landing.architectureTitle}</h2>
           </div>
 
           <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -169,9 +169,9 @@ export function LandingPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cream text-ink">
                 <Icon icon={DescriptionOutlinedIcon} size="md" />
               </div>
-              <p className="mt-4 text-xs font-mono lowercase text-ink/40">{COPY.landing.steps.step1Number}</p>
-              <h3 className="mt-1 text-lg font-medium lowercase">{COPY.landing.steps.step1Title}</h3>
-              <p className="mt-2 text-xs leading-relaxed lowercase text-ink/60">
+              <p className="mt-4 text-xs font-mono text-ink/40">{COPY.landing.steps.step1Number}</p>
+              <h3 className="mt-1 text-lg font-medium">{COPY.landing.steps.step1Title}</h3>
+              <p className="mt-2 text-xs leading-relaxed text-ink/60">
                 {COPY.landing.steps.step1Body}
               </p>
             </div>
@@ -180,9 +180,9 @@ export function LandingPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-mint text-ink">
                 <Icon icon={ScienceOutlinedIcon} size="md" />
               </div>
-              <p className="mt-4 text-xs font-mono lowercase text-ink/40">{COPY.landing.steps.step2Number}</p>
-              <h3 className="mt-1 text-lg font-medium lowercase">{COPY.landing.steps.step2Title}</h3>
-              <p className="mt-2 text-xs leading-relaxed lowercase text-ink/60">
+              <p className="mt-4 text-xs font-mono text-ink/40">{COPY.landing.steps.step2Number}</p>
+              <h3 className="mt-1 text-lg font-medium">{COPY.landing.steps.step2Title}</h3>
+              <p className="mt-2 text-xs leading-relaxed text-ink/60">
                 {COPY.landing.steps.step2Body}
               </p>
             </div>
@@ -191,9 +191,9 @@ export function LandingPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blush text-ink">
                 <Icon icon={ShieldOutlinedIcon} size="md" />
               </div>
-              <p className="mt-4 text-xs font-mono lowercase text-ink/40">{COPY.landing.steps.step3Number}</p>
-              <h3 className="mt-1 text-lg font-medium lowercase">{COPY.landing.steps.step3Title}</h3>
-              <p className="mt-2 text-xs leading-relaxed lowercase text-ink/60">
+              <p className="mt-4 text-xs font-mono text-ink/40">{COPY.landing.steps.step3Number}</p>
+              <h3 className="mt-1 text-lg font-medium">{COPY.landing.steps.step3Title}</h3>
+              <p className="mt-2 text-xs leading-relaxed text-ink/60">
                 {COPY.landing.steps.step3Body}
               </p>
             </div>
@@ -202,9 +202,9 @@ export function LandingPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-white">
                 <Icon icon={HealthAndSafetyOutlinedIcon} size="md" />
               </div>
-              <p className="mt-4 text-xs font-mono lowercase text-white/50">{COPY.landing.steps.step4Number}</p>
-              <h3 className="mt-1 text-lg font-medium lowercase">{COPY.landing.steps.step4Title}</h3>
-              <p className="mt-2 text-xs leading-relaxed lowercase text-white/70">
+              <p className="mt-4 text-xs font-mono text-white/50">{COPY.landing.steps.step4Number}</p>
+              <h3 className="mt-1 text-lg font-medium">{COPY.landing.steps.step4Title}</h3>
+              <p className="mt-2 text-xs leading-relaxed text-white/70">
                 {COPY.landing.steps.step4Body}
               </p>
             </div>
@@ -217,7 +217,7 @@ export function LandingPage() {
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-ink/45">{COPY.landing.capabilities}</p>
-            <h2 className="mt-2 text-3xl lowercase">{COPY.landing.capabilitiesTitle}</h2>
+            <h2 className="mt-2 text-3xl">{COPY.landing.capabilitiesTitle}</h2>
           </div>
 
           <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -226,8 +226,8 @@ export function LandingPage() {
                 <Icon icon={CheckCircleOutlineIcon} size="md" />
               </div>
               <div>
-                <h3 className="text-base font-medium lowercase">{COPY.landing.features.gatekeeperTitle}</h3>
-                <p className="mt-1 text-xs leading-relaxed lowercase text-ink/60">
+                <h3 className="text-base font-medium">{COPY.landing.features.gatekeeperTitle}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-ink/60">
                   {COPY.landing.features.gatekeeperBody}
                 </p>
               </div>
@@ -238,8 +238,8 @@ export function LandingPage() {
                 <Icon icon={CheckCircleOutlineIcon} size="md" />
               </div>
               <div>
-                <h3 className="text-base font-medium lowercase">{COPY.landing.features.auditingTitle}</h3>
-                <p className="mt-1 text-xs leading-relaxed lowercase text-ink/60">
+                <h3 className="text-base font-medium">{COPY.landing.features.auditingTitle}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-ink/60">
                   {COPY.landing.features.auditingBody}
                 </p>
               </div>
@@ -250,8 +250,8 @@ export function LandingPage() {
                 <Icon icon={CheckCircleOutlineIcon} size="md" />
               </div>
               <div>
-                <h3 className="text-base font-medium lowercase">{COPY.landing.features.safetyTitle}</h3>
-                <p className="mt-1 text-xs leading-relaxed lowercase text-ink/60">
+                <h3 className="text-base font-medium">{COPY.landing.features.safetyTitle}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-ink/60">
                   {COPY.landing.features.safetyBody}
                 </p>
               </div>
@@ -262,8 +262,8 @@ export function LandingPage() {
                 <Icon icon={CheckCircleOutlineIcon} size="md" />
               </div>
               <div>
-                <h3 className="text-base font-medium lowercase">{COPY.landing.features.summaryTitle}</h3>
-                <p className="mt-1 text-xs leading-relaxed lowercase text-ink/60">
+                <h3 className="text-base font-medium">{COPY.landing.features.summaryTitle}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-ink/60">
                   {COPY.landing.features.summaryBody}
                 </p>
               </div>
@@ -273,8 +273,8 @@ export function LandingPage() {
           {/* Interactive Demo Callout */}
           <div className="mt-16 rounded-card border border-ink bg-ink p-8 text-center text-white sm:p-12">
             <Icon icon={AutoAwesomeOutlinedIcon} size="xl" className="text-mint mx-auto" />
-            <h2 className="mt-4 text-3xl font-normal lowercase">{COPY.landing.demoTitle}</h2>
-            <p className="mx-auto mt-2 max-w-lg text-sm lowercase text-white/70">
+            <h2 className="mt-4 text-3xl font-normal">{COPY.landing.demoTitle}</h2>
+            <p className="mx-auto mt-2 max-w-lg text-sm text-white/70">
               {COPY.landing.demoSubtitle}
             </p>
             <div className="mt-6 flex justify-center">
@@ -287,7 +287,7 @@ export function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-ink/10 bg-canvas py-8 text-center text-xs text-ink/45 lowercase">
+      <footer className="border-t border-ink/10 bg-canvas py-8 text-center text-xs text-ink/45">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 sm:flex-row lg:px-8">
           <p>{COPY.landing.footerTagline}</p>
           <div className="flex items-center gap-4">

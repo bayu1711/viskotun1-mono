@@ -27,7 +27,7 @@ export function FilterChips<T extends string>({ options, value, onChange, ariaLa
             onClick={() => onChange(option.id)}
             aria-pressed={selected}
             className={cn(
-              'shrink-0 rounded-full px-4 py-1.5 text-xs lowercase transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30',
+              'shrink-0 rounded-full px-4 py-1.5 text-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30',
               selected ? 'bg-ink text-white' : 'border border-ink/20 text-ink/55 hover:border-ink'
             )}>
             

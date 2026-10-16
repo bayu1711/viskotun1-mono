@@ -9,9 +9,9 @@ import {
   MOTION
 } from '../../data/config';
 import { COPY } from '../../data/copy';
-import type { FeedbackMetric } from '../../types/protocol';
+import type { FeedbackMetric } from '../../types/routine';
 import { cn } from '../../utils/cn';
-import { clampFeedbackScore } from '../../utils/protocolMetrics';
+import { clampFeedbackScore } from '../../utils/routineMetrics';
 import type { SeverityTone } from '../../utils/tones';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
@@ -56,7 +56,7 @@ export function FeedbackScoreControl({ score, tone, onChange, metric }: Feedback
           <Icon icon={AddIcon} size="md" />
         </CircleButton>
       </div>
-      <p className="mt-3 text-center text-2xl lowercase">
+      <p className="mt-3 text-center text-2xl">
         {COPY.feedbackDrawer.ofMax(maxScore)} <span className="text-sm text-ink/45">/ {tone.label}</span>
       </p>
 
@@ -84,7 +84,7 @@ export function FeedbackScoreControl({ score, tone, onChange, metric }: Feedback
           className="feedback-slider relative w-full bg-transparent"
         />
       </div>
-      <div className="mt-2 flex justify-between text-xs lowercase text-ink/45">
+      <div className="mt-2 flex justify-between text-xs text-ink/45">
         <span>{metric?.minLabel ?? COPY.feedbackDrawer.minLabel(minScore)}</span>
         <span>{metric?.maxLabel ?? COPY.feedbackDrawer.maxLabel(maxScore)}</span>
       </div>

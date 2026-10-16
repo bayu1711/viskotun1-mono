@@ -2,13 +2,13 @@
 
 import React, { useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
 import { COPY } from '../../data/copy';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { PillButton } from '../ui/PillButton';
 import { Spinner } from '../feedback/Spinner';
-import type { ReviewOutcome } from '../../types/protocol';
+import type { ReviewOutcome } from '../../types/routine';
 import { cn } from '../../utils/cn';
 
 interface CommunityReviewDrawerProps {
@@ -18,12 +18,13 @@ interface CommunityReviewDrawerProps {
 
 export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerProps = {}) {
   const {
-    protocol,
+    routine,
+    protocol = routine,
     adherenceRate,
     isReviewDrawerOpen,
     closeReviewDrawer,
     submitCommunityReview
-  } = useProtocol();
+  } = useRoutine();
 
   const isOpen = open ?? isReviewDrawerOpen;
   const handleClose = onClose ?? closeReviewDrawer;
@@ -102,7 +103,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
                   <span className="text-xs uppercase tracking-wider text-ink/40 font-mono">
                     {COPY.community.shareModalEyebrow}
                   </span>
-                  <h2 className="text-lg font-medium lowercase text-ink mt-0.5">
+                  <h2 className="text-lg font-medium text-ink mt-0.5">
                     {COPY.community.shareModalTitle}
                   </h2>
                 </div>
@@ -117,7 +118,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
               </div>
 
               {protocol && (
-                <div className="mt-3 rounded-tile bg-canvas p-3 text-xs lowercase border border-ink/10">
+                <div className="mt-3 rounded-tile bg-canvas p-3 text-xs border border-ink/10">
                   <span className="font-semibold text-ink">{protocol.title}</span>
                   {protocol.paper?.doi && (
                     <span className="ml-2 text-ink/50 font-mono">
@@ -130,7 +131,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
               <div className="mt-4 space-y-4">
                 {/* Clinical Outcome Selection */}
                 <div>
-                  <label className="block text-xs lowercase font-medium text-ink mb-1.5">
+                  <label className="block text-xs font-medium text-ink mb-1.5">
                     {COPY.community.outcomeLabel}
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -140,7 +141,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
                         type="button"
                         onClick={() => setOutcome(opt)}
                         className={cn(
-                          'rounded-tile border py-2 px-2.5 text-xs lowercase text-center transition-all',
+                          'rounded-tile border py-2 px-2.5 text-xs text-center transition-all',
                           outcome === opt
                             ? outcomeColors[opt].active
                             : `bg-white text-ink/70 ${outcomeColors[opt].border}`
@@ -155,7 +156,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
                 {/* Day & Adherence Inputs */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs lowercase font-medium text-ink mb-1">
+                    <label className="block text-xs font-medium text-ink mb-1">
                       {COPY.community.dayLabel}
                     </label>
                     <input
@@ -168,7 +169,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
                     />
                   </div>
                   <div>
-                    <label className="block text-xs lowercase font-medium text-ink mb-1">
+                    <label className="block text-xs font-medium text-ink mb-1">
                       {COPY.community.adherenceLabel} (%)
                     </label>
                     <input
@@ -184,7 +185,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
 
                 {/* Demographic Handle */}
                 <div>
-                  <label className="block text-xs lowercase font-medium text-ink mb-1">
+                  <label className="block text-xs font-medium text-ink mb-1">
                     {COPY.community.handleLabel}
                   </label>
                   <input
@@ -199,7 +200,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
 
                 {/* Experience & Observations Text */}
                 <div>
-                  <label className="block text-xs lowercase font-medium text-ink mb-1">
+                  <label className="block text-xs font-medium text-ink mb-1">
                     {COPY.community.notesLabel}
                   </label>
                   <textarea

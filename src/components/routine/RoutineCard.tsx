@@ -54,7 +54,7 @@ export function RoutineCard() {
       )}
 
       {rule && (
-        <p className="mt-3 px-1 text-xs lowercase leading-relaxed text-ink/45">
+        <p className="mt-3 px-1 text-xs leading-relaxed text-ink/45">
           {COPY.protocolCard.rulePrefix} {rule.condition.toLowerCase()} {COPY.protocolCard.ruleArrow}{' '}
           <span className="text-ink">{rule.action.toLowerCase()}</span>
         </p>
@@ -63,7 +63,7 @@ export function RoutineCard() {
       <DayActions className="mt-5 gap-2" size="md" />
 
       {escalationPaused && (
-        <p role="status" className="mt-3 text-center text-xs lowercase text-danger">
+        <p role="status" className="mt-3 text-center text-xs text-danger">
           {COPY.safety.escalationShort}
         </p>
       )}

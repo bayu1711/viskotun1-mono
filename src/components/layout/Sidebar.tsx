@@ -11,7 +11,7 @@ export function Sidebar() {
         <span aria-hidden="true" className="text-xl font-medium italic tracking-tighter">
           {COPY.brand.mark}
         </span>
-        <span className="text-body lowercase">{COPY.brand.name}</span>
+        <span className="text-body">{COPY.brand.name}</span>
       </Link>
       <SidebarNav className="mt-14" />
       <TodaySummaryCard className="mt-auto" />

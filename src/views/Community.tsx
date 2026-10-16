@@ -7,32 +7,32 @@ import { ReviewsPanel } from '../components/community/ReviewsPanel';
 import { PageContainer } from '../components/layout/PageContainer';
 import { PageHeader } from '../components/layout/PageHeader';
 import { useAssistant } from '../contexts/AssistantContext';
-import { useProtocol } from '../contexts/ProtocolContext';
+import { useRoutine } from '../contexts/RoutineContext';
 import { COPY } from '../data/copy';
 import { PillButton } from '../components/ui/PillButton';
-import type { CommunityInsights } from '../types/protocol';
+import type { CommunityInsights } from '../types/routine';
 
 export function CommunityPage() {
-  const { protocol, openHowTo } = useProtocol();
+  const { routine, openHowTo } = useRoutine();
   const { openAssistant } = useAssistant();
   const [liveMetrics, setLiveMetrics] = useState<CommunityInsights | null>(
-    protocol?.community || null
+    routine?.community || null
   );
 
   useEffect(() => {
     let isMounted = true;
-    if (!protocol?.id) return;
+    if (!routine?.id) return;
 
-    setLiveMetrics(protocol.community);
+    setLiveMetrics(routine.community);
 
     async function fetchLiveMetrics() {
       try {
-        const res = await fetch(`/api/community/metrics?routineId=${encodeURIComponent(protocol.id)}`);
+        const res = await fetch(`/api/community/metrics?routineId=${encodeURIComponent(routine.id)}`);
         if (res.ok) {
           const data = await res.json();
           if (isMounted && data.metrics) {
             setLiveMetrics((prev) => ({
-              ...(prev || protocol.community),
+              ...(prev || routine.community),
               ...data.metrics
             }));
           }
@@ -47,15 +47,15 @@ export function CommunityPage() {
     return () => {
       isMounted = false;
     };
-  }, [protocol?.id, protocol?.community]);
+  }, [routine?.id, routine?.community]);
 
-  if (!protocol) {
+  if (!routine) {
     return (
       <PageContainer>
         <PageHeader eyebrow={COPY.nav.community} title={COPY.nav.community} />
         <div className="mt-8 rounded-card border border-ink/10 bg-white p-8 text-center max-w-md mx-auto space-y-4">
-          <p className="text-sm font-medium lowercase text-ink">{COPY.onboarding.noActiveProtocol}</p>
-          <p className="text-xs lowercase text-ink/65 leading-relaxed">
+          <p className="text-sm font-medium text-ink">{COPY.onboarding.noActiveProtocol}</p>
+          <p className="text-xs text-ink/65 leading-relaxed">
             {COPY.onboarding.noActiveProtocolDesc}
           </p>
           <div className="flex items-center justify-center gap-3 pt-2">
@@ -71,7 +71,7 @@ export function CommunityPage() {
     );
   }
 
-  const insights = liveMetrics || protocol.community;
+  const insights = liveMetrics || routine.community;
 
   return (
     <PageContainer>
@@ -83,10 +83,10 @@ export function CommunityPage() {
           <span className="h-1.5 w-1.5 rounded-full bg-mint ring-1 ring-ink/20" />
           {COPY.community.canonicalPaperBadge}
         </span>
-        {protocol.paper?.doi ? (
-          <span className="font-mono text-ink/50">DOI: {protocol.paper.doi}</span>
+        {routine.paper?.doi ? (
+          <span className="font-mono text-ink/50">DOI: {routine.paper.doi}</span>
         ) : (
-          <span className="text-ink/40">{protocol.title}</span>
+          <span className="text-ink/40">{routine.title}</span>
         )}
       </div>
 
@@ -95,7 +95,7 @@ export function CommunityPage() {
           tone="cream"
           label={COPY.community.studyEfficacy}
           value={insights.studyEfficacy}
-          caption={COPY.community.studyCaption(protocol.paper.sampleSize)}
+          caption={COPY.community.studyCaption(routine.paper.sampleSize)}
         />
         <EfficacyCard
           tone="mint"

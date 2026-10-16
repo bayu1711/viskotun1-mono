@@ -1,6 +1,6 @@
 import React from 'react';
 import { COPY } from '../../data/copy';
-import type { FeedbackLog } from '../../types/protocol';
+import type { FeedbackLog } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { severityTone } from '../../utils/tones';
 import { IconTile } from '../ui/IconTile';
@@ -18,10 +18,10 @@ export function FeedbackLogItem({ log }: FeedbackLogItemProps) {
         {log.score}
       </IconTile>
       <div className="min-w-0 flex-1">
-        <p className="text-sm lowercase">{COPY.routine.feedbackDay(log.day)}</p>
+        <p className="text-sm">{COPY.routine.feedbackDay(log.day)}</p>
         <p className="truncate text-xs text-ink/45">{log.note || COPY.routine.noNotes}</p>
       </div>
-      <span className="text-xs lowercase text-ink/45">{tone.label}</span>
+      <span className="text-xs text-ink/45">{tone.label}</span>
     </li>
   );
 }

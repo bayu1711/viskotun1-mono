@@ -1,12 +1,12 @@
 import React from 'react';
 import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { EmptyState } from '../feedback/EmptyState';
 import { FeedbackLogItem } from './FeedbackLogItem';
 
 export function FeedbackLogList() {
-  const { feedbackLogs, feedbackMetric } = useProtocol();
+  const { feedbackLogs, feedbackMetric } = useRoutine();
 
   if (feedbackLogs.length === 0) {
     return (

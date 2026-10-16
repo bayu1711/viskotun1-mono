@@ -1,7 +1,7 @@
 import React from 'react';
 import type { TooltipProps } from 'recharts';
 import { COPY } from '../../data/copy';
-import type { DropOffUnit } from '../../types/protocol';
+import type { DropOffUnit } from '../../types/routine';
 
 interface DropOffTooltipProps extends TooltipProps<number, string> {
   unit: DropOffUnit;
@@ -13,7 +13,7 @@ export function DropOffTooltip({ active, payload, label, unit }: DropOffTooltipP
 
   return (
     <div className="rounded-xl bg-ink px-3 py-2 text-xs text-white">
-      <p className="lowercase text-white/60">{COPY.community.periodLabel(unit, label)}</p>
+      <p className="text-white/60">{COPY.community.periodLabel(unit, label)}</p>
       <p>{COPY.community.dropOffValue(value)}</p>
     </div>);
 

@@ -96,7 +96,7 @@ export function AuthView({ mode }: AuthViewProps) {
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white">
           {COPY.brand.initials}
         </span>
-        <span className="text-xl lowercase font-medium">{COPY.brand.name}</span>
+        <span className="text-xl font-medium">{COPY.brand.name}</span>
       </Link>
 
       <div className="w-full max-w-md rounded-card border border-ink/15 bg-white p-7 shadow-sm sm:p-8">
@@ -106,7 +106,7 @@ export function AuthView({ mode }: AuthViewProps) {
             type="button"
             onClick={() => setActiveMode('login')}
             className={clsx(
-              'flex-1 rounded-full py-1.5 text-xs lowercase font-medium transition-colors',
+              'flex-1 rounded-full py-1.5 text-xs font-medium transition-colors',
               isLogin ? 'bg-white text-ink shadow-2xs' : 'text-ink/60 hover:text-ink'
             )}
           >
@@ -116,7 +116,7 @@ export function AuthView({ mode }: AuthViewProps) {
             type="button"
             onClick={() => setActiveMode('signup')}
             className={clsx(
-              'flex-1 rounded-full py-1.5 text-xs lowercase font-medium transition-colors',
+              'flex-1 rounded-full py-1.5 text-xs font-medium transition-colors',
               !isLogin ? 'bg-white text-ink shadow-2xs' : 'text-ink/60 hover:text-ink'
             )}
           >
@@ -125,10 +125,10 @@ export function AuthView({ mode }: AuthViewProps) {
         </div>
 
         <div className="text-center">
-          <h1 className="text-2xl font-normal lowercase tracking-tight">
+          <h1 className="text-2xl font-normal tracking-tight">
             {isLogin ? COPY.auth.loginTitle : COPY.auth.signupTitle}
           </h1>
-          <p className="mt-2 text-xs leading-relaxed lowercase text-ink/50">
+          <p className="mt-2 text-xs leading-relaxed text-ink/50">
             {isLogin ? COPY.auth.loginSubtitle : COPY.auth.signupSubtitle}
           </p>
         </div>
@@ -138,7 +138,7 @@ export function AuthView({ mode }: AuthViewProps) {
           type="button"
           onClick={handleGoogleAuth}
           disabled={isSubmitting}
-          className="mt-6 flex w-full items-center justify-center gap-2.5 rounded-full border border-ink/20 bg-white py-2.5 text-xs lowercase font-medium text-ink transition-colors hover:bg-canvas disabled:opacity-50"
+          className="mt-6 flex w-full items-center justify-center gap-2.5 rounded-full border border-ink/20 bg-white py-2.5 text-xs font-medium text-ink transition-colors hover:bg-canvas disabled:opacity-50"
         >
           <Icon icon={GoogleIcon} size="sm" />
           <span>{COPY.auth.googleButton}</span>
@@ -148,14 +148,14 @@ export function AuthView({ mode }: AuthViewProps) {
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-ink/10" />
           </div>
-          <span className="relative bg-white px-3 text-2xs lowercase text-ink/40">{COPY.auth.orWithEmail}</span>
+          <span className="relative bg-white px-3 text-2xs text-ink/40">{COPY.auth.orWithEmail}</span>
         </div>
 
         {/* Email/Password Form */}
         <form onSubmit={handleEmailSubmit} className="space-y-4">
           {!isLogin && (
             <div>
-              <label className="block text-2xs lowercase font-medium text-ink/70">
+              <label className="block text-2xs font-medium text-ink/70">
                 {COPY.auth.nameLabel}
               </label>
               <input
@@ -169,7 +169,7 @@ export function AuthView({ mode }: AuthViewProps) {
           )}
 
           <div>
-            <label className="block text-2xs lowercase font-medium text-ink/70">
+            <label className="block text-2xs font-medium text-ink/70">
               {COPY.auth.emailLabel}
             </label>
             <input
@@ -183,7 +183,7 @@ export function AuthView({ mode }: AuthViewProps) {
           </div>
 
           <div>
-            <label className="block text-2xs lowercase font-medium text-ink/70">
+            <label className="block text-2xs font-medium text-ink/70">
               {COPY.auth.passwordLabel}
             </label>
             <input
@@ -197,7 +197,7 @@ export function AuthView({ mode }: AuthViewProps) {
             />
           </div>
 
-          <PillButton type="submit" size="md" fullWidth loading={isSubmitting} className="mt-2 text-xs lowercase">
+          <PillButton type="submit" size="md" fullWidth loading={isSubmitting} className="mt-2 text-xs">
             {isLogin ? COPY.auth.loginButton : COPY.auth.signupButton}
           </PillButton>
         </form>
@@ -207,19 +207,19 @@ export function AuthView({ mode }: AuthViewProps) {
           <button
             type="button"
             onClick={handleGuestContinue}
-            className="inline-flex items-center gap-1.5 text-xs lowercase font-medium text-ink/75 hover:text-ink underline underline-offset-4"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-ink/75 hover:text-ink underline underline-offset-4"
           >
             <span>{COPY.auth.guestButton}</span>
             <Icon icon={ArrowForwardIcon} size="xs" />
           </button>
-          <p className="mt-2 text-2xs leading-relaxed lowercase text-ink/40">
+          <p className="mt-2 text-2xs leading-relaxed text-ink/40">
             {COPY.auth.guestNotice}
           </p>
         </div>
       </div>
 
       {/* Switch between Login and Signup */}
-      <p className="mt-6 text-xs lowercase text-ink/60">
+      <p className="mt-6 text-xs text-ink/60">
         {isLogin ? (
           <button
             type="button"

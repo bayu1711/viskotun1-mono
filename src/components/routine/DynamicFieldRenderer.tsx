@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import type { DataCollectionField } from '../../types/protocol';
+import type { DataCollectionField } from '../../types/routine';
 import { BooleanWidget } from './widgets/BooleanWidget';
 import { MultiChoiceWidget } from './widgets/MultiChoiceWidget';
 import { NumericWidget } from './widgets/NumericWidget';

@@ -29,9 +29,9 @@ export function FileDropOverlay({ visible }: FileDropOverlayProps) {
             <IconTile variant="outline" shape="circle" size={64}>
               <Icon icon={UploadFileOutlinedIcon} size="2xl" />
             </IconTile>
-            <p className="mt-5 text-metric lowercase leading-none tracking-tight">{COPY.shell.dropTitle}</p>
-            <p className="mt-2 text-sm lowercase text-ink/75">{COPY.shell.dropSubtitle}</p>
-            <p className="mt-4 rounded-full border border-ink/20 bg-white/60 px-4 py-1.5 text-xs lowercase text-ink/65">
+            <p className="mt-5 text-metric leading-none tracking-tight">{COPY.shell.dropTitle}</p>
+            <p className="mt-2 text-sm text-ink/75">{COPY.shell.dropSubtitle}</p>
+            <p className="mt-4 rounded-full border border-ink/20 bg-white/60 px-4 py-1.5 text-xs text-ink/65">
               {COPY.shell.dropScope}
             </p>
           </div>

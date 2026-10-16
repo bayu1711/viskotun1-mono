@@ -25,7 +25,7 @@ export function SidebarNav({ className }: SidebarNavProps) {
               <Link
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-3 py-2 text-2xl lowercase transition-colors focus:outline-none focus-visible:underline',
+                  'flex items-center gap-3 py-2 text-2xl transition-colors focus:outline-none focus-visible:underline',
                   isActive ? 'text-ink' : 'text-ink/30 hover:text-ink/60'
                 )}
               >

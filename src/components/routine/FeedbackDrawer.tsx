@@ -2,7 +2,7 @@
 
 import React, { useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
 import { COPY } from '../../data/copy';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
@@ -14,9 +14,9 @@ interface FeedbackDrawerProps {
 }
 
 export function FeedbackDrawer({ open, onClose }: FeedbackDrawerProps = {}) {
-  const protocol = useProtocol();
-  const isOpen = open ?? protocol.isFeedbackDrawerOpen;
-  const handleClose = onClose ?? protocol.closeFeedbackDrawer;
+  const routine = useRoutine();
+  const isOpen = open ?? routine.isFeedbackDrawerOpen;
+  const handleClose = onClose ?? routine.closeFeedbackDrawer;
 
   const panelRef = useRef<HTMLDivElement>(null);
   useDialogA11y(panelRef, { open: isOpen, onClose: handleClose });
@@ -35,7 +35,7 @@ export function FeedbackDrawer({ open, onClose }: FeedbackDrawerProps = {}) {
             ref={panelRef}
             role="dialog"
             aria-modal="true"
-            aria-label={COPY.feedbackDrawer.metricDialogLabel(protocol.feedbackMetric?.name)}
+            aria-label={COPY.feedbackDrawer.metricDialogLabel(routine.feedbackMetric?.name)}
             tabIndex={-1}
             initial={{ y: MOTION.dialogOffsetY, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}

@@ -10,7 +10,7 @@ const LEGEND_ITEMS = [
 
 export function CalendarLegend() {
   return (
-    <ul className="mt-5 flex flex-wrap gap-4 text-xs lowercase text-ink/45">
+    <ul className="mt-5 flex flex-wrap gap-4 text-xs text-ink/45">
       {LEGEND_ITEMS.map((item) =>
       <li key={item.label} className="flex items-center gap-1.5">
           <span aria-hidden="true" className={cn('h-3 w-3 rounded-full', item.swatch)} />

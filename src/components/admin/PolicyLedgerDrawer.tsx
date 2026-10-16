@@ -99,19 +99,19 @@ export function PolicyLedgerDrawer() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base font-semibold lowercase">{COPY.policyLedger.title}</h2>
+                    <h2 className="text-base font-semibold">{COPY.policyLedger.title}</h2>
                     {isLiveFirestore ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-mint bg-mint/30 px-2 py-0.5 text-3xs font-semibold lowercase text-ink">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-mint bg-mint/30 px-2 py-0.5 text-3xs font-semibold text-ink">
                         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ink" />
                         {COPY.policyLedger.firestoreLive}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-ink/15 bg-cream px-2 py-0.5 text-3xs font-medium lowercase text-ink/70">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-ink/15 bg-cream px-2 py-0.5 text-3xs font-medium text-ink/70">
                         {COPY.policyLedger.memoryCache}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs lowercase text-ink/50">
+                  <p className="text-xs text-ink/50">
                     {COPY.policyLedger.versionLabel(policy?.version || COPY.policyLedger.versionFallback)}
                   </p>
                 </div>
@@ -139,10 +139,10 @@ export function PolicyLedgerDrawer() {
               <div className="rounded-card border border-ink/10 bg-white p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <label htmlFor="pain-threshold" className="text-sm font-medium lowercase">
+                    <label htmlFor="pain-threshold" className="text-sm font-medium">
                       {COPY.policyLedger.thresholdLabel}
                     </label>
-                    <p className="text-xs lowercase text-ink/50">
+                    <p className="text-xs text-ink/50">
                       {COPY.policyLedger.thresholdDesc}
                     </p>
                   </div>
@@ -171,10 +171,10 @@ export function PolicyLedgerDrawer() {
               <div className="rounded-card border border-ink/10 bg-white p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <label htmlFor="load-reduction" className="text-sm font-medium lowercase">
+                    <label htmlFor="load-reduction" className="text-sm font-medium">
                       {COPY.policyLedger.reductionLabel}
                     </label>
-                    <p className="text-xs lowercase text-ink/50">
+                    <p className="text-xs text-ink/50">
                       {COPY.policyLedger.reductionDesc}
                     </p>
                   </div>
@@ -201,15 +201,15 @@ export function PolicyLedgerDrawer() {
 
               {/* Gatekeeper Banned Criteria */}
               <div className="rounded-card border border-ink/10 bg-white p-4">
-                <p className="text-sm font-medium lowercase">{COPY.policyLedger.bannedLabel}</p>
-                <p className="text-xs lowercase text-ink/50">
+                <p className="text-sm font-medium">{COPY.policyLedger.bannedLabel}</p>
+                <p className="text-xs text-ink/50">
                   {COPY.policyLedger.bannedDesc}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {(policy?.bannedKeywords || []).map((keyword) => (
                     <span
                       key={keyword}
-                      className="rounded-full border border-ink/10 bg-cream px-2.5 py-1 text-2xs lowercase text-ink/80"
+                      className="rounded-full border border-ink/10 bg-cream px-2.5 py-1 text-2xs text-ink/80"
                     >
                       {keyword}
                     </span>
@@ -225,7 +225,7 @@ export function PolicyLedgerDrawer() {
                   ) : (
                     <Icon icon={CloudOffOutlinedIcon} size="sm" className="text-ink/50" />
                   )}
-                  <span className="lowercase text-ink/70">
+                  <span className="text-ink/70">
                     {isLiveFirestore
                       ? COPY.policyLedger.syncActive
                       : COPY.policyLedger.syncFallback(firestoreStatus)}
@@ -234,7 +234,7 @@ export function PolicyLedgerDrawer() {
                 <button
                   type="button"
                   onClick={handleReset}
-                  className="inline-flex items-center gap-1 text-2xs font-medium lowercase text-ink/60 hover:text-ink underline"
+                  className="inline-flex items-center gap-1 text-2xs font-medium text-ink/60 hover:text-ink underline"
                 >
                   <Icon icon={RestartAltOutlinedIcon} size="xs" />
                   {COPY.policyLedger.resetBaseline}
@@ -247,7 +247,7 @@ export function PolicyLedgerDrawer() {
               <button
                 type="button"
                 onClick={closePolicyDrawer}
-                className="text-xs lowercase text-ink/60 hover:text-ink transition-colors"
+                className="text-xs text-ink/60 hover:text-ink transition-colors"
               >
                 {COPY.policyLedger.cancel}
               </button>

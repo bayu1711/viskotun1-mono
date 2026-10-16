@@ -40,7 +40,7 @@ export function RoutineSwitcher() {
       <button
         type="button"
         onClick={handleAddPaper}
-        className="flex items-center gap-2 rounded-full border border-dashed border-ink/40 py-1.5 px-3 text-sm lowercase text-ink/70 hover:border-ink hover:text-ink transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+        className="flex items-center gap-2 rounded-full border border-dashed border-ink/40 py-1.5 px-3 text-sm text-ink/70 hover:border-ink hover:text-ink transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
       >
         <Icon icon={AddIcon} size="sm" />
         <span>{COPY.switcher.addPaper}</span>
@@ -56,7 +56,7 @@ export function RoutineSwitcher() {
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-controls={isOpen ? listId : undefined}
-        className="flex items-center gap-2 rounded-full border border-ink py-1.5 pl-1.5 pr-3 text-sm lowercase transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+        className="flex items-center gap-2 rounded-full border border-ink py-1.5 pl-1.5 pr-3 text-sm transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
       >
         <IconTile variant="solid" shape="circle" size={28}>
           <StepIcon icon={routine.icon} size="xs" />
@@ -99,7 +99,7 @@ export function RoutineSwitcher() {
             <button
               type="button"
               onClick={handleAddPaper}
-              className="mt-2 flex w-full items-center gap-2 rounded-tile border border-dashed border-ink/40 p-2 text-sm lowercase text-ink/70 hover:border-ink hover:text-ink transition-colors"
+              className="mt-2 flex w-full items-center gap-2 rounded-tile border border-dashed border-ink/40 p-2 text-sm text-ink/70 hover:border-ink hover:text-ink transition-colors"
             >
               <Icon icon={AddIcon} size="sm" />
               <span>{COPY.switcher.addPaper}</span>

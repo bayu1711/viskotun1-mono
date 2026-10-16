@@ -8,7 +8,7 @@ import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePolicyLedger } from '../../contexts/PolicyLedgerContext';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
 import { greeting } from '../../utils/time';
@@ -17,7 +17,7 @@ import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 
 export function TopBar() {
-  const { streak, resetToDefaults, openHowTo } = useProtocol();
+  const { streak, resetToDefaults, openHowTo } = useRoutine();
   const { openAssistant } = useAssistant();
   const { user, isGuest, logout } = useAuth();
   const { openPolicyDrawer, isLiveFirestore } = usePolicyLedger();
@@ -36,19 +36,19 @@ export function TopBar() {
             {isGuest ? (
               <Link
                 href={ROUTES.login}
-                className="rounded-full border border-ink/15 bg-cream px-2 py-0.5 text-2xs font-medium lowercase text-ink transition-colors hover:bg-mint"
+                className="rounded-full border border-ink/15 bg-cream px-2 py-0.5 text-2xs font-medium text-ink transition-colors hover:bg-mint"
               >
                 {COPY.auth.signInToSyncBadge}
               </Link>
             ) : (
-              <span className="rounded-full border border-ink/15 bg-mint px-2 py-0.5 text-2xs font-medium lowercase text-ink">
+              <span className="rounded-full border border-ink/15 bg-mint px-2 py-0.5 text-2xs font-medium text-ink">
                 {COPY.auth.cloudSyncedBadge}
               </span>
             )}
           </div>
         </div>
 
-        <p className="ml-auto text-sm lowercase text-ink/60">{COPY.shell.streak(streak)}</p>
+        <p className="ml-auto text-sm text-ink/60">{COPY.shell.streak(streak)}</p>
 
         {user && !isGuest && (
           <CircleButton label={COPY.auth.signOut} onClick={logout} size={38}>

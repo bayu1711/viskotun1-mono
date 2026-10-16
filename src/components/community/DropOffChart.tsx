@@ -5,7 +5,7 @@ import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis } from 'rechar
 import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';
 import { CHART_BAR_RADIUS, CHART_MARGIN, CHART_TICK_FONT_SIZE, DROP_OFF_HIGH_MIN } from '../../data/config';
 import { COPY } from '../../data/copy';
-import type { DropOffPoint, DropOffUnit } from '../../types/protocol';
+import type { DropOffPoint, DropOffUnit } from '../../types/routine';
 import { EmptyState } from '../feedback/EmptyState';
 import { DropOffTooltip } from './DropOffTooltip';
 

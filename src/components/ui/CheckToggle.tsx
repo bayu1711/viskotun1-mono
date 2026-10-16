@@ -1,7 +1,7 @@
 import React from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import { COPY } from '../../data/copy';
-import type { Tone } from '../../types/protocol';
+import type { Tone } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { toneStyles } from '../../utils/tones';
 import { Icon } from './Icon';

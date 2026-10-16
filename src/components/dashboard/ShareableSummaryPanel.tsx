@@ -2,7 +2,7 @@
 
 import React, { useId, useState } from 'react';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { Icon } from '../ui/Icon';
 import { Panel } from '../ui/Panel';
@@ -10,21 +10,21 @@ import { PillButton } from '../ui/PillButton';
 import { ShareableSummaryModal } from './ShareableSummaryModal';
 
 export function ShareableSummaryPanel() {
-  const { protocol } = useProtocol();
+  const { routine } = useRoutine();
   const headingId = useId();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <>
       <Panel tone="ink" aria-labelledby={headingId}>
-        <p className="text-sm lowercase leading-none text-white/45">
+        <p className="text-sm leading-none text-white/45">
           {COPY.shareableSummary.eyebrow}
         </p>
-        <h2 id={headingId} className="mt-1 text-2xl lowercase">
+        <h2 id={headingId} className="mt-1 text-2xl">
           {COPY.shareableSummary.title}
         </h2>
         <p className="mt-3 text-sm text-white/55">
-          {COPY.shareableSummary.body(protocol.shortTitle)}
+          {COPY.shareableSummary.body(routine.shortTitle)}
         </p>
 
         <PillButton

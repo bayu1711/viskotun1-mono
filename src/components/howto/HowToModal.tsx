@@ -12,7 +12,7 @@ import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined';
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
 import { COPY } from '../../data/copy';
 import { SAMPLE_PAPERS } from '../../data/samplePapers';
@@ -25,7 +25,7 @@ import { PillButton } from '../ui/PillButton';
 type HowToTab = 'guide' | 'samples' | 'scope';
 
 export function HowToModal() {
-  const { isHowToOpen, closeHowTo, loadSampleProtocol, activeProtocolId, samplePapers, sampleSource } = useProtocol();
+  const { isHowToOpen, closeHowTo, loadSampleRoutine, loadSampleProtocol, activeRoutineId, activeProtocolId, samplePapers, sampleSource } = useRoutine();
   const [activeTab, setActiveTab] = useState<HowToTab>('guide');
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -67,8 +67,8 @@ export function HowToModal() {
                   <Icon icon={HelpOutlineOutlinedIcon} size="sm" />
                 </span>
                 <div>
-                  <p className="text-2xs font-medium lowercase text-ink/50">{COPY.howTo.eyebrow}</p>
-                  <h2 className="text-base font-medium lowercase text-ink">{COPY.howTo.title}</h2>
+                  <p className="text-2xs font-medium text-ink/50">{COPY.howTo.eyebrow}</p>
+                  <h2 className="text-base font-medium text-ink">{COPY.howTo.title}</h2>
                 </div>
               </div>
 
@@ -87,7 +87,7 @@ export function HowToModal() {
                     type="button"
                     onClick={() => setActiveTab(tabKey)}
                     className={cn(
-                      'relative px-4 py-3 text-xs font-medium lowercase transition-colors focus:outline-none focus-visible:underline',
+                      'relative px-4 py-3 text-xs font-medium transition-colors focus:outline-none focus-visible:underline',
                       isActive ? 'text-ink' : 'text-ink/45 hover:text-ink/75'
                     )}
                   >
@@ -113,7 +113,7 @@ export function HowToModal() {
                       <span className="h-1.5 w-1.5 rounded-full bg-ink" aria-hidden="true" />
                       {COPY.howTo.badge}
                     </div>
-                    <p className="mt-3 text-sm leading-relaxed lowercase text-ink/75">
+                    <p className="mt-3 text-sm leading-relaxed text-ink/75">
                       {COPY.howTo.intro}
                     </p>
                   </div>
@@ -128,10 +128,10 @@ export function HowToModal() {
                           <span className="inline-block rounded bg-canvas px-2 py-0.5 text-xs font-semibold tabular-nums text-ink/60">
                             {item.step}
                           </span>
-                          <h3 className="mt-3 text-sm font-medium lowercase text-ink">
+                          <h3 className="mt-3 text-sm font-medium text-ink">
                             {item.title}
                           </h3>
-                          <p className="mt-2 text-xs leading-relaxed lowercase text-ink/65">
+                          <p className="mt-2 text-xs leading-relaxed text-ink/65">
                             {item.description}
                           </p>
                         </div>
@@ -141,8 +141,8 @@ export function HowToModal() {
 
                   <div className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-ink/10 bg-cream/50 p-4">
                     <div>
-                      <h4 className="text-xs font-medium lowercase text-ink">Ready to explore?</h4>
-                      <p className="text-2xs lowercase text-ink/60">
+                      <h4 className="text-xs font-medium text-ink">Ready to explore?</h4>
+                      <p className="text-2xs text-ink/60">
                         Choose a pre-calibrated sample paper or download one of our verified open-access PDFs.
                       </p>
                     </div>
@@ -158,10 +158,10 @@ export function HowToModal() {
                 <div className="space-y-5">
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="text-sm font-medium lowercase text-ink">{COPY.howTo.samplesTitle}</h3>
+                      <h3 className="text-sm font-medium text-ink">{COPY.howTo.samplesTitle}</h3>
                       <span
                         className={cn(
-                          'rounded-full px-2.5 py-0.5 text-2xs font-medium lowercase border',
+                          'rounded-full px-2.5 py-0.5 text-2xs font-medium border',
                           sampleSource === 'firestore-live'
                             ? 'border-mint/60 bg-mint/20 text-ink'
                             : 'border-ink/10 bg-canvas text-ink/60'
@@ -172,13 +172,14 @@ export function HowToModal() {
                           : COPY.howTo.firestoreSyncLocal}
                       </span>
                     </div>
-                    <p className="text-xs lowercase text-ink/60">{COPY.howTo.samplesSubtitle}</p>
+                    <p className="text-xs text-ink/60">{COPY.howTo.samplesSubtitle}</p>
                   </div>
 
                   <div className="space-y-4">
                     {(samplePapers && samplePapers.length > 0 ? samplePapers : SAMPLE_PAPERS).map((paper) => {
-                      const isPrecalibrated = Boolean(paper.protocolId);
-                      const isActive = paper.protocolId === activeProtocolId;
+                      const targetId = paper.routineId || paper.protocolId;
+                      const isPrecalibrated = Boolean(targetId);
+                      const isActive = targetId === (activeRoutineId || activeProtocolId);
                       const isRejectionTest = Boolean(paper.isGuardrailRejectionTest);
 
                       return (
@@ -198,7 +199,7 @@ export function HowToModal() {
                               <div className="flex flex-wrap items-center gap-2">
                                 <span
                                   className={cn(
-                                    'rounded-full px-2 py-0.5 text-2xs font-medium lowercase',
+                                    'rounded-full px-2 py-0.5 text-2xs font-medium',
                                     isRejectionTest
                                       ? 'bg-blush text-ink'
                                       : 'bg-canvas text-ink/75'
@@ -207,33 +208,33 @@ export function HowToModal() {
                                   {paper.domain}
                                 </span>
                                 {isRejectionTest ? (
-                                  <span className="rounded-full bg-blush/30 px-2 py-0.5 text-2xs font-semibold lowercase text-ink">
+                                  <span className="rounded-full bg-blush/30 px-2 py-0.5 text-2xs font-semibold text-ink">
                                     {COPY.howTo.testGatekeeperBadge}
                                   </span>
                                 ) : (
-                                  <span className="rounded-full bg-mint px-2 py-0.5 text-2xs font-semibold lowercase text-ink">
+                                  <span className="rounded-full bg-mint px-2 py-0.5 text-2xs font-semibold text-ink">
                                     RCT
                                   </span>
                                 )}
                               </div>
-                              <h4 className="text-sm font-medium lowercase text-ink leading-snug">
+                              <h4 className="text-sm font-medium text-ink leading-snug">
                                 {paper.title}
                               </h4>
-                              <p className="text-2xs lowercase text-ink/50">
+                              <p className="text-2xs text-ink/50">
                                 {paper.authors} · <em>{paper.journal}</em> ({paper.year})
                               </p>
                             </div>
                           </div>
 
-                          <p className="mt-2.5 text-xs leading-relaxed lowercase text-ink/70">
+                          <p className="mt-2.5 text-xs leading-relaxed text-ink/70">
                             {paper.summary}
                           </p>
 
                           <div className="mt-3 rounded-card bg-canvas/70 p-2.5">
-                            <p className="text-2xs font-medium lowercase text-ink/55">
+                            <p className="text-2xs font-medium text-ink/55">
                               {COPY.howTo.featuresHeader}
                             </p>
-                            <ul className="mt-1 grid grid-cols-1 gap-1 text-2xs lowercase text-ink/75 sm:grid-cols-2">
+                            <ul className="mt-1 grid grid-cols-1 gap-1 text-2xs text-ink/75 sm:grid-cols-2">
                               {paper.featuresTested.map((feat, i) => (
                                 <li key={i} className="flex items-center gap-1.5">
                                   <span className="h-1 w-1 rounded-full bg-ink/40" />
@@ -245,11 +246,11 @@ export function HowToModal() {
 
                           <div className="mt-4 flex flex-wrap items-center justify-between gap-2.5 border-t border-ink/10 pt-3">
                             <div className="flex flex-wrap items-center gap-2">
-                              {isPrecalibrated && paper.protocolId && (
+                              {isPrecalibrated && targetId && (
                                 <PillButton
                                   size="sm"
                                   variant={isActive ? 'outline' : 'primary'}
-                                  onClick={() => loadSampleProtocol(paper.protocolId!)}
+                                  onClick={() => (loadSampleRoutine || loadSampleProtocol)(targetId)}
                                   className="gap-1.5"
                                 >
                                   <Icon icon={PlayArrowOutlinedIcon} size="xs" />
@@ -261,7 +262,7 @@ export function HowToModal() {
                                 href={paper.pdfUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 bg-white px-3 py-1.5 text-xs lowercase font-medium text-ink transition-colors hover:bg-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+                                className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 bg-white px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
                               >
                                 <Icon icon={DownloadOutlinedIcon} size="xs" />
                                 <span>{COPY.howTo.downloadPdfButton}</span>
@@ -272,7 +273,7 @@ export function HowToModal() {
                               href={paper.openAccessUrl}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1 text-2xs lowercase text-ink/55 transition-colors hover:text-ink focus:outline-none focus-visible:underline"
+                              className="inline-flex items-center gap-1 text-2xs text-ink/55 transition-colors hover:text-ink focus:outline-none focus-visible:underline"
                             >
                               <span>{COPY.howTo.doiLabel}</span>
                               <Icon icon={NorthEastIcon} size="xs" />
@@ -289,8 +290,8 @@ export function HowToModal() {
               {activeTab === 'scope' && (
                 <div className="space-y-6">
                   <div className="space-y-1">
-                    <h3 className="text-sm font-medium lowercase text-ink">{COPY.howTo.scopeTitle}</h3>
-                    <p className="text-xs lowercase text-ink/60">{COPY.howTo.scopeSubtitle}</p>
+                    <h3 className="text-sm font-medium text-ink">{COPY.howTo.scopeTitle}</h3>
+                    <p className="text-xs text-ink/60">{COPY.howTo.scopeSubtitle}</p>
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -300,11 +301,11 @@ export function HowToModal() {
                         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-mint text-ink">
                           <Icon icon={CheckCircleOutlineIcon} size="xs" />
                         </span>
-                        <h4 className="text-xs font-semibold lowercase text-ink">
+                        <h4 className="text-xs font-semibold text-ink">
                           {COPY.howTo.acceptedHeader}
                         </h4>
                       </div>
-                      <ul className="mt-3 space-y-2 text-xs lowercase text-ink/80">
+                      <ul className="mt-3 space-y-2 text-xs text-ink/80">
                         {COPY.howTo.acceptedList.map((item, i) => (
                           <li key={i} className="flex items-start gap-2">
                             <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-ink" />
@@ -320,11 +321,11 @@ export function HowToModal() {
                         <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blush text-ink">
                           <Icon icon={HighlightOffOutlinedIcon} size="xs" />
                         </span>
-                        <h4 className="text-xs font-semibold lowercase text-ink">
+                        <h4 className="text-xs font-semibold text-ink">
                           {COPY.howTo.rejectedHeader}
                         </h4>
                       </div>
-                      <ul className="mt-3 space-y-2 text-xs lowercase text-ink/80">
+                      <ul className="mt-3 space-y-2 text-xs text-ink/80">
                         {COPY.howTo.rejectedList.map((item, i) => (
                           <li key={i} className="flex items-start gap-2">
                             <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-ink/60" />
@@ -341,11 +342,11 @@ export function HowToModal() {
                       <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cream text-ink">
                         <Icon icon={ShieldOutlinedIcon} size="xs" />
                       </span>
-                      <h4 className="text-xs font-semibold lowercase text-ink">
+                      <h4 className="text-xs font-semibold text-ink">
                         {COPY.howTo.testGatekeeperTitle}
                       </h4>
                     </div>
-                    <p className="mt-2 text-xs leading-relaxed lowercase text-ink/70">
+                    <p className="mt-2 text-xs leading-relaxed text-ink/70">
                       {COPY.howTo.testGatekeeperSubtitle}
                     </p>
                   </div>
@@ -355,7 +356,7 @@ export function HowToModal() {
 
             {/* Footer */}
             <div className="flex items-center justify-between border-t border-ink/10 bg-white px-6 py-3">
-              <p className="text-2xs lowercase text-ink/45">
+              <p className="text-2xs text-ink/45">
                 ViskotuN1 · Interventional Human Science Pipeline
               </p>
               <PillButton size="sm" variant="outline" onClick={closeHowTo}>

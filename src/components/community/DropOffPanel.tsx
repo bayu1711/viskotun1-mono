@@ -3,7 +3,7 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { EmptyState } from '../feedback/EmptyState';
 import { Panel } from '../ui/Panel';
@@ -18,8 +18,8 @@ const DropOffChart = dynamic(
 );
 
 export function DropOffPanel() {
-  const { protocol } = useProtocol();
-  const insights = protocol.community;
+  const { routine } = useRoutine();
+  const insights = routine.community;
   const unit = insights.dropOffUnit;
 
   return (
@@ -28,7 +28,7 @@ export function DropOffPanel() {
         eyebrow={COPY.community.dropOffEyebrow}
         title={unit === 'day' ? COPY.community.hardestDays : COPY.community.hardestWeeks}
         action={
-          <span className="rounded-full bg-ink px-3 py-1.5 text-xs lowercase text-white">
+          <span className="rounded-full bg-ink px-3 py-1.5 text-xs text-white">
             {COPY.community.peak(unit, insights.peakPeriod)}
           </span>
         }

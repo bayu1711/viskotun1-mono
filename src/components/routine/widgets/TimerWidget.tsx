@@ -5,7 +5,7 @@ import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import { COPY } from '../../../data/copy';
-import type { DataCollectionField } from '../../../types/protocol';
+import type { DataCollectionField } from '../../../types/routine';
 import { CircleButton } from '../../ui/CircleButton';
 import { Icon } from '../../ui/Icon';
 
@@ -68,7 +68,7 @@ export function TimerWidget({ field, value, onChange }: TimerWidgetProps) {
         <p className="text-giant font-light leading-none tabular-nums text-ink">
           {formatTime(seconds)}
         </p>
-        <span className="mt-1 text-xs text-ink/50 lowercase">
+        <span className="mt-1 text-xs text-ink/50">
           {COPY.morphing.widgets.timer.elapsedSummary(seconds, field.max)}
         </span>
 

@@ -4,7 +4,7 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAssistant } from '../../contexts/AssistantContext';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { useFileDrop } from '../../hooks/useFileDrop';
 import { isPdfFile } from '../../utils/files';
@@ -26,7 +26,7 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
-  const { uploadPaper } = useProtocol();
+  const { uploadPaper } = useRoutine();
   const { openAssistant } = useAssistant();
 
   const isDragging = useFileDrop((file) => {

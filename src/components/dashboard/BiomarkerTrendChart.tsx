@@ -4,9 +4,9 @@ import React, { useId, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import ShowChartOutlinedIcon from '@mui/icons-material/ShowChartOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
-import type { DataCollectionField } from '../../types/protocol';
+import type { DataCollectionField } from '../../types/routine';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 import { Panel } from '../ui/Panel';
@@ -22,13 +22,13 @@ const BiomarkerChartContent = dynamic(
 );
 
 export function BiomarkerTrendChart() {
-  const { protocol, morphingLogs, feedbackLogs, currentDay, openFeedbackDrawer } = useProtocol();
+  const { routine, morphingLogs, feedbackLogs, currentDay, openFeedbackDrawer } = useRoutine();
   const headingId = useId();
 
   const trackableFields = useMemo(() => {
-    const spec = protocol.dataCollectionSpec || [];
+    const spec = routine.dataCollectionSpec || [];
     return spec.filter((f) => f.type === 'scale' || f.type === 'numeric' || f.type === 'timer');
-  }, [protocol.dataCollectionSpec]);
+  }, [routine.dataCollectionSpec]);
 
   const [selectedFieldId, setSelectedFieldId] = useState<string>(
     () => trackableFields[0]?.id || ''

@@ -1,6 +1,6 @@
 import React from 'react';
 import { COPY } from '../../data/copy';
-import type { EvidenceBadge } from '../../types/protocol';
+import type { EvidenceBadge } from '../../types/routine';
 import { cn } from '../../utils/cn';
 
 const BADGE_CONFIG: Record<EvidenceBadge, {label: string;className: string;}> = {

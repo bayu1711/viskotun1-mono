@@ -16,7 +16,7 @@ import ShowerOutlinedIcon from '@mui/icons-material/ShowerOutlined';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import WaterDropOutlinedIcon from '@mui/icons-material/WaterDropOutlined';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
-import type { StepIconKey } from '../../types/protocol';
+import type { StepIconKey } from '../../types/routine';
 import { Icon, type IconSize } from './Icon';
 
 const ICONS: Record<StepIconKey, SvgIconComponent> = {

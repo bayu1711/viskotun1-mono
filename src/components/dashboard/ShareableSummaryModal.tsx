@@ -4,7 +4,7 @@ import React, { useRef } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
 import { COPY } from '../../data/copy';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
@@ -13,7 +13,7 @@ import {
   isRandomizedTrial,
   progressionStatus,
   stopRuleOf
-} from '../../utils/protocolMetrics';
+} from '../../utils/routineMetrics';
 import { CircleButton } from '../ui/CircleButton';
 import { EvidenceBadgeChip } from '../ui/EvidenceBadgeChip';
 import { Icon } from '../ui/Icon';
@@ -26,7 +26,8 @@ interface ShareableSummaryModalProps {
 
 export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModalProps) {
   const {
-    protocol,
+    routine,
+    protocol = routine,
     currentDay,
     totalDays,
     streak,
@@ -34,7 +35,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
     escalationPaused,
     progressionReady,
     feedbackLogs
-  } = useProtocol();
+  } = useRoutine();
 
   const panelRef = useRef<HTMLDivElement>(null);
   useDialogA11y(panelRef, { open: isOpen, onClose });
@@ -92,7 +93,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                 <p className="text-2xs font-mono uppercase tracking-widest text-ink/45">
                   {COPY.shareableSummary.cardTitle}
                 </p>
-                <h2 className="text-lg font-medium lowercase tracking-tight">
+                <h2 className="text-lg font-medium tracking-tight">
                   {protocol.title}
                 </h2>
               </div>
@@ -169,14 +170,14 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
               {/* Key Adherence & Metric Badges */}
               <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4 print:grid-cols-4">
                 <div className="rounded-tile border border-ink/10 bg-canvas/40 p-3 print:bg-white">
-                  <p className="text-2xs lowercase text-ink/50">{COPY.shareableSummary.timelineProgress}</p>
+                  <p className="text-2xs text-ink/50">{COPY.shareableSummary.timelineProgress}</p>
                   <p className="mt-1 text-lg font-bold text-ink">
                     {COPY.shareableSummary.dayValue(currentDay)}{' '}
                     <span className="text-xs font-normal text-ink/50">{COPY.shareableSummary.totalDaysValue(totalDays)}</span>
                   </p>
                 </div>
                 <div className="rounded-tile border border-ink/10 bg-cream/30 p-3 print:bg-white">
-                  <p className="text-2xs lowercase text-ink/50">{COPY.shareableSummary.adherenceRate}</p>
+                  <p className="text-2xs text-ink/50">{COPY.shareableSummary.adherenceRate}</p>
                   <p className="mt-1 text-lg font-bold text-ink">
                     {adherenceRate}%{' '}
                     <span className="text-xs font-normal text-ink/60 capitalize">
@@ -185,13 +186,13 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                   </p>
                 </div>
                 <div className="rounded-tile border border-ink/10 bg-mint/30 p-3 print:bg-white">
-                  <p className="text-2xs lowercase text-ink/50">{COPY.shareableSummary.consistencyStreak}</p>
+                  <p className="text-2xs text-ink/50">{COPY.shareableSummary.consistencyStreak}</p>
                   <p className="mt-1 text-lg font-bold text-ink">
                     {streak} {COPY.shareableSummary.dayUnit(streak)}
                   </p>
                 </div>
                 <div className="rounded-tile border border-ink/10 bg-canvas/40 p-3 print:bg-white">
-                  <p className="text-2xs lowercase text-ink/50">{COPY.shareableSummary.progressionGate}</p>
+                  <p className="text-2xs text-ink/50">{COPY.shareableSummary.progressionGate}</p>
                   <p className="mt-1 text-sm font-semibold capitalize text-ink">
                     {status === 'paused'
                       ? COPY.shareableSummary.statusPaused

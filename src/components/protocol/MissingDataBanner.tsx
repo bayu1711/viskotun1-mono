@@ -25,7 +25,7 @@ export function MissingDataBanner() {
       }>
       
       <p>
-        {COPY.missingData.caution} <span className="lowercase">{step?.action ?? flag.parameter}</span>.
+        {COPY.missingData.caution} <span className="">{step?.action ?? flag.parameter}</span>.
       </p>
       <p className="text-ink/50">{COPY.missingData.fallback}</p>
     </Callout>);

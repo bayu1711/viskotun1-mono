@@ -16,8 +16,8 @@ export function ErrorFallback({ onRetry }: ErrorFallbackProps) {
         <IconTile variant="outline" shape="circle" size={48}>
           <Icon icon={ErrorOutlineIcon} size="lg" />
         </IconTile>
-        <h1 className="mt-4 text-2xl lowercase">{COPY.errors.boundaryTitle}</h1>
-        <p className="mt-1 text-sm lowercase text-ink/55">{COPY.errors.boundaryBody}</p>
+        <h1 className="mt-4 text-2xl">{COPY.errors.boundaryTitle}</h1>
+        <p className="mt-1 text-sm text-ink/55">{COPY.errors.boundaryBody}</p>
         <PillButton size="sm" className="mt-6" onClick={onRetry}>
           {COPY.errors.retry}
         </PillButton>

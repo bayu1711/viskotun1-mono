@@ -5,7 +5,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { type AssistantMode, useAssistant } from '../../contexts/AssistantContext';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
 import { COPY } from '../../data/copy';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
@@ -22,7 +22,7 @@ import { UploadDropzone } from './UploadDropzone';
 
 export function AssistantSheet() {
   const { isOpen, mode, setMode, closeAssistant } = useAssistant();
-  const { messages, protocol, assistantTyping, askQuestion, uploadPaper } = useProtocol();
+  const { messages, routine, protocol = routine, assistantTyping, askQuestion, uploadPaper } = useRoutine();
   const panelRef = useRef<HTMLElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const titleId = useId();

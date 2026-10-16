@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { COPY } from '../../../data/copy';
-import type { DataCollectionField } from '../../../types/protocol';
+import type { DataCollectionField } from '../../../types/routine';
 import { severityTone } from '../../../utils/tones';
 import { FeedbackScoreControl } from '../FeedbackScoreControl';
 

@@ -2,7 +2,7 @@ import React from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { COPY } from '../../data/copy';
-import type { Tone } from '../../types/protocol';
+import type { Tone } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { toneStyles } from '../../utils/tones';
 import { Icon } from '../ui/Icon';
@@ -25,7 +25,7 @@ export function SetCounter({ action, done, max, perSetLabel, tone, onIncrement, 
 
   return (
     <div className="mt-3 flex items-center justify-between gap-2">
-      <span className={cn('truncate text-xs lowercase', styles.muted)}>{perSetLabel}</span>
+      <span className={cn('truncate text-xs', styles.muted)}>{perSetLabel}</span>
       <div role="group" aria-label={COPY.task.counterLabel(action)} className="flex items-center gap-1.5">
         <button
           type="button"

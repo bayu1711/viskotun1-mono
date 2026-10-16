@@ -3,24 +3,24 @@ import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import {
   complianceLevel,
   isRandomizedTrial,
-  progressionStatus } from
-'../../utils/protocolMetrics';
+  progressionStatus
+} from '../../utils/routineMetrics';
 import { StatCard, type StatCardProps } from './StatCard';
 
 export function KeyMetrics() {
-  const { protocol, adherenceRate, currentDay, totalDays, progressionReady, escalationPaused } = useProtocol();
+  const { routine, adherenceRate, currentDay, totalDays, progressionReady, escalationPaused } = useRoutine();
   const status = progressionStatus(escalationPaused, progressionReady);
-  const isRct = isRandomizedTrial(protocol.paper);
+  const isRct = isRandomizedTrial(routine.paper);
 
   const metrics: StatCardProps[] = [
-  {
-    label: COPY.dashboard.activeProtocol,
-    value: protocol.shortTitle,
+    {
+      label: COPY.dashboard.activeRoutine,
+      value: routine.shortTitle,
     caption: COPY.shell.dayOfTotal(currentDay, totalDays),
     tone: 'ink',
     icon: AssignmentOutlinedIcon
@@ -34,7 +34,7 @@ export function KeyMetrics() {
   },
   {
     label: COPY.dashboard.currentPhase,
-    value: protocol.phaseLabel,
+    value: routine.phaseLabel,
     caption: COPY.dashboard.phase[status],
     tone: status === 'paused' ? 'white' : 'mint',
     icon: TimelineIcon
@@ -44,7 +44,7 @@ export function KeyMetrics() {
     value: isRct ? COPY.evidence.high : COPY.evidence.moderate,
     caption: COPY.dashboard.evidenceCaption(
       isRct ? COPY.evidence.rctShort : COPY.evidence.pilotShort,
-      protocol.paper.sampleSize
+      routine.paper.sampleSize
     ),
     tone: 'white',
     icon: ScienceOutlinedIcon

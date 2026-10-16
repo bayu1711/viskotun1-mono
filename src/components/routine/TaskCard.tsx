@@ -1,7 +1,7 @@
 import React from 'react';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
-import type { ProtocolStep } from '../../types/protocol';
+import type { RoutineStep, ProtocolStep } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { getStepDisplay } from '../../utils/steps';
 import { toneStyles } from '../../utils/tones';
@@ -11,12 +11,12 @@ import { SetCounter } from './SetCounter';
 import { TaskStatList } from './TaskStatList';
 
 interface TaskCardProps {
-  step: ProtocolStep;
+  step: RoutineStep | ProtocolStep;
   wide?: boolean;
 }
 
 export function TaskCard({ step, wide = false }: TaskCardProps) {
-  const { setsDone, incrementSet, decrementSet, toggleStep, isStepComplete } = useProtocol();
+  const { setsDone, incrementSet, decrementSet, toggleStep, isStepComplete } = useRoutine();
   const done = Math.min(setsDone[step.id] ?? 0, step.sets);
   const complete = isStepComplete(step.id);
   const styles = toneStyles[step.tone];
@@ -30,7 +30,7 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
         </span>
         <h3
           className={cn(
-            'flex-1 lowercase leading-snug transition-opacity',
+            'flex-1 leading-snug transition-opacity',
             wide ? 'text-2xl sm:text-title' : 'text-body',
             complete && 'opacity-50'
           )}>
@@ -57,7 +57,7 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
           onIncrement={() => incrementSet(step.id)}
           onDecrement={() => decrementSet(step.id)} />
         
-        {step.inferred && wide && <p className={cn('mt-3 text-xs lowercase', styles.muted)}>{COPY.task.inferredNote}</p>}
+        {step.inferred && wide && <p className={cn('mt-3 text-xs', styles.muted)}>{COPY.task.inferredNote}</p>}
       </div>
     </article>);
 

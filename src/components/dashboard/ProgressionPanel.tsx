@@ -1,8 +1,8 @@
 import React from 'react';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
-import type { ProgressionRule } from '../../types/protocol';
-import { type ProgressionStatus, progressionStatus } from '../../utils/protocolMetrics';
+import type { ProgressionRule } from '../../types/routine';
+import { type ProgressionStatus, progressionStatus } from '../../utils/routineMetrics';
 import { Panel, type PanelTone } from '../ui/Panel';
 import { SectionHeading } from '../ui/SectionHeading';
 
@@ -13,14 +13,14 @@ const STATUS_TONE: Record<ProgressionStatus, PanelTone> = {
 };
 
 export function ProgressionPanel() {
-  const { protocol, escalationPaused, progressionReady, feedbackMetric } = useProtocol();
+  const { routine, escalationPaused, progressionReady, feedbackMetric } = useRoutine();
   const status = progressionStatus(escalationPaused, progressionReady);
 
   return (
     <Panel tone={STATUS_TONE[status]} aria-live="polite">
       <SectionHeading eyebrow={COPY.dashboard.progressionEyebrow} title={COPY.dashboard.progressionTitle} />
       <p className="mt-4 text-sm leading-relaxed">
-        {progressionMessage(status, protocol.progressionRules[0], feedbackMetric?.escalationMessage)}
+        {progressionMessage(status, routine.progressionRules[0], feedbackMetric?.escalationMessage)}
       </p>
     </Panel>
   );

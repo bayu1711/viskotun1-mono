@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { reviewFilters } from '../../data/reviewFilters';
-import type { ReviewFilter, CommunityReview } from '../../types/protocol';
+import type { ReviewFilter, CommunityReview } from '../../types/routine';
 import { EmptyState } from '../feedback/EmptyState';
 import { FilterChips } from '../ui/FilterChips';
 import { Panel } from '../ui/Panel';
@@ -13,10 +13,10 @@ import { SectionHeading } from '../ui/SectionHeading';
 import { ReviewCard } from './ReviewCard';
 
 export function ReviewsPanel() {
-  const { protocol, openReviewDrawer } = useProtocol();
+  const { routine, protocol = routine, openReviewDrawer } = useRoutine();
   const [filter, setFilter] = useState<ReviewFilter>('all');
   const [liveReviews, setLiveReviews] = useState<CommunityReview[]>(
-    protocol?.community?.reviews || []
+    routine?.community?.reviews || []
   );
   const [isLoading, setIsLoading] = useState(false);
 

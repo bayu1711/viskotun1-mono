@@ -18,14 +18,14 @@ import { Icon } from '../components/ui/Icon';
 import { Panel } from '../components/ui/Panel';
 import { SectionHeading } from '../components/ui/SectionHeading';
 import { EmptyRoutineView } from '../components/routine/EmptyRoutineView';
-import { useProtocol } from '../contexts/ProtocolContext';
+import { useRoutine } from '../contexts/RoutineContext';
 import { COPY } from '../data/copy';
 import { ROUTES } from '../data/navigation';
-import { stopRuleOf } from '../utils/protocolMetrics';
+import { stopRuleOf } from '../utils/routineMetrics';
 
 export function RoutinePage() {
   const {
-    protocol,
+    routine,
     currentDay,
     totalDays,
     todayPercent,
@@ -33,15 +33,15 @@ export function RoutinePage() {
     escalationPaused,
     feedbackMetric,
     incrementSet
-  } = useProtocol();
+  } = useRoutine();
   const historyHeadingId = useId();
   const feedbackHeadingId = useId();
 
-  if (!protocol) {
+  if (!routine) {
     return <EmptyRoutineView />;
   }
 
-  const stopRule = stopRuleOf(protocol);
+  const stopRule = stopRuleOf(routine);
 
   return (
     <PageContainer>
@@ -60,10 +60,10 @@ export function RoutinePage() {
               </Callout>
             )}
             <VoiceCoachBar
-              steps={protocol.steps}
+              steps={routine.steps}
               safetyRule={stopRule?.text}
               onStepComplete={(stepIndex) => {
-                const step = protocol.steps[stepIndex];
+                const step = routine.steps[stepIndex];
                 if (step) {
                   incrementSet(step.id);
                 }
@@ -71,11 +71,11 @@ export function RoutinePage() {
             />
           </div>
 
-          <TaskGrid steps={protocol.steps} />
+          <TaskGrid steps={routine.steps} />
           <DayActions className="mt-2.5" />
 
           {stopRule && (
-            <p className="mt-4 px-1 text-sm lowercase text-ink/45">
+            <p className="mt-4 px-1 text-sm text-ink/45">
               {COPY.common.warningPrefix} {stopRule.text}
             </p>
           )}

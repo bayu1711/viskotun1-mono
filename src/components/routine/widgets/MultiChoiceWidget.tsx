@@ -3,7 +3,7 @@
 import React from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import { COPY } from '../../../data/copy';
-import type { DataCollectionField } from '../../../types/protocol';
+import type { DataCollectionField } from '../../../types/routine';
 import { cn } from '../../../utils/cn';
 import { Icon } from '../../ui/Icon';
 
@@ -22,7 +22,7 @@ export function MultiChoiceWidget({ field, value, onChange }: MultiChoiceWidgetP
 
   return (
     <div className="w-full text-left">
-      <p className="text-xs text-ink/60 lowercase">
+      <p className="text-xs text-ink/60">
         {COPY.morphing.widgets.multichoice.selectOne}
       </p>
 

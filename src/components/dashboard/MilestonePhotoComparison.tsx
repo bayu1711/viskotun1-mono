@@ -4,7 +4,7 @@ import React, { useId, useState } from 'react';
 import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
 import CompareArrowsOutlinedIcon from '@mui/icons-material/CompareArrowsOutlined';
 import GridOnOutlinedIcon from '@mui/icons-material/GridOnOutlined';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
@@ -20,10 +20,10 @@ const SAMPLE_PROGRESSION_MOCKUP = COPY.morphing.dashboard.progressionMockupSvg(
 );
 
 export function MilestonePhotoComparison() {
-  const { protocol, morphingLogs, openFeedbackDrawer } = useProtocol();
+  const { routine, morphingLogs, openFeedbackDrawer } = useRoutine();
   const headingId = useId();
 
-  const photoField = protocol.dataCollectionSpec?.find((field) => field.type === 'photo');
+  const photoField = routine.dataCollectionSpec?.find((field) => field.type === 'photo');
 
   const [sliderPos, setSliderPos] = useState<number>(50);
   const [showGrid, setShowGrid] = useState<boolean>(true);

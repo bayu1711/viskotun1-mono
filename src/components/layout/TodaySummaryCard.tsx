@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { cn } from '../../utils/cn';
 import { ProgressRing } from '../ui/ProgressRing';
@@ -11,14 +11,14 @@ interface TodaySummaryCardProps {
 }
 
 export function TodaySummaryCard({ className }: TodaySummaryCardProps) {
-  const { protocol, todayPercent, todayFraction, currentDay, totalDays } = useProtocol();
+  const { routine, todayPercent, todayFraction, currentDay, totalDays } = useRoutine();
 
-  if (!protocol) {
+  if (!routine) {
     return (
       <section aria-label={COPY.shell.todaySummaryLabel} className={cn('rounded-card bg-ink p-5 text-white', className)}>
-        <p className="text-xs lowercase text-white/50">{COPY.shell.noActiveProtocol}</p>
-        <p className="mt-2 text-2xs leading-relaxed lowercase text-white/70">
-          upload a research paper or explore sample protocols to start tracking.
+        <p className="text-xs text-white/50">{COPY.shell.noActiveRoutine}</p>
+        <p className="mt-2 text-2xs leading-relaxed text-white/70">
+          {COPY.shell.noActivePrompt}
         </p>
       </section>
     );
@@ -27,14 +27,14 @@ export function TodaySummaryCard({ className }: TodaySummaryCardProps) {
   return (
     <section aria-label={COPY.shell.todaySummaryLabel} className={cn('rounded-card bg-ink p-5 text-white', className)}>
       <div className="flex items-center justify-between gap-2">
-        <p className="truncate text-sm lowercase text-white/50">{protocol.shortTitle}</p>
+        <p className="truncate text-sm text-white/50">{routine.shortTitle}</p>
         <ProgressRing value={todayFraction} size={36} tone="light" decorative />
       </div>
       <p className="mt-3 text-4xl font-light tabular-nums">
         {todayPercent}
         <span className="text-white/40">{COPY.common.percentSign}</span>
       </p>
-      <p className="mt-1 text-sm lowercase text-white/50">{COPY.shell.dayOfTotal(currentDay, totalDays)}</p>
+      <p className="mt-1 text-sm text-white/50">{COPY.shell.dayOfTotal(currentDay, totalDays)}</p>
     </section>
   );
 }

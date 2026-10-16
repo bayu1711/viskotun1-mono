@@ -6,7 +6,7 @@ import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
-import { useProtocol } from '../../contexts/ProtocolContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { PageContainer } from '../layout/PageContainer';
 import { PageHeader } from '../layout/PageHeader';
@@ -15,8 +15,9 @@ import { PillButton } from '../ui/PillButton';
 import { StepIcon } from '../ui/StepIcon';
 
 export function EmptyRoutineView() {
-  const { openHowTo, loadSampleProtocol } = useProtocol();
+  const { openHowTo, loadSampleRoutine, loadSampleProtocol } = useRoutine();
   const { openAssistant } = useAssistant();
+  const loadRoutine = loadSampleRoutine || loadSampleProtocol;
 
   const handleOpenUpload = () => {
     openAssistant('upload');
@@ -30,7 +31,7 @@ export function EmptyRoutineView() {
       />
 
       <div className="mt-5 max-w-3xl space-y-6">
-        <p className="text-base leading-relaxed lowercase text-ink/70">
+        <p className="text-base leading-relaxed text-ink/70">
           {COPY.onboarding.welcomeSubtitle}
         </p>
 
@@ -63,10 +64,10 @@ export function EmptyRoutineView() {
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-canvas text-ink/70 transition-transform group-hover:scale-105">
             <Icon icon={UploadFileOutlinedIcon} size="lg" />
           </div>
-          <h3 className="mt-4 text-base font-medium lowercase text-ink">
+          <h3 className="mt-4 text-base font-medium text-ink">
             {COPY.onboarding.dropPrompt}
           </h3>
-          <p className="mx-auto mt-1 max-w-md text-xs lowercase text-ink/55">
+          <p className="mx-auto mt-1 max-w-md text-xs text-ink/55">
             {COPY.onboarding.dropSubtext}
           </p>
         </div>
@@ -74,13 +75,13 @@ export function EmptyRoutineView() {
         {/* Quick Sample Loaders */}
         <div className="space-y-3 pt-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-medium lowercase text-ink/70">
+            <h3 className="text-xs font-medium text-ink/70">
               {COPY.onboarding.samplesHeading}
             </h3>
             <button
               type="button"
               onClick={openHowTo}
-              className="text-2xs font-medium lowercase text-ink/50 hover:text-ink transition-colors underline"
+              className="text-2xs font-medium text-ink/50 hover:text-ink transition-colors underline"
             >
               {COPY.howTo.buttonExploreSamples}
             </button>
@@ -94,14 +95,14 @@ export function EmptyRoutineView() {
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-canvas text-ink">
                     <StepIcon icon="straight-knee" size="xs" />
                   </span>
-                  <span className="rounded-full bg-mint px-2 py-0.5 text-2xs font-semibold lowercase text-ink">
+                  <span className="rounded-full bg-mint px-2 py-0.5 text-2xs font-semibold text-ink">
                     rehab
                   </span>
                 </div>
-                <h4 className="mt-3 text-sm font-medium lowercase text-ink">
+                <h4 className="mt-3 text-sm font-medium text-ink">
                   Achilles Tendinopathy
                 </h4>
-                <p className="mt-1 text-2xs lowercase text-ink/60">
+                <p className="mt-1 text-2xs text-ink/60">
                   Alfredson & McCormack eccentric drops · 0–10 pain slider & load reduction.
                 </p>
               </div>
@@ -109,7 +110,7 @@ export function EmptyRoutineView() {
                 <PillButton
                   size="sm"
                   variant="outline"
-                  onClick={() => loadSampleProtocol('achilles')}
+                  onClick={() => loadRoutine('achilles')}
                   className="w-full justify-center gap-1.5"
                 >
                   <Icon icon={PlayArrowOutlinedIcon} size="xs" />
@@ -125,14 +126,14 @@ export function EmptyRoutineView() {
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-canvas text-ink">
                     <StepIcon icon="serum" size="xs" />
                   </span>
-                  <span className="rounded-full bg-cream px-2 py-0.5 text-2xs font-semibold lowercase text-ink">
+                  <span className="rounded-full bg-cream px-2 py-0.5 text-2xs font-semibold text-ink">
                     dermatology
                   </span>
                 </div>
-                <h4 className="mt-3 text-sm font-medium lowercase text-ink">
+                <h4 className="mt-3 text-sm font-medium text-ink">
                   Alopecia Hair Regrowth
                 </h4>
-                <p className="mt-1 text-2xs lowercase text-ink/60">
+                <p className="mt-1 text-2xs text-ink/60">
                   Dhurat RCT minoxidil + microneedling · milestone photo comparison.
                 </p>
               </div>
@@ -140,7 +141,7 @@ export function EmptyRoutineView() {
                 <PillButton
                   size="sm"
                   variant="outline"
-                  onClick={() => loadSampleProtocol('hair-loss')}
+                  onClick={() => loadRoutine('hair-loss')}
                   className="w-full justify-center gap-1.5"
                 >
                   <Icon icon={PlayArrowOutlinedIcon} size="xs" />
@@ -156,14 +157,14 @@ export function EmptyRoutineView() {
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-canvas text-ink">
                     <StepIcon icon="sleep" size="xs" />
                   </span>
-                  <span className="rounded-full bg-mint px-2 py-0.5 text-2xs font-semibold lowercase text-ink">
+                  <span className="rounded-full bg-mint px-2 py-0.5 text-2xs font-semibold text-ink">
                     nutrition
                   </span>
                 </div>
-                <h4 className="mt-3 text-sm font-medium lowercase text-ink">
+                <h4 className="mt-3 text-sm font-medium text-ink">
                   Creatine & Sleep Deficit
                 </h4>
-                <p className="mt-1 text-2xs lowercase text-ink/60">
+                <p className="mt-1 text-2xs text-ink/60">
                   Gordji-Nejad 2024 cognitive rescue · PVT reaction timer & sleepiness scale.
                 </p>
               </div>
@@ -171,7 +172,7 @@ export function EmptyRoutineView() {
                 <PillButton
                   size="sm"
                   variant="outline"
-                  onClick={() => loadSampleProtocol('creatine-sleep')}
+                  onClick={() => loadRoutine('creatine-sleep')}
                   className="w-full justify-center gap-1.5"
                 >
                   <Icon icon={PlayArrowOutlinedIcon} size="xs" />
