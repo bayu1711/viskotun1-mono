@@ -55,7 +55,7 @@ export function TopBar() {
           </CircleButton>
         )}
 
-        <CircleButton label="Clinical Guardrail Policy Ledger" onClick={openPolicyDrawer} size={38} className="relative">
+        <CircleButton label={COPY.policyLedger.dialogLabel} onClick={openPolicyDrawer} size={38} className="relative">
           <Icon icon={ShieldOutlinedIcon} size="md" />
           {isLiveFirestore && (
             <span

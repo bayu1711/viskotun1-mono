@@ -466,5 +466,38 @@ export const COPY = {
       currentReading: (val: number | string, unit?: string) => `Current: ${val} ${unit || ''}`.trim(),
       targetReference: (target: string) => `Target: ${target}`
     }
+  },
+  policyLedger: {
+    dialogLabel: 'Clinical Guardrail Policy Ledger',
+    title: 'Clinical Policy Ledger',
+    firestoreLive: 'Firestore Live',
+    memoryCache: 'Memory Hot Cache · Fail-Safe',
+    versionLabel: (version: string) => `version ${version} · Google Cloud Firestore`,
+    close: 'Close policy ledger',
+    governanceBadge: 'Dynamic Runtime Governance',
+    governanceDesc:
+      'Policies resolve dynamically from Cloud Firestore across all Gemini extraction calls, Edge Gemma sessions, and client load-reduction triggers without container redeployment.',
+    thresholdLabel: 'Adverse Escalation Threshold',
+    thresholdDesc: 'Progression freezes when patient discomfort exceeds this level',
+    mildLabel: '1 (mild)',
+    severeLabel: '10 (severe)',
+    reductionLabel: 'Recommended Load Reduction',
+    reductionDesc: 'Training load / dose reduction applied when threshold is exceeded',
+    reductionMinLabel: '10%',
+    reductionMaxLabel: '50%',
+    bannedLabel: 'Automated Gatekeeper Banned Criteria',
+    bannedDesc: 'Studies matching these keywords are immediately rejected by Gemini',
+    syncActive: 'Live Cloud Firestore sync active',
+    syncFallback: (status: string) => `Cloud Firestore ${status} (using hot memory ledger)`,
+    resetBaseline: 'reset baseline',
+    cancel: 'cancel',
+    syncing: 'syncing ledger…',
+    saveSync: 'save & sync policy',
+    upToDate: 'policy up to date',
+    toastUpdated: 'Clinical guardrail policy ledger updated',
+    toastUpdateError: 'Failed to update guardrail policy ledger',
+    toastNetworkError: 'Network error updating policy ledger',
+    toastReset: 'Guardrails reset to baseline clinical standards',
+    toastResetError: 'Failed to reset guardrails'
   }
 } as const;

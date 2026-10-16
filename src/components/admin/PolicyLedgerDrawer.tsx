@@ -10,6 +10,7 @@ import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import { usePolicyLedger } from '../../contexts/PolicyLedgerContext';
 import { MOTION } from '../../data/config';
+import { COPY } from '../../data/copy';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
@@ -82,7 +83,7 @@ export function PolicyLedgerDrawer() {
             ref={panelRef}
             role="dialog"
             aria-modal="true"
-            aria-label="Clinical Guardrail Policy Ledger"
+            aria-label={COPY.policyLedger.dialogLabel}
             tabIndex={-1}
             initial={{ y: MOTION.dialogOffsetY, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -98,25 +99,25 @@ export function PolicyLedgerDrawer() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base font-semibold lowercase">Clinical Policy Ledger</h2>
+                    <h2 className="text-base font-semibold lowercase">{COPY.policyLedger.title}</h2>
                     {isLiveFirestore ? (
                       <span className="inline-flex items-center gap-1 rounded-full border border-mint bg-mint/30 px-2 py-0.5 text-3xs font-semibold lowercase text-ink">
                         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ink" />
-                        Firestore Live
+                        {COPY.policyLedger.firestoreLive}
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 rounded-full border border-ink/15 bg-cream px-2 py-0.5 text-3xs font-medium lowercase text-ink/70">
-                        Memory Hot Cache · Fail-Safe
+                        {COPY.policyLedger.memoryCache}
                       </span>
                     )}
                   </div>
                   <p className="text-xs lowercase text-ink/50">
-                    version {policy?.version || 'baseline'} · Google Cloud Firestore
+                    {COPY.policyLedger.versionLabel(policy?.version || 'baseline')}
                   </p>
                 </div>
               </div>
 
-              <CircleButton label="Close policy ledger" onClick={closePolicyDrawer} size={36}>
+              <CircleButton label={COPY.policyLedger.close} onClick={closePolicyDrawer} size={36}>
                 <Icon icon={CloseIcon} size="md" />
               </CircleButton>
             </div>
@@ -127,11 +128,10 @@ export function PolicyLedgerDrawer() {
               <div className="rounded-card border border-ink/10 bg-canvas p-4 text-xs leading-relaxed text-ink/75">
                 <div className="flex items-center gap-1.5 font-medium text-ink">
                   <Icon icon={TuneOutlinedIcon} size="sm" />
-                  <span>Dynamic Runtime Governance</span>
+                  <span>{COPY.policyLedger.governanceBadge}</span>
                 </div>
                 <p className="mt-1">
-                  Policies resolve dynamically from Cloud Firestore across all Gemini extraction calls,
-                  Edge Gemma sessions, and client load-reduction triggers without container redeployment.
+                  {COPY.policyLedger.governanceDesc}
                 </p>
               </div>
 
@@ -140,10 +140,10 @@ export function PolicyLedgerDrawer() {
                 <div className="flex items-center justify-between">
                   <div>
                     <label htmlFor="pain-threshold" className="text-sm font-medium lowercase">
-                      Adverse Escalation Threshold
+                      {COPY.policyLedger.thresholdLabel}
                     </label>
                     <p className="text-xs lowercase text-ink/50">
-                      Progression freezes when patient discomfort exceeds this level
+                      {COPY.policyLedger.thresholdDesc}
                     </p>
                   </div>
                   <span className="rounded-full bg-ink px-3 py-1 font-mono text-sm font-medium text-white">
@@ -152,7 +152,7 @@ export function PolicyLedgerDrawer() {
                 </div>
 
                 <div className="mt-4 flex items-center gap-3">
-                  <span className="text-xs text-ink/40">1 (mild)</span>
+                  <span className="text-xs text-ink/40">{COPY.policyLedger.mildLabel}</span>
                   <input
                     id="pain-threshold"
                     type="range"
@@ -163,7 +163,7 @@ export function PolicyLedgerDrawer() {
                     onChange={(e) => handleThresholdChange(Number(e.target.value))}
                     className="h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-ink/10 accent-ink"
                   />
-                  <span className="text-xs text-ink/40">10 (severe)</span>
+                  <span className="text-xs text-ink/40">{COPY.policyLedger.severeLabel}</span>
                 </div>
               </div>
 
@@ -172,10 +172,10 @@ export function PolicyLedgerDrawer() {
                 <div className="flex items-center justify-between">
                   <div>
                     <label htmlFor="load-reduction" className="text-sm font-medium lowercase">
-                      Recommended Load Reduction
+                      {COPY.policyLedger.reductionLabel}
                     </label>
                     <p className="text-xs lowercase text-ink/50">
-                      Training load / dose reduction applied when threshold is exceeded
+                      {COPY.policyLedger.reductionDesc}
                     </p>
                   </div>
                   <span className="rounded-full bg-ink px-3 py-1 font-mono text-sm font-medium text-white">
@@ -184,7 +184,7 @@ export function PolicyLedgerDrawer() {
                 </div>
 
                 <div className="mt-4 flex items-center gap-3">
-                  <span className="text-xs text-ink/40">10%</span>
+                  <span className="text-xs text-ink/40">{COPY.policyLedger.reductionMinLabel}</span>
                   <input
                     id="load-reduction"
                     type="range"
@@ -195,15 +195,15 @@ export function PolicyLedgerDrawer() {
                     onChange={(e) => handleReductionChange(Number(e.target.value))}
                     className="h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-ink/10 accent-ink"
                   />
-                  <span className="text-xs text-ink/40">50%</span>
+                  <span className="text-xs text-ink/40">{COPY.policyLedger.reductionMaxLabel}</span>
                 </div>
               </div>
 
               {/* Gatekeeper Banned Criteria */}
               <div className="rounded-card border border-ink/10 bg-white p-4">
-                <p className="text-sm font-medium lowercase">Automated Gatekeeper Banned Criteria</p>
+                <p className="text-sm font-medium lowercase">{COPY.policyLedger.bannedLabel}</p>
                 <p className="text-xs lowercase text-ink/50">
-                  Studies matching these keywords are immediately rejected by Gemini
+                  {COPY.policyLedger.bannedDesc}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {(policy?.bannedKeywords || []).map((keyword) => (
@@ -227,8 +227,8 @@ export function PolicyLedgerDrawer() {
                   )}
                   <span className="lowercase text-ink/70">
                     {isLiveFirestore
-                      ? 'Live Cloud Firestore sync active'
-                      : `Cloud Firestore ${firestoreStatus} (using hot memory ledger)`}
+                      ? COPY.policyLedger.syncActive
+                      : COPY.policyLedger.syncFallback(firestoreStatus)}
                   </span>
                 </div>
                 <button
@@ -237,7 +237,7 @@ export function PolicyLedgerDrawer() {
                   className="inline-flex items-center gap-1 text-2xs font-medium lowercase text-ink/60 hover:text-ink underline"
                 >
                   <Icon icon={RestartAltOutlinedIcon} size="xs" />
-                  reset baseline
+                  {COPY.policyLedger.resetBaseline}
                 </button>
               </div>
             </div>
@@ -249,7 +249,7 @@ export function PolicyLedgerDrawer() {
                 onClick={closePolicyDrawer}
                 className="text-xs lowercase text-ink/60 hover:text-ink transition-colors"
               >
-                cancel
+                {COPY.policyLedger.cancel}
               </button>
 
               <PillButton
@@ -258,7 +258,7 @@ export function PolicyLedgerDrawer() {
                 variant="primary"
                 className="text-xs"
               >
-                {isLoading ? 'syncing ledger…' : hasChanges ? 'save & sync policy' : 'policy up to date'}
+                {isLoading ? COPY.policyLedger.syncing : hasChanges ? COPY.policyLedger.saveSync : COPY.policyLedger.upToDate}
               </PillButton>
             </div>
           </motion.div>
