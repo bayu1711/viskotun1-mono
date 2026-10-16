@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import GoogleIcon from '@mui/icons-material/Google';
@@ -20,6 +20,10 @@ export function AuthView({ mode }: AuthViewProps) {
   const isLogin = mode === 'login';
   const router = useRouter();
   const { loginWithEmail, loginWithGoogle, signupWithEmail, loginAsGuest } = useAuth();
+
+  useEffect(() => {
+    router.prefetch(ROUTES.routine);
+  }, [router]);
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
