@@ -631,11 +631,11 @@ export function generateFallbackProtocol(source: string): Protocol {
       label: 'symptom / tolerability',
       eyebrow: 'symptom',
       logTitle: 'log',
-      minLabel: '0 · none',
-      maxLabel: '10 · severe',
+      minLabel: COPY.feedbackDrawer.minLabel(0),
+      maxLabel: COPY.feedbackDrawer.maxLabel(10),
       maxScore: 10,
       escalationThreshold: 4,
-      escalationMessage: 'Symptom threshold exceeded. Escalation paused. Reduce dosage or intensity by 20% tomorrow.'
+      escalationMessage: COPY.safety.baselineEscalationAlert
     },
     initialFeedbackLogs: [],
     initialMessages: [
@@ -644,22 +644,21 @@ export function generateFallbackProtocol(source: string): Protocol {
         role: 'user',
         kind: 'file',
         content: source,
-        timestamp: 'Just now'
+        timestamp: COPY.assistant.timestampJustNow
       },
       {
         id: `${slug}-msg-2`,
         role: 'ai',
         kind: 'text',
-        content:
-          'Parsed paper and isolated the Methods & Interventions section. Non-actionable theoretical sections were excluded.',
-        timestamp: 'Just now'
+        content: COPY.assistant.parsedSummary(12),
+        timestamp: COPY.assistant.timestampJustNow
       },
       {
         id: `${slug}-msg-3`,
         role: 'ai',
         kind: 'protocol',
         content: slug,
-        timestamp: 'Just now'
+        timestamp: COPY.assistant.timestampJustNow
       }
     ],
     community: {
