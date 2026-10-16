@@ -3,7 +3,8 @@ import { toast } from 'sonner';
 import { AuthContext } from '../contexts/AuthContext';
 import { DEFAULT_CONFIRMATION_SCORE, FEEDBACK_ESCALATION_THRESHOLD } from '../data/config';
 import { COPY } from '../data/copy';
-import { initialQueuedPapers, protocols as initialProtocols } from '../data/protocols';
+import { initialQueuedPapers, protocols as initialProtocols, sampleProtocols } from '../data/protocols';
+import { PRECALIBRATED_SAMPLE_PROTOCOLS } from '../data/samplePapers';
 import type {
   ChatMessage,
   DataCollectionField,
@@ -62,11 +63,12 @@ const STORAGE_KEY_RUNTIME = 'protocol_engine_runtime_v1';
 export function useProtocolState() {
   const auth = useContext(AuthContext);
   const [protocolList, setProtocolList] = useState<Protocol[]>(initialProtocols);
-  const [activeProtocolId, setActiveProtocol] = useState(initialProtocols[0].id);
+  const [activeProtocolId, setActiveProtocol] = useState<string>(initialProtocols[0]?.id ?? '');
   const [queuedPapers, setQueuedPapers] = useState<QueuedPaper[]>(initialQueuedPapers);
   const [isFeedbackDrawerOpen, setIsFeedbackDrawerOpen] = useState(false);
+  const [isHowToOpen, setIsHowToOpen] = useState(false);
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
-  const [runtime, setRuntime] = useState(() => createInitialRuntime(initialProtocols));
+  const [runtime, setRuntime] = useState<Record<string, ProtocolRuntime>>(() => createInitialRuntime(initialProtocols));
   const [hasHydrated, setHasHydrated] = useState(false);
   const [hasRemoteHydrated, setHasRemoteHydrated] = useState(false);
 
@@ -83,9 +85,7 @@ export function useProtocolState() {
         try {
           const parsed: Protocol[] = JSON.parse(savedProtocolsRaw);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            const defaultIds = new Set(initialProtocols.map((p) => p.id));
-            const customOnes = parsed.filter((p) => !defaultIds.has(p.id));
-            loadedProtocols = [...initialProtocols, ...customOnes];
+            loadedProtocols = parsed;
             if (isMounted) {
               setProtocolList(loadedProtocols);
             }
@@ -98,6 +98,10 @@ export function useProtocolState() {
       if (savedActiveId && loadedProtocols.some((p) => p.id === savedActiveId)) {
         if (isMounted) {
           setActiveProtocol(savedActiveId);
+        }
+      } else if (loadedProtocols.length > 0) {
+        if (isMounted) {
+          setActiveProtocol(loadedProtocols[0].id);
         }
       }
 
@@ -236,21 +240,62 @@ export function useProtocolState() {
     }
 
     setProtocolList(initialProtocols);
-    setActiveProtocol(initialProtocols[0].id);
+    setActiveProtocol(initialProtocols[0]?.id ?? '');
     setQueuedPapers(initialQueuedPapers);
     setRuntime(createInitialRuntime(initialProtocols));
     toast.success(COPY.demo.resetSuccess);
   }, []);
 
-  const protocol = protocolList.find((item) => item.id === activeProtocolId) ?? protocolList[0];
-  const state = runtime[protocol.id] ?? {
-    setsDone: {},
-    feedbackLogs: [],
-    morphingLogs: [],
-    messages: [],
-    escalationPaused: false,
-    assistantTyping: false
-  };
+  const openHowTo = useCallback(() => setIsHowToOpen(true), []);
+  const closeHowTo = useCallback(() => setIsHowToOpen(false), []);
+
+  const loadSampleProtocol = useCallback((sampleId: string) => {
+    const sample =
+      PRECALIBRATED_SAMPLE_PROTOCOLS[sampleId] ||
+      sampleProtocols.find((p) => p.id === sampleId);
+    if (!sample) {
+      toast.error(`Sample protocol "${sampleId}" not found`);
+      return;
+    }
+
+    setProtocolList((prev) => {
+      const exists = prev.some((p) => p.id === sample.id);
+      if (exists) return prev;
+      return [...prev, sample];
+    });
+
+    setActiveProtocol(sample.id);
+
+    setRuntime((prev) => {
+      if (prev[sample.id]) return prev;
+      return {
+        ...prev,
+        [sample.id]: {
+          setsDone: { ...(sample.initialSetsDone ?? {}) },
+          feedbackLogs: sample.initialFeedbackLogs ?? [],
+          morphingLogs: sample.initialMorphingLogs ?? [],
+          messages: sample.initialMessages ?? [],
+          escalationPaused: false,
+          assistantTyping: false
+        }
+      };
+    });
+
+    setIsHowToOpen(false);
+    toast.success(COPY.howTo.loadedToast(sample.shortTitle || sample.title));
+  }, []);
+
+  const protocol = (protocolList.find((item) => item.id === activeProtocolId) ?? protocolList[0]) || null;
+  const state: ProtocolRuntime = protocol && runtime[protocol.id]
+    ? runtime[protocol.id]
+    : {
+        setsDone: {},
+        feedbackLogs: [],
+        morphingLogs: [],
+        messages: [],
+        escalationPaused: false,
+        assistantTyping: false
+      };
 
   const updateRuntime = useCallback((id: string, update: (prev: ProtocolRuntime) => ProtocolRuntime) => {
     setRuntime((prev) => {
@@ -266,23 +311,43 @@ export function useProtocolState() {
     });
   }, []);
 
-  const feedbackMetric = useMemo(() => resolveFeedbackMetric(protocol), [protocol]);
-  const dataCollectionSpec = useMemo(() => resolveDataCollectionSpec(protocol), [protocol]);
+  const feedbackMetric = useMemo(
+    () =>
+      protocol
+        ? resolveFeedbackMetric(protocol)
+        : {
+            name: 'tolerability',
+            label: 'symptom / tolerability',
+            eyebrow: 'symptom',
+            logTitle: 'log',
+            minLabel: '0 · minimal',
+            maxLabel: '10 · severe',
+            maxScore: 10,
+            escalationThreshold: FEEDBACK_ESCALATION_THRESHOLD,
+            escalationMessage: 'Adverse threshold exceeded. Escalation paused.'
+          },
+    [protocol]
+  );
+  const dataCollectionSpec = useMemo(
+    () => (protocol ? resolveDataCollectionSpec(protocol) : []),
+    [protocol]
+  );
   const morphingLogs = useMemo(
-    () => state.morphingLogs ?? protocol.initialMorphingLogs ?? [],
-    [state.morphingLogs, protocol.initialMorphingLogs]
+    () => state.morphingLogs ?? protocol?.initialMorphingLogs ?? [],
+    [state.morphingLogs, protocol?.initialMorphingLogs]
   );
   const isCurrentDayMilestone = useMemo(
-    () => isMilestoneDay(protocol, protocol.currentDay),
+    () => (protocol ? isMilestoneDay(protocol, protocol.currentDay) : false),
     [protocol]
   );
   const scheduledFields = useMemo(
-    () => getScheduledFieldsForDay(protocol, protocol.currentDay),
+    () => (protocol ? getScheduledFieldsForDay(protocol, protocol.currentDay) : []),
     [protocol]
   );
 
   const pushMessages = useCallback(
     (id: string, ...messages: NewChatMessage[]) => {
+      if (!id) return;
       updateRuntime(id, (prev) => ({
         ...prev,
         messages: [...prev.messages, ...messages.map(buildMessage)]
@@ -292,15 +357,17 @@ export function useProtocolState() {
   );
 
   // Derived values
-  const todayFraction = completionOf(protocol, state.setsDone);
+  const todayFraction = protocol ? completionOf(protocol, state.setsDone) : 0;
   const todayPercent = toPercent(todayFraction);
-  const dayIsComplete = todayFraction === 1;
-  const adherenceRate = adherenceOf(protocol, todayFraction);
-  const progressionReady = isProgressionReady(
-    state.feedbackLogs,
-    state.escalationPaused,
-    feedbackMetric.escalationThreshold ?? FEEDBACK_ESCALATION_THRESHOLD
-  );
+  const dayIsComplete = protocol ? todayFraction === 1 : false;
+  const adherenceRate = protocol ? adherenceOf(protocol, todayFraction) : 0;
+  const progressionReady = protocol
+    ? isProgressionReady(
+        state.feedbackLogs,
+        state.escalationPaused,
+        feedbackMetric.escalationThreshold ?? FEEDBACK_ESCALATION_THRESHOLD
+      )
+    : false;
 
   const summaries = useMemo<ProtocolSummary[]>(
     () =>
@@ -323,20 +390,22 @@ export function useProtocolState() {
   );
 
   const findStep = useCallback(
-    (stepId: string) => protocol.steps.find((step) => step.id === stepId),
-    [protocol.steps]
+    (stepId: string) => (protocol ? protocol.steps.find((step) => step.id === stepId) : undefined),
+    [protocol]
   );
 
   const isStepComplete = useCallback(
     (stepId: string) => {
+      if (!protocol) return false;
       const step = protocol.steps.find((s) => s.id === stepId);
       return step ? (state.setsDone[stepId] ?? 0) >= step.sets : false;
     },
-    [protocol.steps, state.setsDone]
+    [protocol, state.setsDone]
   );
 
   const updateSetCount = useCallback(
     (stepId: string, next: (current: number, max: number) => number) => {
+      if (!protocol) return;
       const step = protocol.steps.find((s) => s.id === stepId);
       if (!step) return;
       updateRuntime(protocol.id, (prev) => ({
@@ -347,7 +416,7 @@ export function useProtocolState() {
         }
       }));
     },
-    [protocol.id, protocol.steps, updateRuntime]
+    [protocol, updateRuntime]
   );
 
   const incrementSet = useCallback((stepId: string) => updateSetCount(stepId, (current) => current + 1), [updateSetCount]);
@@ -358,6 +427,7 @@ export function useProtocolState() {
   );
 
   const markTodayComplete = useCallback(() => {
+    if (!protocol) return;
     const allSetsDone = Object.fromEntries(protocol.steps.map((step) => [step.id, step.sets]));
     updateRuntime(protocol.id, (prev) => ({ ...prev, setsDone: allSetsDone }));
     const latestScore = state.feedbackLogs[state.feedbackLogs.length - 1]?.score ?? DEFAULT_CONFIRMATION_SCORE;
@@ -366,10 +436,11 @@ export function useProtocolState() {
       kind: 'confirmation',
       content: COPY.assistant.confirmLogged(protocol.currentDay, latestScore)
     });
-  }, [protocol.steps, protocol.id, protocol.currentDay, state.feedbackLogs, updateRuntime, pushMessages]);
+  }, [protocol, state.feedbackLogs, updateRuntime, pushMessages]);
 
   const logFeedback = useCallback(
     (score: number, note: string) => {
+      if (!protocol) return;
       const metric = resolveFeedbackMetric(protocol);
       const threshold = metric.escalationThreshold ?? FEEDBACK_ESCALATION_THRESHOLD;
       const exceeded = exceedsFeedbackThreshold(score, threshold);
@@ -399,8 +470,10 @@ export function useProtocolState() {
 
   const logMorphingData = useCallback(
     (fieldId: string, value: number | string | boolean, note = '') => {
+      if (!protocol) return;
       const spec = resolveDataCollectionSpec(protocol);
       const field = spec.find((f) => f.id === fieldId) ?? spec[0];
+      if (!field) return;
       const threshold = field.escalationThreshold ?? FEEDBACK_ESCALATION_THRESHOLD;
       const isNumeric = typeof value === 'number';
       const exceeded = isNumeric && exceedsFeedbackThreshold(value, threshold);
@@ -463,6 +536,10 @@ export function useProtocolState() {
 
   const askQuestion = useCallback(
     async (text: string) => {
+      if (!protocol) {
+        toast.info(COPY.errors.noProtocolsBody);
+        return;
+      }
       const target = protocol;
       pushMessages(target.id, { role: 'user', kind: 'question', content: text });
       updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: true }));
@@ -573,7 +650,7 @@ export function useProtocolState() {
       const fileName = typeof source === 'string' ? source : source.name;
       const queuedId = createId('queued');
       const procId = createId('proc');
-      const targetProtocolId = protocol.id;
+      const targetProtocolId = protocol?.id ?? 'pending-upload';
 
       setQueuedPapers((prev) => [...prev, { id: queuedId, name: fileName, note: COPY.papers.queuedNote }]);
       pushMessages(
@@ -640,7 +717,7 @@ export function useProtocolState() {
         toast.error(COPY.extraction.errorGeneral);
       }
     },
-    [protocol.id, addProtocol, pushMessages, updateRuntime]
+    [protocol?.id, addProtocol, pushMessages, updateRuntime]
   );
 
   const openFeedbackDrawer = useCallback((fieldId?: string) => {
@@ -656,6 +733,7 @@ export function useProtocolState() {
 
   const updateGuardrailThreshold = useCallback(
     (threshold: number, message?: string) => {
+      if (!protocol) return;
       setProtocolList((prev) =>
         prev.map((p) => {
           if (p.id !== protocol.id) return p;
@@ -686,19 +764,20 @@ export function useProtocolState() {
         })
       );
     },
-    [protocol.id]
+    [protocol]
   );
 
   return useMemo(
     () => ({
       protocols: summaries,
       queuedPapers,
-      activeProtocolId: protocol.id,
+      activeProtocolId: protocol?.id ?? '',
       setActiveProtocol,
       protocol,
-      currentDay: protocol.currentDay,
-      totalDays: protocol.totalDays,
-      streak: protocol.streak,
+      hasProtocols: protocolList.length > 0,
+      currentDay: protocol?.currentDay ?? 1,
+      totalDays: protocol?.totalDays ?? 14,
+      streak: protocol?.streak ?? 0,
       messages: state.messages,
       setsDone: state.setsDone,
       feedbackLogs: state.feedbackLogs ?? [],
@@ -719,6 +798,10 @@ export function useProtocolState() {
       isFeedbackDrawerOpen,
       openFeedbackDrawer,
       closeFeedbackDrawer,
+      isHowToOpen,
+      openHowTo,
+      closeHowTo,
+      loadSampleProtocol,
       isStepComplete,
       incrementSet,
       decrementSet,
@@ -737,6 +820,7 @@ export function useProtocolState() {
       summaries,
       queuedPapers,
       protocol,
+      protocolList.length,
       state.messages,
       state.setsDone,
       state.feedbackLogs,
@@ -756,6 +840,10 @@ export function useProtocolState() {
       isFeedbackDrawerOpen,
       openFeedbackDrawer,
       closeFeedbackDrawer,
+      isHowToOpen,
+      openHowTo,
+      closeHowTo,
+      loadSampleProtocol,
       isStepComplete,
       incrementSet,
       decrementSet,
