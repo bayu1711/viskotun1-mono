@@ -21,6 +21,7 @@ import type {
   QueuedPaper
 } from '../types/routine';
 import { answerFor } from '../utils/assistant';
+import { stripClinicalDisclaimer } from '../utils/disclaimer';
 import { isEdgeGemmaAvailable, queryEdgeGemma } from '../utils/edgeGemma';
 import { createId } from '../utils/id';
 import { clamp, toPercent } from '../utils/math';
@@ -930,7 +931,7 @@ export function useRoutineState() {
             pushMessages(target.id, {
               role: 'ai',
               kind: 'answer',
-              content: data.answer,
+              content: stripClinicalDisclaimer(data.answer),
               engine: data.engine ?? 'cloud-gemini',
               source: data.source ?? COPY.assistant.methodsSectionSource
             });
@@ -942,7 +943,7 @@ export function useRoutineState() {
         pushMessages(target.id, {
           role: 'ai',
           kind: 'answer',
-          content: answerFor(target, text),
+          content: stripClinicalDisclaimer(answerFor(target, text)),
           engine: 'local-rules',
           source: COPY.assistant.methodsSectionSource
         });
@@ -950,7 +951,7 @@ export function useRoutineState() {
         pushMessages(target.id, {
           role: 'ai',
           kind: 'answer',
-          content: answerFor(target, text),
+          content: stripClinicalDisclaimer(answerFor(target, text)),
           engine: 'local-rules',
           source: COPY.assistant.methodsSectionSource
         });
@@ -959,6 +960,13 @@ export function useRoutineState() {
       }
     },
     [protocol, pushMessages, updateRuntime]
+  );
+
+  const askAboutStep = useCallback(
+    (step: RoutineStep | ProtocolStep) => {
+      askQuestion(COPY.task.taskQuestionPrompt(step.action));
+    },
+    [askQuestion]
   );
 
   const addProtocol = useCallback((newProtocol: Protocol) => {
@@ -1246,7 +1254,7 @@ export function useRoutineState() {
                 id: createId('msg'),
                 role: 'ai',
                 kind: 'answer',
-                content: data.answer,
+                content: stripClinicalDisclaimer(data.answer),
                 engine: data.engine ?? 'cloud-gemini',
                 source: data.source ?? COPY.assistant.methodsSectionSource,
                 timestamp: nowLabel()
@@ -1262,7 +1270,7 @@ export function useRoutineState() {
             id: createId('msg'),
             role: 'ai',
             kind: 'answer',
-            content: answerFor(target, text),
+            content: stripClinicalDisclaimer(answerFor(target, text)),
             engine: 'local-rules',
             source: COPY.assistant.methodsSectionSource,
             timestamp: nowLabel()
@@ -1275,7 +1283,7 @@ export function useRoutineState() {
             id: createId('msg'),
             role: 'ai',
             kind: 'answer',
-            content: answerFor(target, text),
+            content: stripClinicalDisclaimer(answerFor(target, text)),
             engine: 'local-rules',
             source: COPY.assistant.methodsSectionSource,
             timestamp: nowLabel()
@@ -1475,6 +1483,7 @@ export function useRoutineState() {
       logFeedback,
       logMorphingData,
       askQuestion,
+      askAboutStep,
       uploadPaper,
       stagingProtocol,
       isExtractingPaper,
@@ -1537,6 +1546,7 @@ export function useRoutineState() {
       logFeedback,
       logMorphingData,
       askQuestion,
+      askAboutStep,
       uploadPaper,
       stagingProtocol,
       isExtractingPaper,

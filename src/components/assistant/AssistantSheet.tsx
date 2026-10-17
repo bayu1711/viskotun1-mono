@@ -178,6 +178,7 @@ export function AssistantSheet() {
                         onConfirm={handleConfirmCandidate}
                         onDiscard={discardStagingProtocol}
                         onToggleExcludeStep={toggleStagingExcludeStep}
+                        onAskAboutStep={(step) => askStagingQuestion(COPY.task.taskQuestionPrompt(step.action))}
                       />
 
                       {/* Pre-confirmation Q&A messages */}

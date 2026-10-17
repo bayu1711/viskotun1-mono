@@ -4,8 +4,9 @@ import React from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import { COPY } from '../../../data/copy';
-import type { Protocol } from '../../../types/routine';
+import type { Protocol, ProtocolStep } from '../../../types/routine';
 import { cn } from '../../../utils/cn';
 import { isRandomizedTrial, stopRuleOf } from '../../../utils/routineMetrics';
 import { Callout } from '../../feedback/Callout';
@@ -19,13 +20,15 @@ interface CandidateProtocolCardProps {
   onConfirm: () => void;
   onDiscard: () => void;
   onToggleExcludeStep?: (stepId: string) => void;
+  onAskAboutStep?: (step: ProtocolStep) => void;
 }
 
 export function CandidateProtocolCard({
   protocol,
   onConfirm,
   onDiscard,
-  onToggleExcludeStep
+  onToggleExcludeStep,
+  onAskAboutStep
 }: CandidateProtocolCardProps) {
   const paper = protocol.paper;
   const stopRule = stopRuleOf(protocol);
@@ -116,16 +119,29 @@ export function CandidateProtocolCard({
                       {step.detail && <p className="mt-0.5 text-2xs text-ink/50">{step.detail}</p>}
                     </div>
 
-                    {step.inferred && onToggleExcludeStep && (
-                      <button
-                        type="button"
-                        onClick={() => onToggleExcludeStep(step.id)}
-                        className="shrink-0 text-3xs text-ink/50 underline decoration-dotted hover:text-ink transition-colors"
-                        title={isExcluded ? COPY.task.restoreStep : COPY.missingData.candidateExclusionNotice}
-                      >
-                        {isExcluded ? COPY.assistant.restoreCandidateStep : COPY.assistant.excludeCandidateStep}
-                      </button>
-                    )}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {onAskAboutStep && (
+                        <button
+                          type="button"
+                          onClick={() => onAskAboutStep(step)}
+                          aria-label={COPY.task.helpAriaLabel(step.action)}
+                          title={COPY.task.helpTooltip(step.action)}
+                          className="flex h-6 w-6 items-center justify-center rounded-full border border-ink/15 bg-white text-ink/60 shadow-2xs transition-colors hover:border-ink hover:bg-mint hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+                        >
+                          <Icon icon={HelpOutlineOutlinedIcon} size="xs" />
+                        </button>
+                      )}
+                      {step.inferred && onToggleExcludeStep && (
+                        <button
+                          type="button"
+                          onClick={() => onToggleExcludeStep(step.id)}
+                          className="text-3xs text-ink/50 underline decoration-dotted hover:text-ink transition-colors"
+                          title={isExcluded ? COPY.task.restoreStep : COPY.missingData.candidateExclusionNotice}
+                        >
+                          {isExcluded ? COPY.assistant.restoreCandidateStep : COPY.assistant.excludeCandidateStep}
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   {step.inferred && (

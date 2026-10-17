@@ -1,10 +1,13 @@
 import React from 'react';
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
+import { useAssistant } from '../../contexts/AssistantContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import type { RoutineStep } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { getStepDisplay } from '../../utils/steps';
 import { CheckToggle } from '../ui/CheckToggle';
+import { Icon } from '../ui/Icon';
 import { IconTile } from '../ui/IconTile';
 import { StepIcon } from '../ui/StepIcon';
 
@@ -14,6 +17,7 @@ interface RoutineStepRowProps {
 
 export function RoutineStepRow({ step }: RoutineStepRowProps) {
   const { isStepComplete, toggleStep } = useRoutine();
+  const { askAboutTask } = useAssistant();
   const complete = isStepComplete(step.id);
   const display = getStepDisplay(step);
 
@@ -35,7 +39,21 @@ export function RoutineStepRow({ step }: RoutineStepRowProps) {
           )}
         </p>
       </div>
-      <CheckToggle checked={complete} onToggle={() => toggleStep(step.id)} itemLabel={step.action} />
+      <div className="flex items-center gap-1.5 shrink-0">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            askAboutTask(step);
+          }}
+          aria-label={COPY.task.helpAriaLabel(step.action)}
+          title={COPY.task.helpTooltip(step.action)}
+          className="flex h-7 w-7 items-center justify-center rounded-full border border-ink/15 bg-white/80 text-ink/60 shadow-2xs transition-colors hover:border-ink hover:bg-mint hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+        >
+          <Icon icon={HelpOutlineOutlinedIcon} size="xs" />
+        </button>
+        <CheckToggle checked={complete} onToggle={() => toggleStep(step.id)} itemLabel={step.action} />
+      </div>
     </li>
   );
 }

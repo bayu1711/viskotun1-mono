@@ -1,6 +1,7 @@
 import React from 'react';
 import { COPY } from '../../../data/copy';
 import type { AIEngineType } from '../../../types/routine';
+import { stripClinicalDisclaimer } from '../../../utils/disclaimer';
 
 interface AnswerBubbleProps {
   content: string;
@@ -9,6 +10,7 @@ interface AnswerBubbleProps {
 }
 
 export function AnswerBubble({ content, engine, source }: AnswerBubbleProps) {
+  const cleanContent = stripClinicalDisclaimer(content);
   let badgeLabel: string = COPY.assistant.answerSource;
   if (engine === 'on-device-gemma') {
     badgeLabel = `${COPY.assistant.engines.onDeviceGemma} · ${COPY.assistant.engines.onDeviceBadge}`;
@@ -22,7 +24,7 @@ export function AnswerBubble({ content, engine, source }: AnswerBubbleProps) {
 
   return (
     <div className="max-w-bubble-wide rounded-bubble rounded-bl-md bg-white px-4 py-3 shadow-sm">
-      <p className="text-sm leading-relaxed text-ink">{content}</p>
+      <p className="text-sm leading-relaxed text-ink whitespace-pre-line">{cleanContent}</p>
       <div className="mt-2 flex items-center justify-between gap-2 border-t border-ink/5 pt-1.5">
         <span className="text-2xs font-medium text-ink/45">
           {badgeLabel}

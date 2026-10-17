@@ -1,4 +1,6 @@
 import React from 'react';
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
+import { useAssistant } from '../../contexts/AssistantContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import type { RoutineStep, ProtocolStep } from '../../types/routine';
@@ -6,6 +8,7 @@ import { cn } from '../../utils/cn';
 import { getStepDisplay } from '../../utils/steps';
 import { toneStyles } from '../../utils/tones';
 import { CheckToggle } from '../ui/CheckToggle';
+import { Icon } from '../ui/Icon';
 import { StepIcon } from '../ui/StepIcon';
 import { SetCounter } from './SetCounter';
 import { TaskStatList } from './TaskStatList';
@@ -25,6 +28,7 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
     isStepExcluded,
     toggleExcludeStep
   } = useRoutine();
+  const { askAboutTask } = useAssistant();
   const excluded = isStepExcluded(step.id);
   const done = Math.min(setsDone[step.id] ?? 0, step.sets);
   const complete = isStepComplete(step.id);
@@ -107,7 +111,21 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
             </div>
           )}
         </div>
-        <CheckToggle checked={complete} onToggle={() => toggleStep(step.id)} itemLabel={step.action} tone={step.tone} />
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              askAboutTask(step);
+            }}
+            aria-label={COPY.task.helpAriaLabel(step.action)}
+            title={COPY.task.helpTooltip(step.action)}
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-ink/15 bg-white/80 text-ink/60 shadow-2xs transition-colors hover:border-ink hover:bg-mint hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+          >
+            <Icon icon={HelpOutlineOutlinedIcon} size="xs" />
+          </button>
+          <CheckToggle checked={complete} onToggle={() => toggleStep(step.id)} itemLabel={step.action} tone={step.tone} />
+        </div>
       </div>
 
       {wide && <TaskStatList step={step} display={display} />}

@@ -12,7 +12,7 @@ export interface RoutineProviderProps {
   missingDataFlagEnabled?: boolean;
 }
 
-const RoutineContext = createContext<RoutineContextValue | null>(null);
+export const RoutineContext = createContext<RoutineContextValue | null>(null);
 
 export function RoutineProvider({ children, missingDataFlagEnabled = true }: RoutineProviderProps) {
   return (
