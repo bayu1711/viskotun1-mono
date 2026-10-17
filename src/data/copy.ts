@@ -689,11 +689,6 @@ export const COPY = {
     rigorTitle: 'Built on uncompromising scientific rigor',
     rigorSubtitle:
       'ViskotuN1 is engineered strictly for human health interventions—not theoretical physics or animal models.',
-    rigorStats: [
-      { value: '100%', label: 'Interventional Human Science', sub: 'Clinical RCTs & peer-reviewed trials' },
-      { value: '0', label: 'Hallucinated Parameters', sub: 'Audited conservative clinical defaults' },
-      { value: '<2s', label: 'Safety Policy Validation', sub: 'Real-time threshold & escalation checks' }
-    ],
     ctaGuest: 'Try as guest',
     ctaLogin: 'Sign in',
     ctaSignup: 'Create account',
@@ -717,9 +712,7 @@ export const COPY = {
     },
     demoTitle: 'Ready to build science-backed daily habits?',
     demoSubtitle: 'Drop any clinical research PDF or explore pre-loaded clinical routines with zero setup.',
-    architecture: 'Architecture',
     architectureTitle: 'How ViskotuN1 works',
-    capabilities: 'Capabilities',
     capabilitiesTitle: 'Built for clinical rigour',
     nav: {
       howItWorks: 'How it works',
