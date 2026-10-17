@@ -2,6 +2,7 @@ import React from 'react';
 import { COPY } from '../../../data/copy';
 import type { AIEngineType } from '../../../types/routine';
 import { stripClinicalDisclaimer } from '../../../utils/disclaimer';
+import { MarkdownContent } from '../../ui/MarkdownContent';
 
 interface AnswerBubbleProps {
   content: string;
@@ -24,8 +25,8 @@ export function AnswerBubble({ content, engine, source }: AnswerBubbleProps) {
 
   return (
     <div className="max-w-bubble-wide rounded-bubble rounded-bl-md bg-white px-4 py-3 shadow-sm">
-      <p className="text-sm leading-relaxed text-ink whitespace-pre-line">{cleanContent}</p>
-      <div className="mt-2 flex items-center justify-between gap-2 border-t border-ink/5 pt-1.5">
+      <MarkdownContent content={cleanContent} />
+      <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-ink/5 pt-1.5">
         <span className="text-2xs font-medium text-ink/45">
           {badgeLabel}
         </span>
