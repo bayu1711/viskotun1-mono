@@ -140,6 +140,13 @@ describe('routineMetrics', () => {
     it('clamps setsDone per step so it never exceeds step.sets', () => {
       expect(completionOf(mockRoutine, { 'step-1': 10, 'step-2': 10 })).toBe(1);
     });
+
+    it('correctly re-normalizes ratio when steps are excluded by user', () => {
+      // step-2 (2 sets) is excluded, leaving step-1 (3 sets) as the sole active step
+      expect(completionOf(mockRoutine, {}, ['step-2'])).toBe(0);
+      expect(completionOf(mockRoutine, { 'step-1': 3 }, ['step-2'])).toBe(1);
+      expect(completionOf(mockRoutine, { 'step-1': 1 }, ['step-2'])).toBe(1 / 3);
+    });
   });
 
   describe('feedback metric resolution & thresholds', () => {

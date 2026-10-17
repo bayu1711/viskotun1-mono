@@ -64,10 +64,15 @@ export function getScheduledFieldsForDay(routine?: Routine, day?: number): DataC
   return spec.filter((field) => isFieldScheduledForDay(field, targetDay));
 }
 
-/** Fraction (0–1) of today's sets completed across all steps. */
-export function completionOf(routine: Routine, setsDone: Record<string, number>) {
-  const total = routine.steps.reduce((sum, step) => sum + step.sets, 0);
-  const done = routine.steps.reduce(
+/** Fraction (0–1) of today's sets completed across all active (non-excluded) steps. */
+export function completionOf(
+  routine: Routine,
+  setsDone: Record<string, number>,
+  excludedStepIds: string[] = []
+) {
+  const activeSteps = routine.steps.filter((step) => !excludedStepIds.includes(step.id));
+  const total = activeSteps.reduce((sum, step) => sum + step.sets, 0);
+  const done = activeSteps.reduce(
     (sum, step) => sum + Math.min(setsDone[step.id] ?? 0, step.sets),
     0
   );
