@@ -96,6 +96,14 @@ export function useRoutineState() {
   const [hasHydrated, setHasHydrated] = useState(false);
   const [hasRemoteHydrated, setHasRemoteHydrated] = useState(false);
 
+  // Staging candidate paper for pre-confirmation review & discussion
+  const [stagingProtocol, setStagingProtocol] = useState<Protocol | null>(null);
+  const [isExtractingPaper, setIsExtractingPaper] = useState(false);
+  const [extractingSourceName, setExtractingSourceName] = useState('');
+  const [stagingMessages, setStagingMessages] = useState<ChatMessage[]>([]);
+  const [stagingError, setStagingError] = useState<string | null>(null);
+  const [isStagingAssistantTyping, setIsStagingAssistantTyping] = useState(false);
+
   // Dynamic sample research papers pulled from Firebase Firestore
   const [samplePapers, setSamplePapers] = useState<SamplePaper[]>(SAMPLE_PAPERS);
   const [sampleProtocolsMap, setSampleProtocolsMap] = useState<Record<string, Protocol>>(PRECALIBRATED_SAMPLE_PROTOCOLS);
@@ -867,21 +875,41 @@ export function useRoutineState() {
   const uploadPaper = useCallback(
     async (source: string | File, extractedProtocol?: Protocol) => {
       if (extractedProtocol) {
-        addProtocol(extractedProtocol);
+        setStagingProtocol(extractedProtocol);
+        setStagingError(null);
+        setStagingMessages([
+          {
+            id: createId('msg'),
+            role: 'user',
+            kind: 'file',
+            content: extractedProtocol.paper?.title || extractedProtocol.title,
+            timestamp: nowLabel()
+          },
+          {
+            id: createId('msg'),
+            role: 'ai',
+            kind: 'candidate',
+            content: extractedProtocol.id,
+            timestamp: nowLabel()
+          }
+        ]);
         return;
       }
 
       const fileName = typeof source === 'string' ? source : source.name;
-      const queuedId = createId('queued');
-      const procId = createId('proc');
-      const targetProtocolId = protocol?.id ?? 'pending-upload';
-
-      setQueuedPapers((prev) => [...prev, { id: queuedId, name: fileName, note: COPY.papers.queuedNote }]);
-      pushMessages(
-        targetProtocolId,
-        { role: 'user', kind: 'file', content: fileName },
-        { id: procId, role: 'ai', kind: 'processing', content: fileName, createdAt: Date.now() }
-      );
+      setStagingProtocol(null);
+      setStagingError(null);
+      setIsExtractingPaper(true);
+      setExtractingSourceName(fileName);
+      setStagingMessages([
+        {
+          id: createId('msg'),
+          role: 'user',
+          kind: 'file',
+          content: fileName,
+          timestamp: nowLabel()
+        }
+      ]);
 
       try {
         const formData = new FormData();
@@ -901,85 +929,213 @@ export function useRoutineState() {
         }
 
         const result = await res.json();
-
         const extractedRoutine = result.routine || result.protocol;
 
         if (result.eligible && extractedRoutine) {
-          addRoutine(extractedRoutine);
-
-          // Persist uploaded paper to unified Firebase papers collection
-          fetch('/api/papers', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              paper: {
-                id: extractedRoutine.id,
-                title: extractedRoutine.paper?.title || extractedRoutine.title,
-                shortTitle: extractedRoutine.shortTitle,
-                domain: extractedRoutine.phase || 'Clinical Research',
-                category: 'rehab',
-                authors: extractedRoutine.paper?.authors || 'Unknown Authors',
-                journal: extractedRoutine.paper?.journal || 'Clinical Trial',
-                year: extractedRoutine.paper?.year || new Date().getFullYear(),
-                doi: extractedRoutine.paper?.doi || '',
-                openAccessUrl: extractedRoutine.paper?.doi ? `https://doi.org/${extractedRoutine.paper?.doi}` : '',
-                pdfUrl: typeof source === 'string' ? source : '',
-                summary: extractedRoutine.steps?.map((s: RoutineStep) => s.action).join('. ') || '',
-                featuresTested: extractedRoutine.steps?.map((s: RoutineStep) => s.action) || [],
-                routineId: extractedRoutine.id,
-                protocolId: extractedRoutine.id,
-                isSample: false,
-                userId: userId || 'guest'
-              },
-              routine: extractedRoutine,
-              protocol: extractedRoutine
-            })
-          }).catch((err) => {
-            console.warn('[uploadPaper] Could not persist to Firebase papers collection:', err);
-          });
-
-          setQueuedPapers((prev) => prev.filter((p) => p.id !== queuedId));
-          updateRuntime(targetProtocolId, (prev) => ({
+          setStagingProtocol(extractedRoutine);
+          setStagingMessages((prev) => [
             ...prev,
-            messages: prev.messages.map((m) =>
-              m.id === procId
-                ? { ...m, kind: 'confirmation', content: COPY.extraction.routineReady(extractedRoutine.title) }
-                : m
-            )
-          }));
-          if (result.isExistingCanonical) {
-            toast.success(COPY.community.existingCanonicalFound(extractedRoutine.title));
-          } else {
-            toast.success(COPY.extraction.success);
-          }
+            {
+              id: createId('msg'),
+              role: 'ai',
+              kind: 'candidate',
+              content: extractedRoutine.id,
+              timestamp: nowLabel()
+            }
+          ]);
+          toast.success(COPY.processing.ready);
         } else {
           const reason = result.rejectionReason || COPY.extraction.declinedNonHuman;
-          setQueuedPapers((prev) => prev.filter((p) => p.id !== queuedId));
-          updateRuntime(targetProtocolId, (prev) => ({
+          setStagingError(reason);
+          setStagingMessages((prev) => [
             ...prev,
-            messages: prev.messages.map((m) =>
-              m.id === procId
-                ? { ...m, kind: 'alert', content: reason }
-                : m
-            )
-          }));
+            {
+              id: createId('msg'),
+              role: 'ai',
+              kind: 'alert',
+              content: reason,
+              timestamp: nowLabel()
+            }
+          ]);
           toast.error(reason);
         }
       } catch (err) {
         console.error('[uploadPaper] Extraction failed:', err);
-        setQueuedPapers((prev) => prev.filter((p) => p.id !== queuedId));
-        updateRuntime(targetProtocolId, (prev) => ({
+        const errorMsg = COPY.extraction.errorGeneral;
+        setStagingError(errorMsg);
+        setStagingMessages((prev) => [
           ...prev,
-          messages: prev.messages.map((m) =>
-            m.id === procId
-              ? { ...m, kind: 'alert', content: COPY.extraction.errorGeneral }
-              : m
-          )
-        }));
-        toast.error(COPY.extraction.errorGeneral);
+          {
+            id: createId('msg'),
+            role: 'ai',
+            kind: 'alert',
+            content: errorMsg,
+            timestamp: nowLabel()
+          }
+        ]);
+        toast.error(errorMsg);
+      } finally {
+        setIsExtractingPaper(false);
       }
     },
-    [protocol?.id, addProtocol, addRoutine, pushMessages, updateRuntime, userId]
+    []
+  );
+
+  const confirmStagingProtocol = useCallback(() => {
+    if (!stagingProtocol) return;
+    const target = stagingProtocol;
+    addProtocol(target);
+
+    // Persist uploaded paper to unified Firebase papers collection
+    fetch('/api/papers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        paper: {
+          id: target.id,
+          title: target.paper?.title || target.title,
+          shortTitle: target.shortTitle,
+          domain: target.phase || 'Clinical Research',
+          category: 'rehab',
+          authors: target.paper?.authors || 'Unknown Authors',
+          journal: target.paper?.journal || 'Clinical Trial',
+          year: target.paper?.year || new Date().getFullYear(),
+          doi: target.paper?.doi || '',
+          openAccessUrl: target.paper?.doi ? `https://doi.org/${target.paper?.doi}` : '',
+          pdfUrl: '',
+          summary: target.steps?.map((s: RoutineStep) => s.action).join('. ') || '',
+          featuresTested: target.steps?.map((s: RoutineStep) => s.action) || [],
+          routineId: target.id,
+          protocolId: target.id,
+          isSample: false,
+          userId: userId || 'guest'
+        },
+        routine: target,
+        protocol: target
+      })
+    }).catch((err) => {
+      console.warn('[confirmStagingProtocol] Could not persist to Firebase papers collection:', err);
+    });
+
+    const displayTitle = target.shortTitle || target.title;
+    setStagingProtocol(null);
+    setStagingMessages([]);
+    setStagingError(null);
+    toast.success(COPY.assistant.confirmedToast(displayTitle));
+  }, [stagingProtocol, addProtocol, userId]);
+
+  const discardStagingProtocol = useCallback(() => {
+    setStagingProtocol(null);
+    setStagingMessages([]);
+    setStagingError(null);
+    setIsExtractingPaper(false);
+    toast.info(COPY.assistant.discardedToast);
+  }, []);
+
+  const askStagingQuestion = useCallback(
+    async (text: string) => {
+      if (!stagingProtocol) return;
+      const target = stagingProtocol;
+      const userMsg: ChatMessage = {
+        id: createId('msg'),
+        role: 'user',
+        kind: 'question',
+        content: text,
+        timestamp: nowLabel()
+      };
+      setStagingMessages((prev) => [...prev, userMsg]);
+      setIsStagingAssistantTyping(true);
+
+      try {
+        const canUseEdgeGemma = await isEdgeGemmaAvailable();
+        if (canUseEdgeGemma) {
+          const edgeAnswer = await queryEdgeGemma(target, text);
+          if (edgeAnswer) {
+            setStagingMessages((prev) => [
+              ...prev,
+              {
+                id: createId('msg'),
+                role: 'ai',
+                kind: 'answer',
+                content: edgeAnswer,
+                engine: 'on-device-gemma',
+                source: COPY.assistant.engines.onDeviceGemmaSource,
+                timestamp: nowLabel()
+              }
+            ]);
+            return;
+          }
+        }
+      } catch (edgeErr) {
+        console.info('[askStagingQuestion] Edge Gemma bypassed:', edgeErr);
+      }
+
+      try {
+        const res = await fetch('/api/assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: text,
+            protocolTitle: target.title,
+            shortTitle: target.shortTitle,
+            faqs: target.faqs,
+            contraindications: target.contraindications,
+            steps: target.steps,
+            progressionRules: target.progressionRules,
+            feedbackMetric: target.feedbackMetric,
+            paper: target.paper
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.answer) {
+            setStagingMessages((prev) => [
+              ...prev,
+              {
+                id: createId('msg'),
+                role: 'ai',
+                kind: 'answer',
+                content: data.answer,
+                engine: data.engine ?? 'cloud-gemini',
+                source: data.source ?? COPY.assistant.methodsSectionSource,
+                timestamp: nowLabel()
+              }
+            ]);
+            return;
+          }
+        }
+
+        setStagingMessages((prev) => [
+          ...prev,
+          {
+            id: createId('msg'),
+            role: 'ai',
+            kind: 'answer',
+            content: answerFor(target, text),
+            engine: 'local-rules',
+            source: COPY.assistant.methodsSectionSource,
+            timestamp: nowLabel()
+          }
+        ]);
+      } catch {
+        setStagingMessages((prev) => [
+          ...prev,
+          {
+            id: createId('msg'),
+            role: 'ai',
+            kind: 'answer',
+            content: answerFor(target, text),
+            engine: 'local-rules',
+            source: COPY.assistant.methodsSectionSource,
+            timestamp: nowLabel()
+          }
+        ]);
+      } finally {
+        setIsStagingAssistantTyping(false);
+      }
+    },
+    [stagingProtocol]
   );
 
   const openFeedbackDrawer = useCallback((fieldId?: string) => {
@@ -1160,6 +1316,15 @@ export function useRoutineState() {
       logMorphingData,
       askQuestion,
       uploadPaper,
+      stagingProtocol,
+      isExtractingPaper,
+      extractingSourceName,
+      stagingMessages,
+      stagingError,
+      isStagingAssistantTyping,
+      confirmStagingProtocol,
+      discardStagingProtocol,
+      askStagingQuestion,
       addRoutine: addProtocol,
       addProtocol,
       resetToDefaults,
@@ -1212,6 +1377,15 @@ export function useRoutineState() {
       logMorphingData,
       askQuestion,
       uploadPaper,
+      stagingProtocol,
+      isExtractingPaper,
+      extractingSourceName,
+      stagingMessages,
+      stagingError,
+      isStagingAssistantTyping,
+      confirmStagingProtocol,
+      discardStagingProtocol,
+      askStagingQuestion,
       addProtocol,
       resetToDefaults,
       updateGuardrailThreshold,
