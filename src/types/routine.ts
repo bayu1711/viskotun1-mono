@@ -298,6 +298,8 @@ export interface StoredPaper {
   routine?: Routine;
   protocol?: Routine;
   userId?: string | null;
+  userEmail?: string | null;
+  uploadedBy?: string | null;
   createdAt: number;
   updatedAt: number;
 }
