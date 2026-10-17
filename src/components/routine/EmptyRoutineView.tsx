@@ -25,10 +25,12 @@ export function EmptyRoutineView() {
     openAssistant('upload');
   };
 
-  const getIconForRoutine = (targetId: string) => {
+  const getIconForRoutine = (targetId?: string, category?: string) => {
     if (targetId === 'achilles') return 'straight-knee' as const;
     if (targetId === 'hair-loss') return 'serum' as const;
     if (targetId === 'creatine-sleep') return 'sleep' as const;
+    if (category?.includes('metabol') || category?.includes('fasting')) return 'timer' as const;
+    if (category?.includes('circadian') || category?.includes('sleep') || category?.includes('light')) return 'sun' as const;
     return 'pill' as const;
   };
 
@@ -84,7 +86,7 @@ export function EmptyRoutineView() {
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {topTrending.map((paper, index) => {
-              const targetId = paper.routineId || paper.protocolId || 'achilles';
+              const targetId = paper.routineId || paper.protocolId;
               const rank = paper.trendingRank ?? index + 1;
               const trackers = paper.activeTrackersCount;
               const logs = paper.totalLogsCount;
@@ -97,7 +99,7 @@ export function EmptyRoutineView() {
                   <div>
                     <div className="flex items-center justify-between gap-1.5">
                       <span className="flex h-7 w-7 items-center justify-center rounded-full bg-canvas text-ink">
-                        <StepIcon icon={getIconForRoutine(targetId)} size="xs" />
+                        <StepIcon icon={getIconForRoutine(targetId, paper.category)} size="xs" />
                       </span>
                       <div className="flex items-center gap-1.5">
                         <span className="rounded-full bg-mint/30 border border-mint/60 px-2 py-0.5 text-2xs font-semibold text-ink">
@@ -127,7 +129,7 @@ export function EmptyRoutineView() {
                     <PillButton
                       size="sm"
                       variant="outline"
-                      onClick={() => loadRoutine(targetId)}
+                      onClick={() => (targetId ? loadRoutine(targetId) : handleOpenUpload())}
                       className="w-full justify-center gap-1.5"
                     >
                       <Icon icon={PlayArrowOutlinedIcon} size="xs" />

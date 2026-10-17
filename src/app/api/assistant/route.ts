@@ -51,6 +51,7 @@ Known FAQs: ${JSON.stringify(faqs || [])}
 Instructions:
 1. For general inquiries, answer concisely in 1-3 sentences citing the Methods & Interventions section.
 2. If the user asks about a specific task, exercise, or step (e.g., "What is [task] and what is needed to be done?"): Provide a clear, structured breakdown:
+   - State the task title once at most as a header (e.g. "### [Task Name]"). Do not repeat the heading.
    - What it is: The physiological/clinical mechanism, target tissue, and purpose from the study's Methods & Interventions section.
    - What is needed to be done: Step-by-step instructions on execution, form/posture, prescribed sets, repetitions/dosage, tempo/cadence, hold duration, frequency, and relevant safety precautions from the paper.
 3. If the user asks about something not addressed in the trial (or asks for speculative medical advice), state clearly that the trial's Methods section did not investigate this, and advise consulting a specialist.
