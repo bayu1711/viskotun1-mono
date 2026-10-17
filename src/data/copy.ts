@@ -583,7 +583,6 @@ export const COPY = {
     guestNotice: 'Guest mode stores routines locally in your browser. Sign in anytime to sync to the cloud.',
     adminButton: 'Continue as Clinical Administrator (Admin Mode)',
     adminNotice: 'Administrator privileges enabled: Clinical Policy Ledger unlocked.',
-    adminCheckboxLabel: 'Sign in with clinical administrator privileges',
     haveAccount: 'Already have an account? Sign in',
     needAccount: "Don't have an account? Create one",
     signOut: 'Sign out',

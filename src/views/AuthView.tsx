@@ -41,7 +41,6 @@ export function AuthView({ mode }: AuthViewProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [asAdmin, setAsAdmin] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -57,11 +56,11 @@ export function AuthView({ mode }: AuthViewProps) {
     setIsSubmitting(true);
     try {
       if (isLogin) {
-        await loginWithEmail(email, password, asAdmin);
-        toast.success(asAdmin || email.toLowerCase().includes('admin') ? COPY.auth.toastAdminEntered : COPY.auth.toastWelcomeBack);
+        await loginWithEmail(email, password);
+        toast.success(email.toLowerCase().includes('admin') ? COPY.auth.toastAdminEntered : COPY.auth.toastWelcomeBack);
       } else {
-        await signupWithEmail(name, email, password, asAdmin);
-        toast.success(asAdmin || email.toLowerCase().includes('admin') ? COPY.auth.toastAdminEntered : COPY.auth.toastAccountCreated);
+        await signupWithEmail(name, email, password);
+        toast.success(email.toLowerCase().includes('admin') ? COPY.auth.toastAdminEntered : COPY.auth.toastAccountCreated);
       }
       router.push(ROUTES.routine);
     } catch (err: unknown) {
@@ -205,15 +204,6 @@ export function AuthView({ mode }: AuthViewProps) {
             />
           </div>
 
-          <label className="flex items-center gap-2 cursor-pointer pt-1 text-2xs text-ink/70">
-            <input
-              type="checkbox"
-              checked={asAdmin}
-              onChange={(e) => setAsAdmin(e.target.checked)}
-              className="h-3.5 w-3.5 rounded border-ink/20 text-ink accent-ink focus:ring-0"
-            />
-            <span>{COPY.auth.adminCheckboxLabel}</span>
-          </label>
 
           <PillButton type="submit" size="md" fullWidth loading={isSubmitting} className="mt-2 text-xs">
             {isLogin ? COPY.auth.loginButton : COPY.auth.signupButton}
