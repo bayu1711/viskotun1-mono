@@ -113,6 +113,46 @@ In safety-critical clinical and health applications, hardcoded thresholds in cod
 
 ---
 
+## Zero-Hallucination Parameter Resolution (3-Tier Clinical Pipeline)
+
+When academic papers describe interventions in their Methods section, authors frequently omit minor execution parameters (e.g., stating *"participants performed static stretching"* without publishing hold duration or sets). Rather than silently hallucinating numbers or breaking protocol execution, ViskotuN1 executes a deterministic **3-Tier Resolution Pipeline**:
+
+```text
+Paper Omission Detected (e.g., Calf Stretch hold duration missing)
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Tier 1: Scientific Lineage Resolution (Reference Tree Scan)                 │
+│  • Checks the author's bibliography and cited predecessors (e.g. Ref [14])  │
+│  • Inherits documented execution parameters directly from the parent study  │
+│  • UI Attribution: [Lineage: Ref 14 · Alfredson et al. 1998]                │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │ (If not found in citations)
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Tier 2: Clinical Consensus Fallback OR Safe Omission                        │
+│  • Essential Adjunct: Queries clinical standards of care (e.g. ACSM, NICE, │
+│    Cochrane) and applies the lowest-risk, conservative baseline             │
+│    UI Attribution: [Inferred: ACSM Clinical Guideline · 30s]                │
+│  • Non-Essential / Ambiguous: AI safely omits the step entirely rather than │
+│    fabricating arbitrary activities                                         │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Tier 3: In-Situ User Agency & Non-Punitive Compliance                       │
+│  • Zero Friction: Step is pre-loaded with baseline (no upfront cognitive    │
+│    burden on everyday users)                                                │
+│  • Contextual Card Badge: Parameter provenance displayed directly on the    │
+│    exercise task card (eliminates intrusive, persistent top banners)        │
+│  • 1-Click "Ignore / Exclude": Users or clinicians can exclude the inferred │
+│    step without penalty — daily adherence rings instantly re-normalize      │
+│    to 100% based strictly on the trial's core validated steps               │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Tech Stack
 
 - **Framework**: Next.js 14 (App Router, Server & Client Components)
