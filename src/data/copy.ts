@@ -544,10 +544,103 @@ export const COPY = {
       'Declined: Theoretical physics, mathematics, or non-interventional topic. ViskotuN1 only builds executable routines from interventional studies conducted on human participants.'
   },
   landing: {
+    topBanner: '✨ Strictly interventional human research · Zero-hallucination daily protocols →',
+    heroBadge: 'Science-backed human routines',
     heroEyebrow: 'Evidence into action',
-    heroTitle: 'Transform clinical trials into executable daily routines.',
+    heroTitle: 'Live healthier with daily routines from real human science.',
     heroSubtitle:
-      'ViskotuN1 converts dense, peer-reviewed human interventional research into adaptive daily routines with zero hallucinated gaps and an evidence-grounded AI safety assistant.',
+      'ViskotuN1 converts dense, peer-reviewed human clinical research into simple, colorful daily habits with voice coaching, parameter auditing, and zero guesswork.',
+    heroCtaPrimary: 'Start your routine — Free',
+    heroCtaSecondary: 'Explore benchmarks',
+    heroTrustPoints: [
+      'Instant guest demo · No card required',
+      '100% human interventional trials',
+      'Zero AI hallucinations'
+    ],
+    interactivePreview: {
+      tag: 'Live Protocol Preview',
+      title: "Today's Clinical Session",
+      streakBadge: '14-Day Streak',
+      progressLabel: 'Progress today',
+      progressPercent: 75,
+      step1Action: 'Straight-Knee Eccentric Drops',
+      step1Detail: 'Alfredson et al. 1998 · 3s eccentric lowering',
+      step1Meta: '3 × 15 reps',
+      step2Action: 'Morning Creatine Saturation',
+      step2Detail: 'Forbes et al. 2021 · Take with warm fluid',
+      step2Meta: '1 × 5g dose',
+      step3Action: 'Static Calf Stretch & Recovery',
+      step3Detail: 'ACSM Guidelines · Conservative hold',
+      step3Meta: '3 × 30s hold',
+      clickHint: 'Interactive demo: click checkmarks or counters to test'
+    },
+    domainsTitle: 'Explore what we help you achieve',
+    domainsSubtitle:
+      'Human interventional trials translated into vibrant, approachable daily protocols.',
+    domains: [
+      {
+        id: 'rehab',
+        tag: 'Mobility & Rehab',
+        title: 'Tendon & Joint Rehabilitation',
+        description:
+          'Eccentric loading and heavy-slow resistance protocols proven in clinical trials.',
+        tone: 'orange' as const,
+        stat: '84-day benchmark'
+      },
+      {
+        id: 'cognitive',
+        tag: 'Brain & Energy',
+        title: 'Cognitive Vigilance & Alertness',
+        description:
+          'Standardized creatine saturation, reaction-time psychomotor tests, and nootropic pacing.',
+        tone: 'yellow' as const,
+        stat: 'Daily baseline'
+      },
+      {
+        id: 'mindfulness',
+        tag: 'Breath & Focus',
+        title: 'Autonomic & Breath Regulation',
+        description:
+          'Cyclic physiological sighing and parasympathetic tone recalibration from human trials.',
+        tone: 'sky' as const,
+        stat: '10 min sessions'
+      },
+      {
+        id: 'sleep',
+        tag: 'Deep Sleep',
+        title: 'Circadian Light & Sleep Hygiene',
+        description:
+          'Morning retinal light exposure windows, temperature drops, and sleep-latency optimization.',
+        tone: 'lavender' as const,
+        stat: 'Evening protocol'
+      },
+      {
+        id: 'cellular',
+        tag: 'Dermatology',
+        title: 'Scalp & Cellular Density Regimens',
+        description:
+          'Microneedling depth cycles, clinical phototherapy, and topical compliance tracking.',
+        tone: 'peach' as const,
+        stat: 'Weekly cadence'
+      },
+      {
+        id: 'nutrition',
+        tag: 'Nutrition',
+        title: 'Clinical Nutrient Timing',
+        description:
+          'Grounded nutrient timing, hydration baselines, and biomarker trend analysis.',
+        tone: 'mint' as const,
+        stat: 'Biomarker tracking'
+      }
+    ],
+    rigorTitle: 'Built on uncompromising scientific rigor',
+    rigorSubtitle:
+      'ViskotuN1 is engineered strictly for human health interventions—not theoretical physics or animal models.',
+    rigorStats: [
+      { value: '100%', label: 'Interventional Human Science', sub: 'Clinical RCTs & peer-reviewed trials' },
+      { value: '0', label: 'Hallucinated Parameters', sub: 'Audited conservative clinical defaults' },
+      { value: '<2s', label: 'Safety Policy Validation', sub: 'Real-time threshold & escalation checks' }
+    ],
     ctaGuest: 'Try as guest (instant demo)',
     ctaLogin: 'Sign in with account',
     ctaSignup: 'Create account',
@@ -569,30 +662,31 @@ export const COPY = {
       summaryTitle: '1-Page Clinical Brief',
       summaryBody: 'Export formatted adherence and biofeedback trends for your specialist or personal records.'
     },
-    demoTitle: 'Try it right now',
-    demoSubtitle: 'Drop a research PDF or explore pre-loaded clinical routines with zero setup.',
+    demoTitle: 'Ready to build science-backed daily habits?',
+    demoSubtitle: 'Drop any clinical research PDF or explore pre-loaded clinical routines with zero setup.',
     architecture: 'Architecture',
     architectureTitle: 'How ViskotuN1 works',
     capabilities: 'Capabilities',
     capabilitiesTitle: 'Built for clinical rigour',
     nav: {
       howItWorks: 'How it works',
+      domains: 'Health domains',
       gatekeeper: 'Scientific gatekeeper',
       features: 'Features'
     },
     steps: {
-      step1Number: 'Step 01',
+      step1Number: '01',
       step1Title: 'Multimodal Ingestion',
       step1Body: 'Drop any clinical research PDF. Gemini 1.5 processes document bytes natively without fragile text scraping.',
-      step2Number: 'Step 02',
-      step2Title: 'Scientific Gatekeeper',
-      step2Body: 'Verifies human interventional criteria. Theoretical physics or non-human animal assays are rejected with educational guidance.',
-      step3Number: 'Step 03',
-      step3Title: 'Parameter Auditing',
-      step3Body: 'Detects omitted dosages, hold times, or execution parameters. Flags them as conservative clinical baselines with zero hallucinated gaps.',
-      step4Number: 'Step 04',
-      step4Title: 'Adaptive Routine & Q&A',
-      step4Body: 'Executes daily sets, progression rules, safety & biofeedback thresholds, and answers questions strictly cited from the Methods.'
+      step2Number: '02',
+      step2Title: 'Scientific Gatekeeper & Parameter Auditing',
+      step2Body: 'Verifies human interventional criteria and audits omitted hold times or dosages against conservative clinical standards.',
+      step3Number: '03',
+      step3Title: 'Adaptive Daily Routine & Voice Coach',
+      step3Body: 'Executes daily sets, progression rules, safety & biofeedback thresholds, and answers questions strictly cited from the Methods.',
+      step4Number: '04',
+      step4Title: 'Clinical Adherence Brief',
+      step4Body: 'One-page summary of adherence trends, biomarker improvements, and pain logs formatted for physician review.'
     },
     footerTagline: 'ViskotuN1 · Interventional human research intelligence',
     footerSignIn: 'Sign in',
