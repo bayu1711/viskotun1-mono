@@ -12,16 +12,16 @@ export const achillesRoutine: Routine = {
   streak: 0,
   paper: {
     title:
-    'Eccentric Loading for Mid-Portion Achilles Tendinopathy: A Randomized Controlled Trial',
+    'Heavy-Load Eccentric Calf Muscle Training for the Treatment of Chronic Achilles Tendinosis',
     fileName: 'Eccentric_Loading_Achilles_Tendinopathy.pdf',
-    authors: 'Alfredson H., Nordin M., Keller T.',
-    year: 2023,
-    journal: 'Journal of Sports Rehabilitation',
-    doi: '10.1016/j.jsr.2023.04.017',
-    sampleSize: 42,
-    trialType: 'Randomized Controlled Trial',
-    evidenceBadges: ['rct', 'missing-parameters'],
-    pages: 14
+    authors: 'Alfredson H., Pietilä T., Jonsson P., Lorentzon R.',
+    year: 1998,
+    journal: 'The American Journal of Sports Medicine',
+    doi: '10.1177/03635465980260030301',
+    sampleSize: 15,
+    trialType: 'Prospective Controlled Study',
+    evidenceBadges: ['pilot', 'missing-parameters'],
+    pages: 7
   },
   steps: [
   {
@@ -147,7 +147,7 @@ export const achillesRoutine: Routine = {
     role: 'ai',
     kind: 'text',
     content:
-    'Parsed 14 pages and isolated the Methods & Interventions section. Background theory and discussion were ignored.',
+    'Parsed 7 pages and isolated the Methods & Interventions section. Background theory and discussion were ignored.',
     timestamp: '9:02 AM'
   },
   { id: 'ach-msg-3', role: 'ai', kind: 'routine', content: 'achilles', timestamp: '9:03 AM' }],

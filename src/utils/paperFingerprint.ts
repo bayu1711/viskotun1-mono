@@ -43,7 +43,7 @@ const KNOWN_PRESET_MAP: Record<string, string> = {
 };
 
 const KNOWN_DOI_MAP: Record<string, string> = {
-  '10.1016/j.jsr.2023.04.017': 'achilles',
+  '10.1177/03635465980260030301': 'achilles',
   '10.4103/0974-7753.114700': 'hair-loss',
   '10.1038/s41598-024-54249-9': 'creatine-sleep',
   '10.1249/mss.0000000000002130': 'zone2-cardio',

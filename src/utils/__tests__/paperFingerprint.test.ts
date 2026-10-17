@@ -9,11 +9,11 @@ import {
 describe('paperFingerprint', () => {
   describe('normalizeDoi', () => {
     it('normalizes standard DOI strings', () => {
-      expect(normalizeDoi('10.1016/j.jsr.2023.04.017')).toBe('10.1016/j.jsr.2023.04.017');
+      expect(normalizeDoi('10.1177/03635465980260030301')).toBe('10.1177/03635465980260030301');
     });
 
     it('strips https://doi.org/ prefix', () => {
-      expect(normalizeDoi('https://doi.org/10.1016/j.jsr.2023.04.017')).toBe('10.1016/j.jsr.2023.04.017');
+      expect(normalizeDoi('https://doi.org/10.1177/03635465980260030301')).toBe('10.1177/03635465980260030301');
     });
 
     it('strips doi: scheme prefix', () => {
@@ -36,14 +36,14 @@ describe('paperFingerprint', () => {
 
   describe('sanitizeDocId', () => {
     it('replaces slashes and punctuation with underscores for Firestore document safety', () => {
-      expect(sanitizeDocId('10.1016/j.jsr.2023.04.017')).toBe('10_1016_j_jsr_2023_04_017');
+      expect(sanitizeDocId('10.1177/03635465980260030301')).toBe('10_1177_03635465980260030301');
     });
   });
 
   describe('getCanonicalPaperId', () => {
     it('preserves known preset aliases for built-in sample protocols', () => {
       expect(getCanonicalPaperId({ id: 'achilles' })).toBe('achilles');
-      expect(getCanonicalPaperId({ doi: '10.1016/j.jsr.2023.04.017' })).toBe('achilles');
+      expect(getCanonicalPaperId({ doi: '10.1177/03635465980260030301' })).toBe('achilles');
       expect(getCanonicalPaperId({ doi: '10.4103/0974-7753.114700' })).toBe('hair-loss');
     });
 

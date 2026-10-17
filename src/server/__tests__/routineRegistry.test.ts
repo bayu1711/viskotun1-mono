@@ -14,7 +14,7 @@ describe('routineRegistry', () => {
     expect(achilles).not.toBeNull();
     expect(achilles?.id).toBe('achilles');
 
-    const byDoi = await findCanonicalRoutine({ doi: '10.1016/j.jsr.2023.04.017' });
+    const byDoi = await findCanonicalRoutine({ doi: '10.1177/03635465980260030301' });
     expect(byDoi).not.toBeNull();
     expect(byDoi?.id).toBe('achilles');
   });
