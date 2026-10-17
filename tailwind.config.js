@@ -99,10 +99,30 @@ module.exports = {
         rise: {
           from: { opacity: '0', transform: 'translateY(12px)' },
           to: { opacity: '1', transform: 'translateY(0)' }
+        },
+        enter: {
+          from: { opacity: '0', transform: 'translateY(8px)' },
+          to: { opacity: '1', transform: 'translateY(0)' }
+        },
+        fill: {
+          from: { transform: 'scaleX(0)' },
+          to: { transform: 'scaleX(1)' }
+        },
+        settle: {
+          from: { transform: 'scale(1.04)' },
+          to: { transform: 'scale(1)' }
+        },
+        pop: {
+          from: { opacity: '0', transform: 'scale(0.9)' },
+          to: { opacity: '1', transform: 'scale(1)' }
         }
       },
       animation: {
-        rise: 'rise 700ms cubic-bezier(0.22, 1, 0.36, 1) 150ms both'
+        enter: 'enter 500ms cubic-bezier(0.23, 1, 0.32, 1) both',
+        rise: 'rise 600ms cubic-bezier(0.23, 1, 0.32, 1) 300ms both',
+        fill: 'fill 900ms cubic-bezier(0.23, 1, 0.32, 1) 800ms both',
+        pop: 'pop 300ms cubic-bezier(0.23, 1, 0.32, 1) 1500ms both',
+        settle: 'settle 1200ms cubic-bezier(0.23, 1, 0.32, 1) both'
       },
       transitionProperty: {
         ring: 'stroke-dashoffset',

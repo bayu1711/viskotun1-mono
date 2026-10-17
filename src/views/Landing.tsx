@@ -98,7 +98,7 @@ export function LandingPage() {
           <Icon
             icon={ArrowForwardIcon}
             size="xs"
-            className="ml-1.5 inline-block align-[-0.2em] transition-transform group-hover:translate-x-0.5"
+            className="ml-1.5 inline-block align-[-0.2em] transition-transform duration-200 ease-out-strong group-hover:translate-x-0.5"
           />
         </a>
       </div>
@@ -189,21 +189,21 @@ export function LandingPage() {
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
           <div className="text-left lg:col-span-6">
             {user && (
-              <p className="mb-5 inline-flex items-center gap-2 rounded-full bg-mint px-3.5 py-1 text-sm font-medium text-ink">
+              <p className="mb-5 inline-flex animate-enter items-center gap-2 rounded-full bg-mint px-3.5 py-1 text-sm font-medium text-ink">
                 <span className="h-1.5 w-1.5 rounded-full bg-ink" aria-hidden="true" />
                 <span>{COPY.landing.loggedInBadge(user.name)}</span>
               </p>
             )}
 
-            <h1 className="text-balance text-[2.5rem] font-semibold leading-[1.04] tracking-[-0.015em] text-ink sm:text-5xl sm:leading-[1.04] lg:text-hero-lg lg:leading-[1.04]">
+            <h1 className="animate-enter text-balance text-[2.5rem] [animation-delay:60ms] font-semibold leading-[1.04] tracking-[-0.015em] text-ink sm:text-5xl sm:leading-[1.04] lg:text-hero-lg lg:leading-[1.04]">
               {COPY.landing.heroTitle}
             </h1>
 
-            <p className="mt-6 max-w-[34rem] text-pretty text-lg leading-relaxed text-ink/80">
+            <p className="mt-6 max-w-[34rem] animate-enter text-pretty text-lg leading-relaxed text-ink/80 [animation-delay:120ms]">
               {COPY.landing.heroSubtitle}
             </p>
 
-            <div className="mt-9 flex flex-wrap items-center gap-3">
+            <div className="mt-9 flex animate-enter flex-wrap items-center gap-3 [animation-delay:180ms]">
               <PillButton
                 size="lg"
                 onClick={handleLaunch}
@@ -211,7 +211,7 @@ export function LandingPage() {
                 className="group min-h-12 gap-2 px-6 font-semibold"
               >
                 <span>{user ? COPY.landing.ctaGoToApp : COPY.landing.heroCtaPrimary}</span>
-                <Icon icon={ArrowForwardIcon} size="sm" className="transition-transform group-hover:translate-x-0.5" />
+                <Icon icon={ArrowForwardIcon} size="sm" className="transition-transform duration-200 ease-out-strong group-hover:translate-x-1" />
               </PillButton>
               {user ? (
                 <Link href={ROUTES.dashboard} className={pillClassName('outline', 'lg', 'min-h-12 px-6 font-semibold')}>
@@ -224,7 +224,7 @@ export function LandingPage() {
               )}
             </div>
 
-            <ul className="mt-9 flex flex-col gap-2.5 text-sm text-ink/75">
+            <ul className="mt-9 flex animate-enter flex-col gap-2.5 text-sm text-ink/75 [animation-delay:240ms]">
               {COPY.landing.heroTrustPoints.map((point) => (
                 <li key={point} className="flex items-center gap-2">
                   <Icon icon={CheckCircleOutlineIcon} size="sm" className="text-ink/70" />
@@ -235,14 +235,14 @@ export function LandingPage() {
           </div>
 
           <div className="relative lg:col-span-6">
-            <div className="relative aspect-[3/2] w-full overflow-hidden rounded-callout bg-canvas">
+            <div className="relative aspect-[3/2] w-full animate-enter overflow-hidden rounded-callout bg-canvas">
               <Image
                 src="/images/hero-image.jpg"
                 alt={COPY.landing.heroImageAlt}
                 fill
                 priority
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 650px"
-                className="object-cover"
+                className="animate-settle object-cover"
               />
             </div>
 
@@ -263,7 +263,7 @@ export function LandingPage() {
                 </span>
               </div>
               <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-ink/10">
-                <div className="h-full rounded-full bg-orange" style={{ width: `${PREVIEW_PERCENT}%` }} />
+                <div className="h-full origin-left animate-fill rounded-full bg-orange" style={{ width: `${PREVIEW_PERCENT}%` }} />
               </div>
               <ul className="mt-4 space-y-3">
                 {PREVIEW_STEPS.map((step) => (
@@ -274,7 +274,7 @@ export function LandingPage() {
                         step.done ? 'bg-ink text-white' : 'border border-ink/30'
                       )}
                     >
-                      {step.done && <Icon icon={CheckIcon} size="xs" />}
+                      {step.done && <Icon icon={CheckIcon} size="xs" className="animate-pop" />}
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline justify-between gap-3">
@@ -296,7 +296,7 @@ export function LandingPage() {
       {/* Domains: the one color-blocked grid on the page */}
       <section id="domains" className="scroll-mt-20 py-20 lg:py-28">
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
-          <div className="max-w-2xl">
+          <div className="reveal max-w-2xl">
             <h2 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
               {COPY.landing.domainsTitle}
             </h2>
@@ -313,7 +313,7 @@ export function LandingPage() {
                 <div
                   key={domain.id}
                   className={cn(
-                    'flex flex-col justify-between rounded-callout p-6',
+                    'reveal flex flex-col justify-between rounded-callout p-6',
                     isFeatured && 'sm:col-span-2 lg:row-span-2 lg:p-8',
                     cardTone.card
                   )}
@@ -350,13 +350,13 @@ export function LandingPage() {
       {/* How It Works: a real four-step sequence, so it is an ordered list */}
       <section id="how-it-works" className="scroll-mt-20 bg-canvas py-20 lg:py-28">
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
-          <h2 className="max-w-2xl text-balance text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="reveal max-w-2xl text-balance text-3xl font-bold tracking-tight sm:text-4xl">
             {COPY.landing.architectureTitle}
           </h2>
 
           <ol className="mt-12 grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-2">
             {HOW_IT_WORKS_STEPS.map((step) => (
-              <li key={step.number} className="flex gap-5">
+              <li key={step.number} className="reveal flex gap-5">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink font-display text-base font-bold text-white">
                   {step.number}
                 </span>
@@ -373,7 +373,7 @@ export function LandingPage() {
       {/* Scientific Rigor & Scope Gatekeeper */}
       <section id="gatekeeper" className="scroll-mt-20 pt-20 lg:pt-28">
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
-          <div className="grid gap-8 rounded-callout bg-mint p-8 sm:p-12 lg:grid-cols-2 lg:gap-16">
+          <div className="reveal grid gap-8 rounded-callout bg-mint p-8 sm:p-12 lg:grid-cols-2 lg:gap-16">
             <div>
               <p className="flex items-center gap-2 text-sm font-semibold text-ink">
                 <Icon icon={ShieldOutlinedIcon} size="sm" />
@@ -394,13 +394,13 @@ export function LandingPage() {
       {/* Features: plain two-column list, no card chrome */}
       <section id="features" className="scroll-mt-20 py-20 lg:py-28">
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
-          <h2 className="max-w-2xl text-balance text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="reveal max-w-2xl text-balance text-3xl font-bold tracking-tight sm:text-4xl">
             {COPY.landing.capabilitiesTitle}
           </h2>
 
           <ul className="mt-12 grid grid-cols-1 gap-x-12 gap-y-8 md:grid-cols-2">
             {FEATURES.map((feature) => (
-              <li key={feature.title} className="flex gap-4">
+              <li key={feature.title} className="reveal flex gap-4">
                 <IconTile variant="plain" shape="circle" size={48} className="shrink-0 bg-mint text-ink">
                   <Icon icon={feature.icon} size="md" />
                 </IconTile>
@@ -413,7 +413,7 @@ export function LandingPage() {
           </ul>
 
           {/* Closing call to action: flat panel, one button */}
-          <div className="mt-20 rounded-callout bg-yellow px-6 py-12 text-center sm:px-14 sm:py-16">
+          <div className="reveal mt-20 rounded-callout bg-yellow px-6 py-12 text-center sm:px-14 sm:py-16">
             <h2 className="mx-auto max-w-2xl text-balance text-3xl font-bold tracking-tight sm:text-4xl">
               {COPY.landing.demoTitle}
             </h2>
@@ -427,7 +427,7 @@ export function LandingPage() {
                 className="group min-h-12 gap-2 px-6 font-semibold"
               >
                 <span>{user ? COPY.landing.ctaGoToApp : COPY.landing.heroCtaPrimary}</span>
-                <Icon icon={ArrowForwardIcon} size="sm" className="transition-transform group-hover:translate-x-0.5" />
+                <Icon icon={ArrowForwardIcon} size="sm" className="transition-transform duration-200 ease-out-strong group-hover:translate-x-1" />
               </PillButton>
             </div>
           </div>
