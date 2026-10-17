@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined';
@@ -8,6 +9,7 @@ import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
+import { ROUTES } from '../../data/navigation';
 import { PageContainer } from '../layout/PageContainer';
 import { PageHeader } from '../layout/PageHeader';
 import { Icon } from '../ui/Icon';
@@ -87,13 +89,12 @@ export function EmptyRoutineView() {
             <h3 className="text-xs font-medium text-ink/70">
               {COPY.onboarding.trendingHeading}
             </h3>
-            <button
-              type="button"
-              onClick={openHowTo}
+            <Link
+              href={`${ROUTES.community}?tab=explore`}
               className="text-2xs font-medium text-ink/50 hover:text-ink transition-colors underline"
             >
               {COPY.howTo.buttonExploreSamples}
-            </button>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">

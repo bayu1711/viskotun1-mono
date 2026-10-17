@@ -1,31 +1,27 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
+import Link from 'next/link';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CloseIcon from '@mui/icons-material/Close';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import HighlightOffOutlinedIcon from '@mui/icons-material/HighlightOffOutlined';
-import NorthEastIcon from '@mui/icons-material/NorthEast';
-import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined';
-import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
 import { COPY } from '../../data/copy';
-import { SAMPLE_PAPERS } from '../../data/samplePapers';
+import { ROUTES } from '../../data/navigation';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { cn } from '../../utils/cn';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 import { PillButton } from '../ui/PillButton';
 
-type HowToTab = 'guide' | 'samples' | 'scope';
+type HowToTab = 'guide' | 'scope';
 
 export function HowToModal() {
-  const { isHowToOpen, closeHowTo, loadSampleRoutine, loadSampleProtocol, activeRoutineId, activeProtocolId, samplePapers, sampleSource } = useRoutine();
+  const { isHowToOpen, closeHowTo } = useRoutine();
   const [activeTab, setActiveTab] = useState<HowToTab>('guide');
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -79,7 +75,7 @@ export function HowToModal() {
 
             {/* Navigation Tabs */}
             <div className="flex border-b border-ink/10 bg-white/40 px-6">
-              {(['guide', 'samples', 'scope'] as const).map((tabKey) => {
+              {(['guide', 'scope'] as const).map((tabKey) => {
                 const isActive = activeTab === tabKey;
                 return (
                   <button
@@ -143,168 +139,21 @@ export function HowToModal() {
                     <div>
                       <h4 className="text-xs font-medium text-ink">Ready to explore?</h4>
                       <p className="text-2xs text-ink/60">
-                        Choose a pre-calibrated sample paper or download one of our verified open-access PDFs.
+                        Choose a pre-calibrated sample paper or explore trending community protocols.
                       </p>
                     </div>
-                    <PillButton size="sm" onClick={() => setActiveTab('samples')}>
-                      {COPY.howTo.buttonExploreSamples}
-                    </PillButton>
+                    <Link
+                      href={`${ROUTES.community}?tab=explore`}
+                      onClick={closeHowTo}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-ink bg-ink px-3.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-ink/85"
+                    >
+                      <span>{COPY.howTo.buttonExploreSamples}</span>
+                    </Link>
                   </div>
                 </div>
               )}
 
-              {/* TAB 2: SAMPLE PAPERS */}
-              {activeTab === 'samples' && (
-                <div className="space-y-5">
-                  <div className="space-y-1">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="text-sm font-medium text-ink">{COPY.howTo.samplesTitle}</h3>
-                      <span
-                        className={cn(
-                          'rounded-full px-2.5 py-0.5 text-2xs font-medium border',
-                          sampleSource === 'firestore-live'
-                            ? 'border-mint/60 bg-mint/20 text-ink'
-                            : 'border-ink/10 bg-canvas text-ink/60'
-                        )}
-                      >
-                        {sampleSource === 'firestore-live'
-                          ? COPY.howTo.firestoreSyncLive
-                          : COPY.howTo.firestoreSyncLocal}
-                      </span>
-                    </div>
-                    <p className="text-xs text-ink/60">{COPY.howTo.samplesSubtitle}</p>
-                  </div>
-
-                  <div className="space-y-4">
-                    {(samplePapers && samplePapers.length > 0 ? samplePapers : SAMPLE_PAPERS).map((paper) => {
-                      const targetId = paper.routineId || paper.protocolId;
-                      const isPrecalibrated = Boolean(targetId);
-                      const isActive = targetId === (activeRoutineId || activeProtocolId);
-                      const isRejectionTest = Boolean(paper.isGuardrailRejectionTest);
-
-                      return (
-                        <div
-                          key={paper.id}
-                          className={cn(
-                            'rounded-card border p-4 transition-all',
-                            isRejectionTest
-                              ? 'border-blush/40 bg-blush/10'
-                              : isActive
-                              ? 'border-ink bg-mint/10'
-                              : 'border-ink/10 bg-white hover:border-ink/20'
-                          )}
-                        >
-                          <div className="flex flex-wrap items-start justify-between gap-2">
-                            <div className="space-y-1">
-                              <div className="flex flex-wrap items-center gap-2">
-                                {paper.trendingRank && (
-                                  <span className="rounded-full bg-mint/30 border border-mint/60 px-2 py-0.5 text-2xs font-semibold text-ink">
-                                    {COPY.howTo.trendingRankBadge(paper.trendingRank)}
-                                  </span>
-                                )}
-                                <span
-                                  className={cn(
-                                    'rounded-full px-2 py-0.5 text-2xs font-medium',
-                                    isRejectionTest
-                                      ? 'bg-blush text-ink'
-                                      : 'bg-canvas text-ink/75'
-                                  )}
-                                >
-                                  {paper.domain}
-                                </span>
-                                {isRejectionTest ? (
-                                  <span className="rounded-full bg-blush/30 px-2 py-0.5 text-2xs font-semibold text-ink">
-                                    {COPY.howTo.testGatekeeperBadge}
-                                  </span>
-                                ) : (
-                                  <span className="rounded-full bg-mint px-2 py-0.5 text-2xs font-semibold text-ink">
-                                    RCT
-                                  </span>
-                                )}
-                              </div>
-                              <h4 className="text-sm font-medium text-ink leading-snug">
-                                {paper.title}
-                              </h4>
-                              <p className="text-2xs text-ink/50">
-                                {paper.authors} · <em>{paper.journal}</em> ({paper.year})
-                              </p>
-                              {(paper.activeTrackersCount || paper.totalLogsCount) && (
-                                <div className="flex flex-wrap items-center gap-2 pt-0.5 text-2xs text-ink/60">
-                                  {paper.activeTrackersCount && (
-                                    <span className="font-medium text-ink/75">
-                                      {COPY.howTo.activeTrackersBadge(paper.activeTrackersCount)}
-                                    </span>
-                                  )}
-                                  {paper.activeTrackersCount && paper.totalLogsCount && <span>·</span>}
-                                  {paper.totalLogsCount && (
-                                    <span>{COPY.howTo.totalLogsBadge(paper.totalLogsCount)}</span>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          <p className="mt-2.5 text-xs leading-relaxed text-ink/70">
-                            {paper.summary}
-                          </p>
-
-                          <div className="mt-3 rounded-card bg-canvas/70 p-2.5">
-                            <p className="text-2xs font-medium text-ink/55">
-                              {COPY.howTo.featuresHeader}
-                            </p>
-                            <ul className="mt-1 grid grid-cols-1 gap-1 text-2xs text-ink/75 sm:grid-cols-2">
-                              {paper.featuresTested.map((feat, i) => (
-                                <li key={i} className="flex items-center gap-1.5">
-                                  <span className="h-1 w-1 rounded-full bg-ink/40" />
-                                  <span>{feat}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-
-                          <div className="mt-4 flex flex-wrap items-center justify-between gap-2.5 border-t border-ink/10 pt-3">
-                            <div className="flex flex-wrap items-center gap-2">
-                              {isPrecalibrated && targetId && (
-                                <PillButton
-                                  size="sm"
-                                  variant={isActive ? 'outline' : 'primary'}
-                                  onClick={() => (loadSampleRoutine || loadSampleProtocol)(targetId)}
-                                  className="gap-1.5"
-                                >
-                                  <Icon icon={PlayArrowOutlinedIcon} size="xs" />
-                                  <span>{isActive ? COPY.howTo.loadedButton : COPY.howTo.loadButton}</span>
-                                </PillButton>
-                              )}
-
-                              <a
-                                href={paper.pdfUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-1.5 rounded-full border border-ink/15 bg-white px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:bg-canvas focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
-                              >
-                                <Icon icon={DownloadOutlinedIcon} size="xs" />
-                                <span>{COPY.howTo.downloadPdfButton}</span>
-                              </a>
-                            </div>
-
-                            <a
-                              href={paper.openAccessUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1 text-2xs text-ink/55 transition-colors hover:text-ink focus:outline-none focus-visible:underline"
-                            >
-                              <span>{COPY.howTo.doiLabel}</span>
-                              <Icon icon={NorthEastIcon} size="xs" />
-                            </a>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 3: ACCEPTED PAPER SCOPE */}
+              {/* TAB 2: ACCEPTED PAPER SCOPE */}
               {activeTab === 'scope' && (
                 <div className="space-y-6">
                   <div className="space-y-1">
