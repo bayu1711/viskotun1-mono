@@ -738,6 +738,19 @@ export const COPY = {
       previewBadge: ' (preview)',
       dayTooltip: (day: number) => `Day ${day}`,
       dayTick: (day: number) => `D${day}`,
+      notScheduledPhotoNote: (currentDay: number, nextMilestone?: number, daysUntil?: number | null) =>
+        nextMilestone && daysUntil
+          ? `Photo assessment is not scheduled for Day ${currentDay}. Next milestone photo is scheduled for Day ${nextMilestone} (in ${daysUntil} ${daysUntil === 1 ? 'day' : 'days'}).`
+          : `Photo assessment is not scheduled for Day ${currentDay}. All protocol milestone assessments have been completed.`,
+      notScheduledPhotoTooltip: (nextDay?: number) =>
+        nextDay
+          ? `Not scheduled for today · Next photo due Day ${nextDay}`
+          : 'Photo assessment not scheduled for today',
+      notScheduledBiomarkerNote: (name: string, currentDay: number) =>
+        `${name} measurement is not scheduled for Day ${currentDay}.`,
+      notScheduledBiomarkerTooltip: 'Metric not scheduled for today',
+      scheduledTodayBadge: 'Scheduled Today',
+      notScheduledBadge: 'Not Scheduled Today',
       baselineMockupSvgText: 'Day 1 baseline · vertex thinning',
       progressionMockupSvgText: 'Day 28 milestone · increased terminal density',
       baselineMockupSvg: (text: string) =>

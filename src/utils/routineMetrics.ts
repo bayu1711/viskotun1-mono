@@ -42,6 +42,13 @@ export function resolveDataCollectionSpec(routine?: Routine): DataCollectionFiel
   ];
 }
 
+export function isFieldScheduledForDay(field: DataCollectionField, day: number): boolean {
+  if (field.frequency === 'daily') return true;
+  if (field.frequency === 'milestone') return field.milestoneDays?.includes(day) ?? false;
+  if (field.frequency === 'weekly') return day % 7 === 1 || day === 1;
+  return true;
+}
+
 export function isMilestoneDay(routine?: Routine, day?: number): boolean {
   if (!routine || typeof day !== 'number') return false;
   const spec = resolveDataCollectionSpec(routine);
@@ -54,12 +61,7 @@ export function getScheduledFieldsForDay(routine?: Routine, day?: number): DataC
   if (!routine) return [];
   const targetDay = day ?? routine.currentDay;
   const spec = resolveDataCollectionSpec(routine);
-  return spec.filter((field) => {
-    if (field.frequency === 'daily') return true;
-    if (field.frequency === 'milestone') return field.milestoneDays?.includes(targetDay);
-    if (field.frequency === 'weekly') return targetDay % 7 === 1 || targetDay === 1;
-    return true;
-  });
+  return spec.filter((field) => isFieldScheduledForDay(field, targetDay));
 }
 
 /** Fraction (0–1) of today's sets completed across all steps. */
