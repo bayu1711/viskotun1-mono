@@ -80,9 +80,8 @@ export function TrendingPapersExplore() {
     return 'bg-canvas text-ink/70 hover:bg-ink/10 border border-ink/10';
   };
 
-  const handleStartRoutine = (targetId: string, paperTitle: string) => {
+  const handleStartRoutine = (targetId: string) => {
     loadRoutine(targetId);
-    toast.success(COPY.howTo.loadedToast(paperTitle));
   };
 
   return (
@@ -208,7 +207,7 @@ export function TrendingPapersExplore() {
                   <PillButton
                     size="sm"
                     variant={isActive ? 'outline' : 'primary'}
-                    onClick={() => handleStartRoutine(targetId, paper.shortTitle || paper.title)}
+                    onClick={() => handleStartRoutine(targetId)}
                     className="flex-1 justify-center gap-1.5"
                   >
                     <Icon icon={isActive ? CheckIcon : PlayArrowOutlinedIcon} size="xs" />

@@ -32,7 +32,8 @@ export function RoutinePage() {
     escalationPaused,
     feedbackMetric,
     incrementSet,
-    isStepExcluded
+    isStepExcluded,
+    hasHydrated
   } = useRoutine();
   const historyHeadingId = useId();
   const feedbackHeadingId = useId();
@@ -41,6 +42,16 @@ export function RoutinePage() {
     () => routine?.steps.filter((s) => !isStepExcluded(s.id)) ?? [],
     [routine?.steps, isStepExcluded]
   );
+
+  if (!hasHydrated) {
+    return (
+      <PageContainer>
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-ink border-t-transparent" />
+        </div>
+      </PageContainer>
+    );
+  }
 
   if (!routine) {
     return <EmptyRoutineView />;

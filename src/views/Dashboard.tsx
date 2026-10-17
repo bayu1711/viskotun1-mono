@@ -14,7 +14,17 @@ import { useRoutine } from '../contexts/RoutineContext';
 import { COPY } from '../data/copy';
 
 export function DashboardPage() {
-  const { routine } = useRoutine();
+  const { routine, hasHydrated } = useRoutine();
+
+  if (!hasHydrated) {
+    return (
+      <PageContainer>
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-ink border-t-transparent" />
+        </div>
+      </PageContainer>
+    );
+  }
 
   if (!routine) {
     return <EmptyRoutineView />;

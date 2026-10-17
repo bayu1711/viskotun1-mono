@@ -919,7 +919,8 @@ export function useRoutineState() {
             steps: target.steps,
             progressionRules: target.progressionRules,
             feedbackMetric: target.feedbackMetric,
-            paper: target.paper
+            paper: target.paper,
+            missingDataFlags: target.missingDataFlags
           })
         });
 
@@ -1231,7 +1232,8 @@ export function useRoutineState() {
             steps: target.steps,
             progressionRules: target.progressionRules,
             feedbackMetric: target.feedbackMetric,
-            paper: target.paper
+            paper: target.paper,
+            missingDataFlags: target.missingDataFlags
           })
         });
 
