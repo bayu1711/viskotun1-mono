@@ -26,7 +26,13 @@ export function RoutineStepRow({ step }: RoutineStepRowProps) {
         <p className={cn('text-sm leading-snug', complete && 'text-ink/40 line-through')}>{step.action}</p>
         <p className="mt-0.5 text-xs text-ink/45">
           {display.summary} · {step.frequency}
-          {step.inferred && <span className="text-warning">{COPY.protocolCard.defaulted}</span>}
+          {step.inferred && (
+            <span className="ml-1.5 inline-flex items-center rounded-full border border-ink/15 bg-cream px-1.5 py-0.2 text-3xs font-medium text-ink/80">
+              {step.inferredProvenance?.tier === 'lineage'
+                ? COPY.task.lineageBadge(step.inferredProvenance.source)
+                : COPY.task.inferredBadge(step.inferredProvenance?.source)}
+            </span>
+          )}
         </p>
       </div>
       <CheckToggle checked={complete} onToggle={() => toggleStep(step.id)} itemLabel={step.action} />

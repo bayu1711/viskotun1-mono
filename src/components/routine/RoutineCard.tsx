@@ -14,6 +14,7 @@ import { Icon } from '../ui/Icon';
 import { Panel } from '../ui/Panel';
 import { SectionHeading } from '../ui/SectionHeading';
 import { DayActions } from '../protocol/DayActions';
+import { MissingDataBanner } from '../protocol/MissingDataBanner';
 import { RoutineStepRow } from './RoutineStepRow';
 
 export function RoutineCard() {
@@ -36,6 +37,8 @@ export function RoutineCard() {
           </CircleButton>
         }
       />
+
+      <MissingDataBanner protocol={routine} className="mt-3 rounded-tile" />
 
       {routine.steps.length === 0 ? (
         <EmptyState className="mt-5" title={COPY.routine.emptyStepsTitle} description={COPY.routine.emptyStepsBody} />

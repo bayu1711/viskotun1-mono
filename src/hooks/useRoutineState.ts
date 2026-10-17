@@ -1288,6 +1288,16 @@ export function useRoutineState() {
     [stagingProtocol]
   );
 
+  const toggleStagingExcludeStep = useCallback((stepId: string) => {
+    setStagingProtocol((prev) => {
+      if (!prev) return prev;
+      const current = prev.initialExcludedStepIds ?? [];
+      const isExcluded = current.includes(stepId);
+      const next = isExcluded ? current.filter((id) => id !== stepId) : [...current, stepId];
+      return { ...prev, initialExcludedStepIds: next };
+    });
+  }, []);
+
   const openFeedbackDrawer = useCallback((fieldId?: string) => {
     if (fieldId) {
       setActiveFieldId(fieldId);
@@ -1475,6 +1485,7 @@ export function useRoutineState() {
       confirmStagingProtocol,
       discardStagingProtocol,
       askStagingQuestion,
+      toggleStagingExcludeStep,
       addRoutine: addProtocol,
       addProtocol,
       resetToDefaults,
@@ -1536,6 +1547,7 @@ export function useRoutineState() {
       confirmStagingProtocol,
       discardStagingProtocol,
       askStagingQuestion,
+      toggleStagingExcludeStep,
       addProtocol,
       resetToDefaults,
       updateGuardrailThreshold,

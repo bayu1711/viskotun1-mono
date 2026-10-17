@@ -40,7 +40,8 @@ export function AssistantSheet() {
     isStagingAssistantTyping,
     confirmStagingProtocol,
     discardStagingProtocol,
-    askStagingQuestion
+    askStagingQuestion,
+    toggleStagingExcludeStep
   } = useRoutine();
 
   const panelRef = useRef<HTMLElement>(null);
@@ -176,6 +177,7 @@ export function AssistantSheet() {
                         protocol={stagingProtocol}
                         onConfirm={handleConfirmCandidate}
                         onDiscard={discardStagingProtocol}
+                        onToggleExcludeStep={toggleStagingExcludeStep}
                       />
 
                       {/* Pre-confirmation Q&A messages */}

@@ -6,8 +6,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { COPY } from '../../../data/copy';
 import type { Protocol } from '../../../types/routine';
+import { cn } from '../../../utils/cn';
 import { isRandomizedTrial, stopRuleOf } from '../../../utils/routineMetrics';
 import { Callout } from '../../feedback/Callout';
+import { MissingDataBanner } from '../../protocol/MissingDataBanner';
 import { EvidenceBadgeChip } from '../../ui/EvidenceBadgeChip';
 import { Icon } from '../../ui/Icon';
 import { MetaItem } from './MetaItem';
@@ -16,16 +18,19 @@ interface CandidateProtocolCardProps {
   protocol: Protocol;
   onConfirm: () => void;
   onDiscard: () => void;
+  onToggleExcludeStep?: (stepId: string) => void;
 }
 
 export function CandidateProtocolCard({
   protocol,
   onConfirm,
-  onDiscard
+  onDiscard,
+  onToggleExcludeStep
 }: CandidateProtocolCardProps) {
   const paper = protocol.paper;
   const stopRule = stopRuleOf(protocol);
   const progressionRule = protocol.progressionRules?.[0];
+  const excludedIds = protocol.initialExcludedStepIds ?? [];
 
   const meta = [
     { label: COPY.assistant.meta.sample, value: COPY.assistant.meta.sampleValue(paper.sampleSize) },
@@ -69,31 +74,77 @@ export function CandidateProtocolCard({
         </div>
       )}
 
+      {/* Missing Parameters / Lineage Banner */}
+      <MissingDataBanner protocol={protocol} className="rounded-tile text-xs" />
+
       {protocol.steps && protocol.steps.length > 0 && (
         <div className="space-y-2 pt-1 border-t border-ink/10">
           <p className="text-2xs font-semibold uppercase tracking-wider text-ink/45">
             {COPY.assistant.candidateStepsTitle}
           </p>
-          <ul className="space-y-2">
-            {protocol.steps.map((step, idx) => (
-              <li
-                key={step.id || idx}
-                className="flex items-start gap-2.5 rounded-tile border border-ink/10 bg-canvas/70 p-2.5"
-              >
-                <span className="shrink-0 rounded bg-ink/10 px-1.5 py-0.5 text-2xs font-bold text-ink">
-                  {step.sets}×
-                </span>
-                <div className="min-w-0 flex-1 text-xs">
-                  <p className="font-medium text-ink">{step.action}</p>
-                  {step.detail && <p className="mt-0.5 text-2xs text-ink/50">{step.detail}</p>}
-                </div>
-                {step.inferred && (
-                  <span className="shrink-0 rounded-full bg-cream px-1.5 py-0.5 text-3xs font-medium text-ink/70">
-                    Inferred
-                  </span>
-                )}
-              </li>
-            ))}
+          <ul className="space-y-2.5">
+            {protocol.steps.map((step, idx) => {
+              const isExcluded = excludedIds.includes(step.id);
+              return (
+                <li
+                  key={step.id || idx}
+                  className={cn(
+                    'rounded-tile border border-ink/10 p-2.5 transition-opacity',
+                    isExcluded ? 'bg-canvas/40 opacity-60' : 'bg-canvas/70'
+                  )}
+                >
+                  <div className="flex items-start gap-2.5">
+                    <span
+                      className={cn(
+                        'shrink-0 rounded px-1.5 py-0.5 text-2xs font-bold',
+                        isExcluded ? 'bg-ink/5 text-ink/40' : 'bg-ink/10 text-ink'
+                      )}
+                    >
+                      {step.sets}×
+                    </span>
+                    <div className="min-w-0 flex-1 text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <p className={cn('font-medium text-ink', isExcluded && 'line-through text-ink/40')}>
+                          {step.action}
+                        </p>
+                        {isExcluded && (
+                          <span className="rounded bg-ink/10 px-1 py-0.2 text-3xs text-ink/60">
+                            {COPY.task.excludedBadge}
+                          </span>
+                        )}
+                      </div>
+                      {step.detail && <p className="mt-0.5 text-2xs text-ink/50">{step.detail}</p>}
+                    </div>
+
+                    {step.inferred && onToggleExcludeStep && (
+                      <button
+                        type="button"
+                        onClick={() => onToggleExcludeStep(step.id)}
+                        className="shrink-0 text-3xs text-ink/50 underline decoration-dotted hover:text-ink transition-colors"
+                        title={isExcluded ? COPY.task.restoreStep : COPY.missingData.candidateExclusionNotice}
+                      >
+                        {isExcluded ? COPY.assistant.restoreCandidateStep : COPY.assistant.excludeCandidateStep}
+                      </button>
+                    )}
+                  </div>
+
+                  {step.inferred && (
+                    <div className="mt-2 pt-1.5 border-t border-ink/5 text-2xs space-y-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="inline-flex items-center rounded-full border border-ink/15 bg-cream px-2 py-0.5 text-3xs font-medium text-ink/80 shadow-2xs">
+                          {step.inferredProvenance?.tier === 'lineage'
+                            ? COPY.task.lineageBadge(step.inferredProvenance.source)
+                            : COPY.task.inferredBadge(step.inferredProvenance?.source)}
+                        </span>
+                      </div>
+                      <p className="text-3xs text-ink/60">
+                        {step.inferredProvenance?.rationale || COPY.task.inferredNote}
+                      </p>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

@@ -27,7 +27,8 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
     routine,
     protocol = routine,
     confirmStagingProtocol,
-    discardStagingProtocol
+    discardStagingProtocol,
+    toggleStagingExcludeStep
   } = useRoutine();
 
   if (message.role === 'user') {
@@ -46,6 +47,7 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
             protocol={target}
             onConfirm={confirmStagingProtocol}
             onDiscard={discardStagingProtocol}
+            onToggleExcludeStep={toggleStagingExcludeStep}
           />
         );
       }
