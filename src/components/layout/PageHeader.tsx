@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
@@ -6,6 +8,7 @@ import { SectionHeading } from '../ui/SectionHeading';
 import { Icon } from '../ui/Icon';
 import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
+import { useRoutine } from '../../contexts/RoutineContext';
 
 interface PageHeaderProps {
   eyebrow: string;
@@ -16,13 +19,15 @@ interface PageHeaderProps {
 
 /** Routine switcher + page title shared by every route. */
 export function PageHeader({ eyebrow, title, children, switcherExtra }: PageHeaderProps) {
+  const { routine } = useRoutine();
+
   return (
     <header>
       <div className="mb-5 flex flex-wrap items-center gap-2.5">
         <RoutineSwitcher />
         {switcherExtra !== undefined ? (
           switcherExtra
-        ) : (
+        ) : !routine ? (
           <Link
             href={`${ROUTES.community}?tab=explore`}
             className="inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
@@ -30,7 +35,7 @@ export function PageHeader({ eyebrow, title, children, switcherExtra }: PageHead
             <Icon icon={AutoAwesomeOutlinedIcon} size="xs" />
             <span>{COPY.howTo.buttonExploreSamples}</span>
           </Link>
-        )}
+        ) : null}
       </div>
       <SectionHeading as="h1" size="xl" eyebrow={eyebrow} title={title} />
       {children}
