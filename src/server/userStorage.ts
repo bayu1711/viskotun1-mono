@@ -6,6 +6,8 @@
  * Provides live aggregate statistics for protocols without dummy or simulated multipliers.
  */
 
+import fs from 'fs';
+import path from 'path';
 import { getFirestore } from './guardrailLedger';
 import type { Routine, RoutineRuntime, Protocol } from '../types/routine';
 import { SEEDED_COMMUNITY_USERS } from './seedUsers';
@@ -20,6 +22,9 @@ export interface UserRecord {
   updatedAt: number;
 }
 
+const IS_TEST = process.env.NODE_ENV === 'test' || Boolean(process.env.VITEST);
+const LOCAL_STORAGE_FILE = path.join(process.cwd(), '.viskotun1_users.local.json');
+
 // In-memory server-side user store with fail-safe fallback
 export const memoryUserStorage = new Map<string, UserRecord>();
 
@@ -27,6 +32,38 @@ export const memoryUserStorage = new Map<string, UserRecord>();
 for (const user of SEEDED_COMMUNITY_USERS) {
   memoryUserStorage.set(user.userId, user);
 }
+
+function loadLocalUserLedger(): void {
+  if (IS_TEST) return;
+  try {
+    if (fs.existsSync(LOCAL_STORAGE_FILE)) {
+      const raw = fs.readFileSync(LOCAL_STORAGE_FILE, 'utf-8');
+      const records = JSON.parse(raw);
+      if (Array.isArray(records)) {
+        for (const record of records) {
+          if (record && record.userId) {
+            memoryUserStorage.set(record.userId, record);
+          }
+        }
+      }
+    }
+  } catch {
+    // Fail-safe silent continue
+  }
+}
+
+function persistLocalUserLedger(): void {
+  if (IS_TEST) return;
+  try {
+    const records = Array.from(memoryUserStorage.values());
+    fs.writeFileSync(LOCAL_STORAGE_FILE, JSON.stringify(records, null, 2), 'utf-8');
+  } catch {
+    // Fail-safe silent continue in read-only environments
+  }
+}
+
+// Hydrate from local ledger on startup
+loadLocalUserLedger();
 
 let hasAttemptedUserSeed = false;
 
@@ -71,6 +108,7 @@ export async function getUserRecord(userId: string): Promise<UserRecord | null> 
             updatedAt: data.updatedAt || Date.now()
           };
           memoryUserStorage.set(userId, resolved);
+          persistLocalUserLedger();
           return resolved;
         }
       }
@@ -78,6 +116,12 @@ export async function getUserRecord(userId: string): Promise<UserRecord | null> 
       console.warn('[UserStorage] Firestore read failed, falling back to memory:', err?.message || err);
     }
   }
+
+  if (memoryUserStorage.has(userId)) {
+    return memoryUserStorage.get(userId) || null;
+  }
+
+  loadLocalUserLedger();
   return memoryUserStorage.get(userId) || null;
 }
 
@@ -86,6 +130,7 @@ export async function getUserRecord(userId: string): Promise<UserRecord | null> 
  */
 export async function saveUserRecord(record: UserRecord): Promise<void> {
   memoryUserStorage.set(record.userId, record);
+  persistLocalUserLedger();
   const db = getFirestore();
   if (db) {
     try {
@@ -100,6 +145,7 @@ export async function saveUserRecord(record: UserRecord): Promise<void> {
  * Fetch all registered users across in-memory cache and Firestore.
  */
 export async function getAllUserRecords(): Promise<UserRecord[]> {
+  loadLocalUserLedger();
   const recordsMap = new Map<string, UserRecord>();
 
   // 1. Fast in-memory hot cache
