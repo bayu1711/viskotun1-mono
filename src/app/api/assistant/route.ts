@@ -8,7 +8,10 @@ import { getEffectiveGuardrails } from '@/server/guardrailLedger';
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body) {
+      return NextResponse.json({ error: COPY.api.assistant.invalidJson }, { status: 400 });
+    }
     const {
       question,
       routineTitle,

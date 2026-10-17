@@ -985,6 +985,7 @@ export const COPY = {
     },
     assistant: {
       questionRequired: 'Question is required',
+      invalidJson: 'Invalid JSON payload',
       internalError: 'Internal Server Error'
     },
     extract: {
