@@ -26,9 +26,14 @@ export function MissingDataBanner() {
       }>
       
       <p>
-        {COPY.missingData.caution} <span className="">{step?.action ?? flag.parameter}</span>.
+        {COPY.missingData.caution} <span className="font-medium text-ink">{step?.action ?? flag.parameter}</span>.
       </p>
-      <p className="text-ink/50">{COPY.missingData.fallback}</p>
-    </Callout>);
-
+      <p className="mt-1 text-xs text-ink/70">
+        {flag.fallback}
+        {flag.sourceGuideline && (
+          <span className="ml-1 text-ink/50 font-normal">({flag.sourceGuideline})</span>
+        )}
+      </p>
+    </Callout>
+  );
 }

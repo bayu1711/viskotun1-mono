@@ -45,6 +45,7 @@ function createInitialRuntime(items: Routine[]): Record<string, RoutineRuntime> 
         item.id,
         {
           setsDone: { ...item.initialSetsDone },
+          excludedStepIds: item.initialExcludedStepIds ?? [],
           feedbackLogs: logs,
           morphingLogs: morphLogs,
           messages: item.initialMessages,
@@ -445,6 +446,7 @@ export function useRoutineState() {
           ...prev,
           [cleanProtocol.id]: {
             setsDone: {},
+            excludedStepIds: cleanProtocol.initialExcludedStepIds ?? [],
             feedbackLogs: [],
             morphingLogs: [],
             messages: cleanProtocol.initialMessages?.length
@@ -541,10 +543,36 @@ export function useRoutineState() {
     [updateRuntime]
   );
 
+  const excludedStepIds = useMemo(() => state.excludedStepIds ?? [], [state.excludedStepIds]);
+
+  const toggleExcludeStep = useCallback(
+    (stepId: string) => {
+      if (!protocol) return;
+      updateRuntime(protocol.id, (prev) => {
+        const current = prev.excludedStepIds ?? [];
+        const isExcluded = current.includes(stepId);
+        const next = isExcluded ? current.filter((id) => id !== stepId) : [...current, stepId];
+        return { ...prev, excludedStepIds: next };
+      });
+    },
+    [protocol, updateRuntime]
+  );
+
+  const isStepExcluded = useCallback(
+    (stepId: string) => (state.excludedStepIds ?? []).includes(stepId),
+    [state.excludedStepIds]
+  );
+
   // Derived values
-  const todayFraction = protocol ? completionOf(protocol, state.setsDone) : 0;
+  const todayFraction = protocol
+    ? completionOf(protocol, state.setsDone, state.excludedStepIds ?? [])
+    : 0;
   const todayPercent = toPercent(todayFraction);
-  const dayIsComplete = protocol ? todayFraction === 1 : false;
+  const activeSteps = useMemo(
+    () => (protocol ? protocol.steps.filter((s) => !(state.excludedStepIds ?? []).includes(s.id)) : []),
+    [protocol, state.excludedStepIds]
+  );
+  const dayIsComplete = protocol && activeSteps.length > 0 ? todayFraction === 1 : false;
   const adherenceRate = protocol ? adherenceOf(protocol, todayFraction) : 0;
   const progressionReady = protocol
     ? isProgressionReady(
@@ -558,7 +586,8 @@ export function useRoutineState() {
     () =>
       protocolList.map((item) => {
         const itemState = runtime[item.id]?.setsDone ?? {};
-        const fraction = completionOf(item, itemState);
+        const itemExcluded = runtime[item.id]?.excludedStepIds ?? [];
+        const fraction = completionOf(item, itemState, itemExcluded);
         return {
           id: item.id,
           title: item.title,
@@ -582,10 +611,11 @@ export function useRoutineState() {
   const isStepComplete = useCallback(
     (stepId: string) => {
       if (!protocol) return false;
+      if ((state.excludedStepIds ?? []).includes(stepId)) return false;
       const step = protocol.steps.find((s) => s.id === stepId);
       return step ? (state.setsDone[stepId] ?? 0) >= step.sets : false;
     },
-    [protocol, state.setsDone]
+    [protocol, state.setsDone, state.excludedStepIds]
   );
 
   const updateSetCount = useCallback(
@@ -613,15 +643,21 @@ export function useRoutineState() {
 
   const markTodayComplete = useCallback(() => {
     if (!protocol) return;
-    const allSetsDone = Object.fromEntries(protocol.steps.map((step) => [step.id, step.sets]));
-    updateRuntime(protocol.id, (prev) => ({ ...prev, setsDone: allSetsDone }));
+    const nonExcludedSteps = protocol.steps.filter(
+      (step) => !(state.excludedStepIds ?? []).includes(step.id)
+    );
+    const allSetsDone = Object.fromEntries(nonExcludedSteps.map((step) => [step.id, step.sets]));
+    updateRuntime(protocol.id, (prev) => ({
+      ...prev,
+      setsDone: { ...prev.setsDone, ...allSetsDone }
+    }));
     const latestScore = state.feedbackLogs[state.feedbackLogs.length - 1]?.score ?? DEFAULT_CONFIRMATION_SCORE;
     pushMessages(protocol.id, {
       role: 'ai',
       kind: 'confirmation',
       content: COPY.assistant.confirmLogged(protocol.currentDay, latestScore)
     });
-  }, [protocol, state.feedbackLogs, updateRuntime, pushMessages]);
+  }, [protocol, state.excludedStepIds, state.feedbackLogs, updateRuntime, pushMessages]);
 
   const logFeedback = useCallback(
     (score: number, note: string) => {
@@ -815,6 +851,7 @@ export function useRoutineState() {
         ...prev,
         [newProtocol.id]: {
           setsDone: { ...(newProtocol.initialSetsDone ?? {}) },
+          excludedStepIds: newProtocol.initialExcludedStepIds ?? [],
           feedbackLogs: logs,
           messages: newProtocol.initialMessages ?? [],
           escalationPaused: false,
@@ -1112,6 +1149,9 @@ export function useRoutineState() {
       samplePapers,
       sampleSource,
       isStepComplete,
+      excludedStepIds,
+      toggleExcludeStep,
+      isStepExcluded,
       incrementSet,
       decrementSet,
       toggleStep,
@@ -1161,6 +1201,9 @@ export function useRoutineState() {
       samplePapers,
       sampleSource,
       isStepComplete,
+      excludedStepIds,
+      toggleExcludeStep,
+      isStepExcluded,
       incrementSet,
       decrementSet,
       toggleStep,

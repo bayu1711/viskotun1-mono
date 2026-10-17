@@ -6,7 +6,6 @@ import { Callout } from '../components/feedback/Callout';
 import { PageContainer } from '../components/layout/PageContainer';
 import { PageHeader } from '../components/layout/PageHeader';
 import { DayActions } from '../components/protocol/DayActions';
-import { MissingDataBanner } from '../components/protocol/MissingDataBanner';
 import { DailyProgressBar } from '../components/routine/DailyProgressBar';
 import { FeedbackLogList } from '../components/routine/FeedbackLogList';
 import { HistoryCalendar } from '../components/routine/HistoryCalendar';
@@ -32,10 +31,16 @@ export function RoutinePage() {
     todayFraction,
     escalationPaused,
     feedbackMetric,
-    incrementSet
+    incrementSet,
+    isStepExcluded
   } = useRoutine();
   const historyHeadingId = useId();
   const feedbackHeadingId = useId();
+
+  const activeVoiceSteps = React.useMemo(
+    () => routine?.steps.filter((s) => !isStepExcluded(s.id)) ?? [],
+    [routine?.steps, isStepExcluded]
+  );
 
   if (!routine) {
     return <EmptyRoutineView />;
@@ -53,17 +58,16 @@ export function RoutinePage() {
 
           <div className="mt-5 space-y-2.5">
             <MilestoneBanner />
-            <MissingDataBanner />
             {escalationPaused && (
               <Callout tone="blush" role="alert">
                 {COPY.safety.dynamicEscalationAlert(feedbackMetric.name, feedbackMetric.escalationMessage)}
               </Callout>
             )}
             <VoiceCoachBar
-              steps={routine.steps}
+              steps={activeVoiceSteps}
               safetyRule={stopRule?.text}
               onStepComplete={(stepIndex) => {
-                const step = routine.steps[stepIndex];
+                const step = activeVoiceSteps[stepIndex];
                 if (step) {
                   incrementSet(step.id);
                 }
