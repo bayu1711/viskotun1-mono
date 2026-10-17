@@ -32,7 +32,7 @@ export function MilestoneBanner() {
         return (
           <Callout
             key={field.id}
-            tone="mint"
+            tone="peach"
             role="status"
             icon={
               <IconTile variant="outline" shape="circle" size={36} className="bg-white/80">

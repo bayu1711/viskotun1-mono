@@ -1,12 +1,16 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
 
-type CalloutTone = 'blush' | 'cream' | 'mint';
+type CalloutTone = 'blush' | 'cream' | 'mint' | 'peach' | 'sky' | 'yellow' | 'orange';
 
 const TONES: Record<CalloutTone, string> = {
   blush: 'bg-blush',
   cream: 'bg-cream',
-  mint: 'bg-mint'
+  mint: 'bg-mint',
+  peach: 'bg-peach',
+  sky: 'bg-sky',
+  yellow: 'bg-yellow',
+  orange: 'bg-orange/20'
 };
 
 interface CalloutProps {

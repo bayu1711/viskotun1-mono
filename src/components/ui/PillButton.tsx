@@ -2,11 +2,13 @@ import React from 'react';
 import { cn } from '../../utils/cn';
 import { Spinner } from '../feedback/Spinner';
 
-type Variant = 'primary' | 'outline' | 'success' | 'inverse';
+type Variant = 'primary' | 'orange' | 'ink' | 'outline' | 'success' | 'inverse';
 type Size = 'sm' | 'md' | 'lg';
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-ink text-white hover:bg-ink/85',
+  primary: 'bg-orange text-white hover:bg-orange/90 font-medium shadow-sm active:bg-orange/95',
+  orange: 'bg-orange text-white hover:bg-orange/90 font-medium shadow-sm active:bg-orange/95',
+  ink: 'bg-ink text-white hover:bg-ink/85',
   outline: 'border border-ink text-ink hover:bg-ink hover:text-white',
   success: 'bg-mint text-ink',
   inverse: 'bg-white text-ink hover:bg-white/90'

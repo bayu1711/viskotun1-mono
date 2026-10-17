@@ -19,10 +19,10 @@ export function DailyProgressBar({ fraction, percent }: DailyProgressBarProps) {
       aria-valuemin={0}
       aria-valuemax={PERCENT_MAX}
       aria-label={COPY.routine.progressLabel}
-      className="mt-4 h-hairline w-full overflow-hidden rounded-full bg-ink/10"
+      className="mt-4 h-2 w-full overflow-hidden rounded-full bg-ink/10"
     >
       <motion.div
-        className="h-full w-full origin-left bg-ink"
+        className="h-full w-full origin-left rounded-full bg-orange"
         initial={false}
         animate={{ scaleX: fraction }}
         transition={MOTION.progress}

@@ -57,7 +57,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
         <div className="flex items-center gap-3">
           <div
             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
-              isPlaying ? 'bg-mint text-ink' : 'bg-cream text-ink/70'
+              isPlaying ? 'bg-orange text-white' : 'bg-orange/15 text-orange'
             }`}
           >
             <Icon icon={GraphicEqIcon} size="md" className={isPlaying ? 'animate-pulse' : ''} />
@@ -111,7 +111,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
               type="button"
               onClick={resumeCoach}
               aria-label={COPY.voiceCoach.resume}
-              className="flex h-10 items-center gap-1.5 rounded-full bg-mint px-4 text-xs font-medium text-ink shadow-sm transition-all hover:bg-mint/80 active:scale-95"
+              className="flex h-10 items-center gap-1.5 rounded-full bg-orange px-4 text-xs font-medium text-white shadow-sm transition-all hover:bg-orange/90 active:scale-95"
             >
               <Icon icon={PlayArrowRoundedIcon} size="sm" />
               <span>{COPY.voiceCoach.resume}</span>
@@ -121,7 +121,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
               type="button"
               onClick={startCoach}
               aria-label={COPY.voiceCoach.play}
-              className="flex h-10 items-center gap-1.5 rounded-full bg-mint px-4 text-xs font-medium text-ink shadow-sm transition-all hover:bg-mint/80 active:scale-95"
+              className="flex h-10 items-center gap-1.5 rounded-full bg-orange px-4 text-xs font-medium text-white shadow-sm transition-all hover:bg-orange/90 active:scale-95"
             >
               <Icon icon={PlayArrowRoundedIcon} size="sm" />
               <span>{COPY.voiceCoach.play}</span>

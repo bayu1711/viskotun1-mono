@@ -60,7 +60,16 @@ export function TopBar() {
           </div>
         </div>
 
-        <p className="ml-auto text-sm text-ink/60">{COPY.shell.streak(streak)}</p>
+        <div className="ml-auto">
+          {streak > 0 ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-orange/15 px-3 py-1 text-xs font-semibold text-orange">
+              <span aria-hidden="true">🔥</span>
+              {COPY.shell.streak(streak)}
+            </span>
+          ) : (
+            <p className="text-sm text-ink/60">{COPY.shell.streak(streak)}</p>
+          )}
+        </div>
 
         {user && !isGuest && (
           <CircleButton label={COPY.auth.signOut} onClick={logout} size={38}>

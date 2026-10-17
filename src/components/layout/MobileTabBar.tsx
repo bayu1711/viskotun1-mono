@@ -44,7 +44,7 @@ export function MobileTabBar() {
           aria-label={COPY.shell.openAssistant}
           aria-haspopup="dialog"
           aria-expanded={isOpen}
-          className="flex h-fab w-fab shrink-0 items-center justify-center rounded-full bg-ink text-white"
+          className="flex h-fab w-fab shrink-0 items-center justify-center rounded-full bg-orange text-white shadow-float transition-transform active:scale-95"
         >
           <Icon icon={AutoAwesomeOutlinedIcon} size="xl" />
         </button>

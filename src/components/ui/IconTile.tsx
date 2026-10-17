@@ -1,13 +1,14 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
 
-type TileVariant = 'solid' | 'inverse' | 'muted' | 'outline' | 'outline-light' | 'dashed' | 'plain';
+type TileVariant = 'solid' | 'inverse' | 'orange' | 'muted' | 'outline' | 'outline-light' | 'dashed' | 'plain';
 type TileShape = 'square' | 'circle';
 type TileSize = 24 | 28 | 32 | 36 | 40 | 48 | 64;
 
 const VARIANTS: Record<TileVariant, string> = {
   solid: 'bg-ink text-white',
   inverse: 'bg-white text-ink',
+  orange: 'bg-orange text-white',
   muted: 'bg-canvas text-ink/50',
   outline: 'border border-ink',
   'outline-light': 'border border-white/30',

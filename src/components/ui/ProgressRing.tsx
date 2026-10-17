@@ -4,7 +4,7 @@ import { cn } from '../../utils/cn';
 import { clamp, toPercent } from '../../utils/math';
 
 type RingSize = 36 | 38 | 40;
-type RingTone = 'ink' | 'ink-bare' | 'light' | 'light-bare';
+type RingTone = 'ink' | 'ink-bare' | 'light' | 'light-bare' | 'orange';
 type RingWeight = 'thin' | 'regular';
 
 const VIEWBOX = 40;
@@ -20,7 +20,8 @@ const TONE_CLASS: Record<RingTone, {progress: string;track: string;}> = {
   ink: { progress: 'stroke-ink', track: 'stroke-ink/10' },
   'ink-bare': { progress: 'stroke-ink', track: 'stroke-transparent' },
   light: { progress: 'stroke-white', track: 'stroke-white/20' },
-  'light-bare': { progress: 'stroke-white', track: 'stroke-transparent' }
+  'light-bare': { progress: 'stroke-white', track: 'stroke-transparent' },
+  orange: { progress: 'stroke-orange', track: 'stroke-orange/20' }
 };
 
 const STROKE_WIDTH: Record<RingWeight, number> = {

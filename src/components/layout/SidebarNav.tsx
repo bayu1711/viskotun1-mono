@@ -31,7 +31,7 @@ export function SidebarNav({ className }: SidebarNavProps) {
               >
                 <span
                   aria-hidden="true"
-                  className={cn('h-2 w-2 rounded-full', isActive ? 'bg-ink' : 'bg-transparent')}
+                  className={cn('h-2 w-2 rounded-full', isActive ? 'bg-orange' : 'bg-transparent')}
                 />
                 {item.label}
               </Link>
