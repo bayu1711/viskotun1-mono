@@ -329,6 +329,9 @@ export const COPY = {
   community: {
     eyebrow: 'Community',
     title: 'Evidence insights',
+    activeTab: 'Active routine insights',
+    exploreTab: 'Explore trending papers',
+    goToRoutine: 'Go to daily routine',
     comparisonLabel: 'Paper versus reality',
     studyEfficacy: 'Study reported efficacy',
     studyCaption: (sampleSize: number) => `Lab · N = ${sampleSize}`,
