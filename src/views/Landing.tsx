@@ -200,43 +200,18 @@ export function LandingPage() {
             </div>
           </div>
 
-          {/* Right Column: Hero Photo of Many People (Human Community) */}
+          {/* Right Column: Large Hero Image complementing headline and value proposition */}
           <div className="lg:col-span-6">
-            <div className="relative rounded-sheet border border-ink/10 bg-white/90 p-3 shadow-float backdrop-blur-md sm:p-4">
-              <div className="relative aspect-[3/2] w-full overflow-hidden rounded-[1.25rem] bg-ink/5">
+            <div className="relative overflow-hidden rounded-sheet border border-ink/10 bg-white/80 shadow-float">
+              <div className="relative aspect-[3/2] w-full overflow-hidden bg-ink/5">
                 <Image
                   src="/images/hero-image.jpg"
                   alt={COPY.landing.heroImageAlt}
                   fill
                   priority
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
-                  className="object-cover transition-transform duration-500 hover:scale-[1.02]"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 650px"
+                  className="object-cover transition-transform duration-700 hover:scale-[1.02]"
                 />
-
-                {/* Top Floating Cohort Badge */}
-                <div className="absolute left-3 top-3 sm:left-4 sm:top-4">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-ink/80 px-3 py-1 text-2xs font-semibold text-white shadow-sm backdrop-blur-md">
-                    <span className="h-2 w-2 rounded-full bg-mint animate-pulse" aria-hidden="true" />
-                    <span>{COPY.landing.heroImageBadge}</span>
-                  </span>
-                </div>
-
-                {/* Bottom Floating Glass Card */}
-                <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4">
-                  <div className="flex items-center justify-between gap-3 rounded-card border border-white/20 bg-ink/80 px-4 py-2.5 text-white shadow-lg backdrop-blur-md">
-                    <div className="min-w-0">
-                      <p className="text-3xs font-semibold uppercase tracking-wider text-white/70">
-                        {COPY.landing.heroImageSubheading}
-                      </p>
-                      <p className="truncate text-xs font-medium text-white/95">
-                        {COPY.landing.heroImageCaption}
-                      </p>
-                    </div>
-                    <span className="shrink-0 rounded-full bg-orange px-2.5 py-1 text-3xs font-semibold uppercase tracking-wider text-white">
-                      {COPY.landing.heroImageStat}
-                    </span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
