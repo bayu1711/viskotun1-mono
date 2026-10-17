@@ -79,4 +79,11 @@ describe('papersStorage and /api/papers endpoint', () => {
     const data = await res.json();
     expect(data.error).toBeDefined();
   });
+
+  it('assigns trending and sample papers to user fazarathfazal@gmail.com in the database', async () => {
+    const userPapers = await getUserPapers('fazarathfazal@gmail.com');
+    expect(userPapers.length).toBeGreaterThanOrEqual(5);
+    expect(userPapers.some((p) => p.id === 'achilles-rehab')).toBe(true);
+    expect(userPapers.every((p) => p.userId === 'fazarathfazal@gmail.com')).toBe(true);
+  });
 });

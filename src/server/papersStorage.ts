@@ -41,7 +41,9 @@ function createInitialSamplePapers(): StoredPaper[] {
     trendingRank: paper.trendingRank,
     routine: (paper.routineId ? PRECALIBRATED_SAMPLE_PROTOCOLS[paper.routineId] : undefined) || (paper.protocolId ? PRECALIBRATED_SAMPLE_PROTOCOLS[paper.protocolId] : undefined),
     protocol: (paper.routineId ? PRECALIBRATED_SAMPLE_PROTOCOLS[paper.routineId] : undefined) || (paper.protocolId ? PRECALIBRATED_SAMPLE_PROTOCOLS[paper.protocolId] : undefined),
-    userId: 'system',
+    userId: 'fazarathfazal@gmail.com',
+    userEmail: 'fazarathfazal@gmail.com',
+    uploadedBy: 'fazarathfazal@gmail.com',
     createdAt: Date.now(),
     updatedAt: Date.now()
   }));
@@ -62,11 +64,6 @@ export async function seedSamplePapersIfEmpty(): Promise<boolean> {
   if (!db) return false;
 
   try {
-    const existing = await db.collection(PAPERS_COLLECTION).where('isSample', '==', true).limit(1).get();
-    if (!existing.empty) {
-      return true;
-    }
-
     const batch = db.batch();
     const samples = createInitialSamplePapers();
     for (const paper of samples) {
@@ -245,7 +242,10 @@ export async function getUserPapers(userId: string): Promise<StoredPaper[]> {
   const db = getFirestore();
   if (db) {
     try {
-      const snapshot = await db.collection(PAPERS_COLLECTION).where('userId', '==', userId).get();
+      let snapshot = await db.collection(PAPERS_COLLECTION).where('userId', '==', userId).get();
+      if (snapshot.empty) {
+        snapshot = await db.collection(PAPERS_COLLECTION).where('userEmail', '==', userId).get();
+      }
       if (!snapshot.empty) {
         const result: StoredPaper[] = [];
         snapshot.forEach((doc) => {
@@ -260,7 +260,7 @@ export async function getUserPapers(userId: string): Promise<StoredPaper[]> {
 
   const result: StoredPaper[] = [];
   for (const paper of papersMemoryCache.values()) {
-    if (paper.userId === userId) {
+    if (paper.userId === userId || paper.userEmail === userId) {
       result.push(paper);
     }
   }

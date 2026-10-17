@@ -25,6 +25,9 @@ export interface SamplePaper {
   activeTrackersCount?: number; // Simulated active community participants tracking this paper
   totalLogsCount?: number; // Simulated cumulative user biofeedback & compliance logs
   trendingRank?: number; // Dynamic trending rank (#1, #2, #3, ...)
+  userId?: string | null;
+  userEmail?: string | null;
+  uploadedBy?: string | null;
 }
 
 export type TrendingPaper = SamplePaper;
@@ -56,7 +59,10 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     popularityScore: 98,
     activeTrackersCount: 1420,
     totalLogsCount: 18450,
-    trendingRank: 1
+    trendingRank: 1,
+    userId: 'fazarathfazal@gmail.com',
+    userEmail: 'fazarathfazal@gmail.com',
+    uploadedBy: 'fazarathfazal@gmail.com'
   },
   {
     id: 'hair-regrowth',
@@ -84,7 +90,10 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     popularityScore: 95,
     activeTrackersCount: 980,
     totalLogsCount: 11200,
-    trendingRank: 2
+    trendingRank: 2,
+    userId: 'fazarathfazal@gmail.com',
+    userEmail: 'fazarathfazal@gmail.com',
+    uploadedBy: 'fazarathfazal@gmail.com'
   },
   {
     id: 'creatine-sleep',
@@ -112,7 +121,10 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     popularityScore: 91,
     activeTrackersCount: 750,
     totalLogsCount: 8940,
-    trendingRank: 3
+    trendingRank: 3,
+    userId: 'fazarathfazal@gmail.com',
+    userEmail: 'fazarathfazal@gmail.com',
+    uploadedBy: 'fazarathfazal@gmail.com'
   },
   {
     id: 'time-restricted-eating',
@@ -138,7 +150,10 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     popularityScore: 86,
     activeTrackersCount: 430,
     totalLogsCount: 4200,
-    trendingRank: 4
+    trendingRank: 4,
+    userId: 'fazarathfazal@gmail.com',
+    userEmail: 'fazarathfazal@gmail.com',
+    uploadedBy: 'fazarathfazal@gmail.com'
   },
   {
     id: 'light-circadian',
@@ -164,7 +179,10 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     popularityScore: 82,
     activeTrackersCount: 310,
     totalLogsCount: 2800,
-    trendingRank: 5
+    trendingRank: 5,
+    userId: 'fazarathfazal@gmail.com',
+    userEmail: 'fazarathfazal@gmail.com',
+    uploadedBy: 'fazarathfazal@gmail.com'
   },
   {
     id: 'rodent-exercise-model',
@@ -189,7 +207,10 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     isGuardrailRejectionTest: true,
     popularityScore: 0,
     activeTrackersCount: 0,
-    totalLogsCount: 0
+    totalLogsCount: 0,
+    userId: 'fazarathfazal@gmail.com',
+    userEmail: 'fazarathfazal@gmail.com',
+    uploadedBy: 'fazarathfazal@gmail.com'
   }
 ];
 
