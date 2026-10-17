@@ -548,7 +548,6 @@ export const COPY = {
   },
   landing: {
     topBanner: '✨ Strictly interventional human research · Zero-hallucination daily protocols →',
-    heroBadge: 'Science-backed human routines',
     heroEyebrow: 'Evidence into action',
     heroTitle: 'Live healthier with daily routines from real human science.',
     heroSubtitle:
@@ -560,6 +559,11 @@ export const COPY = {
       '100% human interventional trials',
       'Zero AI hallucinations'
     ],
+    heroImageAlt: 'Diverse community of people practicing healthy daily routines together',
+    heroImageBadge: 'Real Human Cohorts',
+    heroImageSubheading: 'Active Community',
+    heroImageCaption: '2,400+ participants practicing daily clinical routines',
+    heroImageStat: 'Verified Trials',
     interactivePreview: {
       tag: 'Live Protocol Preview',
       title: "Today's Clinical Session",
