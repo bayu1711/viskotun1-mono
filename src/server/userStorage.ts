@@ -19,8 +19,15 @@ export interface UserRecord {
   updatedAt: number;
 }
 
+import { SEEDED_COMMUNITY_USERS } from './seedUsers';
+
 // In-memory server-side user store with fail-safe fallback
 export const memoryUserStorage = new Map<string, UserRecord>();
+
+// Pre-seed memory cache with authentic simulated trial cohort participants
+for (const user of SEEDED_COMMUNITY_USERS) {
+  memoryUserStorage.set(user.userId, user);
+}
 
 /**
  * Retrieve a user record by ID from live Cloud Firestore or fallback memory cache.
