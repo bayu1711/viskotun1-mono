@@ -34,6 +34,12 @@ export type StepIconKey =
   | 'walk'
   | 'check';
 
+export interface InferredProvenance {
+  tier: 'lineage' | 'guideline';
+  source: string; // e.g. "Alfredson et al. 1998 (Ref [14])" or "ACSM Clinical Guidelines"
+  rationale?: string;
+}
+
 export interface RoutineStep {
   id: string;
   tone: Tone;
@@ -46,6 +52,7 @@ export interface RoutineStep {
   tempo?: string;
   durationSeconds?: number;
   inferred?: boolean;
+  inferredProvenance?: InferredProvenance;
   /** Unit name for a "set" (e.g. "doses", "session"). Defaults to "sets". */
   setLabel?: string;
   /** Per-set description (e.g. "× 1 mL"). Defaults to reps or hold time. */
@@ -74,6 +81,7 @@ export interface MissingDataFlag {
   stepId: string;
   parameter: string;
   fallback: string;
+  sourceGuideline?: string;
 }
 
 export type WidgetType =
@@ -219,6 +227,7 @@ export interface Routine {
   /** Completion ratio (0–1) for each day before the current day, index 0 = day 1. */
   dayHistory: number[];
   initialSetsDone: Record<string, number>;
+  initialExcludedStepIds?: string[];
   initialFeedbackLogs?: FeedbackLog[];
   feedbackMetric?: FeedbackMetric;
   dataCollectionSpec?: DataCollectionField[];
@@ -244,6 +253,7 @@ export type DropOffUnit = CommunityInsights['dropOffUnit'];
 /** Mutable, per-routine session state (everything else is derived during render). */
 export interface RoutineRuntime {
   setsDone: Record<string, number>;
+  excludedStepIds?: string[];
   feedbackLogs: FeedbackLog[];
   morphingLogs?: MorphingDataLog[];
   messages: ChatMessage[];
