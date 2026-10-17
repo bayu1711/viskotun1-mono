@@ -40,15 +40,6 @@ export function TrendingPapersExplore() {
     return list && list.length > 0 ? list : SAMPLE_PAPERS;
   }, [trendingPapers, samplePapers]);
 
-  // Extract categories for filter
-  const categories = useMemo(() => {
-    const set = new Set<string>();
-    availablePapers.forEach((p) => {
-      if (p.category) set.add(p.category);
-    });
-    return ['all', ...Array.from(set)];
-  }, [availablePapers]);
-
   const filteredPapers = useMemo(() => {
     return availablePapers.filter((paper) => {
       if (paper.isGuardrailRejectionTest) return false;
@@ -73,22 +64,17 @@ export function TrendingPapersExplore() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Intro & Source Badge */}
-      <div className="rounded-sheet border border-ink/10 bg-white/70 p-5 backdrop-blur-xs sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="space-y-1">
-            <h2 className="text-base font-medium text-ink">
-              {COPY.howTo.trendingTitle}
-            </h2>
-            <p className="max-w-2xl text-xs leading-relaxed text-ink/65">
-              {COPY.howTo.trendingSubtitle}
-            </p>
-          </div>
+    <div className="mt-5 space-y-6">
+      {/* Intro Subtitle & Source Badge */}
+      <div className="max-w-3xl space-y-3">
+        <p className="text-base leading-relaxed text-ink/70">
+          {COPY.howTo.trendingSubtitle}
+        </p>
 
+        <div className="flex flex-wrap items-center gap-2 pt-1">
           <span
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-2xs font-medium border',
+              'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-2xs font-medium border shrink-0',
               sampleSource === 'firestore-live'
                 ? 'border-mint/60 bg-mint/20 text-ink'
                 : 'border-ink/10 bg-canvas text-ink/60'
@@ -104,28 +90,21 @@ export function TrendingPapersExplore() {
               ? COPY.howTo.firestoreSyncLive
               : COPY.howTo.firestoreSyncLocal}
           </span>
-        </div>
 
-        {/* Category Filters */}
-        <div className="mt-4 flex flex-wrap items-center gap-1.5 border-t border-ink/10 pt-4">
-          {categories.map((cat) => {
-            const isSelected = selectedCategory === cat;
-            return (
+          {selectedCategory !== 'all' && (
+            <div className="flex items-center gap-1.5 text-2xs">
+              <span className="text-ink/50">{COPY.howTo.filterByTopic}</span>
               <button
-                key={cat}
                 type="button"
-                onClick={() => setSelectedCategory(cat)}
-                className={cn(
-                  'rounded-full px-3 py-1 text-2xs font-medium transition-colors',
-                  isSelected
-                    ? 'bg-ink text-white shadow-xs'
-                    : 'border border-ink/15 bg-white text-ink/65 hover:border-ink/40 hover:text-ink'
-                )}
+                onClick={() => setSelectedCategory('all')}
+                className="inline-flex items-center gap-1 rounded-full bg-ink px-2.5 py-0.5 font-medium text-white transition-opacity hover:opacity-80"
+                title={COPY.howTo.clearFilter}
               >
-                {cat === 'all' ? 'All research topics' : cat}
+                <span>{selectedCategory}</span>
+                <span className="text-white/70">×</span>
               </button>
-            );
-          })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -149,7 +128,7 @@ export function TrendingPapersExplore() {
               )}
             >
               <div>
-                {/* Header row: Icon, Rank, Category */}
+                {/* Header row: Icon, Rank, Category inside the card */}
                 <div className="flex items-center justify-between gap-2">
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-canvas text-ink">
                     <StepIcon icon={getIconForRoutine(targetId)} size="xs" />
@@ -158,9 +137,21 @@ export function TrendingPapersExplore() {
                     <span className="rounded-full bg-mint/30 border border-mint/60 px-2.5 py-0.5 text-2xs font-semibold text-ink">
                       {COPY.howTo.trendingRankBadge(rank)}
                     </span>
-                    <span className="rounded-full bg-canvas px-2.5 py-0.5 text-2xs font-semibold text-ink/70">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSelectedCategory(selectedCategory === paper.category ? 'all' : paper.category)
+                      }
+                      className={cn(
+                        'rounded-full px-2.5 py-0.5 text-2xs font-semibold transition-colors',
+                        selectedCategory === paper.category
+                          ? 'bg-ink text-white'
+                          : 'bg-canvas text-ink/70 hover:bg-ink/10 hover:text-ink'
+                      )}
+                      title={`${COPY.howTo.filterByTopic} ${paper.category}`}
+                    >
                       {paper.category}
-                    </span>
+                    </button>
                   </div>
                 </div>
 
