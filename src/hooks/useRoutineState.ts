@@ -82,6 +82,7 @@ export function useRoutineState() {
   const auth = useContext(AuthContext);
   const isAuthenticated = auth?.isAuthenticated;
   const userId = auth?.user?.id;
+  const isAdmin = auth?.isAdmin;
 
   const [protocolList, setProtocolList] = useState<Protocol[]>(initialProtocols);
   const [activeProtocolId, setActiveProtocol] = useState<string>(initialProtocols[0]?.id ?? '');
@@ -364,6 +365,11 @@ export function useRoutineState() {
   }, [protocolList, activeProtocolId, runtime, hasHydrated, isAuthenticated, userId, hasRemoteHydrated]);
 
   const resetToDefaults = useCallback(() => {
+    if (!isAdmin) {
+      console.warn('[useRoutineState] resetToDefaults requires admin privileges.');
+      return;
+    }
+
     const keys = getStorageKeys(isAuthenticated ? userId : undefined);
     try {
       window.localStorage.removeItem(keys.routines);
@@ -395,7 +401,7 @@ export function useRoutineState() {
     }
 
     toast.success(COPY.demo.resetSuccess);
-  }, [isAuthenticated, userId]);
+  }, [isAuthenticated, userId, isAdmin]);
 
   const openHowTo = useCallback(() => setIsHowToOpen(true), []);
   const closeHowTo = useCallback(() => setIsHowToOpen(false), []);

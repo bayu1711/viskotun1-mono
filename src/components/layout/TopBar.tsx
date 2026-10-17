@@ -77,9 +77,11 @@ export function TopBar() {
           </CircleButton>
         )}
 
-        <CircleButton label={COPY.shell.resetDemo} onClick={resetToDefaults} size={38}>
-          <Icon icon={RestartAltOutlinedIcon} size="md" />
-        </CircleButton>
+        {isAdmin && (
+          <CircleButton label={COPY.shell.resetDemo} onClick={resetToDefaults} size={38}>
+            <Icon icon={RestartAltOutlinedIcon} size="md" />
+          </CircleButton>
+        )}
 
         <CircleButton label={COPY.shell.addPaper} onClick={() => openAssistant('upload')}>
           <Icon icon={AddIcon} size="lg" />
