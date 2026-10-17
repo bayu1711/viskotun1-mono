@@ -83,7 +83,7 @@ export function TimerWidget({ field, value, onChange }: TimerWidgetProps) {
               variant="solid"
               onClick={pauseTimer}
               size={40}
-              className="bg-mint text-ink"
+              className="bg-mint text-ink hover:bg-mint/90 shadow-2xs"
             >
               <Icon icon={PauseOutlinedIcon} size="md" />
             </CircleButton>
@@ -93,7 +93,7 @@ export function TimerWidget({ field, value, onChange }: TimerWidgetProps) {
               variant="solid"
               onClick={startTimer}
               size={40}
-              className="bg-ink text-white"
+              className="bg-orange text-white hover:bg-orange/90 shadow-2xs"
             >
               <Icon icon={PlayArrowIcon} size="md" />
             </CircleButton>

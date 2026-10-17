@@ -29,19 +29,27 @@ function renderVisual({ day, completion, status }: CalendarDay) {
   switch (status) {
     case 'today':
       return (
-        <ProgressRing value={completion} size={38} tone="light-bare" decorative className="rounded-full bg-ink text-xs text-white">
+        <ProgressRing
+          value={completion}
+          size={38}
+          tone="light-bare"
+          decorative
+          className="rounded-full bg-orange text-xs font-semibold text-white shadow-sm ring-2 ring-orange/30"
+        >
           {day}
-        </ProgressRing>);
+        </ProgressRing>
+      );
 
     case 'complete':
-      return <span className={cn(CELL, 'bg-mint text-ink/60')}>{day}</span>;
+      return <span className={cn(CELL, 'bg-mint font-semibold text-ink shadow-2xs')}>{day}</span>;
     case 'partial':
       return (
-        <ProgressRing value={completion} size={38} tone="ink-bare" weight="thin" decorative>
-          <span className="text-xs text-ink/70">{day}</span>
-        </ProgressRing>);
+        <ProgressRing value={completion} size={38} tone="orange" weight="thin" decorative>
+          <span className="text-xs font-medium text-ink/80">{day}</span>
+        </ProgressRing>
+      );
 
     case 'upcoming':
-      return <span className={cn(CELL, 'text-ink/30')}>{day}</span>;
+      return <span className={cn(CELL, 'font-medium text-ink/35')}>{day}</span>;
   }
 }

@@ -27,14 +27,19 @@ export function TodaySummaryCard({ className }: TodaySummaryCardProps) {
   return (
     <section aria-label={COPY.shell.todaySummaryLabel} className={cn('rounded-card bg-ink p-5 text-white', className)}>
       <div className="flex items-center justify-between gap-2">
-        <p className="truncate text-sm text-white/50">{routine.shortTitle}</p>
-        <ProgressRing value={todayFraction} size={36} tone="light" decorative />
+        <p className="truncate text-sm text-white/60 font-medium">{routine.shortTitle}</p>
+        <ProgressRing value={todayFraction} size={36} tone="orange" decorative />
       </div>
       <p className="mt-3 text-4xl font-light tabular-nums">
         {todayPercent}
         <span className="text-white/40">{COPY.common.percentSign}</span>
       </p>
-      <p className="mt-1 text-sm text-white/50">{COPY.shell.dayOfTotal(currentDay, totalDays)}</p>
+      <div className="mt-2 flex items-center justify-between">
+        <p className="text-xs text-white/50">{COPY.shell.dayOfTotal(currentDay, totalDays)}</p>
+        <span className="inline-flex items-center rounded-full bg-orange/20 px-2 py-0.5 text-3xs font-semibold text-orange">
+          Day {currentDay}
+        </span>
+      </div>
     </section>
   );
 }

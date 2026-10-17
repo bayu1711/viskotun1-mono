@@ -13,8 +13,8 @@ export function FeedbackLogItem({ log }: FeedbackLogItemProps) {
   const tone = severityTone(log.score);
 
   return (
-    <li className="flex items-center gap-3 rounded-tile border border-ink p-2.5 pr-4">
-      <IconTile variant="plain" size={40} decorative={false} className={cn('text-base font-light', tone.chip)}>
+    <li className="flex items-center gap-3 rounded-tile border border-ink/10 bg-canvas/60 p-2.5 pr-4 transition-colors hover:border-ink/20 shadow-2xs">
+      <IconTile variant="plain" size={40} decorative={false} className={cn('text-base font-medium rounded-full shadow-2xs', tone.chip)}>
         {log.score}
       </IconTile>
       <div className="min-w-0 flex-1">

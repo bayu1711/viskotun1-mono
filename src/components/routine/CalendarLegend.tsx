@@ -3,9 +3,10 @@ import { COPY } from '../../data/copy';
 import { cn } from '../../utils/cn';
 
 const LEGEND_ITEMS = [
-{ label: COPY.calendar.legend.complete, swatch: 'bg-mint' },
-{ label: COPY.calendar.legend.partial, swatch: 'border border-ink border-l-transparent' },
-{ label: COPY.calendar.legend.today, swatch: 'bg-ink' }];
+  { label: COPY.calendar.legend.complete, swatch: 'bg-mint' },
+  { label: COPY.calendar.legend.partial, swatch: 'border-2 border-orange border-l-transparent' },
+  { label: COPY.calendar.legend.today, swatch: 'bg-orange' }
+];
 
 
 export function CalendarLegend() {

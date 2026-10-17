@@ -31,14 +31,14 @@ export function RoutineOption({ routine, protocol, active, onSelect }: RoutineOp
           active && 'bg-canvas'
         )}
       >
-        <ProgressRing value={item.todayFraction} size={40} decorative>
+        <ProgressRing value={item.todayFraction} size={40} tone={active ? 'orange' : 'ink'} decorative>
           <StepIcon icon={item.icon} size="sm" />
         </ProgressRing>
         <PaperRowText
           title={item.title}
           meta={COPY.switcher.meta(item.currentDay, item.totalDays, item.todayPercent)}
         />
-        {active && <Icon icon={CheckIcon} size="md" />}
+        {active && <Icon icon={CheckIcon} size="md" className="text-orange" />}
       </button>
     </li>
   );

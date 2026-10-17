@@ -58,7 +58,7 @@ export function RoutineSwitcher() {
         aria-controls={isOpen ? listId : undefined}
         className="flex items-center gap-2 rounded-full border border-ink py-1.5 pl-1.5 pr-3 text-sm transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
       >
-        <IconTile variant="solid" shape="circle" size={28}>
+        <IconTile variant="orange" shape="circle" size={28}>
           <StepIcon icon={routine.icon} size="xs" />
         </IconTile>
         <span className="max-w-switcher truncate">{routine.title}</span>
