@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -22,6 +22,7 @@ interface AuthViewProps {
 export function AuthView({ mode }: AuthViewProps) {
   const [activeMode, setActiveMode] = useState<'login' | 'signup'>(mode);
   const isLogin = activeMode === 'login';
+  const fieldId = useId();
   const router = useRouter();
   const { isAuthenticated, loginWithEmail, loginWithGoogle, signupWithEmail, loginAsGuest, loginAsAdmin } = useAuth();
 
@@ -167,11 +168,13 @@ export function AuthView({ mode }: AuthViewProps) {
         <form onSubmit={handleEmailSubmit} className="space-y-4">
           {!isLogin && (
             <div>
-              <label className="block text-2xs font-medium text-ink/70">
+              <label htmlFor={`${fieldId}-name`} className="block text-2xs font-medium text-ink/70">
                 {COPY.auth.nameLabel}
               </label>
               <input
+                id={`${fieldId}-name`}
                 type="text"
+                autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={COPY.auth.namePlaceholder}
@@ -181,11 +184,13 @@ export function AuthView({ mode }: AuthViewProps) {
           )}
 
           <div>
-            <label className="block text-2xs font-medium text-ink/70">
+            <label htmlFor={`${fieldId}-email`} className="block text-2xs font-medium text-ink/70">
               {COPY.auth.emailLabel}
             </label>
             <input
+              id={`${fieldId}-email`}
               type="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={COPY.auth.emailPlaceholder}
@@ -195,11 +200,13 @@ export function AuthView({ mode }: AuthViewProps) {
           </div>
 
           <div>
-            <label className="block text-2xs font-medium text-ink/70">
+            <label htmlFor={`${fieldId}-password`} className="block text-2xs font-medium text-ink/70">
               {COPY.auth.passwordLabel}
             </label>
             <input
+              id={`${fieldId}-password`}
               type="password"
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={COPY.auth.passwordPlaceholder}
