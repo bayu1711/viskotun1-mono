@@ -9,7 +9,7 @@ const VARIANTS: Record<TileVariant, string> = {
   solid: 'bg-ink text-white',
   inverse: 'bg-white text-ink',
   orange: 'bg-orange text-white',
-  muted: 'bg-canvas text-ink/50',
+  muted: 'bg-canvas text-ink/60',
   outline: 'border border-ink',
   'outline-light': 'border border-white/30',
   dashed: 'border border-dashed border-ink/25',

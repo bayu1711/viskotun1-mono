@@ -23,7 +23,7 @@ export function TaskGrid({ steps }: TaskGridProps) {
   }
 
   return (
-    <div className="mt-2.5 grid grid-cols-2 gap-2.5">
+    <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
       {steps.map((step, index) =>
       <TaskCard key={step.id} step={step} wide={isWideStep(index, steps.length)} />
       )}

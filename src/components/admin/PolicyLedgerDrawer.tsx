@@ -115,7 +115,7 @@ export function PolicyLedgerDrawer() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-ink/50">
+                  <p className="text-xs text-ink/60">
                     {COPY.policyLedger.versionLabel(policy?.version || COPY.policyLedger.versionFallback)}
                   </p>
                 </div>
@@ -146,7 +146,7 @@ export function PolicyLedgerDrawer() {
                     <label htmlFor="pain-threshold" className="text-sm font-medium">
                       {COPY.policyLedger.thresholdLabel}
                     </label>
-                    <p className="text-xs text-ink/50">
+                    <p className="text-xs text-ink/60">
                       {COPY.policyLedger.thresholdDesc}
                     </p>
                   </div>
@@ -156,7 +156,7 @@ export function PolicyLedgerDrawer() {
                 </div>
 
                 <div className="mt-4 flex items-center gap-3">
-                  <span className="text-xs text-ink/40">{COPY.policyLedger.mildLabel}</span>
+                  <span className="text-xs text-ink/60">{COPY.policyLedger.mildLabel}</span>
                   <input
                     id="pain-threshold"
                     type="range"
@@ -167,7 +167,7 @@ export function PolicyLedgerDrawer() {
                     onChange={(e) => handleThresholdChange(Number(e.target.value))}
                     className="h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-ink/10 accent-ink"
                   />
-                  <span className="text-xs text-ink/40">{COPY.policyLedger.severeLabel}</span>
+                  <span className="text-xs text-ink/60">{COPY.policyLedger.severeLabel}</span>
                 </div>
               </div>
 
@@ -178,7 +178,7 @@ export function PolicyLedgerDrawer() {
                     <label htmlFor="load-reduction" className="text-sm font-medium">
                       {COPY.policyLedger.reductionLabel}
                     </label>
-                    <p className="text-xs text-ink/50">
+                    <p className="text-xs text-ink/60">
                       {COPY.policyLedger.reductionDesc}
                     </p>
                   </div>
@@ -188,7 +188,7 @@ export function PolicyLedgerDrawer() {
                 </div>
 
                 <div className="mt-4 flex items-center gap-3">
-                  <span className="text-xs text-ink/40">{COPY.policyLedger.reductionMinLabel}</span>
+                  <span className="text-xs text-ink/60">{COPY.policyLedger.reductionMinLabel}</span>
                   <input
                     id="load-reduction"
                     type="range"
@@ -199,14 +199,14 @@ export function PolicyLedgerDrawer() {
                     onChange={(e) => handleReductionChange(Number(e.target.value))}
                     className="h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-ink/10 accent-ink"
                   />
-                  <span className="text-xs text-ink/40">{COPY.policyLedger.reductionMaxLabel}</span>
+                  <span className="text-xs text-ink/60">{COPY.policyLedger.reductionMaxLabel}</span>
                 </div>
               </div>
 
               {/* Gatekeeper Banned Criteria */}
               <div className="rounded-card border border-ink/10 bg-white p-4">
                 <p className="text-sm font-medium">{COPY.policyLedger.bannedLabel}</p>
-                <p className="text-xs text-ink/50">
+                <p className="text-xs text-ink/60">
                   {COPY.policyLedger.bannedDesc}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
@@ -227,7 +227,7 @@ export function PolicyLedgerDrawer() {
                   {isLiveFirestore ? (
                     <Icon icon={CloudDoneOutlinedIcon} size="sm" className="text-ink" />
                   ) : (
-                    <Icon icon={CloudOffOutlinedIcon} size="sm" className="text-ink/50" />
+                    <Icon icon={CloudOffOutlinedIcon} size="sm" className="text-ink/60" />
                   )}
                   <span className="text-ink/70">
                     {isLiveFirestore

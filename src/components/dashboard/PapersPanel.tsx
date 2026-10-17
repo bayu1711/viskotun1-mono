@@ -84,7 +84,7 @@ export function PapersPanel() {
             href={`${DOI_BASE_URL}${routine.paper.doi}`}
             target="_blank"
             rel="noreferrer"
-            className="ml-auto flex items-center gap-1 text-xs text-ink/55 transition-colors hover:text-ink focus:outline-none focus-visible:underline"
+            className="ml-auto flex min-h-11 items-center gap-1 text-xs text-ink/60 transition-colors hover:text-ink focus:outline-none focus-visible:underline"
           >
             {COPY.dashboard.sourcePaper}
             <Icon icon={NorthEastIcon} size="xs" />

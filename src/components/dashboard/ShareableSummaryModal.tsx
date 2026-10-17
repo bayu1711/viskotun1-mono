@@ -91,7 +91,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
               className="flex shrink-0 items-center justify-between border-b border-ink/10 bg-canvas/80 px-6 py-4 backdrop-blur-md"
             >
               <div>
-                <p className="text-2xs font-mono uppercase tracking-widest text-ink/45">
+                <p className="text-2xs font-mono uppercase tracking-widest text-ink/60">
                   {COPY.shareableSummary.cardTitle}
                 </p>
                 <h2 className="text-lg font-medium tracking-tight">
@@ -141,7 +141,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                     {COPY.shareableSummary.phasePrefix} <span className="font-medium text-ink">{protocol.phase}</span>
                   </p>
                 </div>
-                <div className="text-right text-xs text-ink/50">
+                <div className="text-right text-xs text-ink/60">
                   <p className="font-medium text-ink">{COPY.shareableSummary.generatedOn(todayFormatted)}</p>
                   <p>{COPY.shareableSummary.studyYear(protocol.paper.year)}</p>
                 </div>
@@ -149,7 +149,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
 
               {/* Study Citation & Evidence */}
               <div className="mt-5 rounded-tile border border-ink/15 bg-canvas/50 p-4 print:bg-white print:border-ink/20">
-                <p className="text-2xs font-mono uppercase tracking-wider text-ink/50">
+                <p className="text-2xs font-mono uppercase tracking-wider text-ink/60">
                   {COPY.shareableSummary.trialCitation}
                 </p>
                 <p className="mt-1 text-sm font-semibold leading-snug text-ink">
@@ -175,14 +175,14 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
               {/* Key Adherence & Metric Badges */}
               <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4 print:grid-cols-4">
                 <div className="rounded-tile border border-ink/10 bg-canvas/40 p-3 print:bg-white">
-                  <p className="text-2xs text-ink/50">{COPY.shareableSummary.timelineProgress}</p>
+                  <p className="text-2xs text-ink/60">{COPY.shareableSummary.timelineProgress}</p>
                   <p className="mt-1 text-lg font-bold text-ink">
                     {COPY.shareableSummary.dayValue(currentDay)}{' '}
-                    <span className="text-xs font-normal text-ink/50">{COPY.shareableSummary.totalDaysValue(totalDays)}</span>
+                    <span className="text-xs font-normal text-ink/60">{COPY.shareableSummary.totalDaysValue(totalDays)}</span>
                   </p>
                 </div>
                 <div className="rounded-tile border border-ink/10 bg-cream/30 p-3 print:bg-white">
-                  <p className="text-2xs text-ink/50">{COPY.shareableSummary.adherenceRate}</p>
+                  <p className="text-2xs text-ink/60">{COPY.shareableSummary.adherenceRate}</p>
                   <p className="mt-1 text-lg font-bold text-ink">
                     {adherenceRate}%{' '}
                     <span className="text-xs font-normal text-ink/60 capitalize">
@@ -191,13 +191,13 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                   </p>
                 </div>
                 <div className="rounded-tile border border-ink/10 bg-mint/30 p-3 print:bg-white">
-                  <p className="text-2xs text-ink/50">{COPY.shareableSummary.consistencyStreak}</p>
+                  <p className="text-2xs text-ink/60">{COPY.shareableSummary.consistencyStreak}</p>
                   <p className="mt-1 text-lg font-bold text-ink">
                     {streak} {COPY.shareableSummary.dayUnit(streak)}
                   </p>
                 </div>
                 <div className="rounded-tile border border-ink/10 bg-canvas/40 p-3 print:bg-white">
-                  <p className="text-2xs text-ink/50">{COPY.shareableSummary.progressionGate}</p>
+                  <p className="text-2xs text-ink/60">{COPY.shareableSummary.progressionGate}</p>
                   <p className="mt-1 text-sm font-semibold capitalize text-ink">
                     {status === 'paused'
                       ? COPY.shareableSummary.statusPaused
@@ -216,7 +216,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                 <div className="mt-2 divide-y divide-ink/10 rounded-tile border border-ink/15 overflow-hidden">
                   {protocol.steps.map((step, idx) => (
                     <div key={step.id} className="flex items-start gap-4 p-3.5 text-xs bg-white">
-                      <span className="font-mono font-bold text-ink/40">
+                      <span className="font-mono font-bold text-ink/60">
                         {String(idx + 1).padStart(2, '0')}
                       </span>
                       <div className="flex-1">
@@ -234,7 +234,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                         <p className="font-semibold text-ink">
                           {step.sets} {step.setLabel || COPY.task.defaultSetLabel} {step.perSetLabel || ''}
                         </p>
-                        <p className="text-3xs text-ink/50">{step.frequency}</p>
+                        <p className="text-3xs text-ink/60">{step.frequency}</p>
                       </div>
                     </div>
                   ))}
@@ -254,7 +254,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                       <span className="font-medium">{COPY.shareableSummary.actionLabel}</span> {progressionRule.action}
                     </p>
                   ) : (
-                    <p className="mt-1 text-xs text-ink/50">{COPY.shareableSummary.standardDurationFallback}</p>
+                    <p className="mt-1 text-xs text-ink/60">{COPY.shareableSummary.standardDurationFallback}</p>
                   )}
                 </div>
 
@@ -281,7 +281,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                   {COPY.shareableSummary.recentLogs}
                 </h3>
                 {recentLogs.length === 0 ? (
-                  <p className="mt-2 text-xs italic text-ink/40">
+                  <p className="mt-2 text-xs italic text-ink/60">
                     {COPY.shareableSummary.noLogsYet}
                   </p>
                 ) : (
@@ -297,7 +297,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                           </p>
                           {log.note && <p className="text-2xs text-ink/60 italic">{log.note}</p>}
                         </div>
-                        <span className="text-3xs text-ink/40 font-mono">{log.loggedAt}</span>
+                        <span className="text-3xs text-ink/60 font-mono">{log.loggedAt}</span>
                       </div>
                     ))}
                   </div>
@@ -305,7 +305,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
               </div>
 
               {/* Legal / Scientific Disclaimer */}
-              <div className="mt-8 border-t border-ink/10 pt-4 text-center text-3xs leading-relaxed text-ink/45">
+              <div className="mt-8 border-t border-ink/10 pt-4 text-center text-3xs leading-relaxed text-ink/60">
                 <p>{COPY.shareableSummary.disclaimer}</p>
                 <p className="mt-1 font-mono">
                   {COPY.shareableSummary.footerAudit(protocol.paper.doi)}

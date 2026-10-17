@@ -57,7 +57,7 @@ export function UploadDropzone({ onFile }: UploadDropzoneProps) {
         <Icon icon={UploadFileOutlinedIcon} size="xl" />
       </IconTile>
       <p className="mt-3 text-lg">{COPY.upload.title}</p>
-      <p className="mt-0.5 text-xs text-ink/45">{COPY.upload.body}</p>
+      <p className="mt-0.5 text-xs text-ink/60">{COPY.upload.body}</p>
 
       {error && (
         <p role="alert" className="mt-2 text-xs text-danger">
@@ -74,7 +74,7 @@ export function UploadDropzone({ onFile }: UploadDropzoneProps) {
           <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
           {COPY.upload.scopeBadge}
         </p>
-        <p className="mt-1 text-2xs leading-relaxed text-ink/50">
+        <p className="mt-1 text-2xs leading-relaxed text-ink/60">
           {COPY.upload.scopeNote}
         </p>
       </div>

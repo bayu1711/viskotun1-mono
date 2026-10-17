@@ -68,7 +68,7 @@ export function TimerWidget({ field, value, onChange }: TimerWidgetProps) {
         <p className="text-giant font-light leading-none tabular-nums text-ink">
           {formatTime(seconds)}
         </p>
-        <span className="mt-1 text-xs text-ink/50">
+        <span className="mt-1 text-xs text-ink/60">
           {COPY.morphing.widgets.timer.elapsedSummary(seconds, field.max)}
         </span>
 

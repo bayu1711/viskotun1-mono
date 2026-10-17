@@ -23,7 +23,7 @@ export function CheckToggle({ checked, onToggle, itemLabel, tone = 'cream' }: Ch
       aria-pressed={checked}
       aria-label={checked ? COPY.task.uncheck(itemLabel) : COPY.task.complete(itemLabel)}
       className={cn(
-        'flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-current',
+        'relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors before:absolute before:-inset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-current',
         checked ? styles.checkOn : styles.checkOff
       )}>
       

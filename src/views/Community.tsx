@@ -84,7 +84,7 @@ export function CommunityPage() {
       <button
         type="button"
         onClick={() => setActiveTab('active')}
-        className="inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
       >
         <Icon icon={BarChartOutlinedIcon} size="xs" />
         <span>{COPY.community.activeTab}</span>
@@ -93,7 +93,7 @@ export function CommunityPage() {
       <button
         type="button"
         onClick={() => setActiveTab('explore')}
-        className="inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
+        className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
       >
         <Icon icon={AutoAwesomeOutlinedIcon} size="xs" />
         <span>{COPY.howTo.buttonExploreSamples}</span>
@@ -127,9 +127,9 @@ export function CommunityPage() {
               {COPY.community.canonicalPaperBadge}
             </span>
             {routine?.paper?.doi ? (
-              <span className="font-mono text-ink/50">DOI: {routine.paper.doi}</span>
+              <span className="font-mono text-ink/60">DOI: {routine.paper.doi}</span>
             ) : (
-              <span className="text-ink/40">{routine?.title}</span>
+              <span className="text-ink/60">{routine?.title}</span>
             )}
           </div>
 

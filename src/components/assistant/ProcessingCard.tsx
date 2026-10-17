@@ -26,7 +26,7 @@ export function ProcessingCard({ source, createdAt }: ProcessingCardProps) {
 
   return (
     <article className="rounded-card bg-white p-5" aria-live="polite" aria-busy={!done}>
-      <p className="text-xs text-ink/45">{done ? COPY.processing.queued : COPY.processing.extracting}</p>
+      <p className="text-xs text-ink/60">{done ? COPY.processing.queued : COPY.processing.extracting}</p>
       <p className="mt-1 truncate text-lg">{source}</p>
       <ol className="mt-4 space-y-2.5">
         {STAGES.map((label, index) => {
@@ -36,7 +36,7 @@ export function ProcessingCard({ source, createdAt }: ProcessingCardProps) {
               <span className={cn('flex h-6 w-6 shrink-0 items-center justify-center rounded-full', STAGE_DOT[state])}>
                 {state === 'done' && <Icon icon={CheckIcon} size="xs" />}
               </span>
-              <span className={cn(state === 'idle' && 'text-ink/35')}>{label}</span>
+              <span className={cn(state === 'idle' && 'text-ink/60')}>{label}</span>
             </li>);
 
         })}

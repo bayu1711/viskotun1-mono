@@ -20,7 +20,7 @@ const SIZES: Record<Size, string> = {
 };
 
 const BASE =
-  'inline-flex shrink-0 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:pointer-events-none disabled:opacity-30';
+  'relative inline-flex shrink-0 items-center justify-center rounded-full transition-colors before:absolute before:-inset-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:pointer-events-none disabled:opacity-30';
 
 interface CircleButtonProps {
   /** Accessible name — required because the button is icon-only. */

@@ -150,7 +150,7 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
             <h2 className="text-sm font-medium">
               {COPY.morphing.dialogTitle(activeField.name, currentDay)}
             </h2>
-            <span className="text-3xs uppercase tracking-wider text-ink/50">
+            <span className="text-3xs uppercase tracking-wider text-ink/60">
               {activeField.frequency === 'milestone'
                 ? COPY.morphing.milestoneTag
                 : COPY.morphing.dailyTag}
@@ -187,7 +187,7 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
           maxLength={FEEDBACK_NOTE_MAX_LENGTH}
           onChange={(event) => setNote(event.target.value)}
           placeholder={COPY.feedbackDrawer.notesPlaceholder}
-          className="w-full resize-none rounded-tile border border-ink/15 px-4 py-3 text-sm placeholder:text-ink/35 focus:border-ink focus:outline-none"
+          className="w-full resize-none rounded-tile border border-ink/15 px-4 py-3 text-sm placeholder:text-ink/60 focus:border-ink focus:outline-none"
         />
 
         <PillButton type="submit" fullWidth className="mt-4">

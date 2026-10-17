@@ -57,7 +57,7 @@ export function FeedbackScoreControl({ score, tone, onChange, metric }: Feedback
         </CircleButton>
       </div>
       <p className="mt-3 text-center text-2xl">
-        {COPY.feedbackDrawer.ofMax(maxScore)} <span className="text-sm text-ink/45">/ {tone.label}</span>
+        {COPY.feedbackDrawer.ofMax(maxScore)} <span className="text-sm text-ink/60">/ {tone.label}</span>
       </p>
 
       <label htmlFor={sliderId} className="sr-only">
@@ -84,7 +84,7 @@ export function FeedbackScoreControl({ score, tone, onChange, metric }: Feedback
           className="feedback-slider relative w-full bg-transparent"
         />
       </div>
-      <div className="mt-2 flex justify-between text-xs text-ink/45">
+      <div className="mt-2 flex justify-between text-xs text-ink/60">
         <span>{metric?.minLabel ?? COPY.feedbackDrawer.minLabel(minScore)}</span>
         <span>{metric?.maxLabel ?? COPY.feedbackDrawer.maxLabel(maxScore)}</span>
       </div>

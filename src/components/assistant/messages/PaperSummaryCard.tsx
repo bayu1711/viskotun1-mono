@@ -23,9 +23,9 @@ export function PaperSummaryCard({ intro }: PaperSummaryCardProps) {
 
   return (
     <article className="rounded-card bg-white p-5">
-      <p className="text-sm text-ink/45">{intro}</p>
+      <p className="text-sm text-ink/60">{intro}</p>
       <h3 className="mt-4 text-lg leading-snug">{paper.title}</h3>
-      <p className="mt-1 text-xs text-ink/45">
+      <p className="mt-1 text-xs text-ink/60">
         {paper.authors} · {paper.journal}
       </p>
       <dl className="mt-4 grid grid-cols-3 gap-3 rounded-bubble bg-mint p-4">

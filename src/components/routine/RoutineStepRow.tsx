@@ -27,8 +27,8 @@ export function RoutineStepRow({ step }: RoutineStepRowProps) {
         <StepIcon icon={step.icon} size="md" />
       </IconTile>
       <div className="min-w-0 flex-1">
-        <p className={cn('text-sm leading-snug', complete && 'text-ink/40 line-through')}>{step.action}</p>
-        <p className="mt-0.5 text-xs text-ink/45">
+        <p className={cn('text-sm leading-snug', complete && 'text-ink/60 line-through')}>{step.action}</p>
+        <p className="mt-0.5 text-xs text-ink/60">
           {display.summary} · {step.frequency}
           {step.inferred && (
             <span className="ml-1 text-3xs text-ink/50">
@@ -48,7 +48,7 @@ export function RoutineStepRow({ step }: RoutineStepRowProps) {
           }}
           aria-label={COPY.task.helpAriaLabel(step.action)}
           title={COPY.task.helpTooltip(step.action)}
-          className="flex h-7 w-7 items-center justify-center rounded-full border border-ink/15 bg-white/80 text-ink/60 shadow-2xs transition-colors hover:border-ink hover:bg-mint hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+          className="relative flex h-7 w-7 items-center justify-center rounded-full border border-ink/15 bg-white/80 text-ink/60 transition-colors before:absolute before:-inset-2 hover:border-ink hover:bg-mint hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
         >
           <Icon icon={HelpOutlineOutlinedIcon} size="xs" />
         </button>

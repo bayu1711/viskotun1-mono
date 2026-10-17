@@ -12,12 +12,12 @@ interface EfficacyStyle {
 
 const TONES: Record<EfficacyTone, EfficacyStyle> = {
   orange: { card: 'bg-orange text-white shadow-2xs', percent: 'text-white/60', caption: 'text-white/80' },
-  yellow: { card: 'bg-yellow text-ink shadow-2xs', percent: 'text-ink/40', caption: 'text-ink/65' },
-  sky: { card: 'bg-sky text-ink shadow-2xs', percent: 'text-ink/40', caption: 'text-ink/65' },
-  lavender: { card: 'bg-lavender text-ink shadow-2xs', percent: 'text-ink/40', caption: 'text-ink/65' },
-  peach: { card: 'bg-peach text-ink shadow-2xs', percent: 'text-ink/40', caption: 'text-ink/65' },
-  cream: { card: 'bg-cream text-ink shadow-2xs', percent: 'text-ink/40', caption: 'text-ink/60' },
-  mint: { card: 'bg-mint text-ink shadow-2xs', percent: 'text-ink/40', caption: 'text-ink/60' }
+  yellow: { card: 'bg-yellow text-ink shadow-2xs', percent: 'text-ink/60', caption: 'text-ink/65' },
+  sky: { card: 'bg-sky text-ink shadow-2xs', percent: 'text-ink/60', caption: 'text-ink/65' },
+  lavender: { card: 'bg-lavender text-ink shadow-2xs', percent: 'text-ink/60', caption: 'text-ink/65' },
+  peach: { card: 'bg-peach text-ink shadow-2xs', percent: 'text-ink/60', caption: 'text-ink/65' },
+  cream: { card: 'bg-cream text-ink shadow-2xs', percent: 'text-ink/60', caption: 'text-ink/60' },
+  mint: { card: 'bg-mint text-ink shadow-2xs', percent: 'text-ink/60', caption: 'text-ink/60' }
 };
 
 interface EfficacyCardProps {

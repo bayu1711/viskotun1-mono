@@ -53,7 +53,7 @@ export function MissingDataBanner({ protocol: propProtocol, className }: Missing
                 <p className="mt-0.5 text-2xs text-ink/70">
                   {flag.fallback}
                   {flag.sourceGuideline && (
-                    <span className="ml-1 text-ink/50 font-normal">({flag.sourceGuideline})</span>
+                    <span className="ml-1 text-ink/60 font-normal">({flag.sourceGuideline})</span>
                   )}
                 </p>
               </div>
@@ -71,7 +71,7 @@ export function MissingDataBanner({ protocol: propProtocol, className }: Missing
               <p className="mt-0.5 text-2xs text-ink/70">
                 {step.inferredProvenance?.rationale || COPY.missingData.fallback}
                 {step.inferredProvenance?.source && (
-                  <span className="ml-1 text-ink/50 font-normal">({step.inferredProvenance.source})</span>
+                  <span className="ml-1 text-ink/60 font-normal">({step.inferredProvenance.source})</span>
                 )}
               </p>
             </div>

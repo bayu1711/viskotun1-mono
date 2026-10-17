@@ -13,11 +13,11 @@ interface ToneStyle {
 }
 
 const LIGHT_SURFACE: Omit<ToneStyle, 'card'> = {
-  muted: 'text-ink/45',
+  muted: 'text-ink/60',
   minus: 'border border-ink text-ink hover:bg-ink/5',
   plus: 'bg-ink text-white hover:bg-ink/85',
   checkOn: 'bg-ink text-white',
-  checkOff: 'border border-ink/40 text-transparent hover:text-ink/40',
+  checkOff: 'border border-ink/40 text-transparent hover:text-ink/60',
   divider: 'border-ink/10'
 };
 

@@ -17,7 +17,7 @@ export function ErrorFallback({ onRetry }: ErrorFallbackProps) {
           <Icon icon={ErrorOutlineIcon} size="lg" />
         </IconTile>
         <h1 className="mt-4 text-2xl">{COPY.errors.boundaryTitle}</h1>
-        <p className="mt-1 text-sm text-ink/55">{COPY.errors.boundaryBody}</p>
+        <p className="mt-1 text-sm text-ink/60">{COPY.errors.boundaryBody}</p>
         <PillButton size="sm" className="mt-6" onClick={onRetry}>
           {COPY.errors.retry}
         </PillButton>

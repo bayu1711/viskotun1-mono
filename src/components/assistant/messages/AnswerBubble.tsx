@@ -26,7 +26,7 @@ export function AnswerBubble({ content, engine, source }: AnswerBubbleProps) {
     <div className="max-w-bubble-wide rounded-bubble rounded-bl-md bg-white px-4 py-3 shadow-sm">
       <p className="text-sm leading-relaxed text-ink whitespace-pre-line">{cleanContent}</p>
       <div className="mt-2 flex items-center justify-between gap-2 border-t border-ink/5 pt-1.5">
-        <span className="text-2xs font-medium text-ink/45">
+        <span className="text-2xs font-medium text-ink/60">
           {badgeLabel}
         </span>
       </div>

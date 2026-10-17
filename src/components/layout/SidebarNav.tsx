@@ -26,7 +26,7 @@ export function SidebarNav({ className }: SidebarNavProps) {
                 href={item.href}
                 className={cn(
                   'flex items-center gap-3 py-2 text-2xl transition-colors focus:outline-none focus-visible:underline',
-                  isActive ? 'text-ink' : 'text-ink/30 hover:text-ink/60'
+                  isActive ? 'text-ink' : 'text-ink/60 hover:text-ink/60'
                 )}
               >
                 <span

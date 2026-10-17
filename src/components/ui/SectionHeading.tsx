@@ -26,7 +26,7 @@ export function SectionHeading({ eyebrow, title, action, size = 'md', as: Tag = 
   return (
     <div className="flex items-end justify-between gap-4">
       <div className="min-w-0">
-        <p className={cn('leading-none text-ink/45', EYEBROW_SIZE[size])}>{eyebrow}</p>
+        <p className={cn('leading-none text-ink/60', EYEBROW_SIZE[size])}>{eyebrow}</p>
         <Tag id={id} className={cn('mt-1 text-ink', TITLE_SIZE[size])}>
           {title}
         </Tag>

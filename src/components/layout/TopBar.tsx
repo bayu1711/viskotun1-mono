@@ -29,7 +29,7 @@ export function TopBar() {
   return (
     <header className="mx-auto w-full max-w-6xl px-5 pt-5 lg:px-10 lg:pt-8">
       <div className="flex items-center gap-3 border-b border-ink pb-4">
-        <Link href={ROUTES.routine} className="flex items-center lg:hidden mr-0.5 hover:opacity-85 transition-opacity" aria-label={COPY.brand.name}>
+        <Link href={ROUTES.routine} className="flex min-h-11 min-w-11 items-center justify-center hover:opacity-85 transition-opacity lg:hidden" aria-label={COPY.brand.name}>
           <Image
             src={COPY.brand.iconUrl}
             alt={COPY.brand.name}
@@ -40,14 +40,14 @@ export function TopBar() {
           />
         </Link>
         <Avatar initials={displayInitials} />
-        <div className="leading-tight">
-          <p className="text-xs text-ink/45">{greeting()}</p>
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium">{displayName}</p>
+        <div className="min-w-0 leading-tight">
+          <p className="hidden text-xs text-ink/60 sm:block">{greeting()}</p>
+          <div className="flex flex-wrap items-center gap-x-2">
+            <p className="truncate text-sm font-medium">{displayName}</p>
             {isGuest ? (
               <Link
                 href={ROUTES.login}
-                className="rounded-full border border-ink/15 bg-cream px-2 py-0.5 text-2xs font-medium text-ink transition-colors hover:bg-mint"
+                className="inline-flex min-h-11 items-center whitespace-nowrap text-2xs font-semibold text-ink underline underline-offset-2 transition-colors hover:text-ink/80"
               >
                 {COPY.auth.signInToSyncBadge}
               </Link>
@@ -61,13 +61,11 @@ export function TopBar() {
         </div>
 
         <div className="ml-auto">
-          {streak > 0 ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-orange/15 px-3 py-1 text-xs font-semibold text-orange">
+          {streak > 0 && (
+            <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-orange/15 px-3 py-1 text-xs font-semibold text-ink">
               <span aria-hidden="true">🔥</span>
               {COPY.shell.streak(streak)}
             </span>
-          ) : (
-            <p className="text-sm text-ink/60">{COPY.shell.streak(streak)}</p>
           )}
         </div>
 

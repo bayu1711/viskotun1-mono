@@ -27,7 +27,7 @@ export function AlertCard({ content }: AlertCardProps) {
       <button
         type="button"
         onClick={closeAssistant}
-        className="mt-1 text-xs text-ink/55 underline underline-offset-2 hover:text-ink">
+        className="mt-1 text-xs text-ink/60 underline underline-offset-2 hover:text-ink">
         
         {COPY.assistant.backToToday}
       </button>

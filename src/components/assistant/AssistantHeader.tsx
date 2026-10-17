@@ -96,7 +96,7 @@ export function AssistantHeader({
       </div>
       <div className="pt-4">
         <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-sm leading-none text-ink/45">
+          <p className="truncate text-sm leading-none text-ink/60">
             {customEyebrow || (isAsk ? protocolTitle : COPY.assistant.eyebrowUpload)}
           </p>
           <div ref={disclaimerRef} className="relative flex items-center gap-1.5 shrink-0">
@@ -130,7 +130,7 @@ export function AssistantHeader({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -4, scale: 0.96 }}
                   transition={{ duration: 0.15, ease: 'easeOut' }}
-                  className="absolute right-0 top-full mt-2 z-30 w-72 sm:w-80 rounded-card bg-white p-3.5 shadow-lg border border-ink/10 text-left"
+                  className="absolute right-0 top-full mt-2 z-30 w-72 sm:w-80 rounded-card bg-white p-3.5 shadow-lg text-left"
                   role="dialog"
                   aria-label={COPY.assistant.medicalDisclaimerChip}
                 >
@@ -144,7 +144,7 @@ export function AssistantHeader({
                     <button
                       type="button"
                       onClick={() => setIsDisclaimerOpen(false)}
-                      className="text-ink/40 hover:text-ink transition-colors p-0.5 rounded cursor-pointer"
+                      className="text-ink/60 hover:text-ink transition-colors p-0.5 rounded cursor-pointer"
                       aria-label={COPY.assistant.closeDisclaimer}
                     >
                       <Icon icon={CloseIcon} size="xs" />

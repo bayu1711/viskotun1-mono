@@ -50,6 +50,6 @@ function renderVisual({ day, completion, status }: CalendarDay) {
       );
 
     case 'upcoming':
-      return <span className={cn(CELL, 'font-medium text-ink/35')}>{day}</span>;
+      return <span className={cn(CELL, 'font-medium text-ink/60')}>{day}</span>;
   }
 }
