@@ -547,7 +547,7 @@ export const COPY = {
       'Declined: Theoretical physics, mathematics, or non-interventional topic. ViskotuN1 only builds executable routines from interventional studies conducted on human participants.'
   },
   landing: {
-    topBanner: '✨ Strictly interventional human research · Zero-hallucination daily protocols →',
+    topBanner: '✨ Strictly interventional human research · Zero-hallucination daily routines →',
     heroEyebrow: 'Evidence into action',
     heroTitle: 'Live healthier with daily routines from real human science.',
     heroSubtitle:
@@ -561,7 +561,7 @@ export const COPY = {
     ],
     heroImageAlt: 'Participant performing focused daily rehabilitation and mobility routine',
     interactivePreview: {
-      tag: 'Live Protocol Preview',
+      tag: 'Live Routine Preview',
       title: "Today's Clinical Session",
       streakBadge: '14-Day Streak',
       progressLabel: 'Progress today',
@@ -579,14 +579,14 @@ export const COPY = {
     },
     domainsTitle: 'Explore what we help you achieve',
     domainsSubtitle:
-      'Human interventional trials translated into vibrant, approachable daily protocols.',
+      'Human interventional trials translated into vibrant, approachable daily routines.',
     domains: [
       {
         id: 'rehab',
         tag: 'Mobility & Rehab',
         title: 'Tendon & Joint Rehabilitation',
         description:
-          'Eccentric loading and heavy-slow resistance protocols proven in clinical trials.',
+          'Eccentric loading and heavy-slow resistance routines proven in clinical trials.',
         tone: 'orange' as const,
         stat: '84-day benchmark'
       },
@@ -615,7 +615,7 @@ export const COPY = {
         description:
           'Morning retinal light exposure windows, temperature drops, and sleep-latency optimization.',
         tone: 'lavender' as const,
-        stat: 'Evening protocol'
+        stat: 'Evening routine'
       },
       {
         id: 'cellular',
