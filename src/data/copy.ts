@@ -575,7 +575,7 @@ export const COPY = {
   },
   extraction: {
     title: 'Routine extraction',
-    parsing: 'Analyzing paper with Gemini 1.5...',
+    parsing: 'Analyzing paper with Gemini...',
     success: 'Routine successfully extracted and activated',
     declinedTitle: 'Paper declined by gatekeeper',
     declinedPrefix: 'Declined: ',
@@ -730,7 +730,7 @@ export const COPY = {
     steps: {
       step1Number: '01',
       step1Title: 'Multimodal Ingestion',
-      step1Body: 'Drop any clinical research PDF. Gemini 1.5 processes document bytes natively without fragile text scraping.',
+      step1Body: 'Drop any clinical research PDF. Gemini processes document bytes natively without fragile text scraping.',
       step2Number: '02',
       step2Title: 'Scientific Gatekeeper & Parameter Auditing',
       step2Body: 'Verifies human interventional criteria and audits omitted hold times or dosages against conservative clinical standards.',
