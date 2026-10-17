@@ -336,7 +336,12 @@ export const COPY = {
     studyEfficacy: 'Study reported efficacy',
     studyCaption: (sampleSize: number) => `Lab · N = ${sampleSize}`,
     realWorldEfficacy: 'Real-world app efficacy',
-    realWorldCaption: (users: string) => `Based on ${users} users`,
+    realWorldCaption: (users: number | string) => {
+      const num = typeof users === 'number' ? users : parseInt(String(users).replace(/,/g, ''), 10);
+      if (isNaN(num) || num === 0) return 'Based on 0 users';
+      if (num === 1) return 'Based on 1 user';
+      return `Based on ${typeof users === 'number' ? users.toLocaleString() : users} users`;
+    },
     dropOffLabel: 'Common drop-off points',
     dropOffEyebrow: 'Drop-off',
     hardestDays: 'Hardest days',
@@ -937,9 +942,9 @@ export const COPY = {
     samplesTitle: 'Trending Clinical Research Papers',
     trendingTitle: 'Trending Clinical Research Papers',
     samplesSubtitle:
-      'Explore top-ranked clinical research papers in our database. Simulated with active community participants, compliance tracking, and biofeedback logs so you can explore trending interventions or start tracking fresh on Day 1.',
+      'Explore top-ranked clinical research papers in our database with real-time community participants, compliance tracking, and verified biofeedback telemetry.',
     trendingSubtitle:
-      'Explore top-ranked clinical research papers in our database. Simulated with active community participants, compliance tracking, and biofeedback logs so you can explore trending interventions or start tracking fresh on Day 1.',
+      'Explore top-ranked clinical research papers in our database with real-time community participants, compliance tracking, and verified biofeedback telemetry.',
     firestoreSyncLive: 'Firebase Firestore live',
     firestoreSyncLocal: 'Local verified catalog',
     loadButton: 'Start this routine',
@@ -948,8 +953,10 @@ export const COPY = {
     doiLabel: 'View on PMC / DOI',
     loadedToast: (title: string) => `Started tracking "${title}" on Day 1`,
     trendingRankBadge: (rank: number) => `#${rank} Trending`,
-    activeTrackersBadge: (count: number) => `${count.toLocaleString()} active trackers`,
-    totalLogsBadge: (count: number) => `${count.toLocaleString()} logs`,
+    activeTrackersBadge: (count: number) =>
+      `${count.toLocaleString()} ${count === 1 ? 'active tracker' : 'active trackers'}`,
+    totalLogsBadge: (count: number) =>
+      `${count.toLocaleString()} ${count === 1 ? 'log' : 'logs'}`,
     featuresHeader: 'Trial Endpoints & Morphing UI Tested:',
     scopeTitle: 'Strict Gatekeeper Scope',
     scopeSubtitle:

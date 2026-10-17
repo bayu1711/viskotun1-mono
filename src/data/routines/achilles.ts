@@ -149,8 +149,8 @@ export const achillesRoutine: Routine = {
 
   community: {
     studyEfficacy: 80,
-    realWorldEfficacy: 74,
-    userCount: 1240,
+    realWorldEfficacy: 25,
+    userCount: 4,
     medianAdherence: 68,
     dropOffUnit: 'day',
     peakPeriod: 11,

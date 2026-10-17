@@ -151,8 +151,8 @@ export const hairLossRoutine: Routine = {
 
   community: {
     studyEfficacy: 82,
-    realWorldEfficacy: 61,
-    userCount: 3480,
+    realWorldEfficacy: 25,
+    userCount: 4,
     medianAdherence: 57,
     dropOffUnit: 'week',
     peakPeriod: 3,

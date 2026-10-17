@@ -186,8 +186,8 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
   ],
   community: {
     studyEfficacy: 84,
-    realWorldEfficacy: 78,
-    userCount: 910,
+    realWorldEfficacy: 50,
+    userCount: 2,
     medianAdherence: 82,
     dropOffUnit: 'day',
     peakPeriod: 4,
@@ -402,8 +402,8 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
   ],
   community: {
     studyEfficacy: 80,
-    realWorldEfficacy: 75,
-    userCount: 680,
+    realWorldEfficacy: 100,
+    userCount: 1,
     medianAdherence: 74,
     dropOffUnit: 'week',
     peakPeriod: 2,
@@ -612,8 +612,8 @@ export function generateFallbackRoutine(source: string): Routine {
     ],
     community: {
       studyEfficacy: 81,
-      realWorldEfficacy: 76,
-      userCount: 320,
+      realWorldEfficacy: 100,
+      userCount: 1,
       medianAdherence: 78,
       dropOffUnit: COPY.fallbackProtocol.dropOffUnit,
       peakPeriod: 7,
