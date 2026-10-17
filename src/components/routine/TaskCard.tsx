@@ -95,11 +95,12 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
 
           {step.inferred && (
             <div className="mt-1 flex flex-wrap items-center gap-1.5 text-2xs">
-              <span className="inline-flex items-center rounded-full border border-ink/15 bg-white/70 px-2 py-0.5 font-medium text-ink/80 shadow-2xs">
+              <span className="text-3xs text-ink/60">
                 {step.inferredProvenance?.tier === 'lineage'
                   ? COPY.task.lineageBadge(step.inferredProvenance.source)
                   : COPY.task.inferredBadge(step.inferredProvenance?.source)}
               </span>
+              <span className="text-3xs text-ink/30">·</span>
               <button
                 type="button"
                 onClick={() => toggleExcludeStep(step.id)}
@@ -145,12 +146,6 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
           onIncrement={() => incrementSet(step.id)}
           onDecrement={() => decrementSet(step.id)}
         />
-
-        {step.inferred && wide && (
-          <p className={cn('mt-3 text-xs', styles.muted)}>
-            {step.inferredProvenance?.rationale || COPY.task.inferredNote}
-          </p>
-        )}
       </div>
     </article>
   );

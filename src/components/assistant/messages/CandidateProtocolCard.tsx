@@ -117,6 +117,13 @@ export function CandidateProtocolCard({
                         )}
                       </div>
                       {step.detail && <p className="mt-0.5 text-2xs text-ink/50">{step.detail}</p>}
+                      {step.inferred && (
+                        <p className="mt-1 text-3xs text-ink/50">
+                          {step.inferredProvenance?.tier === 'lineage'
+                            ? COPY.task.lineageBadge(step.inferredProvenance.source)
+                            : COPY.task.inferredBadge(step.inferredProvenance?.source)}
+                        </p>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
@@ -143,21 +150,6 @@ export function CandidateProtocolCard({
                       )}
                     </div>
                   </div>
-
-                  {step.inferred && (
-                    <div className="mt-2 pt-1.5 border-t border-ink/5 text-2xs space-y-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="inline-flex items-center rounded-full border border-ink/15 bg-cream px-2 py-0.5 text-3xs font-medium text-ink/80 shadow-2xs">
-                          {step.inferredProvenance?.tier === 'lineage'
-                            ? COPY.task.lineageBadge(step.inferredProvenance.source)
-                            : COPY.task.inferredBadge(step.inferredProvenance?.source)}
-                        </span>
-                      </div>
-                      <p className="text-3xs text-ink/60">
-                        {step.inferredProvenance?.rationale || COPY.task.inferredNote}
-                      </p>
-                    </div>
-                  )}
                 </li>
               );
             })}
