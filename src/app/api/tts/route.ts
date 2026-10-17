@@ -38,16 +38,65 @@ export async function POST(req: NextRequest) {
     }
 
     const sanitized = text.trim();
+    const clampedSpeed = Math.min(2.0, Math.max(0.5, speed));
     // Rough speaking duration estimate: ~140 words per minute at 1.0x speed
     const wordCount = sanitized.split(/\s+/).length;
-    const durationSeconds = Math.max(1, Math.round((wordCount / (140 * Math.max(0.5, speed))) * 60));
+    const durationSeconds = Math.max(1, Math.round((wordCount / (140 * clampedSpeed)) * 60));
+
+    const googleTtsKey = process.env.GOOGLE_TTS_API_KEY;
+    if (googleTtsKey) {
+      try {
+        const response = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${googleTtsKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            input: { text: sanitized },
+            voice: {
+              languageCode: 'en-US',
+              name: voice || 'en-US-Journey-F'
+            },
+            audioConfig: {
+              audioEncoding: 'MP3',
+              speakingRate: clampedSpeed
+            }
+          }),
+          signal: AbortSignal.timeout(6000)
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.audioContent) {
+            return NextResponse.json(
+              {
+                success: true,
+                audioContent: data.audioContent,
+                text: sanitized,
+                speed: clampedSpeed,
+                voice: voice || 'en-US-Journey-F',
+                estimatedDurationSec: durationSeconds,
+                wordCount,
+                mode: 'cloud-tts',
+                generatedAt: new Date().toISOString()
+              },
+              {
+                headers: {
+                  'Cache-Control': 'private, max-age=3600'
+                }
+              }
+            );
+          }
+        }
+      } catch (cloudErr) {
+        console.warn('[/api/tts] Google Cloud TTS error, falling back to client synthesis:', cloudErr);
+      }
+    }
 
     // Structured breakdown for clients & audio synthesis
     return NextResponse.json(
       {
         success: true,
         text: sanitized,
-        speed: Math.min(2.0, Math.max(0.5, speed)),
+        speed: clampedSpeed,
         voice: voice || 'en-US-Standard-C',
         estimatedDurationSec: durationSeconds,
         wordCount,
