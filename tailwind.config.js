@@ -92,6 +92,15 @@ module.exports = {
         dialog: '70',
         overlay: '80',
       },
+      keyframes: {
+        rise: {
+          from: { opacity: '0', transform: 'translateY(12px)' },
+          to: { opacity: '1', transform: 'translateY(0)' }
+        }
+      },
+      animation: {
+        rise: 'rise 700ms cubic-bezier(0.22, 1, 0.36, 1) 150ms both'
+      },
       transitionProperty: {
         ring: 'stroke-dashoffset',
       },

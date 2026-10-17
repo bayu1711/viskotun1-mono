@@ -6,8 +6,11 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import BedtimeOutlinedIcon from '@mui/icons-material/BedtimeOutlined';
+import CheckIcon from '@mui/icons-material/Check';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import FitnessCenterOutlinedIcon from '@mui/icons-material/FitnessCenterOutlined';
+import HealthAndSafetyOutlinedIcon from '@mui/icons-material/HealthAndSafetyOutlined';
 import LocalDiningOutlinedIcon from '@mui/icons-material/LocalDiningOutlined';
 import PsychologyOutlinedIcon from '@mui/icons-material/PsychologyOutlined';
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
@@ -43,20 +46,36 @@ const HOW_IT_WORKS_STEPS = [
 ];
 
 const FEATURES = [
-  { title: COPY.landing.features.gatekeeperTitle, body: COPY.landing.features.gatekeeperBody },
-  { title: COPY.landing.features.auditingTitle, body: COPY.landing.features.auditingBody },
-  { title: COPY.landing.features.safetyTitle, body: COPY.landing.features.safetyBody },
-  { title: COPY.landing.features.summaryTitle, body: COPY.landing.features.summaryBody }
+  { icon: ShieldOutlinedIcon, title: COPY.landing.features.gatekeeperTitle, body: COPY.landing.features.gatekeeperBody },
+  { icon: ScienceOutlinedIcon, title: COPY.landing.features.auditingTitle, body: COPY.landing.features.auditingBody },
+  { icon: HealthAndSafetyOutlinedIcon, title: COPY.landing.features.safetyTitle, body: COPY.landing.features.safetyBody },
+  { icon: DescriptionOutlinedIcon, title: COPY.landing.features.summaryTitle, body: COPY.landing.features.summaryBody }
 ];
+
+const PREVIEW = COPY.landing.interactivePreview;
+const PREVIEW_STEPS = [
+  { action: PREVIEW.step1Action, detail: PREVIEW.step1Detail, meta: PREVIEW.step1Meta, done: true },
+  { action: PREVIEW.step2Action, detail: PREVIEW.step2Detail, meta: PREVIEW.step2Meta, done: false }
+];
+const PREVIEW_PERCENT = Math.round((PREVIEW_STEPS.filter((step) => step.done).length / PREVIEW_STEPS.length) * 100);
 
 export function LandingPage() {
   const router = useRouter();
   const { user, isLoading, loginAsGuest, logout } = useAuth();
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     router.prefetch(ROUTES.routine);
   }, [router]);
+
+  // The sticky header gets a hairline only once content scrolls under it
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const handleLaunch = () => {
     setIsNavigating(true);
@@ -70,19 +89,29 @@ export function LandingPage() {
   return (
     <div className="min-h-screen bg-white font-sans text-ink selection:bg-orange/20 selection:text-ink">
       {/* Top Notice Banner */}
-      <div className="bg-yellow px-4 text-center text-sm font-medium text-ink">
+      <div className="bg-yellow text-ink">
         <a
           href="#gatekeeper"
-          className="inline-flex min-h-11 items-center gap-1.5 py-2 underline decoration-ink/30 underline-offset-2 hover:decoration-ink"
+          className="group mx-auto block min-h-11 max-w-6xl text-pretty px-5 py-3 text-center text-sm font-medium"
         >
-          {COPY.landing.topBanner}
+          <span className="underline-offset-4 group-hover:underline">{COPY.landing.topBanner}</span>
+          <Icon
+            icon={ArrowForwardIcon}
+            size="xs"
+            className="ml-1.5 inline-block align-[-0.2em] transition-transform group-hover:translate-x-0.5"
+          />
         </a>
       </div>
 
       {/* Public Top Navigation */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 lg:px-8">
-          <Link href={ROUTES.landing} className="flex min-h-11 items-center transition-opacity hover:opacity-85">
+      <header
+        className={cn(
+          'sticky top-0 z-40 border-b bg-white/90 backdrop-blur-md transition-colors',
+          isScrolled ? 'border-ink/10' : 'border-transparent'
+        )}
+      >
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 lg:px-8 xl:grid xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+          <Link href={ROUTES.landing} className="flex min-h-11 items-center justify-self-start transition-opacity hover:opacity-85">
             <Image
               src={COPY.brand.logoUrl}
               alt={COPY.brand.name}
@@ -93,36 +122,25 @@ export function LandingPage() {
             />
           </Link>
 
-          <nav className="hidden items-center gap-7 whitespace-nowrap text-sm font-medium text-ink/80 xl:flex">
-            <a href="#domains" className="transition-colors hover:text-ink">
+          <nav className="hidden items-center gap-1 whitespace-nowrap text-sm font-medium text-ink/80 xl:flex">
+            <a href="#domains" className="rounded-full px-3 py-2.5 transition-colors hover:bg-ink/5 hover:text-ink">
               {COPY.landing.nav.domains}
             </a>
-            <a href="#how-it-works" className="transition-colors hover:text-ink">
+            <a href="#how-it-works" className="rounded-full px-3 py-2.5 transition-colors hover:bg-ink/5 hover:text-ink">
               {COPY.landing.nav.howItWorks}
             </a>
-            <a href="#gatekeeper" className="transition-colors hover:text-ink">
+            <a href="#gatekeeper" className="rounded-full px-3 py-2.5 transition-colors hover:bg-ink/5 hover:text-ink">
               {COPY.landing.nav.gatekeeper}
             </a>
-            <a href="#features" className="transition-colors hover:text-ink">
+            <a href="#features" className="rounded-full px-3 py-2.5 transition-colors hover:bg-ink/5 hover:text-ink">
               {COPY.landing.nav.features}
             </a>
           </nav>
 
           {!isLoading && user ? (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <Avatar initials={user.initials} />
-                <div className="hidden text-left leading-tight sm:block">
-                  <p className="text-sm font-medium text-ink">{user.name}</p>
-                  <p className="text-xs text-ink/70">
-                    {user.isGuest
-                      ? COPY.auth.guestBadge
-                      : user.role === 'admin'
-                        ? COPY.auth.adminBadge
-                        : user.email || ''}
-                  </p>
-                </div>
-              </div>
+            <div className="flex items-center gap-3 justify-self-end">
+              <Avatar initials={user.initials} />
+              <span className="sr-only">{user.name}</span>
               <PillButton
                 variant="ink"
                 size="sm"
@@ -141,7 +159,7 @@ export function LandingPage() {
               </button>
             </div>
           ) : !isLoading ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 justify-self-end">
               <Link
                 href={ROUTES.login}
                 className="inline-flex min-h-11 items-center whitespace-nowrap px-3 text-sm font-medium text-ink/80 transition-colors hover:text-ink"
@@ -159,13 +177,13 @@ export function LandingPage() {
               </PillButton>
             </div>
           ) : (
-            <div className="h-9 w-28 animate-pulse rounded-full bg-ink/5" />
+            <div className="h-11 w-40 animate-pulse justify-self-end rounded-full bg-ink/5" />
           )}
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="mx-auto max-w-6xl px-5 pb-16 pt-12 lg:px-8 lg:pb-24 lg:pt-20">
+      <section className="mx-auto max-w-6xl px-5 pb-16 pt-10 lg:px-8 lg:pb-24 lg:pt-14">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
           <div className="text-left lg:col-span-6">
             {user && (
@@ -175,23 +193,23 @@ export function LandingPage() {
               </p>
             )}
 
-            <h1 className="text-balance text-4xl font-bold tracking-tight text-ink sm:text-5xl lg:text-hero-lg lg:leading-[1.08]">
+            <h1 className="text-balance text-[2.5rem] font-bold leading-[1.04] tracking-[-0.02em] text-ink sm:text-5xl sm:leading-[1.04] lg:text-hero-lg lg:leading-[1.04]">
               {COPY.landing.heroTitle}
             </h1>
 
-            <p className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-ink/80">
+            <p className="mt-6 max-w-[34rem] text-pretty text-lg leading-relaxed text-ink/80">
               {COPY.landing.heroSubtitle}
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-4">
+            <div className="mt-9 flex flex-wrap items-center gap-3">
               <PillButton
                 size="lg"
                 onClick={handleLaunch}
                 loading={isNavigating}
-                className="min-h-12 gap-2 px-6 font-semibold"
+                className="group min-h-12 gap-2 px-6 font-semibold"
               >
                 <span>{user ? COPY.landing.ctaGoToApp : COPY.landing.heroCtaPrimary}</span>
-                <Icon icon={ArrowForwardIcon} size="sm" />
+                <Icon icon={ArrowForwardIcon} size="sm" className="transition-transform group-hover:translate-x-0.5" />
               </PillButton>
               {user ? (
                 <Link href={ROUTES.dashboard} className={pillClassName('outline', 'lg', 'min-h-12 px-6 font-semibold')}>
@@ -204,17 +222,17 @@ export function LandingPage() {
               )}
             </div>
 
-            <ul className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-ink/75">
+            <ul className="mt-9 flex flex-col gap-2.5 text-sm text-ink/75">
               {COPY.landing.heroTrustPoints.map((point) => (
-                <li key={point} className="flex items-center gap-1.5">
-                  <Icon icon={CheckCircleOutlineIcon} size="xs" className="text-ink" />
+                <li key={point} className="flex items-center gap-2">
+                  <Icon icon={CheckCircleOutlineIcon} size="sm" className="text-ink/70" />
                   <span>{point}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="lg:col-span-6">
+          <div className="relative lg:col-span-6">
             <div className="relative aspect-[3/2] w-full overflow-hidden rounded-callout bg-canvas">
               <Image
                 src="/images/hero-image.jpg"
@@ -224,6 +242,48 @@ export function LandingPage() {
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 650px"
                 className="object-cover"
               />
+            </div>
+
+            {/* Product preview: what a day in the app looks like (illustrative, so hidden from assistive tech) */}
+            <div
+              aria-hidden="true"
+              className="relative mx-4 -mt-10 animate-rise rounded-callout bg-white p-5 shadow-popover sm:ml-auto sm:mr-6 sm:w-80"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-display text-base font-bold text-ink">{PREVIEW.title}</p>
+                <span className="shrink-0 rounded-full bg-mint px-2.5 py-0.5 text-xs font-semibold text-ink">{PREVIEW.tag}</span>
+              </div>
+              <div className="mt-4 flex items-center justify-between text-xs text-ink/70">
+                <span>{PREVIEW.progressLabel}</span>
+                <span className="font-semibold tabular-nums text-ink">
+                  {PREVIEW_PERCENT}
+                  {COPY.common.percentSign}
+                </span>
+              </div>
+              <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-ink/10">
+                <div className="h-full rounded-full bg-orange" style={{ width: `${PREVIEW_PERCENT}%` }} />
+              </div>
+              <ul className="mt-4 space-y-3">
+                {PREVIEW_STEPS.map((step) => (
+                  <li key={step.action} className="flex items-start gap-3">
+                    <span
+                      className={cn(
+                        'mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full',
+                        step.done ? 'bg-ink text-white' : 'border border-ink/30'
+                      )}
+                    >
+                      {step.done && <Icon icon={CheckIcon} size="xs" />}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className={cn('text-sm font-semibold leading-snug text-ink', step.done && 'text-ink/60 line-through')}>
+                        {step.action}
+                      </p>
+                      <p className="truncate text-xs text-ink/65">{step.detail}</p>
+                    </div>
+                    <span className="shrink-0 text-xs font-medium tabular-nums text-ink/70">{step.meta}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
@@ -254,7 +314,7 @@ export function LandingPage() {
                       </IconTile>
                     </div>
 
-                    <h3 className="mt-4 text-balance text-xl font-bold leading-snug text-ink">{domain.title}</h3>
+                    <h3 className="mt-4 text-balance font-display text-xl font-bold leading-snug text-ink">{domain.title}</h3>
                     <p className="mt-2 text-base leading-relaxed text-ink/85">{domain.description}</p>
                   </div>
 
@@ -267,7 +327,7 @@ export function LandingPage() {
       </section>
 
       {/* How It Works: a real four-step sequence, so it is an ordered list */}
-      <section id="how-it-works" className="py-20 lg:py-28">
+      <section id="how-it-works" className="bg-canvas py-20 lg:py-28">
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
           <h2 className="max-w-2xl text-balance text-3xl font-bold tracking-tight sm:text-4xl">
             {COPY.landing.architectureTitle}
@@ -276,11 +336,11 @@ export function LandingPage() {
           <ol className="mt-12 grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-2">
             {HOW_IT_WORKS_STEPS.map((step) => (
               <li key={step.number} className="flex gap-5">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink text-base font-bold text-white">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink font-display text-base font-bold text-white">
                   {step.number}
                 </span>
                 <div>
-                  <h3 className="text-xl font-bold text-ink">{step.title}</h3>
+                  <h3 className="font-display text-xl font-bold text-ink">{step.title}</h3>
                   <p className="mt-2 max-w-prose text-base leading-relaxed text-ink/80">{step.body}</p>
                 </div>
               </li>
@@ -290,9 +350,9 @@ export function LandingPage() {
       </section>
 
       {/* Scientific Rigor & Scope Gatekeeper */}
-      <section id="gatekeeper" className="py-12 lg:py-16">
+      <section id="gatekeeper" className="pt-20 lg:pt-28">
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
-          <div className="rounded-callout bg-canvas p-8 sm:p-12">
+          <div className="rounded-callout bg-mint p-8 sm:p-12">
             <p className="flex items-center gap-2 text-sm font-semibold text-ink">
               <Icon icon={ShieldOutlinedIcon} size="sm" />
               <span>{COPY.landing.scopeBadge}</span>
@@ -320,9 +380,11 @@ export function LandingPage() {
           <ul className="mt-12 grid grid-cols-1 gap-x-12 gap-y-8 md:grid-cols-2">
             {FEATURES.map((feature) => (
               <li key={feature.title} className="flex gap-4">
-                <Icon icon={CheckCircleOutlineIcon} size="md" className="mt-0.5 shrink-0 text-ink" />
+                <IconTile variant="plain" shape="circle" size={48} className="shrink-0 bg-mint text-ink">
+                  <Icon icon={feature.icon} size="md" />
+                </IconTile>
                 <div>
-                  <h3 className="text-lg font-bold text-ink">{feature.title}</h3>
+                  <h3 className="font-display text-lg font-bold text-ink">{feature.title}</h3>
                   <p className="mt-1 max-w-prose text-base leading-relaxed text-ink/80">{feature.body}</p>
                 </div>
               </li>
@@ -341,10 +403,10 @@ export function LandingPage() {
                 size="lg"
                 onClick={handleLaunch}
                 loading={isNavigating}
-                className="min-h-12 gap-2 px-6 font-semibold"
+                className="group min-h-12 gap-2 px-6 font-semibold"
               >
                 <span>{user ? COPY.landing.ctaGoToApp : COPY.landing.heroCtaPrimary}</span>
-                <Icon icon={ArrowForwardIcon} size="sm" />
+                <Icon icon={ArrowForwardIcon} size="sm" className="transition-transform group-hover:translate-x-0.5" />
               </PillButton>
             </div>
           </div>

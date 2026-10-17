@@ -597,7 +597,7 @@ export const COPY = {
       'Declined: Theoretical physics, mathematics, or non-interventional topic. ViskotuN1 only builds executable routines from interventional studies conducted on human participants.'
   },
   landing: {
-    topBanner: '✨ Strictly interventional human research · Zero-hallucination daily routines →',
+    topBanner: 'Strictly interventional human research · Zero-hallucination daily routines',
     heroEyebrow: 'Evidence into action',
     heroTitle: 'Live healthier with daily routines from real human science.',
     heroSubtitle:
@@ -611,21 +611,15 @@ export const COPY = {
     ],
     heroImageAlt: 'Participant performing focused daily rehabilitation and mobility routine',
     interactivePreview: {
-      tag: 'Live Routine Preview',
-      title: "Today's Clinical Session",
-      streakBadge: '14-Day Streak',
+      tag: 'Preview',
+      title: "Today's routine",
       progressLabel: 'Progress today',
-      progressPercent: 75,
       step1Action: 'Straight-Knee Eccentric Drops',
       step1Detail: 'Alfredson et al. 1998 · 3s eccentric lowering',
       step1Meta: '3 × 15 reps',
-      step2Action: 'Morning Creatine Saturation',
-      step2Detail: 'Forbes et al. 2021 · Take with warm fluid',
-      step2Meta: '1 × 5g dose',
-      step3Action: 'Static Calf Stretch & Recovery',
-      step3Detail: 'ACSM Guidelines · Conservative hold',
-      step3Meta: '3 × 30s hold',
-      clickHint: 'Interactive demo: click checkmarks or counters to test'
+      step2Action: 'Static Calf Stretch & Recovery',
+      step2Detail: 'ACSM Guidelines · Conservative hold',
+      step2Meta: '3 × 30s hold'
     },
     domainsTitle: 'Explore what we help you achieve',
     domainsSubtitle:
@@ -759,7 +753,6 @@ export const COPY = {
     haveAccount: 'Already have an account? Sign in',
     needAccount: "Don't have an account? Create one",
     signOut: 'Sign out',
-    guestBadge: 'Guest mode',
     adminBadge: 'Clinical Admin',
     saveNotice: 'Sign in to sync your papers to the cloud',
     orWithEmail: 'Or with email',
