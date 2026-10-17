@@ -603,7 +603,7 @@ export const COPY = {
     heroSubtitle:
       'ViskotuN1 converts dense, peer-reviewed human clinical research into simple, colorful daily habits with voice coaching, parameter auditing, and zero guesswork.',
     heroCtaPrimary: 'Start your routine — Free',
-    heroCtaSecondary: 'Explore benchmarks',
+    heroCtaSecondary: 'See health domains',
     heroTrustPoints: [
       'Instant guest demo · No card required',
       '100% human interventional trials',
@@ -694,8 +694,8 @@ export const COPY = {
       { value: '0', label: 'Hallucinated Parameters', sub: 'Audited conservative clinical defaults' },
       { value: '<2s', label: 'Safety Policy Validation', sub: 'Real-time threshold & escalation checks' }
     ],
-    ctaGuest: 'Try as guest (instant demo)',
-    ctaLogin: 'Sign in with account',
+    ctaGuest: 'Try as guest',
+    ctaLogin: 'Sign in',
     ctaSignup: 'Create account',
     ctaGoToApp: 'Go to your routine',
     ctaContinueAsUser: (name: string) => `Continue as ${name}`,

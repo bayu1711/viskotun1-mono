@@ -20,6 +20,16 @@ const SIZES: Record<Size, string> = {
   lg: 'px-4 py-4'
 };
 
+/** Pill styles for links that must look like a PillButton without nesting a button inside them. */
+export function pillClassName(variant: Variant = 'primary', size: Size = 'lg', className?: string) {
+  return cn(
+    'inline-flex items-center justify-center gap-2 rounded-full text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:cursor-default',
+    VARIANTS[variant],
+    SIZES[size],
+    className
+  );
+}
+
 interface PillButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
@@ -43,14 +53,7 @@ export function PillButton({
       type={type}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
-      className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-full text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:cursor-default',
-        VARIANTS[variant],
-        SIZES[size],
-        fullWidth && 'w-full',
-        loading && 'opacity-70',
-        className
-      )}
+      className={pillClassName(variant, size, cn(fullWidth && 'w-full', loading && 'opacity-70', className))}
       {...rest}>
       
       {loading && <Spinner />}

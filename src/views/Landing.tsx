@@ -25,7 +25,7 @@ import { ROUTES } from '../data/navigation';
 import { Avatar } from '../components/ui/Avatar';
 import { Icon } from '../components/ui/Icon';
 import { IconTile } from '../components/ui/IconTile';
-import { PillButton } from '../components/ui/PillButton';
+import { PillButton, pillClassName } from '../components/ui/PillButton';
 import { toneStyles } from '../utils/tones';
 import { cn } from '../utils/cn';
 
@@ -82,7 +82,7 @@ export function LandingPage() {
             />
           </Link>
 
-          <nav className="hidden items-center gap-7 text-sm font-medium text-ink/70 md:flex">
+          <nav className="hidden items-center gap-7 whitespace-nowrap text-sm font-medium text-ink/70 xl:flex">
             <a href="#domains" className="transition-colors hover:text-ink">
               {COPY.landing.nav.domains}
             </a>
@@ -112,7 +112,7 @@ export function LandingPage() {
                   </p>
                 </div>
               </div>
-              <PillButton size="sm" onClick={handleLaunch} loading={isNavigating}>
+              <PillButton size="sm" onClick={handleLaunch} loading={isNavigating} className="whitespace-nowrap">
                 {COPY.landing.ctaGoToApp}
               </PillButton>
               <button
@@ -131,7 +131,7 @@ export function LandingPage() {
               >
                 {COPY.landing.ctaLogin}
               </Link>
-              <PillButton size="sm" onClick={handleLaunch} loading={isNavigating}>
+              <PillButton size="sm" onClick={handleLaunch} loading={isNavigating} className="whitespace-nowrap">
                 {COPY.landing.ctaGuest}
               </PillButton>
             </div>
@@ -175,16 +175,12 @@ export function LandingPage() {
                 <Icon icon={ArrowForwardIcon} size="sm" />
               </PillButton>
               {user ? (
-                <Link href={ROUTES.dashboard}>
-                  <PillButton variant="outline" size="lg" className="text-sm">
-                    {COPY.nav.stats}
-                  </PillButton>
+                <Link href={ROUTES.dashboard} className={pillClassName('outline', 'lg', 'text-sm')}>
+                  {COPY.nav.stats}
                 </Link>
               ) : (
-                <a href="#domains">
-                  <PillButton variant="outline" size="lg" className="text-sm">
-                    {COPY.landing.heroCtaSecondary}
-                  </PillButton>
+                <a href="#domains" className={pillClassName('outline', 'lg', 'text-sm')}>
+                  {COPY.landing.heroCtaSecondary}
                 </a>
               )}
             </div>
@@ -264,16 +260,8 @@ export function LandingPage() {
                     </p>
                   </div>
 
-                  <div className="mt-6 flex items-center justify-between border-t border-ink/10 pt-4">
+                  <div className="mt-6 border-t border-ink/10 pt-4">
                     <span className="text-2xs font-semibold text-ink/60">{domain.stat}</span>
-                    <button
-                      type="button"
-                      onClick={handleLaunch}
-                      className="inline-flex items-center gap-1 rounded-full bg-ink px-3 py-1 text-xs font-medium text-white transition-opacity hover:opacity-90"
-                    >
-                      <span>Explore</span>
-                      <Icon icon={ArrowForwardIcon} size="xs" />
-                    </button>
                   </div>
                 </div>
               );
