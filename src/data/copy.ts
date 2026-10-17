@@ -560,10 +560,6 @@ export const COPY = {
       'Zero AI hallucinations'
     ],
     heroImageAlt: 'Participant performing focused daily rehabilitation and mobility routine',
-    heroImageBadge: 'Clinical Routine In Action',
-    heroImageSubheading: 'Daily Protocol',
-    heroImageCaption: 'Physical rehabilitation & mobility trials in action',
-    heroImageStat: 'Verified Trials',
     interactivePreview: {
       tag: 'Live Protocol Preview',
       title: "Today's Clinical Session",
