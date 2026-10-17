@@ -38,42 +38,7 @@ export function answerFor(protocol: Routine | Protocol, question: string): strin
     return COPY.assistant.offlineAnswers.progressionCriteria(rulesText);
   }
 
-  // 4. Routine, dosage, steps, sets, reps, frequency
-  const routineKeywords = ['routine', 'plan', 'step', 'sets', 'reps', 'dosage', 'dose', 'frequency', 'how to', 'how many', 'daily', 'schedule', 'cadence'];
-  if (routineKeywords.some((k) => text.includes(k)) && Array.isArray(protocol.steps) && protocol.steps.length > 0) {
-    const stepSummary = protocol.steps
-      .map((s) => `${s.action} (${s.sets} ${s.setLabel || COPY.task.defaultSetLabel}, ${s.frequency}${s.perSetLabel ? ' ' + s.perSetLabel : ''})`)
-      .join('; ');
-    return COPY.assistant.offlineAnswers.prescribedDailyRoutine(stepSummary);
-  }
-
-  // 5. Biofeedback tracking & escalation thresholds
-  const feedbackKeywords = ['feedback', 'metric', 'symptom', 'pain', 'discomfort', 'log', 'threshold', 'scale', 'score', 'track', 'biofeedback'];
-  if (feedbackKeywords.some((k) => text.includes(k)) && protocol.feedbackMetric) {
-    const metric = protocol.feedbackMetric;
-    const alertMsg = metric.escalationMessage ? ` ${metric.escalationMessage}` : '';
-    return COPY.assistant.offlineAnswers.biofeedbackMetric(
-      metric.name,
-      metric.maxScore ?? 10,
-      metric.escalationThreshold ?? 4,
-      alertMsg
-    );
-  }
-
-  // 6. Paper evidence, methodology, and citation
-  const paperKeywords = ['paper', 'doi', 'authors', 'journal', 'study', 'evidence', 'participants', 'sample'];
-  if (paperKeywords.some((k) => text.includes(k)) && protocol.paper) {
-    return COPY.assistant.offlineAnswers.paperCitation(
-      protocol.paper.title,
-      protocol.paper.journal,
-      protocol.paper.year,
-      protocol.paper.authors,
-      protocol.paper.sampleSize,
-      protocol.paper.trialType
-    );
-  }
-
-  // 7. Missing parameters, inferred steps, author omissions, defaulted dosages
+  // 4. Missing parameters, inferred steps, author omissions, defaulted dosages
   const missingKeywords = ['missing', 'omitted', 'inferred', 'default', 'not reported', 'parameter', 'lineage', 'baseline'];
   if (missingKeywords.some((k) => text.includes(k))) {
     const flags = Array.isArray(protocol.missingDataFlags) ? protocol.missingDataFlags : [];
@@ -94,6 +59,41 @@ export function answerFor(protocol: Routine | Protocol, question: string): strin
       return COPY.assistant.offlineAnswers.missingParametersSummary(allOmissions || protocol.shortTitle);
     }
     return COPY.assistant.offlineAnswers.noMissingParameters;
+  }
+
+  // 5. Routine, dosage, steps, sets, reps, frequency
+  const routineKeywords = ['routine', 'plan', 'step', 'sets', 'reps', 'dosage', 'dose', 'frequency', 'how to', 'how many', 'daily', 'schedule', 'cadence'];
+  if (routineKeywords.some((k) => text.includes(k)) && Array.isArray(protocol.steps) && protocol.steps.length > 0) {
+    const stepSummary = protocol.steps
+      .map((s) => `${s.action} (${s.sets} ${s.setLabel || COPY.task.defaultSetLabel}, ${s.frequency}${s.perSetLabel ? ' ' + s.perSetLabel : ''})`)
+      .join('; ');
+    return COPY.assistant.offlineAnswers.prescribedDailyRoutine(stepSummary);
+  }
+
+  // 6. Biofeedback tracking & escalation thresholds
+  const feedbackKeywords = ['feedback', 'metric', 'symptom', 'pain', 'discomfort', 'log', 'threshold', 'scale', 'score', 'track', 'biofeedback'];
+  if (feedbackKeywords.some((k) => text.includes(k)) && protocol.feedbackMetric) {
+    const metric = protocol.feedbackMetric;
+    const alertMsg = metric.escalationMessage ? ` ${metric.escalationMessage}` : '';
+    return COPY.assistant.offlineAnswers.biofeedbackMetric(
+      metric.name,
+      metric.maxScore ?? 10,
+      metric.escalationThreshold ?? 4,
+      alertMsg
+    );
+  }
+
+  // 7. Paper evidence, methodology, and citation
+  const paperKeywords = ['paper', 'doi', 'authors', 'journal', 'study', 'evidence', 'participants', 'sample'];
+  if (paperKeywords.some((k) => text.includes(k)) && protocol.paper) {
+    return COPY.assistant.offlineAnswers.paperCitation(
+      protocol.paper.title,
+      protocol.paper.journal,
+      protocol.paper.year,
+      protocol.paper.authors,
+      protocol.paper.sampleSize,
+      protocol.paper.trialType
+    );
   }
 
   return COPY.assistant.noAnswer(protocol.shortTitle);
