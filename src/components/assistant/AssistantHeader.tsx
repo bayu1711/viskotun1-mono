@@ -20,6 +20,8 @@ interface AssistantHeaderProps {
   titleId: string;
   onModeChange: (mode: AssistantMode) => void;
   onClose: () => void;
+  customTitle?: string;
+  customEyebrow?: string;
 }
 
 export function AssistantHeader({
@@ -27,7 +29,9 @@ export function AssistantHeader({
   protocolTitle,
   titleId,
   onModeChange,
-  onClose
+  onClose,
+  customTitle,
+  customEyebrow
 }: AssistantHeaderProps) {
   const isAsk = mode === 'ask';
   const [isEdgeAvailable, setIsEdgeAvailable] = useState<boolean>(false);
@@ -59,7 +63,7 @@ export function AssistantHeader({
       <div className="pt-4">
         <div className="flex items-center justify-between">
           <p className="text-sm leading-none text-ink/45">
-            {isAsk ? protocolTitle : COPY.assistant.eyebrowUpload}
+            {customEyebrow || (isAsk ? protocolTitle : COPY.assistant.eyebrowUpload)}
           </p>
           {isAsk && (
             <span
@@ -74,7 +78,7 @@ export function AssistantHeader({
           )}
         </div>
         <h2 id={titleId} className="mt-1 text-display-sm leading-tight tracking-tight">
-          {isAsk ? COPY.assistant.titleAsk : COPY.assistant.titleUpload}
+          {customTitle || (isAsk ? COPY.assistant.titleAsk : COPY.assistant.titleUpload)}
         </h2>
       </div>
     </header>

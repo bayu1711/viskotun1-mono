@@ -13,11 +13,13 @@ interface AssistantComposerProps {
   onAsk: (question: string) => void;
   onAddPaper: (source: string) => void;
   onFile: (file: File) => void;
+  placeholder?: string;
+  ariaLabel?: string;
 }
 
 /** Text input that routes to Q&A or paper upload depending on mode / link detection. */
 export const AssistantComposer = forwardRef<HTMLInputElement, AssistantComposerProps>(function AssistantComposer(
-{ mode, onAsk, onAddPaper, onFile },
+{ mode, onAsk, onAddPaper, onFile, placeholder, ariaLabel },
 inputRef)
 {
   const [draft, setDraft] = useState('');
@@ -37,6 +39,9 @@ inputRef)
     setDraft('');
   };
 
+  const defaultPlaceholder = isAsk ? COPY.assistant.placeholderAsk : COPY.assistant.placeholderUpload;
+  const defaultAriaLabel = isAsk ? COPY.assistant.inputAsk : COPY.assistant.inputUpload;
+
   return (
     <form onSubmit={handleSubmit} className="flex items-center gap-2 rounded-full border border-ink/10 bg-white p-1.5">
       <CircleButton label={COPY.assistant.attach} onClick={() => fileRef.current?.click()} size={38}>
@@ -47,8 +52,8 @@ inputRef)
         type="text"
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
-        aria-label={isAsk ? COPY.assistant.inputAsk : COPY.assistant.inputUpload}
-        placeholder={isAsk ? COPY.assistant.placeholderAsk : COPY.assistant.placeholderUpload}
+        aria-label={ariaLabel || defaultAriaLabel}
+        placeholder={placeholder || defaultPlaceholder}
         className="min-w-0 flex-1 bg-transparent py-2 text-sm placeholder:text-ink/35 focus:outline-none" />
       
       <button

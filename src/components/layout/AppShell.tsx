@@ -35,7 +35,7 @@ export function AppShell({ children }: AppShellProps) {
       return;
     }
     uploadPaper(file);
-    openAssistant('ask');
+    openAssistant('upload');
   });
 
   const isPublicPage = pathname === '/' || pathname === '/login' || pathname === '/signup';
