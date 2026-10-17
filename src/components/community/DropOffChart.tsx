@@ -44,7 +44,7 @@ export function DropOffChart({ data, peakPeriod, unit }: DropOffChartProps) {
 }
 
 function barClassName(point: DropOffPoint, peakPeriod: number) {
-  if (point.period === peakPeriod) return 'fill-ink';
-  if (point.dropOff >= DROP_OFF_HIGH_MIN) return 'fill-cream';
-  return 'fill-mint';
+  if (point.period === peakPeriod) return 'fill-orange';
+  if (point.dropOff >= DROP_OFF_HIGH_MIN) return 'fill-yellow';
+  return 'fill-sky';
 }

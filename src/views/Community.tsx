@@ -136,13 +136,13 @@ export function CommunityPage() {
           {insights && (
             <section aria-label={COPY.community.comparisonLabel} className="mt-6 grid grid-cols-2 gap-2.5">
               <EfficacyCard
-                tone="cream"
+                tone="orange"
                 label={COPY.community.studyEfficacy}
                 value={insights.studyEfficacy}
                 caption={COPY.community.studyCaption(routine?.paper?.sampleSize || 120)}
               />
               <EfficacyCard
-                tone="mint"
+                tone="yellow"
                 label={COPY.community.realWorldEfficacy}
                 value={insights.realWorldEfficacy ?? 0}
                 caption={COPY.community.realWorldCaption(insights.userCount ?? 0)}

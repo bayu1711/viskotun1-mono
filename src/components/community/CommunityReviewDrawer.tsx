@@ -62,15 +62,15 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
 
   const outcomeColors: Record<ReviewOutcome, { active: string; border: string }> = {
     improved: {
-      active: 'bg-mint text-ink font-semibold border-ink',
+      active: 'bg-mint text-ink font-semibold border-mint ring-2 ring-mint/40 shadow-2xs',
       border: 'border-ink/20 hover:border-ink/40'
     },
     adjusted: {
-      active: 'bg-cream text-ink font-semibold border-ink',
+      active: 'bg-yellow text-ink font-semibold border-yellow ring-2 ring-yellow/40 shadow-2xs',
       border: 'border-ink/20 hover:border-ink/40'
     },
     paused: {
-      active: 'bg-blush text-ink font-semibold border-ink',
+      active: 'bg-peach text-ink font-semibold border-peach ring-2 ring-peach/40 shadow-2xs',
       border: 'border-ink/20 hover:border-ink/40'
     }
   };

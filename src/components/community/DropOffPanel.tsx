@@ -28,7 +28,7 @@ export function DropOffPanel() {
         eyebrow={COPY.community.dropOffEyebrow}
         title={unit === 'day' ? COPY.community.hardestDays : COPY.community.hardestWeeks}
         action={
-          <span className="rounded-full bg-ink px-3 py-1.5 text-xs text-white">
+          <span className="rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-white shadow-2xs">
             {COPY.community.peak(unit, insights.peakPeriod)}
           </span>
         }

@@ -27,7 +27,7 @@ export function SegmentedTabs<T extends string>({ options, value, onChange, aria
             onClick={() => onChange(option.id)}
             className={cn(
               'rounded-full px-4 py-1.5 text-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30',
-              selected ? 'bg-ink text-white' : 'text-ink/50 hover:text-ink'
+              selected ? 'bg-orange text-white font-medium shadow-2xs' : 'text-ink/65 hover:text-ink'
             )}>
             
             {option.label}

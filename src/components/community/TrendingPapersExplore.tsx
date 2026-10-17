@@ -57,6 +57,29 @@ export function TrendingPapersExplore() {
     return 'pill';
   };
 
+  const getCategoryBadgeClass = (category: string) => {
+    const cat = category.toLowerCase();
+    if (cat.includes('rehab') || cat.includes('ortho')) {
+      return 'bg-orange/15 text-ink hover:bg-orange/25 border border-orange/30';
+    }
+    if (cat.includes('cognit') || cat.includes('focus')) {
+      return 'bg-yellow/30 text-ink hover:bg-yellow/45 border border-yellow/50';
+    }
+    if (cat.includes('sleep') || cat.includes('circadian')) {
+      return 'bg-lavender/30 text-ink hover:bg-lavender/45 border border-lavender/50';
+    }
+    if (cat.includes('derma') || cat.includes('hair') || cat.includes('skin')) {
+      return 'bg-sky/20 text-ink hover:bg-sky/35 border border-sky/40';
+    }
+    if (cat.includes('cardio') || cat.includes('metabol')) {
+      return 'bg-mint/40 text-ink hover:bg-mint/60 border border-mint/60';
+    }
+    if (cat.includes('nutrit') || cat.includes('fasting')) {
+      return 'bg-peach/30 text-ink hover:bg-peach/45 border border-peach/50';
+    }
+    return 'bg-canvas text-ink/70 hover:bg-ink/10 border border-ink/10';
+  };
+
   const handleStartRoutine = (targetId: string, paperTitle: string) => {
     loadRoutine(targetId);
     toast.success(COPY.howTo.loadedToast(paperTitle));
@@ -76,11 +99,11 @@ export function TrendingPapersExplore() {
             <button
               type="button"
               onClick={() => setSelectedCategory('all')}
-              className="inline-flex items-center gap-1 rounded-full bg-ink px-2.5 py-0.5 font-medium text-white transition-opacity hover:opacity-80"
+              className="inline-flex items-center gap-1 rounded-full bg-orange px-2.5 py-0.5 font-medium text-white shadow-2xs transition-opacity hover:opacity-90"
               title={COPY.howTo.clearFilter}
             >
               <span>{selectedCategory}</span>
-              <span className="text-white/70">×</span>
+              <span className="text-white/80">×</span>
             </button>
           </div>
         )}
@@ -101,18 +124,29 @@ export function TrendingPapersExplore() {
               className={cn(
                 'flex flex-col justify-between rounded-card border bg-white p-5 transition-all',
                 isActive
-                  ? 'border-ink shadow-sm ring-1 ring-ink/15'
+                  ? 'border-orange shadow-md ring-2 ring-orange/30'
                   : 'border-ink/10 hover:border-ink/30 hover:shadow-xs'
               )}
             >
               <div>
                 {/* Header row: Icon, Rank, Category inside the card */}
                 <div className="flex items-center justify-between gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-canvas text-ink">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-orange/10 text-orange">
                     <StepIcon icon={getIconForRoutine(targetId)} size="xs" />
                   </span>
                   <div className="flex items-center gap-1.5">
-                    <span className="rounded-full bg-mint/30 border border-mint/60 px-2.5 py-0.5 text-2xs font-semibold text-ink">
+                    <span
+                      className={cn(
+                        'rounded-full px-2.5 py-0.5 text-2xs',
+                        rank === 1
+                          ? 'bg-orange text-white font-semibold shadow-2xs'
+                          : rank === 2
+                          ? 'bg-yellow text-ink font-semibold shadow-2xs'
+                          : rank === 3
+                          ? 'bg-mint text-ink font-semibold shadow-2xs'
+                          : 'bg-canvas text-ink/75 font-medium border border-ink/10'
+                      )}
+                    >
                       {COPY.howTo.trendingRankBadge(rank)}
                     </span>
                     <button
@@ -123,8 +157,8 @@ export function TrendingPapersExplore() {
                       className={cn(
                         'rounded-full px-2.5 py-0.5 text-2xs font-semibold transition-colors',
                         selectedCategory === paper.category
-                          ? 'bg-ink text-white'
-                          : 'bg-canvas text-ink/70 hover:bg-ink/10 hover:text-ink'
+                          ? 'bg-orange text-white shadow-2xs'
+                          : getCategoryBadgeClass(paper.category)
                       )}
                       title={`${COPY.howTo.filterByTopic} ${paper.category}`}
                     >
