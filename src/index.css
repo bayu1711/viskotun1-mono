@@ -29,6 +29,11 @@ body {
   width: 100%;
 }
 
+/* Smooth in-page anchor scrolling; the reduced-motion rule below turns it off. */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: rgb(var(--color-canvas));
   color: rgb(var(--color-ink));

@@ -110,35 +110,37 @@ export function LandingPage() {
           isScrolled ? 'border-ink/10' : 'border-transparent'
         )}
       >
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 lg:px-8 xl:grid xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
-          <Link href={ROUTES.landing} className="flex min-h-11 items-center justify-self-start transition-opacity hover:opacity-85">
-            <Image
-              src={COPY.brand.logoUrl}
-              alt={COPY.brand.name}
-              width={140}
-              height={34}
-              priority
-              className="h-8 w-auto object-contain"
-            />
-          </Link>
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 lg:px-8">
+          <div className="flex items-center gap-8">
+            <Link href={ROUTES.landing} className="flex min-h-11 items-center transition-opacity hover:opacity-85">
+              <Image
+                src={COPY.brand.logoUrl}
+                alt={COPY.brand.name}
+                width={140}
+                height={34}
+                priority
+                className="h-8 w-auto object-contain"
+              />
+            </Link>
 
-          <nav className="hidden items-center gap-1 whitespace-nowrap text-sm font-medium text-ink/80 xl:flex">
-            <a href="#domains" className="rounded-full px-3 py-2.5 transition-colors hover:bg-ink/5 hover:text-ink">
-              {COPY.landing.nav.domains}
-            </a>
-            <a href="#how-it-works" className="rounded-full px-3 py-2.5 transition-colors hover:bg-ink/5 hover:text-ink">
-              {COPY.landing.nav.howItWorks}
-            </a>
-            <a href="#gatekeeper" className="rounded-full px-3 py-2.5 transition-colors hover:bg-ink/5 hover:text-ink">
-              {COPY.landing.nav.gatekeeper}
-            </a>
-            <a href="#features" className="rounded-full px-3 py-2.5 transition-colors hover:bg-ink/5 hover:text-ink">
-              {COPY.landing.nav.features}
-            </a>
-          </nav>
+            <nav className="hidden items-center gap-1 whitespace-nowrap text-sm font-medium text-ink/80 xl:flex">
+              <a href="#domains" className="rounded-full px-3 py-2.5 transition-colors hover:bg-ink/5 hover:text-ink">
+                {COPY.landing.nav.domains}
+              </a>
+              <a href="#how-it-works" className="rounded-full px-3 py-2.5 transition-colors hover:bg-ink/5 hover:text-ink">
+                {COPY.landing.nav.howItWorks}
+              </a>
+              <a href="#gatekeeper" className="rounded-full px-3 py-2.5 transition-colors hover:bg-ink/5 hover:text-ink">
+                {COPY.landing.nav.gatekeeper}
+              </a>
+              <a href="#features" className="rounded-full px-3 py-2.5 transition-colors hover:bg-ink/5 hover:text-ink">
+                {COPY.landing.nav.features}
+              </a>
+            </nav>
+          </div>
 
           {!isLoading && user ? (
-            <div className="flex items-center gap-3 justify-self-end">
+            <div className="flex items-center gap-3">
               <Avatar initials={user.initials} />
               <span className="sr-only">{user.name}</span>
               <PillButton
@@ -159,7 +161,7 @@ export function LandingPage() {
               </button>
             </div>
           ) : !isLoading ? (
-            <div className="flex items-center gap-2 justify-self-end">
+            <div className="flex items-center gap-2">
               <Link
                 href={ROUTES.login}
                 className="inline-flex min-h-11 items-center whitespace-nowrap px-3 text-sm font-medium text-ink/80 transition-colors hover:text-ink"
@@ -177,7 +179,7 @@ export function LandingPage() {
               </PillButton>
             </div>
           ) : (
-            <div className="h-11 w-40 animate-pulse justify-self-end rounded-full bg-ink/5" />
+            <div className="h-11 w-40 animate-pulse rounded-full bg-ink/5" />
           )}
         </div>
       </header>
@@ -193,7 +195,7 @@ export function LandingPage() {
               </p>
             )}
 
-            <h1 className="text-balance text-[2.5rem] font-bold leading-[1.04] tracking-[-0.02em] text-ink sm:text-5xl sm:leading-[1.04] lg:text-hero-lg lg:leading-[1.04]">
+            <h1 className="text-balance text-[2.5rem] font-semibold leading-[1.04] tracking-[-0.015em] text-ink sm:text-5xl sm:leading-[1.04] lg:text-hero-lg lg:leading-[1.04]">
               {COPY.landing.heroTitle}
             </h1>
 
@@ -247,7 +249,7 @@ export function LandingPage() {
             {/* Product preview: what a day in the app looks like (illustrative, so hidden from assistive tech) */}
             <div
               aria-hidden="true"
-              className="relative mx-4 -mt-10 animate-rise rounded-callout bg-white p-5 shadow-popover sm:ml-auto sm:mr-6 sm:w-80"
+              className="relative mx-4 -mt-10 animate-rise rounded-callout bg-white p-5 shadow-popover sm:ml-auto sm:mr-6 sm:w-[22rem]"
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="font-display text-base font-bold text-ink">{PREVIEW.title}</p>
@@ -275,12 +277,14 @@ export function LandingPage() {
                       {step.done && <Icon icon={CheckIcon} size="xs" />}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className={cn('text-sm font-semibold leading-snug text-ink', step.done && 'text-ink/60 line-through')}>
-                        {step.action}
-                      </p>
-                      <p className="truncate text-xs text-ink/65">{step.detail}</p>
+                      <div className="flex items-baseline justify-between gap-3">
+                        <p className={cn('text-sm font-semibold leading-snug', step.done ? 'text-ink/70' : 'text-ink')}>
+                          {step.action}
+                        </p>
+                        <span className="shrink-0 text-xs font-medium tabular-nums text-ink/70">{step.meta}</span>
+                      </div>
+                      <p className="mt-0.5 text-xs leading-snug text-ink/65">{step.detail}</p>
                     </div>
-                    <span className="shrink-0 text-xs font-medium tabular-nums text-ink/70">{step.meta}</span>
                   </li>
                 ))}
               </ul>
@@ -290,7 +294,7 @@ export function LandingPage() {
       </section>
 
       {/* Domains: the one color-blocked grid on the page */}
-      <section id="domains" className="py-20 lg:py-28">
+      <section id="domains" className="scroll-mt-20 py-20 lg:py-28">
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
           <div className="max-w-2xl">
             <h2 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
@@ -300,22 +304,39 @@ export function LandingPage() {
           </div>
 
           <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {COPY.landing.domains.map((domain) => {
+            {COPY.landing.domains.map((domain, index) => {
+              const isFeatured = index === 0;
               const DomainIcon = DOMAIN_ICONS[domain.id] || ScienceOutlinedIcon;
               const cardTone = toneStyles[domain.tone];
 
               return (
-                <div key={domain.id} className={cn('flex flex-col justify-between rounded-callout p-6', cardTone.card)}>
-                  <div>
+                <div
+                  key={domain.id}
+                  className={cn(
+                    'flex flex-col justify-between rounded-callout p-6',
+                    isFeatured && 'sm:col-span-2 lg:row-span-2 lg:p-8',
+                    cardTone.card
+                  )}
+                >
+                  <div className={cn(isFeatured && 'flex flex-1 flex-col')}>
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-sm font-semibold text-ink/80">{domain.tag}</span>
-                      <IconTile variant="inverse" shape="circle" size={32}>
-                        <Icon icon={DomainIcon} size="sm" />
+                      <IconTile variant="inverse" shape="circle" size={isFeatured ? 48 : 32}>
+                        <Icon icon={DomainIcon} size={isFeatured ? 'md' : 'sm'} />
                       </IconTile>
                     </div>
 
-                    <h3 className="mt-4 text-balance font-display text-xl font-bold leading-snug text-ink">{domain.title}</h3>
-                    <p className="mt-2 text-base leading-relaxed text-ink/85">{domain.description}</p>
+                    <h3
+                      className={cn(
+                        'mt-4 text-balance font-display font-bold leading-snug text-ink',
+                        isFeatured ? 'text-3xl sm:text-4xl lg:mt-auto lg:pt-16' : 'text-xl'
+                      )}
+                    >
+                      {domain.title}
+                    </h3>
+                    <p className={cn('mt-2 leading-relaxed text-ink/85', isFeatured ? 'max-w-md text-lg' : 'text-base')}>
+                      {domain.description}
+                    </p>
                   </div>
 
                   <p className="mt-6 border-t border-ink/15 pt-4 text-sm font-semibold text-ink/80">{domain.stat}</p>
@@ -327,7 +348,7 @@ export function LandingPage() {
       </section>
 
       {/* How It Works: a real four-step sequence, so it is an ordered list */}
-      <section id="how-it-works" className="bg-canvas py-20 lg:py-28">
+      <section id="how-it-works" className="scroll-mt-20 bg-canvas py-20 lg:py-28">
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
           <h2 className="max-w-2xl text-balance text-3xl font-bold tracking-tight sm:text-4xl">
             {COPY.landing.architectureTitle}
@@ -350,28 +371,28 @@ export function LandingPage() {
       </section>
 
       {/* Scientific Rigor & Scope Gatekeeper */}
-      <section id="gatekeeper" className="pt-20 lg:pt-28">
+      <section id="gatekeeper" className="scroll-mt-20 pt-20 lg:pt-28">
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
-          <div className="rounded-callout bg-mint p-8 sm:p-12">
-            <p className="flex items-center gap-2 text-sm font-semibold text-ink">
-              <Icon icon={ShieldOutlinedIcon} size="sm" />
-              <span>{COPY.landing.scopeBadge}</span>
-            </p>
-            <h2 className="mt-4 max-w-2xl text-balance text-3xl font-bold tracking-tight sm:text-4xl">
-              {COPY.landing.rigorTitle}
-            </h2>
-            <p className="mt-4 max-w-2xl text-pretty text-lg leading-relaxed text-ink/80">
-              {COPY.landing.rigorSubtitle}
-            </p>
-            <p className="mt-4 max-w-2xl text-pretty text-base leading-relaxed text-ink/75">
-              {COPY.landing.scopeNote}
-            </p>
+          <div className="grid gap-8 rounded-callout bg-mint p-8 sm:p-12 lg:grid-cols-2 lg:gap-16">
+            <div>
+              <p className="flex items-center gap-2 text-sm font-semibold text-ink">
+                <Icon icon={ShieldOutlinedIcon} size="sm" />
+                <span>{COPY.landing.scopeBadge}</span>
+              </p>
+              <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight sm:text-4xl">
+                {COPY.landing.rigorTitle}
+              </h2>
+            </div>
+            <div className="lg:pt-9">
+              <p className="text-pretty text-lg leading-relaxed text-ink/85">{COPY.landing.rigorSubtitle}</p>
+              <p className="mt-4 text-pretty text-base leading-relaxed text-ink/80">{COPY.landing.scopeNote}</p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Features: plain two-column list, no card chrome */}
-      <section id="features" className="py-20 lg:py-28">
+      <section id="features" className="scroll-mt-20 py-20 lg:py-28">
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
           <h2 className="max-w-2xl text-balance text-3xl font-bold tracking-tight sm:text-4xl">
             {COPY.landing.capabilitiesTitle}
