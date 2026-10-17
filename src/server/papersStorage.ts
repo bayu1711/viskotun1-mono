@@ -10,7 +10,6 @@ import { getFirestore } from './guardrailLedger';
 import { SAMPLE_PAPERS, PRECALIBRATED_SAMPLE_PROTOCOLS, PRECALIBRATED_SAMPLE_ROUTINES, type SamplePaper } from '../data/samplePapers';
 import type { Routine, Protocol, StoredPaper } from '../types/routine';
 import { getLiveUserStats } from './userStorage';
-import { getCommunityReviews } from './routineRegistry';
 
 export const PAPERS_COLLECTION = 'papers';
 
@@ -83,15 +82,11 @@ export async function seedSamplePapersIfEmpty(): Promise<boolean> {
 async function enrichPaperWithLiveTelemetry(paper: SamplePaper): Promise<SamplePaper> {
   const targetId = paper.routineId || paper.protocolId || paper.id;
   const userStats = await getLiveUserStats(targetId);
-  const reviews = await getCommunityReviews(targetId);
-
-  const realActiveTrackers = userStats.activeTrackersCount + reviews.length;
-  const realTotalLogs = userStats.userLogsCount + reviews.length;
 
   return {
     ...paper,
-    activeTrackersCount: realActiveTrackers,
-    totalLogsCount: realTotalLogs
+    activeTrackersCount: userStats.activeTrackersCount,
+    totalLogsCount: userStats.userLogsCount
   };
 }
 
@@ -138,12 +133,16 @@ export async function getSamplePapers(): Promise<{
             pdfUrl: data.pdfUrl,
             summary: data.summary,
             featuresTested: data.featuresTested || [],
-            protocolId: data.protocolId,
+            routineId: data.routineId || data.protocolId,
+            protocolId: data.protocolId || data.routineId,
             isGuardrailRejectionTest: data.isGuardrailRejectionTest,
             popularityScore: data.popularityScore ?? 0,
             activeTrackersCount: data.activeTrackersCount ?? 0,
             totalLogsCount: data.totalLogsCount ?? 0,
-            trendingRank: data.trendingRank
+            trendingRank: data.trendingRank,
+            userId: data.userId || 'fazarathfazal@gmail.com',
+            userEmail: data.userEmail || 'fazarathfazal@gmail.com',
+            uploadedBy: data.uploadedBy || 'fazarathfazal@gmail.com'
           });
 
           if (data.protocolId && data.protocol) {
@@ -197,12 +196,16 @@ export async function getSamplePapers(): Promise<{
         pdfUrl: item.pdfUrl,
         summary: item.summary,
         featuresTested: item.featuresTested,
-        protocolId: item.protocolId,
+        routineId: item.routineId || item.protocolId,
+        protocolId: item.protocolId || item.routineId,
         isGuardrailRejectionTest: item.isGuardrailRejectionTest,
         popularityScore: item.popularityScore ?? 0,
         activeTrackersCount: item.activeTrackersCount ?? 0,
         totalLogsCount: item.totalLogsCount ?? 0,
-        trendingRank: item.trendingRank
+        trendingRank: item.trendingRank,
+        userId: item.userId || 'fazarathfazal@gmail.com',
+        userEmail: item.userEmail || 'fazarathfazal@gmail.com',
+        uploadedBy: item.uploadedBy || 'fazarathfazal@gmail.com'
       });
       if (item.protocolId && item.protocol) {
         protocols[item.protocolId] = item.protocol;

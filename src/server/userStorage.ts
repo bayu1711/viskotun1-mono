@@ -8,6 +8,7 @@
 
 import { getFirestore } from './guardrailLedger';
 import type { Routine, RoutineRuntime, Protocol } from '../types/routine';
+import { SEEDED_COMMUNITY_USERS } from './seedUsers';
 
 export interface UserRecord {
   userId: string;
@@ -19,14 +20,34 @@ export interface UserRecord {
   updatedAt: number;
 }
 
-import { SEEDED_COMMUNITY_USERS } from './seedUsers';
-
 // In-memory server-side user store with fail-safe fallback
 export const memoryUserStorage = new Map<string, UserRecord>();
 
 // Pre-seed memory cache with authentic simulated trial cohort participants
 for (const user of SEEDED_COMMUNITY_USERS) {
   memoryUserStorage.set(user.userId, user);
+}
+
+let hasAttemptedUserSeed = false;
+
+async function seedUsersIfEmpty(): Promise<void> {
+  const db = getFirestore();
+  if (!db || hasAttemptedUserSeed) return;
+  hasAttemptedUserSeed = true;
+
+  try {
+    const snapshot = await db.collection('users').limit(1).get();
+    if (snapshot.empty) {
+      const batch = db.batch();
+      for (const user of SEEDED_COMMUNITY_USERS) {
+        const docRef = db.collection('users').doc(user.userId);
+        batch.set(docRef, user, { merge: true });
+      }
+      await batch.commit();
+    }
+  } catch (err: any) {
+    console.warn('[UserStorage] Firestore initial user seeding skipped/failed:', err?.message || err);
+  }
 }
 
 /**
@@ -90,6 +111,10 @@ export async function getAllUserRecords(): Promise<UserRecord[]> {
   const db = getFirestore();
   if (db) {
     try {
+      if (!hasAttemptedUserSeed) {
+        await seedUsersIfEmpty();
+      }
+
       const snapshot = await db.collection('users').get();
       if (!snapshot.empty) {
         snapshot.forEach((doc) => {
@@ -118,6 +143,14 @@ export async function getAllUserRecords(): Promise<UserRecord[]> {
   return Array.from(recordsMap.values());
 }
 
+function matchesProtocol(candidateId: string | undefined, targetId: string): boolean {
+  if (!candidateId) return false;
+  if (candidateId === targetId) return true;
+  if ((candidateId === 'achilles-rehab' && targetId === 'achilles') || (candidateId === 'achilles' && targetId === 'achilles-rehab')) return true;
+  if ((candidateId === 'hair-regrowth' && targetId === 'hair-loss') || (candidateId === 'hair-loss' && targetId === 'hair-regrowth')) return true;
+  return false;
+}
+
 /**
  * Computes live user telemetry for a specific protocol or routine ID:
  * - activeTrackersCount: number of distinct users actively tracking or having this protocol in their routine list
@@ -133,14 +166,20 @@ export async function getLiveUserStats(protocolId: string): Promise<{
 
   for (const user of users) {
     const isActivelyTracking =
-      user.activeRoutineId === protocolId ||
-      user.activeProtocolId === protocolId;
+      matchesProtocol(user.activeRoutineId, protocolId) ||
+      matchesProtocol(user.activeProtocolId, protocolId);
 
     const hasInRoutines =
-      (Array.isArray(user.routines) && user.routines.some((r) => r.id === protocolId)) ||
-      (Array.isArray(user.protocols) && user.protocols.some((p) => p.id === protocolId));
+      (Array.isArray(user.routines) && user.routines.some((r) => matchesProtocol(r.id, protocolId))) ||
+      (Array.isArray(user.protocols) && user.protocols.some((p) => matchesProtocol(p.id, protocolId)));
 
-    const userRuntime = user.runtime?.[protocolId];
+    const userRuntime =
+      user.runtime?.[protocolId] ||
+      (protocolId === 'achilles' ? user.runtime?.['achilles-rehab'] : undefined) ||
+      (protocolId === 'achilles-rehab' ? user.runtime?.['achilles'] : undefined) ||
+      (protocolId === 'hair-loss' ? user.runtime?.['hair-regrowth'] : undefined) ||
+      (protocolId === 'hair-regrowth' ? user.runtime?.['hair-loss'] : undefined);
+
     const hasRuntime = Boolean(userRuntime);
 
     if (isActivelyTracking || hasInRoutines || hasRuntime) {

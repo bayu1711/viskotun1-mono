@@ -17,8 +17,21 @@ describe('papersStorage and /api/papers endpoint', () => {
     expect(trendingPapers[0].id).toBe('achilles-rehab');
     expect(trendingPapers[0].trendingRank).toBe(1);
     expect(trendingPapers[0].popularityScore).toBe(98);
-    expect(trendingPapers[0].activeTrackersCount).toBeGreaterThanOrEqual(0);
-    expect(trendingPapers[0].totalLogsCount).toBeGreaterThanOrEqual(0);
+    expect(trendingPapers[0].activeTrackersCount).toBe(4);
+    expect(trendingPapers[0].totalLogsCount).toBe(30);
+
+    // Verify other papers have authentic telemetry
+    const hairPaper = trendingPapers.find((p) => p.id === 'hair-regrowth');
+    expect(hairPaper?.activeTrackersCount).toBe(4);
+    expect(hairPaper?.totalLogsCount).toBe(21);
+
+    const creatinePaper = trendingPapers.find((p) => p.id === 'creatine-sleep');
+    expect(creatinePaper?.activeTrackersCount).toBe(2);
+    expect(creatinePaper?.totalLogsCount).toBe(12);
+
+    const fastingPaper = trendingPapers.find((p) => p.id === 'time-restricted-eating');
+    expect(fastingPaper?.activeTrackersCount).toBe(0);
+    expect(fastingPaper?.totalLogsCount).toBe(0);
 
     // Verify protocols start on Day 1 with empty history and no initial logs
     expect(protocols['achilles'].currentDay).toBe(1);

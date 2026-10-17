@@ -211,6 +211,7 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
     reviews: [
       {
         id: 'cr-rev-1',
+        userId: 'user-cr-shift-28m',
         handle: 'Anonymous · 28M · Shift Worker',
         day: 7,
         outcome: 'improved',
@@ -219,6 +220,7 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
       },
       {
         id: 'cr-rev-2',
+        userId: 'user-cr-clin-34f',
         handle: 'Anonymous · 34F · Clinical Specialist',
         day: 4,
         outcome: 'adjusted',

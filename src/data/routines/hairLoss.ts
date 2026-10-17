@@ -165,6 +165,7 @@ export const hairLossRoutine: Routine = {
     reviews: [
     {
       id: 'hair-rev-1',
+      userId: 'user-hair-norwood-31m',
       handle: 'Anonymous · 31M · Norwood 3',
       day: 21,
       outcome: 'adjusted',
@@ -173,6 +174,7 @@ export const hairLossRoutine: Routine = {
     },
     {
       id: 'hair-rev-2',
+      userId: 'user-hair-diffuse-44m',
       handle: 'Anonymous · 44M · Diffuse thinning',
       day: 35,
       outcome: 'paused',
@@ -181,6 +183,7 @@ export const hairLossRoutine: Routine = {
     },
     {
       id: 'hair-rev-3',
+      userId: 'user-hair-temples-27m',
       handle: 'Anonymous · 27M · Temples',
       day: 84,
       outcome: 'improved',
@@ -189,6 +192,7 @@ export const hairLossRoutine: Routine = {
     },
     {
       id: 'hair-rev-4',
+      userId: 'user-hair-female-38f',
       handle: 'Anonymous · 38F · Female-pattern',
       day: 28,
       outcome: 'adjusted',
