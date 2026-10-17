@@ -559,10 +559,10 @@ export const COPY = {
       '100% human interventional trials',
       'Zero AI hallucinations'
     ],
-    heroImageAlt: 'Diverse community of people practicing healthy daily routines together',
-    heroImageBadge: 'Real Human Cohorts',
-    heroImageSubheading: 'Active Community',
-    heroImageCaption: '2,400+ participants practicing daily clinical routines',
+    heroImageAlt: 'Participant performing focused daily rehabilitation and mobility routine',
+    heroImageBadge: 'Clinical Routine In Action',
+    heroImageSubheading: 'Daily Protocol',
+    heroImageCaption: 'Physical rehabilitation & mobility trials in action',
     heroImageStat: 'Verified Trials',
     interactivePreview: {
       tag: 'Live Protocol Preview',
