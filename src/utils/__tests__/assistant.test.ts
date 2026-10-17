@@ -128,6 +128,42 @@ describe('Assistant answerFor generalization', () => {
     expect(answer).toContain('Sample size: N = 15 (Double-Blind RCT)');
   });
 
+  it('answers missing parameters inquiry when trial omitted parameters', () => {
+    const protocolWithMissingData: Routine = {
+      ...sampleProtocol,
+      missingDataFlags: [
+        {
+          id: 'miss-1',
+          stepId: 'cr-1',
+          parameter: 'Hold duration',
+          fallback: 'Conservative default 30s',
+          sourceGuideline: 'ACSM 2020'
+        }
+      ],
+      steps: [
+        {
+          ...sampleProtocol.steps[0],
+          inferred: true,
+          inferredProvenance: {
+            tier: 'lineage',
+            source: 'ACSM 2020 Guidelines'
+          }
+        }
+      ]
+    };
+
+    const answer = answerFor(protocolWithMissingData, 'what parameters are missing or inferred?');
+    expect(answer).toContain('The trial authors did not report all execution parameters');
+    expect(answer).toContain('Hold duration');
+    expect(answer).toContain('Conservative default 30s');
+    expect(answer).toContain('ACSM 2020');
+  });
+
+  it('answers missing parameters inquiry when all parameters were reported', () => {
+    const answer = answerFor(sampleProtocol, 'are there any missing parameters or omitted steps?');
+    expect(answer).toContain('All execution parameters, dosages, and cadences were explicitly reported');
+  });
+
   it('falls back gracefully when the question is out of scope', () => {
     const answer = answerFor(sampleProtocol, 'can this predict quantum gravity?');
     expect(answer).toContain("I couldn't find that in the Methods section");

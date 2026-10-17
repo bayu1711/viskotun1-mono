@@ -73,6 +73,29 @@ export function answerFor(protocol: Routine | Protocol, question: string): strin
     );
   }
 
+  // 7. Missing parameters, inferred steps, author omissions, defaulted dosages
+  const missingKeywords = ['missing', 'omitted', 'inferred', 'default', 'not reported', 'parameter', 'lineage', 'baseline'];
+  if (missingKeywords.some((k) => text.includes(k))) {
+    const flags = Array.isArray(protocol.missingDataFlags) ? protocol.missingDataFlags : [];
+    const inferredSteps = Array.isArray(protocol.steps) ? protocol.steps.filter((s) => s.inferred) : [];
+
+    if (flags.length > 0 || inferredSteps.length > 0) {
+      const flagDetails = flags.map((f) => {
+        const step = protocol.steps?.find((s) => s.id === f.stepId);
+        const targetName = step?.action ?? f.parameter;
+        return `${targetName} (${f.parameter}: ${f.fallback}${f.sourceGuideline ? ` via ${f.sourceGuideline}` : ''})`;
+      });
+
+      const stepDetails = inferredSteps
+        .filter((s) => !flags.some((f) => f.stepId === s.id))
+        .map((s) => `${s.action} (${s.inferredProvenance?.source || 'conservative default'})`);
+
+      const allOmissions = [...flagDetails, ...stepDetails].join('; ');
+      return COPY.assistant.offlineAnswers.missingParametersSummary(allOmissions || protocol.shortTitle);
+    }
+    return COPY.assistant.offlineAnswers.noMissingParameters;
+  }
+
   return COPY.assistant.noAnswer(protocol.shortTitle);
 }
 
