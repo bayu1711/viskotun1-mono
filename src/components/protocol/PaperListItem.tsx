@@ -36,14 +36,17 @@ export function PaperListItem({ routine, protocol = routine, active, onOpen }: P
           title={item.title}
           meta={
             <>
-              {COPY.dashboard.paperMeta(item.currentDay, item.totalDays, item.streak)}
+              {COPY.dashboard.paperMeta(item.currentDay, item.totalDays)}
               {active && COPY.dashboard.activeSuffix}
             </>
           }
         />
 
         <ProgressRing value={item.todayFraction} size={36} tone={active ? 'orange' : 'ink'}>
-          <span className="text-3xs tabular-nums">{item.todayPercent}</span>
+          <span className="text-3xs tabular-nums">
+            {item.todayPercent}
+            {COPY.common.percentSign}
+          </span>
         </ProgressRing>
       </button>
     </li>

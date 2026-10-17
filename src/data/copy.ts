@@ -234,7 +234,7 @@ export const COPY = {
     papersLabel: 'All papers',
     papersEyebrow: 'All',
     papersTitle: 'Papers',
-    paperMeta: (day: number, total: number, streak: number) => `Day ${day}/${total} · ${streak} days`,
+    paperMeta: (day: number, total: number) => `Day ${day}/${total}`,
     activeSuffix: ' · Active',
     sourcePaper: 'Source paper',
     emptyPapersTitle: 'No papers yet',
