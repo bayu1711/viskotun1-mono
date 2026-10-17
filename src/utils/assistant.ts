@@ -1,6 +1,7 @@
 import { PAPER_LINK_PATTERN } from '../data/config';
 import { COPY } from '../data/copy';
 import type { Routine, Protocol } from '../types/routine';
+import { getStepDisplay } from './steps';
 
 export function answerFor(protocol: Routine | Protocol, question: string): string {
   const text = question.toLowerCase();
@@ -61,7 +62,41 @@ export function answerFor(protocol: Routine | Protocol, question: string): strin
     return COPY.assistant.offlineAnswers.noMissingParameters;
   }
 
-  // 5. Routine, dosage, steps, sets, reps, frequency
+  // 5. Specific task / step execution guidance ("what is <task> and what is needed to be done?")
+  if (Array.isArray(protocol.steps) && protocol.steps.length > 0) {
+    const matchedStep = protocol.steps.find((s) => {
+      const actionLower = s.action.toLowerCase();
+      const idLower = s.id ? s.id.toLowerCase() : '';
+      if (text.includes(actionLower) || (idLower.length > 3 && text.includes(idLower))) {
+        return true;
+      }
+      const words = actionLower.replace(/[^a-z0-9 ]/g, '').split(/\s+/).filter((w) => w.length > 3);
+      return words.length > 0 && words.every((w) => text.includes(w));
+    });
+
+    if (matchedStep) {
+      const display = getStepDisplay(matchedStep);
+      const volume = `${matchedStep.sets} ${matchedStep.setLabel || COPY.task.defaultSetLabel || 'sets'} (${matchedStep.frequency})${display.perSet ? ` · ${display.perSet}` : ''}`;
+      const tempo = matchedStep.tempo;
+      const hold = matchedStep.durationSeconds ? `${matchedStep.durationSeconds}s` : undefined;
+      const inferredNote = matchedStep.inferred && matchedStep.inferredProvenance?.rationale
+        ? `${matchedStep.inferredProvenance.source || 'Clinical Guideline'}: ${matchedStep.inferredProvenance.rationale}`
+        : undefined;
+      const stopRule = protocol.contraindications?.find((c) => c.severity === 'stop');
+
+      return COPY.assistant.offlineAnswers.stepGuidance(
+        matchedStep.action,
+        matchedStep.detail,
+        volume,
+        tempo,
+        hold,
+        inferredNote,
+        stopRule?.text
+      );
+    }
+  }
+
+  // 6. Routine, dosage, steps, sets, reps, frequency (general summary)
   const routineKeywords = ['routine', 'plan', 'step', 'sets', 'reps', 'dosage', 'dose', 'frequency', 'how to', 'how many', 'daily', 'schedule', 'cadence'];
   if (routineKeywords.some((k) => text.includes(k)) && Array.isArray(protocol.steps) && protocol.steps.length > 0) {
     const stepSummary = protocol.steps

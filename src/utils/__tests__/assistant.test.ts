@@ -115,6 +115,44 @@ describe('Assistant answerFor generalization', () => {
     expect(answer).toContain('Prescribed daily routine: Morning Creatine Dose (1 dose, 1x Daily 5g with food)');
   });
 
+  it('dynamically answers specific task step inquiry with detailed steps on what it is and what is needed to be done', () => {
+    const answer = answerFor(sampleProtocol, 'What is "Morning Creatine Dose" and what is needed to be done?');
+    expect(answer).toContain('Morning Creatine Dose');
+    expect(answer).toContain('What it is: 5g creatine monohydrate dissolved in water with breakfast');
+    expect(answer).toContain('What is needed to be done: Complete 1 dose (1x Daily) · 5g with food');
+    expect(answer).toContain('Caution: Stop immediately if severe renal impairment');
+  });
+
+  it('includes clinical guideline note for inferred task steps in step guidance', () => {
+    const protocolWithInferred: Routine = {
+      ...sampleProtocol,
+      steps: [
+        {
+          id: 'step-inferred',
+          tone: 'mint',
+          icon: 'stretch',
+          action: 'Static Hamstring Stretch',
+          detail: 'Hold the stretch without bouncing.',
+          sets: 2,
+          reps: 1,
+          frequency: '1x Daily',
+          durationSeconds: 30,
+          inferred: true,
+          inferredProvenance: {
+            tier: 'guideline',
+            source: 'ACSM 2024 Guidelines',
+            rationale: 'Conservative 30s static hold standard'
+          }
+        }
+      ]
+    };
+    const answer = answerFor(protocolWithInferred, 'How to perform Static Hamstring Stretch and what is needed to be done?');
+    expect(answer).toContain('Static Hamstring Stretch');
+    expect(answer).toContain('What it is: Hold the stretch without bouncing');
+    expect(answer).toContain('hold: 30s');
+    expect(answer).toContain('ACSM 2024 Guidelines: Conservative 30s static hold standard');
+  });
+
   it('dynamically answers biofeedback tracking inquiries', () => {
     const answer = answerFor(sampleProtocol, 'how do I log my feedback score?');
     expect(answer).toContain('Daily biofeedback metric: GI distress (scale 0–10). Escalation threshold is ≥ 3/10.');
