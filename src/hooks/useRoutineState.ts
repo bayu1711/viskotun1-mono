@@ -27,6 +27,7 @@ import { createId } from '../utils/id';
 import { clamp, toPercent } from '../utils/math';
 import {
   adherenceOf,
+  applyGuardrailThreshold,
   completionOf,
   exceedsFeedbackThreshold,
   getScheduledFieldsForDay,
@@ -1389,35 +1390,9 @@ export function useRoutineState() {
 
   const updateGuardrailThreshold = useCallback(
     (threshold: number, message?: string) => {
-      if (!protocol) return;
+      if (!protocol || applyGuardrailThreshold(protocol, threshold, message) === protocol) return;
       setProtocolList((prev) =>
-        prev.map((p) => {
-          if (p.id !== protocol.id) return p;
-          const updatedFeedbackMetric = p.feedbackMetric
-            ? {
-                ...p.feedbackMetric,
-                escalationThreshold: threshold,
-                escalationMessage: message || p.feedbackMetric.escalationMessage
-              }
-            : p.feedbackMetric;
-
-          const updatedSpec = (p.dataCollectionSpec || []).map((field) => {
-            if (field.type === 'scale' || field.escalationThreshold !== undefined) {
-              return {
-                ...field,
-                escalationThreshold: threshold,
-                escalationMessage: message || field.escalationMessage
-              };
-            }
-            return field;
-          });
-
-          return {
-            ...p,
-            feedbackMetric: updatedFeedbackMetric,
-            dataCollectionSpec: updatedSpec
-          };
-        })
+        prev.map((p) => (p.id === protocol.id ? applyGuardrailThreshold(p, threshold, message) : p))
       );
     },
     [protocol]

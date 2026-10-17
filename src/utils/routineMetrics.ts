@@ -134,3 +134,30 @@ export function stopRuleOf(routine: Routine) {
 export function isRandomizedTrial(paper: PaperMeta) {
   return paper.evidenceBadges.includes('rct');
 }
+
+/** Applies the policy ledger threshold; returns the same routine when nothing changes. */
+export function applyGuardrailThreshold(routine: Routine, threshold: number, message?: string): Routine {
+  const needsUpdate = (target: { escalationThreshold?: number; escalationMessage?: string }) =>
+    target.escalationThreshold !== threshold || (!!message && target.escalationMessage !== message);
+  const appliesTo = (field: DataCollectionField) => field.type === 'scale' || field.escalationThreshold !== undefined;
+
+  const metricChanged = !!routine.feedbackMetric && needsUpdate(routine.feedbackMetric);
+  const specChanged = (routine.dataCollectionSpec || []).some((field) => appliesTo(field) && needsUpdate(field));
+  if (!metricChanged && !specChanged) return routine;
+
+  return {
+    ...routine,
+    feedbackMetric: routine.feedbackMetric
+      ? {
+          ...routine.feedbackMetric,
+          escalationThreshold: threshold,
+          escalationMessage: message || routine.feedbackMetric.escalationMessage
+        }
+      : routine.feedbackMetric,
+    dataCollectionSpec: (routine.dataCollectionSpec || []).map((field) =>
+      appliesTo(field)
+        ? { ...field, escalationThreshold: threshold, escalationMessage: message || field.escalationMessage }
+        : field
+    )
+  };
+}
