@@ -1,6 +1,6 @@
 'use client';
 
-import React, { type FormEvent, useEffect, useId, useMemo, useState } from 'react';
+import React, { type FormEvent, useId, useMemo, useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { toast } from 'sonner';
 import { useRoutine } from '../../contexts/RoutineContext';
@@ -86,13 +86,15 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
   }, [scheduledFields, dataCollectionSpec, activeField]);
 
   const [value, setValue] = useState<MorphingValue>(() => getInitialValueForField(activeField));
+  const [valueFieldId, setValueFieldId] = useState(activeField.id);
   const [note, setNote] = useState('');
   const noteId = useId();
 
-  // Reset value when activeField changes
-  useEffect(() => {
+  // Reset value only when the user switches field, not when the field object is re-created
+  if (valueFieldId !== activeField.id) {
+    setValueFieldId(activeField.id);
     setValue(getInitialValueForField(activeField));
-  }, [activeField]);
+  }
 
   const numericScore = typeof value === 'number' ? value : 0;
   const tone = severityTone(numericScore);
