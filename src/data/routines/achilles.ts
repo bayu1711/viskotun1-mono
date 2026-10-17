@@ -26,7 +26,7 @@ export const achillesRoutine: Routine = {
   steps: [
   {
     id: 'ach-1',
-    tone: 'ink',
+    tone: 'orange',
     icon: 'straight-knee',
     action: 'Straight-Knee Eccentric Heel Drops',
     detail: 'Slow 3s lowering phase, full body weight on affected leg',
@@ -37,7 +37,7 @@ export const achillesRoutine: Routine = {
   },
   {
     id: 'ach-2',
-    tone: 'cream',
+    tone: 'yellow',
     icon: 'bent-knee',
     action: 'Bent-Knee Eccentric Heel Drops',
     detail: 'Knee flexed ~30°, focus on soleus engagement',

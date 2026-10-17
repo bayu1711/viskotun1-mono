@@ -26,7 +26,7 @@ export const hairLossRoutine: Routine = {
   steps: [
   {
     id: 'hair-1',
-    tone: 'ink',
+    tone: 'sky',
     icon: 'serum',
     action: 'Topical Minoxidil 5%',
     detail: 'Apply 1 mL to a dry scalp over the thinning area. Leave on for at least 4 hours.',
@@ -40,7 +40,7 @@ export const hairLossRoutine: Routine = {
   },
   {
     id: 'hair-2',
-    tone: 'cream',
+    tone: 'lavender',
     icon: 'microneedle',
     action: 'Scalp Microneedling',
     detail: '1.5 mm dermaroller, passes in 4 directions until mild redness. Skip minoxidil for 24h after.',
@@ -54,7 +54,7 @@ export const hairLossRoutine: Routine = {
   },
   {
     id: 'hair-3',
-    tone: 'mint',
+    tone: 'peach',
     icon: 'shampoo',
     action: 'Ketoconazole 2% Shampoo',
     detail: 'Lather onto the scalp and leave for 3–5 minutes before rinsing.',
