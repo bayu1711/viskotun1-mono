@@ -12,7 +12,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['var(--font-inter)', '"Helvetica Neue"', 'Helvetica', 'Inter', 'Arial', 'ui-sans-serif', 'sans-serif'],
+        sans: ['var(--font-body)', '"Helvetica Neue"', 'Helvetica', 'Arial', 'ui-sans-serif', 'sans-serif'],
+        display: ['var(--font-display)', 'var(--font-body)', '"Helvetica Neue"', 'Arial', 'sans-serif'],
       },
       colors: {
         ink: withAlpha('--color-ink'),
