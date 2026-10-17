@@ -4,9 +4,9 @@ import type { EvidenceBadge } from '../../types/routine';
 import { cn } from '../../utils/cn';
 
 const BADGE_CONFIG: Record<EvidenceBadge, {label: string;className: string;}> = {
-  rct: { label: COPY.badges.rct, className: 'border border-ink text-ink' },
-  pilot: { label: COPY.badges.pilot, className: 'border border-ink/25 text-ink/55' },
-  'missing-parameters': { label: COPY.badges.missingParameters, className: 'bg-cream text-ink' }
+  rct: { label: COPY.badges.rct, className: 'bg-mint/80 border border-mint text-ink font-medium shadow-2xs' },
+  pilot: { label: COPY.badges.pilot, className: 'bg-sky/30 border border-sky/40 text-ink font-medium shadow-2xs' },
+  'missing-parameters': { label: COPY.badges.missingParameters, className: 'bg-yellow/40 border border-yellow/50 text-ink font-medium shadow-2xs' }
 };
 
 interface EvidenceBadgeChipProps {

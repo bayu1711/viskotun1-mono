@@ -108,7 +108,7 @@ export function MilestonePhotoComparison() {
           <span className="font-medium">
             {COPY.morphing.milestone.bannerTitle(routine.currentDay)}
           </span>
-          <span className="rounded-full bg-ink px-2 py-0.5 text-3xs font-semibold uppercase tracking-wider text-white">
+          <span className="rounded-full bg-orange px-2.5 py-0.5 text-3xs font-semibold uppercase tracking-wider text-white shadow-2xs">
             {COPY.morphing.dashboard.scheduledTodayBadge}
           </span>
         </div>
@@ -135,7 +135,7 @@ export function MilestonePhotoComparison() {
                 onClick={() => setSelectedMilestoneDay(day)}
                 className={`rounded-full px-3 py-1 text-xs transition-colors ${
                   isSelected
-                    ? 'bg-ink font-medium text-white'
+                    ? 'bg-orange font-medium text-white shadow-2xs'
                     : 'bg-canvas text-ink/70 hover:bg-ink/10'
                 }`}
               >
@@ -191,10 +191,10 @@ export function MilestonePhotoComparison() {
 
         {/* Vertical Split Divider */}
         <div
-          className="pointer-events-none absolute top-0 bottom-0 w-0.5 bg-ink shadow-lg"
+          className="pointer-events-none absolute top-0 bottom-0 w-0.5 bg-orange shadow-lg"
           style={{ left: `${sliderPos}%` }}
         >
-          <div className="absolute top-1/2 left-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-ink text-white shadow-md">
+          <div className="absolute top-1/2 left-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-orange text-white shadow-md">
             <Icon icon={CompareArrowsOutlinedIcon} size="xs" />
           </div>
         </div>

@@ -67,8 +67,8 @@ export function BiomarkerChartContent({
         <AreaChart data={data} margin={CHART_MARGIN}>
           <defs>
             <linearGradient id="biomarkerGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#486a57" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#486a57" stopOpacity={0.02} />
+              <stop offset="5%" stopColor="#FF7E1D" stopOpacity={0.35} />
+              <stop offset="95%" stopColor="#FF7E1D" stopOpacity={0.02} />
             </linearGradient>
           </defs>
 
@@ -94,23 +94,23 @@ export function BiomarkerChartContent({
             <ReferenceArea
               y1={targetMin}
               y2={targetMax}
-              fill="#c8ded1"
-              fillOpacity={0.35}
+              fill="#B4E8D8"
+              fillOpacity={0.45}
               strokeDasharray="4 4"
             />
           )}
 
           {typeof targetMin === 'number' && typeof targetMax !== 'number' && (
-            <ReferenceLine y={targetMin} stroke="#486a57" strokeDasharray="3 3" />
+            <ReferenceLine y={targetMin} stroke="#FF7E1D" strokeDasharray="3 3" />
           )}
 
           <Area
             type="monotone"
             dataKey="value"
-            stroke="#2e3a34"
-            strokeWidth={2.5}
+            stroke="#FF7E1D"
+            strokeWidth={3}
             fill="url(#biomarkerGrad)"
-            activeDot={{ r: 5, fill: '#2e3a34', stroke: '#ffffff', strokeWidth: 2 }}
+            activeDot={{ r: 6, fill: '#FF7E1D', stroke: '#ffffff', strokeWidth: 2 }}
           />
         </AreaChart>
       </ResponsiveContainer>

@@ -21,34 +21,35 @@ export function KeyMetrics() {
     {
       label: COPY.dashboard.activeRoutine,
       value: routine.shortTitle,
-    caption: COPY.shell.dayOfTotal(currentDay, totalDays),
-    tone: 'ink',
-    icon: AssignmentOutlinedIcon
-  },
-  {
-    label: COPY.dashboard.adherence,
-    value: `${adherenceRate}${COPY.common.percentSign}`,
-    caption: COPY.dashboard.compliance[complianceLevel(adherenceRate)],
-    tone: 'cream',
-    icon: TrendingUpIcon
-  },
-  {
-    label: COPY.dashboard.currentPhase,
-    value: routine.phaseLabel,
-    caption: COPY.dashboard.phase[status],
-    tone: status === 'paused' ? 'white' : 'mint',
-    icon: TimelineIcon
-  },
-  {
-    label: COPY.dashboard.evidenceScore,
-    value: isRct ? COPY.evidence.high : COPY.evidence.moderate,
-    caption: COPY.dashboard.evidenceCaption(
-      isRct ? COPY.evidence.rctShort : COPY.evidence.pilotShort,
-      routine.paper.sampleSize
-    ),
-    tone: 'white',
-    icon: ScienceOutlinedIcon
-  }];
+      caption: COPY.shell.dayOfTotal(currentDay, totalDays),
+      tone: 'orange',
+      icon: AssignmentOutlinedIcon
+    },
+    {
+      label: COPY.dashboard.adherence,
+      value: `${adherenceRate}${COPY.common.percentSign}`,
+      caption: COPY.dashboard.compliance[complianceLevel(adherenceRate)],
+      tone: 'yellow',
+      icon: TrendingUpIcon
+    },
+    {
+      label: COPY.dashboard.currentPhase,
+      value: routine.phaseLabel,
+      caption: COPY.dashboard.phase[status],
+      tone: status === 'paused' ? 'peach' : 'mint',
+      icon: TimelineIcon
+    },
+    {
+      label: COPY.dashboard.evidenceScore,
+      value: isRct ? COPY.evidence.high : COPY.evidence.moderate,
+      caption: COPY.dashboard.evidenceCaption(
+        isRct ? COPY.evidence.rctShort : COPY.evidence.pilotShort,
+        routine.paper.sampleSize
+      ),
+      tone: 'sky',
+      icon: ScienceOutlinedIcon
+    }
+  ];
 
 
   return (

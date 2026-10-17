@@ -28,7 +28,7 @@ export function ShareableSummaryPanel() {
         </p>
 
         <PillButton
-          variant="inverse"
+          variant="orange"
           size="md"
           fullWidth
           className="mt-5 gap-2"

@@ -9,7 +9,7 @@ import { SectionHeading } from '../ui/SectionHeading';
 const STATUS_TONE: Record<ProgressionStatus, PanelTone> = {
   paused: 'blush',
   ready: 'mint',
-  holding: 'white'
+  holding: 'cream'
 };
 
 export function ProgressionPanel() {

@@ -150,7 +150,7 @@ export function BiomarkerTrendChart() {
                 onClick={() => setSelectedFieldId(field.id)}
                 className={`rounded-full px-3 py-1 text-xs transition-colors ${
                   isSelected
-                    ? 'bg-ink font-medium text-white'
+                    ? 'bg-orange font-medium text-white shadow-2xs'
                     : 'bg-canvas text-ink/70 hover:bg-ink/10'
                 }`}
               >
@@ -172,7 +172,7 @@ export function BiomarkerTrendChart() {
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-ink/10 pt-3 text-xs text-ink/60">
         <div className="flex items-center gap-2">
-          <span className="inline-block h-3 w-5 rounded bg-[#c8ded1] opacity-70" />
+          <span className="inline-block h-3 w-5 rounded bg-mint opacity-85 shadow-2xs" />
           <span>{COPY.morphing.dashboard.targetZone}</span>
         </div>
         <div className="flex items-center gap-1">

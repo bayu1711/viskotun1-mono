@@ -1,13 +1,14 @@
 import React from 'react';
 import { cn } from '../../utils/cn';
 
-export type PanelTone = 'white' | 'ink' | 'mint' | 'blush';
+export type PanelTone = 'white' | 'ink' | 'mint' | 'blush' | 'cream';
 
 const TONES: Record<PanelTone, string> = {
-  white: 'bg-white text-ink',
+  white: 'bg-white text-ink border border-ink/10 shadow-2xs',
   ink: 'bg-ink text-white',
   mint: 'bg-mint text-ink',
-  blush: 'bg-blush text-ink'
+  blush: 'bg-blush text-ink',
+  cream: 'bg-cream text-ink border border-ink/10 shadow-2xs'
 };
 
 interface PanelProps extends React.HTMLAttributes<HTMLElement> {
