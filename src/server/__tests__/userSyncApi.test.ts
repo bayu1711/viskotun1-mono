@@ -2,30 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { GET, POST } from '../../app/api/user/sync/route';
 import { memoryUserStorage } from '../userStorage';
 import type { Routine } from '../../types/routine';
+import { achillesRoutine } from '../../data/routines/achilles';
 
 describe('User Sync API Route', () => {
   const testUserId = `test-sync-user-${Date.now()}@domain.com`;
-  const sampleRoutine: Routine = {
-    id: 'achilles',
-    title: 'Eccentric Achilles Protocol',
-    shortTitle: 'Achilles Rehab',
-    phase: 'Clinical Phase II',
-    currentDay: 1,
-    totalDays: 84,
-    streak: 0,
-    steps: [
-      {
-        id: 'ach-1',
-        action: 'Straight-knee eccentric heel drops',
-        sets: 3,
-        reps: '15 reps',
-        frequency: '2x daily',
-        targetTime: 'morning',
-        cadence: '3s down',
-        inferred: false
-      }
-    ]
-  };
+  const sampleRoutine: Routine = achillesRoutine;
 
   it('handles GET when user has no stored routines', async () => {
     const req = new Request(`http://localhost:3000/api/user/sync?userId=${encodeURIComponent(testUserId)}`);

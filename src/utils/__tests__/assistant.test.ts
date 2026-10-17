@@ -171,7 +171,6 @@ describe('Assistant answerFor generalization', () => {
       ...sampleProtocol,
       missingDataFlags: [
         {
-          id: 'miss-1',
           stepId: 'cr-1',
           parameter: 'Hold duration',
           fallback: 'Conservative default 30s',
