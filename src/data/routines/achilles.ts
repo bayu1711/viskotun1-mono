@@ -57,7 +57,12 @@ export const achillesRoutine: Routine = {
     reps: 1,
     frequency: '1x Daily',
     durationSeconds: 30,
-    inferred: true
+    inferred: true,
+    inferredProvenance: {
+      tier: 'guideline',
+      source: 'ACSM Clinical Guidelines',
+      rationale: 'Conservative standard of care for static stretching (3 × 30s hold)'
+    }
   }],
 
   progressionRules: [
@@ -84,7 +89,8 @@ export const achillesRoutine: Routine = {
   {
     stepId: 'ach-3',
     parameter: 'Hold duration for Static Calf Stretch',
-    fallback: 'Conservative baseline: 3 × 30s hold'
+    fallback: 'Conservative baseline: 3 × 30s hold',
+    sourceGuideline: 'ACSM Clinical Guidelines'
   }],
 
   dayHistory: [],

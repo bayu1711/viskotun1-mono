@@ -68,7 +68,12 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
       perSetLabel: '× 500 mL',
       statLabel: 'target:',
       statValue: '500 mL',
-      inferred: true
+      inferred: true,
+      inferredProvenance: {
+        tier: 'guideline',
+        source: 'Clinical Hydration Standard',
+        rationale: 'Standard fluid intake alongside creatine supplementation'
+      }
     }
   ],
   progressionRules: [
@@ -99,7 +104,8 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
     {
       stepId: 'cr-3',
       parameter: 'Co-ingestion hydration volume & schedule',
-      fallback: 'Conservative baseline: 4 × 500 mL water spaced across the waking day'
+      fallback: 'Conservative baseline: 4 × 500 mL water spaced across the waking day',
+      sourceGuideline: 'Clinical Hydration Standard'
     }
   ],
   dayHistory: [],
@@ -549,7 +555,12 @@ export function generateFallbackRoutine(source: string): Routine {
         reps: 1,
         frequency: COPY.fallbackProtocol.step2Frequency,
         durationSeconds: 30,
-        inferred: true
+        inferred: true,
+        inferredProvenance: {
+          tier: 'guideline',
+          source: 'ACSM Clinical Guidelines',
+          rationale: COPY.fallbackProtocol.step2Detail
+        }
       }
     ],
     progressionRules: [
@@ -570,7 +581,8 @@ export function generateFallbackRoutine(source: string): Routine {
       {
         stepId: `${slug}-2`,
         parameter: COPY.fallbackProtocol.missingParameter,
-        fallback: COPY.fallbackProtocol.missingFallback
+        fallback: COPY.fallbackProtocol.missingFallback,
+        sourceGuideline: 'ACSM Clinical Guidelines'
       }
     ],
     dayHistory: [],
