@@ -29,6 +29,7 @@ import {
   normalizeTitle,
   type PaperIdentifierInput
 } from '../utils/paperFingerprint';
+import { getLiveUserStats } from './userStorage';
 
 const PROTOCOLS_COLLECTION = 'protocols';
 const REVIEWS_SUBCOLLECTION = 'reviews';
@@ -319,6 +320,21 @@ export async function getCommunityMetrics(
   const baselineInsights = proto?.community;
   if (!baselineInsights) return null;
 
+  const allReviews = await getCommunityReviews(protocolId);
+  const improvedCount = allReviews.filter((r) => r.outcome === 'improved').length;
+  const calculatedEfficacy =
+    allReviews.length > 0 ? Math.round((improvedCount / allReviews.length) * 100) : 0;
+
+  const userStats = await getLiveUserStats(protocolId);
+  const userStatsCanonical =
+    canonicalId !== protocolId ? await getLiveUserStats(canonicalId) : { activeTrackersCount: 0, userLogsCount: 0 };
+  const realActiveTrackers = Math.max(
+    userStats.activeTrackersCount,
+    userStatsCanonical.activeTrackersCount
+  );
+
+  const totalParticipants = Math.max(realActiveTrackers, allReviews.length);
+
   const db = getFirestore();
   if (db) {
     try {
@@ -333,8 +349,8 @@ export async function getCommunityMetrics(
         const data = metricsDoc.data();
         return {
           ...baselineInsights,
-          realWorldEfficacy: data?.realWorldEfficacy ?? baselineInsights.realWorldEfficacy,
-          userCount: (data?.totalReviews ? data.totalReviews * 12 : null) ?? baselineInsights.userCount
+          realWorldEfficacy: data?.realWorldEfficacy ?? calculatedEfficacy,
+          userCount: Math.max(totalParticipants, data?.totalReviews || 0)
         };
       }
     } catch (err: any) {
@@ -342,7 +358,11 @@ export async function getCommunityMetrics(
     }
   }
 
-  return baselineInsights;
+  return {
+    ...baselineInsights,
+    realWorldEfficacy: calculatedEfficacy,
+    userCount: totalParticipants
+  };
 }
 
 export const findCanonicalRoutine = findCanonicalProtocol;

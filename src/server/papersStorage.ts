@@ -9,6 +9,8 @@
 import { getFirestore } from './guardrailLedger';
 import { SAMPLE_PAPERS, PRECALIBRATED_SAMPLE_PROTOCOLS, PRECALIBRATED_SAMPLE_ROUTINES, type SamplePaper } from '../data/samplePapers';
 import type { Routine, Protocol, StoredPaper } from '../types/routine';
+import { getLiveUserStats } from './userStorage';
+import { getCommunityReviews } from './routineRegistry';
 
 export const PAPERS_COLLECTION = 'papers';
 
@@ -78,6 +80,24 @@ export async function seedSamplePapersIfEmpty(): Promise<boolean> {
   }
 }
 
+async function enrichPaperWithLiveTelemetry(paper: SamplePaper): Promise<SamplePaper> {
+  const targetId = paper.routineId || paper.protocolId || paper.id;
+  const userStats = await getLiveUserStats(targetId);
+  const reviews = await getCommunityReviews(targetId);
+
+  const realActiveTrackers = Math.max(
+    userStats.activeTrackersCount,
+    reviews.length
+  );
+  const realTotalLogs = userStats.userLogsCount + reviews.length;
+
+  return {
+    ...paper,
+    activeTrackersCount: realActiveTrackers,
+    totalLogsCount: realTotalLogs
+  };
+}
+
 /**
  * Fetch sample research papers and pre-calibrated protocols.
  * Resolves from live Cloud Firestore when available, or gracefully falls back to memory cache.
@@ -141,7 +161,9 @@ export async function getSamplePapers(): Promise<{
           }
         }
 
-        const sorted = (samplePapers.length > 0 ? samplePapers : SAMPLE_PAPERS).slice().sort(
+        const baseList = samplePapers.length > 0 ? samplePapers : SAMPLE_PAPERS;
+        const enriched = await Promise.all(baseList.map(enrichPaperWithLiveTelemetry));
+        const sorted = enriched.slice().sort(
           (a, b) => (b.popularityScore ?? 0) - (a.popularityScore ?? 0)
         );
 
@@ -191,7 +213,9 @@ export async function getSamplePapers(): Promise<{
     }
   }
 
-  const sorted = (samplePapers.length > 0 ? samplePapers : SAMPLE_PAPERS).slice().sort(
+  const baseList = samplePapers.length > 0 ? samplePapers : SAMPLE_PAPERS;
+  const enriched = await Promise.all(baseList.map(enrichPaperWithLiveTelemetry));
+  const sorted = enriched.slice().sort(
     (a, b) => (b.popularityScore ?? 0) - (a.popularityScore ?? 0)
   );
 
