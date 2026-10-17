@@ -83,6 +83,7 @@ export function AssistantSheet() {
   };
 
   const hasAskConversation = messages.length > 0 || assistantTyping;
+  const lastEngine = useMemo(() => [...messages].reverse().find((m) => m.engine)?.engine, [messages]);
   const isAsk = mode === 'ask';
 
   const askSuggestions = useMemo(
@@ -138,6 +139,7 @@ export function AssistantSheet() {
               titleId={titleId}
               onModeChange={handleModeChange}
               onClose={closeAssistant}
+              lastEngine={lastEngine}
             />
 
             <div role="log" aria-live="polite" className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">

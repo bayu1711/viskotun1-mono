@@ -63,6 +63,12 @@ function buildMessage(message: NewChatMessage): ChatMessage {
   return { ...message, id: message.id ?? createId('msg'), timestamp: nowLabel() };
 }
 
+/** Seeded chat history ships with placeholder times; stamp it with the time the routine was added. */
+function stampSeedMessages(messages: ChatMessage[]): ChatMessage[] {
+  const timestamp = nowLabel();
+  return messages.map((message) => ({ ...message, timestamp }));
+}
+
 const STORAGE_VERSION = 'v2';
 const STORAGE_KEY_PREFIX = `viskotun1_${STORAGE_VERSION}`;
 const LEGACY_STORAGE_KEY_PREFIX = `protocol_engine_${STORAGE_VERSION}`;
@@ -521,7 +527,7 @@ export function useRoutineState() {
         feedbackLogs: [],
         morphingLogs: [],
         messages: cleanProtocol.initialMessages?.length
-          ? cleanProtocol.initialMessages
+          ? stampSeedMessages(cleanProtocol.initialMessages)
           : [
               {
                 id: createId('msg'),
@@ -991,7 +997,7 @@ export function useRoutineState() {
       setsDone: { ...(newProtocol.initialSetsDone ?? {}) },
       excludedStepIds: newProtocol.initialExcludedStepIds ?? [],
       feedbackLogs: newProtocol.initialFeedbackLogs ?? [],
-      messages: newProtocol.initialMessages ?? [],
+      messages: stampSeedMessages(newProtocol.initialMessages ?? []),
       escalationPaused: false,
       assistantTyping: false
     };

@@ -6,10 +6,18 @@ import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { AssistantMode } from '../../contexts/AssistantContext';
 import { COPY } from '../../data/copy';
+import type { AIEngineType } from '../../types/routine';
 import { isEdgeGemmaAvailable } from '../../utils/edgeGemma';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 import { SegmentedTabs } from '../ui/SegmentedTabs';
+
+const ENGINE_LABELS: Record<AIEngineType, string> = {
+  'on-device-gemma': COPY.assistant.engines.onDeviceGemma,
+  'server-gemma': COPY.assistant.engines.serverGemma,
+  'cloud-gemini': COPY.assistant.engines.cloudGemini,
+  'local-rules': COPY.assistant.engines.localRules
+};
 
 const MODE_OPTIONS: { id: AssistantMode; label: string }[] = [
   { id: 'ask', label: COPY.assistant.modes.ask },
@@ -24,6 +32,8 @@ interface AssistantHeaderProps {
   onClose: () => void;
   customTitle?: string;
   customEyebrow?: string;
+  /** Engine that produced the latest answer, so the badge reflects what actually responded. */
+  lastEngine?: AIEngineType;
 }
 
 export function AssistantHeader({
@@ -33,12 +43,14 @@ export function AssistantHeader({
   onModeChange,
   onClose,
   customTitle,
-  customEyebrow
+  customEyebrow,
+  lastEngine
 }: AssistantHeaderProps) {
   const isAsk = mode === 'ask';
   const [isEdgeAvailable, setIsEdgeAvailable] = useState<boolean>(false);
   const [isDisclaimerOpen, setIsDisclaimerOpen] = useState<boolean>(false);
   const disclaimerRef = useRef<HTMLDivElement>(null);
+  const engine = lastEngine ?? (isEdgeAvailable ? 'on-device-gemma' : undefined);
 
   useEffect(() => {
     let active = true;
@@ -101,15 +113,13 @@ export function AssistantHeader({
               <span>{COPY.assistant.medicalDisclaimerChip}</span>
             </button>
 
-            {isAsk && (
+            {isAsk && engine && (
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-3xs font-medium ${
-                  isEdgeAvailable ? 'bg-mint text-ink' : 'bg-cream text-ink/80'
+                  engine === 'on-device-gemma' ? 'bg-mint text-ink' : 'bg-cream text-ink/80'
                 }`}
               >
-                {isEdgeAvailable
-                  ? COPY.assistant.engines.onDeviceGemma
-                  : COPY.assistant.engines.cloudGemini}
+                {ENGINE_LABELS[engine]}
               </span>
             )}
 
