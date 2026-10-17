@@ -4,18 +4,15 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import AddIcon from '@mui/icons-material/Add';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import BedtimeOutlinedIcon from '@mui/icons-material/BedtimeOutlined';
-import CheckIcon from '@mui/icons-material/Check';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import FitnessCenterOutlinedIcon from '@mui/icons-material/FitnessCenterOutlined';
 import HealthAndSafetyOutlinedIcon from '@mui/icons-material/HealthAndSafetyOutlined';
 import LocalDiningOutlinedIcon from '@mui/icons-material/LocalDiningOutlined';
 import PsychologyOutlinedIcon from '@mui/icons-material/PsychologyOutlined';
-import RemoveIcon from '@mui/icons-material/Remove';
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
 import SelfImprovementOutlinedIcon from '@mui/icons-material/SelfImprovementOutlined';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
@@ -46,11 +43,6 @@ export function LandingPage() {
   const { user, isLoading, loginAsGuest, logout } = useAuth();
   const [isNavigating, setIsNavigating] = useState(false);
 
-  // Interactive hero routine preview states
-  const [step1Sets, setStep1Sets] = useState(2);
-  const [step2Done, setStep2Done] = useState(true);
-  const [step3Done, setStep3Done] = useState(false);
-
   useEffect(() => {
     router.prefetch(ROUTES.routine);
   }, [router]);
@@ -63,12 +55,6 @@ export function LandingPage() {
     }
     router.push(ROUTES.routine);
   };
-
-  // Calculate live preview progress
-  const totalPreviewItems = 3;
-  const completedPreviewCount =
-    (step1Sets === 3 ? 1 : step1Sets / 3) + (step2Done ? 1 : 0) + (step3Done ? 1 : 0);
-  const previewPercent = Math.round((completedPreviewCount / totalPreviewItems) * 100);
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink selection:bg-orange/20 selection:text-ink">
@@ -159,19 +145,12 @@ export function LandingPage() {
       <section className="mx-auto max-w-6xl px-5 pb-16 pt-12 lg:px-8 lg:pb-24 lg:pt-20">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
           {/* Left Column: Headline, Value Proposition, Action Buttons */}
-          <div className="text-left lg:col-span-7">
-            {user ? (
+          <div className="text-left lg:col-span-6">
+            {user && (
               <div className="mb-5 inline-block">
                 <span className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-mint/70 px-3.5 py-1 text-2xs font-semibold text-ink">
                   <span className="h-1.5 w-1.5 rounded-full bg-ink" aria-hidden="true" />
                   <span>{COPY.landing.loggedInBadge(user.name)}</span>
-                </span>
-              </div>
-            ) : (
-              <div className="mb-5 inline-block">
-                <span className="inline-flex items-center gap-2 rounded-full border border-orange/20 bg-orange/15 px-3.5 py-1 text-2xs font-semibold text-orange">
-                  <span className="h-2 w-2 rounded-full bg-orange animate-pulse" aria-hidden="true" />
-                  <span>{COPY.landing.heroBadge}</span>
                 </span>
               </div>
             )}
@@ -221,179 +200,43 @@ export function LandingPage() {
             </div>
           </div>
 
-          {/* Right Column: Interactive Routine Preview (Headspace Card Container) */}
-          <div className="lg:col-span-5">
-            <div className="relative rounded-sheet border border-ink/10 bg-white/90 p-5 shadow-float backdrop-blur-md sm:p-6">
-              {/* Floating Streak Pill */}
-              <div className="flex items-center justify-between gap-2 border-b border-ink/10 pb-4">
-                <div>
-                  <span className="rounded-full bg-ink/5 px-2.5 py-0.5 text-3xs font-semibold uppercase tracking-wider text-ink/60">
-                    {COPY.landing.interactivePreview.tag}
+          {/* Right Column: Hero Photo of Many People (Human Community) */}
+          <div className="lg:col-span-6">
+            <div className="relative rounded-sheet border border-ink/10 bg-white/90 p-3 shadow-float backdrop-blur-md sm:p-4">
+              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[1.25rem] bg-ink/5">
+                <Image
+                  src="/images/hero-community.jpg"
+                  alt={COPY.landing.heroImageAlt}
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
+                  className="object-cover transition-transform duration-500 hover:scale-[1.02]"
+                />
+
+                {/* Top Floating Cohort Badge */}
+                <div className="absolute left-3 top-3 sm:left-4 sm:top-4">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-ink/80 px-3 py-1 text-2xs font-semibold text-white shadow-sm backdrop-blur-md">
+                    <span className="h-2 w-2 rounded-full bg-mint animate-pulse" aria-hidden="true" />
+                    <span>{COPY.landing.heroImageBadge}</span>
                   </span>
-                  <h3 className="mt-1 text-sm font-semibold text-ink">
-                    {COPY.landing.interactivePreview.title}
-                  </h3>
                 </div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-orange/15 px-3 py-1 text-xs font-semibold text-orange">
-                  <span aria-hidden="true">🔥</span>
-                  {COPY.landing.interactivePreview.streakBadge}
-                </span>
-              </div>
 
-              {/* Chunky Orange Progress Bar */}
-              <div className="mt-4">
-                <div className="flex items-center justify-between text-2xs font-medium text-ink/60">
-                  <span>{COPY.landing.interactivePreview.progressLabel}</span>
-                  <span className="font-semibold text-ink">{previewPercent}%</span>
-                </div>
-                <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-ink/10">
-                  <div
-                    className="h-full rounded-full bg-orange transition-all duration-300"
-                    style={{ width: `${previewPercent}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Interactive Mini Cards */}
-              <div className="mt-5 space-y-3">
-                {/* Step 1: Orange Card */}
-                <div
-                  className={cn(
-                    'rounded-card p-4 transition-all',
-                    toneStyles.orange.card,
-                    step1Sets === 3 && 'ring-2 ring-orange/40'
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <span className="rounded-full bg-white/70 px-2 py-0.5 text-3xs font-semibold uppercase tracking-wider text-ink/80">
-                        {COPY.landing.interactivePreview.step1Meta}
-                      </span>
-                      <h4 className="mt-1 text-sm font-medium leading-snug">
-                        {COPY.landing.interactivePreview.step1Action}
-                      </h4>
-                      <p className="mt-0.5 text-2xs text-ink/65">
-                        {COPY.landing.interactivePreview.step1Detail}
+                {/* Bottom Floating Glass Card */}
+                <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4">
+                  <div className="flex items-center justify-between gap-3 rounded-card border border-white/20 bg-ink/80 px-4 py-2.5 text-white shadow-lg backdrop-blur-md">
+                    <div className="min-w-0">
+                      <p className="text-3xs font-semibold uppercase tracking-wider text-white/70">
+                        {COPY.landing.heroImageSubheading}
+                      </p>
+                      <p className="truncate text-xs font-medium text-white/95">
+                        {COPY.landing.heroImageCaption}
                       </p>
                     </div>
-
-                    {/* Counter Buttons */}
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setStep1Sets((s) => Math.max(0, s - 1))}
-                        disabled={step1Sets === 0}
-                        aria-label="Decrease sets"
-                        className="flex h-7 w-7 items-center justify-center rounded-full border border-ink text-ink transition-colors hover:bg-ink/10 disabled:opacity-30"
-                      >
-                        <Icon icon={RemoveIcon} size="xs" />
-                      </button>
-                      <span className="w-5 text-center text-xs font-semibold tabular-nums">
-                        {step1Sets}/3
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setStep1Sets((s) => Math.min(3, s + 1))}
-                        disabled={step1Sets === 3}
-                        aria-label="Increase sets"
-                        className="flex h-7 w-7 items-center justify-center rounded-full bg-ink text-white transition-colors hover:bg-ink/85 disabled:opacity-30"
-                      >
-                        <Icon icon={AddIcon} size="xs" />
-                      </button>
-                    </div>
+                    <span className="shrink-0 rounded-full bg-orange px-2.5 py-1 text-3xs font-semibold uppercase tracking-wider text-white">
+                      {COPY.landing.heroImageStat}
+                    </span>
                   </div>
                 </div>
-
-                {/* Step 2: Yellow Card */}
-                <div
-                  className={cn(
-                    'rounded-card p-4 transition-all',
-                    toneStyles.yellow.card,
-                    step2Done && 'opacity-90'
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <span className="rounded-full bg-white/70 px-2 py-0.5 text-3xs font-semibold uppercase tracking-wider text-ink/80">
-                        {COPY.landing.interactivePreview.step2Meta}
-                      </span>
-                      <h4
-                        className={cn(
-                          'mt-1 text-sm font-medium leading-snug',
-                          step2Done && 'line-through opacity-70'
-                        )}
-                      >
-                        {COPY.landing.interactivePreview.step2Action}
-                      </h4>
-                      <p className="mt-0.5 text-2xs text-ink/65">
-                        {COPY.landing.interactivePreview.step2Detail}
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setStep2Done((v) => !v)}
-                      aria-label="Toggle step 2"
-                      className={cn(
-                        'flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors',
-                        step2Done
-                          ? 'bg-ink text-white'
-                          : 'border border-ink/40 text-transparent hover:text-ink/40'
-                      )}
-                    >
-                      <Icon icon={CheckIcon} size="xs" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Step 3: Sky Blue Card */}
-                <div
-                  className={cn(
-                    'rounded-card p-4 transition-all',
-                    toneStyles.sky.card,
-                    step3Done && 'opacity-90'
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                      <span className="rounded-full bg-white/70 px-2 py-0.5 text-3xs font-semibold uppercase tracking-wider text-ink/80">
-                        {COPY.landing.interactivePreview.step3Meta}
-                      </span>
-                      <h4
-                        className={cn(
-                          'mt-1 text-sm font-medium leading-snug',
-                          step3Done && 'line-through opacity-70'
-                        )}
-                      >
-                        {COPY.landing.interactivePreview.step3Action}
-                      </h4>
-                      <p className="mt-0.5 text-2xs text-ink/65">
-                        {COPY.landing.interactivePreview.step3Detail}
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setStep3Done((v) => !v)}
-                      aria-label="Toggle step 3"
-                      className={cn(
-                        'flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors',
-                        step3Done
-                          ? 'bg-ink text-white'
-                          : 'border border-ink/40 text-transparent hover:text-ink/40'
-                      )}
-                    >
-                      <Icon icon={CheckIcon} size="xs" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom Interactive Hint */}
-              <div className="mt-4 text-center">
-                <p className="text-2xs font-medium text-ink/50">
-                  {COPY.landing.interactivePreview.clickHint}
-                </p>
               </div>
             </div>
           </div>
