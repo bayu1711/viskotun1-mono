@@ -131,13 +131,11 @@ export function EmptyRoutineView() {
                       {paper.summary}
                     </p>
 
-                    {(trackers || logs) && (
-                      <div className="mt-2.5 flex items-center gap-2 text-2xs text-ink/50">
-                        {trackers && <span>{COPY.howTo.activeTrackersBadge(trackers)}</span>}
-                        {trackers && logs && <span>·</span>}
-                        {logs && <span>{COPY.howTo.totalLogsBadge(logs)}</span>}
-                      </div>
-                    )}
+                    <div className="mt-2.5 flex items-center gap-1.5 text-2xs text-ink/50">
+                      <span>{COPY.howTo.activeTrackersBadge(trackers ?? 0)}</span>
+                      <span>·</span>
+                      <span>{COPY.howTo.totalLogsBadge(logs ?? 0)}</span>
+                    </div>
                   </div>
 
                   <div className="mt-4 pt-3 border-t border-ink/10">

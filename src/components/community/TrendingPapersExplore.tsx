@@ -192,13 +192,11 @@ export function TrendingPapersExplore() {
                 )}
 
                 {/* Community Telemetry Badges */}
-                {(trackers || logs) && (
-                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-ink/5 pt-2 text-2xs text-ink/50">
-                    {trackers && <span>{COPY.howTo.activeTrackersBadge(trackers)}</span>}
-                    {trackers && logs && <span>·</span>}
-                    {logs && <span>{COPY.howTo.totalLogsBadge(logs)}</span>}
-                  </div>
-                )}
+                <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-ink/5 pt-2 text-2xs text-ink/50">
+                  <span>{COPY.howTo.activeTrackersBadge(trackers ?? 0)}</span>
+                  <span>·</span>
+                  <span>{COPY.howTo.totalLogsBadge(logs ?? 0)}</span>
+                </div>
               </div>
 
               {/* Bottom Actions: Start Routine Button & External Links */}

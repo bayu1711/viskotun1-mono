@@ -144,8 +144,8 @@ export function CommunityPage() {
               <EfficacyCard
                 tone="mint"
                 label={COPY.community.realWorldEfficacy}
-                value={insights.realWorldEfficacy}
-                caption={COPY.community.realWorldCaption((insights.userCount || 100).toLocaleString())}
+                value={insights.realWorldEfficacy ?? 0}
+                caption={COPY.community.realWorldCaption(insights.userCount ?? 0)}
               />
             </section>
           )}
