@@ -35,6 +35,18 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Respect reduced-motion for CSS transitions and keyframes; framer-motion is covered by MotionConfig. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Feedback scale slider — the filled track is rendered behind the input; thumb ring uses currentColor. */
 input[type='range'].feedback-slider {
   -webkit-appearance: none;
