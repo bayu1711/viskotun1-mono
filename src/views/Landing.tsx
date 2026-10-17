@@ -203,9 +203,9 @@ export function LandingPage() {
           {/* Right Column: Hero Photo of Many People (Human Community) */}
           <div className="lg:col-span-6">
             <div className="relative rounded-sheet border border-ink/10 bg-white/90 p-3 shadow-float backdrop-blur-md sm:p-4">
-              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-[1.25rem] bg-ink/5">
+              <div className="relative aspect-[3/2] w-full overflow-hidden rounded-[1.25rem] bg-ink/5">
                 <Image
-                  src="/images/hero-community.jpg"
+                  src="/images/hero-image.jpg"
                   alt={COPY.landing.heroImageAlt}
                   fill
                   priority
