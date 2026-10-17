@@ -332,7 +332,10 @@ export const COPY = {
     holdCountdownStart: (seconds: number) => `Begin hold for ${seconds} seconds. 3, 2, 1, start.`,
     holdFinished: 'Hold complete. Relax.',
     finishedAllSteps: 'Great work! You have completed all prescribed plan steps for today.',
-    unsupported: 'Voice synthesis is not supported on this browser.'
+    unsupported: 'Voice synthesis is not supported on this browser.',
+    voiceNameDisplay: (name: string) => `Voice: ${name}`,
+    switchVoice: 'Switch coach voice',
+    voiceLabel: 'Voice'
   },
   community: {
     eyebrow: 'Community',
