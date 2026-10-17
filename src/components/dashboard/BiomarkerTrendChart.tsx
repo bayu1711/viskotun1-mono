@@ -4,9 +4,11 @@ import React, { useId, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import ShowChartOutlinedIcon from '@mui/icons-material/ShowChartOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import type { DataCollectionField } from '../../types/routine';
+import { isFieldScheduledForDay } from '../../utils/routineMetrics';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 import { Panel } from '../ui/Panel';
@@ -96,6 +98,7 @@ export function BiomarkerTrendChart() {
   }
 
   const latestVal = chartData[chartData.length - 1]?.value ?? activeField.min ?? 0;
+  const isScheduledToday = isFieldScheduledForDay(activeField, currentDay);
 
   return (
     <Panel aria-labelledby={headingId}>
@@ -109,14 +112,31 @@ export function BiomarkerTrendChart() {
               {COPY.morphing.dashboard.currentReading(latestVal, activeField.unit)}
             </span>
             <CircleButton
-              label={COPY.morphing.saveEntry}
+              label={
+                isScheduledToday
+                  ? COPY.morphing.saveEntry
+                  : COPY.morphing.dashboard.notScheduledBiomarkerTooltip
+              }
               onClick={() => openFeedbackDrawer(activeField.id)}
+              disabled={!isScheduledToday}
             >
               <Icon icon={TuneOutlinedIcon} size="md" />
             </CircleButton>
           </div>
         }
       />
+
+      {!isScheduledToday && (
+        <div className="mt-3 flex items-start gap-2.5 rounded-tile border border-ink/10 bg-canvas p-3 text-xs text-ink/75">
+          <Icon icon={InfoOutlinedIcon} size="sm" className="mt-0.5 shrink-0 text-ink/50" />
+          <div className="flex-1 leading-relaxed">
+            <span className="font-medium text-ink">
+              {COPY.morphing.dashboard.notScheduledBadge}:
+            </span>{' '}
+            {COPY.morphing.dashboard.notScheduledBiomarkerNote(activeField.name, currentDay)}
+          </div>
+        </div>
+      )}
 
       {/* Field switcher if protocol tracks multiple parameters */}
       {trackableFields.length > 1 && (

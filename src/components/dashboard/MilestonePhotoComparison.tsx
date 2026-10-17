@@ -4,8 +4,10 @@ import React, { useId, useState } from 'react';
 import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
 import CompareArrowsOutlinedIcon from '@mui/icons-material/CompareArrowsOutlined';
 import GridOnOutlinedIcon from '@mui/icons-material/GridOnOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
+import { isFieldScheduledForDay } from '../../utils/routineMetrics';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 import { Panel } from '../ui/Panel';
@@ -35,6 +37,10 @@ export function MilestonePhotoComparison() {
   });
 
   if (!photoField) return null;
+
+  const isScheduledToday = isFieldScheduledForDay(photoField, routine.currentDay);
+  const nextMilestoneDay = photoField.milestoneDays?.find((d) => d > routine.currentDay);
+  const daysUntilNext = nextMilestoneDay ? nextMilestoneDay - routine.currentDay : null;
 
   const baselineLog = morphingLogs.find(
     (log) => log.fieldId === photoField.id && log.day === 1 && typeof log.value === 'string'
@@ -69,8 +75,13 @@ export function MilestonePhotoComparison() {
               <span>{COPY.morphing.dashboard.gridToggle}</span>
             </button>
             <CircleButton
-              label={COPY.morphing.milestone.action}
+              label={
+                isScheduledToday
+                  ? COPY.morphing.milestone.action
+                  : COPY.morphing.dashboard.notScheduledPhotoTooltip(nextMilestoneDay)
+              }
               onClick={() => openFeedbackDrawer(photoField.id)}
+              disabled={!isScheduledToday}
             >
               <Icon icon={CameraAltOutlinedIcon} size="md" />
             </CircleButton>
@@ -78,7 +89,32 @@ export function MilestonePhotoComparison() {
         }
       />
 
-      <p className="mt-1 text-xs text-ink/60">
+      {!isScheduledToday ? (
+        <div className="mt-3 flex items-start gap-2.5 rounded-tile border border-ink/10 bg-canvas p-3 text-xs text-ink/75">
+          <Icon icon={InfoOutlinedIcon} size="sm" className="mt-0.5 shrink-0 text-ink/50" />
+          <div className="flex-1 leading-relaxed">
+            <span className="font-medium text-ink">
+              {COPY.morphing.dashboard.notScheduledBadge}:
+            </span>{' '}
+            {COPY.morphing.dashboard.notScheduledPhotoNote(
+              routine.currentDay,
+              nextMilestoneDay,
+              daysUntilNext
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="mt-3 flex items-center justify-between rounded-tile border border-mint/40 bg-mint/15 px-3.5 py-2 text-xs text-ink">
+          <span className="font-medium">
+            {COPY.morphing.milestone.bannerTitle(routine.currentDay)}
+          </span>
+          <span className="rounded-full bg-ink px-2 py-0.5 text-3xs font-semibold uppercase tracking-wider text-white">
+            {COPY.morphing.dashboard.scheduledTodayBadge}
+          </span>
+        </div>
+      )}
+
+      <p className="mt-2 text-xs text-ink/60">
         {photoField.instructions || COPY.morphing.dashboard.photoSplitSubtitle}
       </p>
 

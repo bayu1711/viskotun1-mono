@@ -53,13 +53,16 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
     activeFieldId,
     setActiveFieldId,
     logMorphingData,
-    feedbackMetric
+    feedbackMetric,
+    dataCollectionSpec
   } = useRoutine();
 
   const activeField = useMemo(
     () =>
+      dataCollectionSpec.find((f) => f.id === activeFieldId) ??
       scheduledFields.find((f) => f.id === activeFieldId) ??
-      scheduledFields[0] ?? {
+      scheduledFields[0] ??
+      dataCollectionSpec[0] ?? {
         id: 'default-scale',
         name: feedbackMetric.name,
         label: feedbackMetric.label,
@@ -71,8 +74,16 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
         escalationThreshold: feedbackMetric.escalationThreshold,
         escalationMessage: feedbackMetric.escalationMessage
       },
-    [scheduledFields, activeFieldId, feedbackMetric]
+    [dataCollectionSpec, scheduledFields, activeFieldId, feedbackMetric]
   );
+
+  const availableFields = useMemo(() => {
+    const baseList = scheduledFields.length > 0 ? scheduledFields : dataCollectionSpec;
+    if (activeField && !baseList.some((f) => f.id === activeField.id)) {
+      return [...baseList, activeField];
+    }
+    return baseList;
+  }, [scheduledFields, dataCollectionSpec, activeField]);
 
   const [value, setValue] = useState<MorphingValue>(() => getInitialValueForField(activeField));
   const [note, setNote] = useState('');
@@ -97,10 +108,10 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
 
   return (
     <form onSubmit={handleSubmit}>
-      {/* Field Switcher Tabs (if protocol has multiple scheduled measures today) */}
-      {scheduledFields.length > 1 && (
+      {/* Field Switcher Tabs (if protocol has multiple measures) */}
+      {availableFields.length > 1 && (
         <div className="flex border-b border-ink/15 bg-canvas px-6 pt-4 pb-2 gap-2 overflow-x-auto">
-          {scheduledFields.map((field) => {
+          {availableFields.map((field) => {
             const isSelected = field.id === activeField.id;
             return (
               <button

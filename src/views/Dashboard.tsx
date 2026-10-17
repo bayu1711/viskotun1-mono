@@ -41,6 +41,9 @@ export function DashboardPage() {
   }
 
   const hasPhotoField = routine.dataCollectionSpec?.some((f) => f.type === 'photo');
+  const hasBiomarkerField = routine.dataCollectionSpec?.some(
+    (f) => f.type === 'scale' || f.type === 'numeric' || f.type === 'timer'
+  );
 
   return (
     <PageContainer>
@@ -48,7 +51,9 @@ export function DashboardPage() {
       <KeyMetrics />
       <div className="mt-2.5 grid grid-cols-1 gap-2.5 lg:grid-cols-main-aside">
         <div className="space-y-2.5">
-          {hasPhotoField ? <MilestonePhotoComparison /> : <BiomarkerTrendChart />}
+          {hasBiomarkerField && <BiomarkerTrendChart />}
+          {hasPhotoField && <MilestonePhotoComparison />}
+          {!hasBiomarkerField && !hasPhotoField && <BiomarkerTrendChart />}
           <PapersPanel />
         </div>
         <aside className="space-y-2.5">
