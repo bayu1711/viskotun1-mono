@@ -81,20 +81,26 @@ function getStorageKeys(userId?: string) {
 /** All routine session state + actions. Only raw state is stored; metrics are derived on render. */
 export function useRoutineState() {
   const auth = useContext(AuthContext);
+  const isAuthLoading = auth?.isLoading ?? false;
   const isAuthenticated = auth?.isAuthenticated;
   const userId = auth?.user?.id;
   const isAdmin = auth?.isAdmin;
 
-  const [protocolList, setProtocolList] = useState<Protocol[]>(initialProtocols);
-  const [activeProtocolId, setActiveProtocol] = useState<string>(initialProtocols[0]?.id ?? '');
+  const [protocolList, setProtocolList] = useState<Protocol[]>([]);
+  const [activeProtocolId, setActiveProtocol] = useState<string>('');
   const [queuedPapers, setQueuedPapers] = useState<QueuedPaper[]>(initialQueuedPapers);
   const [isFeedbackDrawerOpen, setIsFeedbackDrawerOpen] = useState(false);
   const [isReviewDrawerOpen, setIsReviewDrawerOpen] = useState(false);
   const [isHowToOpen, setIsHowToOpen] = useState(false);
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
-  const [runtime, setRuntime] = useState<Record<string, ProtocolRuntime>>(() => createInitialRuntime(initialProtocols));
+  const [runtime, setRuntime] = useState<Record<string, ProtocolRuntime>>({});
   const [hasHydrated, setHasHydrated] = useState(false);
   const [hasRemoteHydrated, setHasRemoteHydrated] = useState(false);
+
+  const activeProtocolIdRef = useRef(activeProtocolId);
+  activeProtocolIdRef.current = activeProtocolId;
+  const runtimeRef = useRef(runtime);
+  runtimeRef.current = runtime;
 
   // Staging candidate paper for pre-confirmation review & discussion
   const [stagingProtocol, setStagingProtocol] = useState<Protocol | null>(null);
@@ -143,6 +149,9 @@ export function useRoutineState() {
 
   // Safe client hydration from scoped localStorage and legacy cleanup
   useEffect(() => {
+    // Wait until auth session resolution completes to prevent reading wrong scoped storage
+    if (isAuthLoading) return;
+
     let isMounted = true;
     try {
       // Clean up legacy v1 storage keys that may contain old default pre-seeded papers
@@ -162,6 +171,28 @@ export function useRoutineState() {
           savedRoutinesRaw = legacyProtocols;
           savedActiveId = savedActiveId || window.localStorage.getItem(keys.legacyActiveId);
           savedRuntimeRaw = savedRuntimeRaw || window.localStorage.getItem(keys.legacyRuntime);
+        }
+      }
+
+      // Guest -> Authenticated user migration: if user is signed in and has no stored routines,
+      // but has routines in guest storage from this browser session, migrate them into the user account
+      if (!savedRoutinesRaw && isAuthenticated && userId) {
+        const guestKeys = getStorageKeys(undefined);
+        const guestRoutinesRaw = window.localStorage.getItem(guestKeys.routines);
+        if (guestRoutinesRaw) {
+          savedRoutinesRaw = guestRoutinesRaw;
+          savedActiveId = savedActiveId || window.localStorage.getItem(guestKeys.activeId);
+          savedRuntimeRaw = savedRuntimeRaw || window.localStorage.getItem(guestKeys.runtime);
+          try {
+            window.localStorage.setItem(keys.routines, guestRoutinesRaw);
+            if (savedActiveId) window.localStorage.setItem(keys.activeId, savedActiveId);
+            if (savedRuntimeRaw) window.localStorage.setItem(keys.runtime, savedRuntimeRaw);
+            window.localStorage.removeItem(guestKeys.routines);
+            window.localStorage.removeItem(guestKeys.activeId);
+            window.localStorage.removeItem(guestKeys.runtime);
+          } catch {
+            // Ignore storage write issues
+          }
         }
       }
 
@@ -259,11 +290,11 @@ export function useRoutineState() {
     return () => {
       isMounted = false;
     };
-  }, [isAuthenticated, userId]);
+  }, [isAuthLoading, isAuthenticated, userId]);
 
   // Persist changes to scoped localStorage once hydrated
   useEffect(() => {
-    if (!hasHydrated) return;
+    if (!hasHydrated || isAuthLoading) return;
     const keys = getStorageKeys(isAuthenticated ? userId : undefined);
     try {
       window.localStorage.setItem(keys.routines, JSON.stringify(protocolList));
@@ -272,12 +303,12 @@ export function useRoutineState() {
     } catch (err) {
       console.error('[useRoutineState] LocalStorage write error:', err);
     }
-  }, [protocolList, activeProtocolId, runtime, hasHydrated, isAuthenticated, userId]);
+  }, [protocolList, activeProtocolId, runtime, hasHydrated, isAuthLoading, isAuthenticated, userId]);
 
   // Fetch cloud state when authenticating as a signed-in user
   useEffect(() => {
     let isMounted = true;
-    if (!isAuthenticated || !userId) {
+    if (isAuthLoading || !isAuthenticated || !userId) {
       setHasRemoteHydrated(false);
       return;
     }
@@ -302,36 +333,81 @@ export function useRoutineState() {
                   }));
 
               if (isLegacyAutoSynced) {
-                // Start with a clean onboarding slate and clean up remote record
-                setProtocolList([]);
-                setActiveProtocol('');
-                setRuntime({});
-                fetch('/api/user/sync', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    userId,
-                    activeProtocolId: '',
-                    protocols: [],
-                    runtime: {}
-                  })
-                }).catch(() => {});
+                // If local state is also empty or legacy, clean up remote record
+                setProtocolList((currentLocal) => {
+                  if (
+                    currentLocal.length === 0 ||
+                    currentLocal.every((p) => ['achilles', 'hair-loss', 'creatine-sleep'].includes(p.id))
+                  ) {
+                    fetch('/api/user/sync', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        userId,
+                        activeProtocolId: '',
+                        protocols: [],
+                        runtime: {}
+                      })
+                    }).catch(() => {});
+                    setActiveProtocol('');
+                    setRuntime({});
+                    return [];
+                  }
+                  return currentLocal;
+                });
               } else {
-                setProtocolList(data.protocols);
+                setProtocolList((currentLocal) => {
+                  const remoteList: Protocol[] = data.protocols;
+                  // If local state already has routines not present in remote, merge and preserve them
+                  const missingFromRemote = currentLocal.filter(
+                    (lp) => !remoteList.some((rp) => rp.id === lp.id)
+                  );
+                  if (missingFromRemote.length > 0) {
+                    const merged = [...remoteList, ...missingFromRemote];
+                    fetch('/api/user/sync', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        userId,
+                        activeProtocolId: data.activeProtocolId || merged[0]?.id || '',
+                        protocols: merged,
+                        runtime: { ...(data.runtime || {}), ...runtimeRef.current }
+                      })
+                    }).catch(() => {});
+                    return merged;
+                  }
+                  return remoteList;
+                });
+
                 if (data.activeProtocolId) {
-                  setActiveProtocol(data.activeProtocolId);
-                } else {
-                  setActiveProtocol(data.protocols[0]?.id ?? '');
+                  setActiveProtocol((curr) => curr || data.activeProtocolId);
+                } else if (data.protocols[0]?.id) {
+                  setActiveProtocol((curr) => curr || data.protocols[0].id);
                 }
+
                 if (data.runtime && typeof data.runtime === 'object') {
-                  setRuntime(data.runtime);
+                  setRuntime((prev) => ({ ...data.runtime, ...prev }));
                 }
               }
             } else {
-              // Brand new user: clean slate with 0 papers pre-selected
-              setProtocolList([]);
-              setActiveProtocol('');
-              setRuntime({});
+              // Remote returned found=false or empty protocols list
+              // DO NOT wipe local state! If the user already has routines locally, sync them to remote!
+              setProtocolList((currentLocal) => {
+                if (currentLocal.length > 0) {
+                  fetch('/api/user/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      userId,
+                      activeProtocolId: activeProtocolIdRef.current,
+                      protocols: currentLocal,
+                      runtime: runtimeRef.current
+                    })
+                  }).catch(() => {});
+                  return currentLocal;
+                }
+                return [];
+              });
             }
           }
         }
@@ -349,11 +425,11 @@ export function useRoutineState() {
     return () => {
       isMounted = false;
     };
-  }, [isAuthenticated, userId]);
+  }, [isAuthLoading, isAuthenticated, userId]);
 
   // Outbound sync to backend once remote state is confirmed/hydrated
   useEffect(() => {
-    if (!hasHydrated || !isAuthenticated || !userId || !hasRemoteHydrated) return;
+    if (!hasHydrated || isAuthLoading || !isAuthenticated || !userId || !hasRemoteHydrated) return;
 
     const timer = window.setTimeout(() => {
       fetch('/api/user/sync', {
@@ -371,7 +447,7 @@ export function useRoutineState() {
     }, 1000);
 
     return () => window.clearTimeout(timer);
-  }, [protocolList, activeProtocolId, runtime, hasHydrated, isAuthenticated, userId, hasRemoteHydrated]);
+  }, [protocolList, activeProtocolId, runtime, hasHydrated, isAuthLoading, isAuthenticated, userId, hasRemoteHydrated]);
 
   const resetToDefaults = useCallback(() => {
     if (!isAdmin) {
@@ -437,47 +513,83 @@ export function useRoutineState() {
         initialMorphingLogs: []
       };
 
+      const initialRuntimeEntry: ProtocolRuntime = {
+        setsDone: {},
+        excludedStepIds: cleanProtocol.initialExcludedStepIds ?? [],
+        feedbackLogs: [],
+        morphingLogs: [],
+        messages: cleanProtocol.initialMessages?.length
+          ? cleanProtocol.initialMessages
+          : [
+              {
+                id: createId('msg'),
+                role: 'ai',
+                kind: 'routine',
+                content: cleanProtocol.id,
+                timestamp: nowLabel()
+              }
+            ],
+        escalationPaused: false,
+        assistantTyping: false
+      };
+
+      let updatedList: Protocol[] = [];
       setProtocolList((prev) => {
         const exists = prev.some((p) => p.id === cleanProtocol.id);
-        if (exists) return prev;
-        return [...prev, cleanProtocol];
+        updatedList = exists ? prev : [...prev, cleanProtocol];
+
+        // Synchronous write to localStorage guarantees persistence even on immediate page refresh
+        const keys = getStorageKeys(isAuthenticated ? userId : undefined);
+        try {
+          window.localStorage.setItem(keys.routines, JSON.stringify(updatedList));
+          window.localStorage.setItem(keys.activeId, cleanProtocol.id);
+        } catch {
+          // Ignore write restrictions
+        }
+
+        return updatedList;
       });
 
       setActiveProtocol(cleanProtocol.id);
 
+      let updatedRuntime: Record<string, ProtocolRuntime> = {};
       setRuntime((prev) => {
-        // If the user already has runtime tracking data for this routine, keep their progress
-        if (prev[cleanProtocol.id]) return prev;
+        updatedRuntime = prev[cleanProtocol.id]
+          ? prev
+          : { ...prev, [cleanProtocol.id]: initialRuntimeEntry };
 
-        // Otherwise, initialize fresh on Day 1 with no logs and all sets at 0
-        return {
-          ...prev,
-          [cleanProtocol.id]: {
-            setsDone: {},
-            excludedStepIds: cleanProtocol.initialExcludedStepIds ?? [],
-            feedbackLogs: [],
-            morphingLogs: [],
-            messages: cleanProtocol.initialMessages?.length
-              ? cleanProtocol.initialMessages
-              : [
-                  {
-                    id: createId('msg'),
-                    role: 'ai',
-                    kind: 'routine',
-                    content: cleanProtocol.id,
-                    timestamp: nowLabel()
-                  }
-                ],
-            escalationPaused: false,
-            assistantTyping: false
-          }
-        };
+        const keys = getStorageKeys(isAuthenticated ? userId : undefined);
+        try {
+          window.localStorage.setItem(keys.runtime, JSON.stringify(updatedRuntime));
+        } catch {
+          // Ignore write restrictions
+        }
+
+        return updatedRuntime;
       });
+
+      // Immediate outbound sync to backend if signed in
+      if (isAuthenticated && userId) {
+        fetch('/api/user/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            activeProtocolId: cleanProtocol.id,
+            activeRoutineId: cleanProtocol.id,
+            protocols: updatedList.length > 0 ? updatedList : [cleanProtocol],
+            routines: updatedList.length > 0 ? updatedList : [cleanProtocol],
+            runtime: Object.keys(updatedRuntime).length > 0 ? updatedRuntime : { [cleanProtocol.id]: initialRuntimeEntry }
+          })
+        }).catch((err) => {
+          console.warn('[loadSampleProtocol] Cloud sync error:', err);
+        });
+      }
 
       setIsHowToOpen(false);
       toast.success(COPY.howTo.loadedToast(cleanProtocol.shortTitle || cleanProtocol.title));
     },
-    [sampleProtocolsMap]
+    [sampleProtocolsMap, isAuthenticated, userId]
   );
 
   const protocol = (protocolList.find((item) => item.id === activeProtocolId) ?? protocolList[0]) || null;
@@ -849,26 +961,62 @@ export function useRoutineState() {
   );
 
   const addProtocol = useCallback((newProtocol: Protocol) => {
+    let updatedList: Protocol[] = [];
     setProtocolList((prev) => {
       const exists = prev.some((p) => p.id === newProtocol.id);
-      return exists ? prev.map((p) => (p.id === newProtocol.id ? newProtocol : p)) : [...prev, newProtocol];
+      updatedList = exists ? prev.map((p) => (p.id === newProtocol.id ? newProtocol : p)) : [...prev, newProtocol];
+
+      const keys = getStorageKeys(isAuthenticated ? userId : undefined);
+      try {
+        window.localStorage.setItem(keys.routines, JSON.stringify(updatedList));
+        window.localStorage.setItem(keys.activeId, newProtocol.id);
+      } catch {
+        // Ignore
+      }
+
+      return updatedList;
     });
+
+    const newRuntimeEntry: ProtocolRuntime = {
+      setsDone: { ...(newProtocol.initialSetsDone ?? {}) },
+      excludedStepIds: newProtocol.initialExcludedStepIds ?? [],
+      feedbackLogs: newProtocol.initialFeedbackLogs ?? [],
+      messages: newProtocol.initialMessages ?? [],
+      escalationPaused: false,
+      assistantTyping: false
+    };
+
+    let updatedRuntime: Record<string, ProtocolRuntime> = {};
     setRuntime((prev) => {
-      const logs = newProtocol.initialFeedbackLogs ?? [];
-      return {
-        ...prev,
-        [newProtocol.id]: {
-          setsDone: { ...(newProtocol.initialSetsDone ?? {}) },
-          excludedStepIds: newProtocol.initialExcludedStepIds ?? [],
-          feedbackLogs: logs,
-          messages: newProtocol.initialMessages ?? [],
-          escalationPaused: false,
-          assistantTyping: false
-        }
-      };
+      updatedRuntime = { ...prev, [newProtocol.id]: newRuntimeEntry };
+      const keys = getStorageKeys(isAuthenticated ? userId : undefined);
+      try {
+        window.localStorage.setItem(keys.runtime, JSON.stringify(updatedRuntime));
+      } catch {
+        // Ignore
+      }
+      return updatedRuntime;
     });
+
     setActiveProtocol(newProtocol.id);
-  }, []);
+
+    if (isAuthenticated && userId) {
+      fetch('/api/user/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          activeProtocolId: newProtocol.id,
+          activeRoutineId: newProtocol.id,
+          protocols: updatedList.length > 0 ? updatedList : [newProtocol],
+          routines: updatedList.length > 0 ? updatedList : [newProtocol],
+          runtime: Object.keys(updatedRuntime).length > 0 ? updatedRuntime : { [newProtocol.id]: newRuntimeEntry }
+        })
+      }).catch((err) => {
+        console.warn('[addProtocol] Cloud sync error:', err);
+      });
+    }
+  }, [isAuthenticated, userId]);
 
   const addRoutine = addProtocol;
 

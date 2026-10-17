@@ -202,7 +202,10 @@ export const COPY = {
   },
   missingData: {
     caution: 'Caution: The authors omitted exact dosing or execution parameters for',
-    fallback: 'System defaulted to conservative baseline parameters.'
+    fallback: 'System defaulted to conservative baseline parameters.',
+    stepOmissionNotice: (param: string) => `Omitted in paper: ${param}`,
+    candidateExclusionNotice: 'Excluded from routine — will not be scheduled on Day 1',
+    missingDataTitle: 'Missing parameters flagged in trial'
   },
   dashboard: {
     eyebrow: 'Track',
@@ -497,8 +500,14 @@ export const COPY = {
       biofeedbackMetric: (name: string, maxScore: number, threshold: number, alertMsg = '') =>
         `Daily biofeedback metric: ${name} (scale 0–${maxScore}). Escalation threshold is ≥ ${threshold}/10.${alertMsg}`,
       paperCitation: (title: string, journal: string, year: number | string, authors: string, sampleSize: number | string, trialType: string) =>
-        `Study: "${title}" published in ${journal} (${year}) by ${authors}. Sample size: N = ${sampleSize} (${trialType}).`
-    }
+        `Study: "${title}" published in ${journal} (${year}) by ${authors}. Sample size: N = ${sampleSize} (${trialType}).`,
+      missingParametersSummary: (paramList: string) =>
+        `The trial authors did not report all execution parameters in their published Methods section. Omitted or defaulted parameters: ${paramList}. Conservative clinical defaults or lineage guidelines were applied.`,
+      noMissingParameters:
+        'All execution parameters, dosages, and cadences were explicitly reported by the authors in the published Methods & Interventions section.'
+    },
+    excludeCandidateStep: 'Exclude step',
+    restoreCandidateStep: 'Include step'
   },
   processing: {
     queued: 'Extraction queued',
