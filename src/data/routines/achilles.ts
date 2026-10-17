@@ -77,7 +77,7 @@ export const achillesRoutine: Routine = {
   }],
 
   contraindications: [
-  { id: 'ach-c-1', text: 'Stop immediately if acute tendon discomfort exceeds 3/10.', severity: 'stop' },
+  { id: 'ach-c-1', text: 'Stop immediately if acute tendon discomfort reaches 4/10.', severity: 'stop' },
   {
     id: 'ach-c-2',
     text: 'Skip the session if morning stiffness persists beyond 60 minutes.',
@@ -215,7 +215,7 @@ export const achillesRoutine: Routine = {
     question: 'is some discomfort okay?',
     keywords: ['discomfort', 'soreness', 'hurt', 'safe'],
     answer:
-    'Yes — mild discomfort during loading was allowed. The stop rule is acute discomfort above 3/10. Past that, stop the session and log it so escalation pauses.'
+    'Yes — mild discomfort during loading was allowed. The stop rule is acute discomfort of 4/10 or higher. At that point, stop the session and log it so escalation pauses.'
   },
   {
     question: 'when do I add load?',

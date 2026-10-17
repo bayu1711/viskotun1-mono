@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
     const systemInstruction = `You are a clinical study safety assistant for the research paper routine "${resolvedTitle}".
 Clinical Policy Standard (v${activePolicy.version}):
-- Safety Lockout: If the user reports symptom/pain intensity exceeding ${activePolicy.painEscalationThreshold}/10, escalation must be paused with a ${activePolicy.loadReductionPercent}% load reduction recommendation.
+- Safety Lockout: If the user reports symptom/pain intensity of ${activePolicy.painEscalationThreshold}/10 or higher, escalation must be paused with a ${activePolicy.loadReductionPercent}% load reduction recommendation.
 Context from the paper:
 Routine: ${resolvedTitle}
 Steps: ${JSON.stringify(steps || [])}

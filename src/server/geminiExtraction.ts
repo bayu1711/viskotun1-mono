@@ -207,7 +207,7 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
       });
 
       const dynamicPolicyInstruction = `\n### ACTIVE CLINICAL GUARDRAIL POLICY (Version: ${activePolicy.version}):
-- Escalation Threshold: If subjective discomfort/pain exceeds ${activePolicy.painEscalationThreshold}/10, escalation MUST be paused with a ${activePolicy.loadReductionPercent}% load reduction.
+- Escalation Threshold: If subjective discomfort/pain reaches ${activePolicy.painEscalationThreshold}/10 or higher, escalation MUST be paused with a ${activePolicy.loadReductionPercent}% load reduction.
 - Mandatory Clinical Disclaimer: "${activePolicy.clinicalDisclaimer}"
 - Banned criteria: Studies matching [${activePolicy.bannedKeywords.join(', ')}] MUST be marked eligible=false.`;
 
