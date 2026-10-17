@@ -26,8 +26,7 @@ export function TrendingPapersExplore() {
     loadSampleRoutine,
     loadSampleProtocol,
     samplePapers,
-    trendingPapers,
-    sampleSource
+    trendingPapers
   } = useRoutine();
 
   const loadRoutine = loadSampleRoutine || loadSampleProtocol;
@@ -65,47 +64,26 @@ export function TrendingPapersExplore() {
 
   return (
     <div className="mt-5 space-y-6">
-      {/* Intro Subtitle & Source Badge */}
+      {/* Intro Subtitle */}
       <div className="max-w-3xl space-y-3">
         <p className="text-base leading-relaxed text-ink/70">
           {COPY.howTo.trendingSubtitle}
         </p>
 
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          <span
-            className={cn(
-              'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-2xs font-medium border shrink-0',
-              sampleSource === 'firestore-live'
-                ? 'border-mint/60 bg-mint/20 text-ink'
-                : 'border-ink/10 bg-canvas text-ink/60'
-            )}
-          >
-            <span
-              className={cn(
-                'h-1.5 w-1.5 rounded-full',
-                sampleSource === 'firestore-live' ? 'bg-mint ring-1 ring-ink/20' : 'bg-ink/40'
-              )}
-            />
-            {sampleSource === 'firestore-live'
-              ? COPY.howTo.firestoreSyncLive
-              : COPY.howTo.firestoreSyncLocal}
-          </span>
-
-          {selectedCategory !== 'all' && (
-            <div className="flex items-center gap-1.5 text-2xs">
-              <span className="text-ink/50">{COPY.howTo.filterByTopic}</span>
-              <button
-                type="button"
-                onClick={() => setSelectedCategory('all')}
-                className="inline-flex items-center gap-1 rounded-full bg-ink px-2.5 py-0.5 font-medium text-white transition-opacity hover:opacity-80"
-                title={COPY.howTo.clearFilter}
-              >
-                <span>{selectedCategory}</span>
-                <span className="text-white/70">×</span>
-              </button>
-            </div>
-          )}
-        </div>
+        {selectedCategory !== 'all' && (
+          <div className="flex items-center gap-1.5 pt-1 text-2xs">
+            <span className="text-ink/50">{COPY.howTo.filterByTopic}</span>
+            <button
+              type="button"
+              onClick={() => setSelectedCategory('all')}
+              className="inline-flex items-center gap-1 rounded-full bg-ink px-2.5 py-0.5 font-medium text-white transition-opacity hover:opacity-80"
+              title={COPY.howTo.clearFilter}
+            >
+              <span>{selectedCategory}</span>
+              <span className="text-white/70">×</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Grid of Trending Paper Cards */}
