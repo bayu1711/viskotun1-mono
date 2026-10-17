@@ -45,11 +45,7 @@ export function TopBar() {
                 <span className="h-1.5 w-1.5 rounded-full bg-ink" />
                 {COPY.auth.adminBadge}
               </span>
-            ) : (
-              <span className="rounded-full border border-ink/15 bg-mint px-2 py-0.5 text-2xs font-medium text-ink">
-                {COPY.auth.cloudSyncedBadge}
-              </span>
-            )}
+            ) : null}
           </div>
         </div>
 
