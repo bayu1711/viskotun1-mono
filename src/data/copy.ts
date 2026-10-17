@@ -619,7 +619,9 @@ export const COPY = {
       step1Meta: '3 × 15 reps',
       step2Action: 'Static Calf Stretch & Recovery',
       step2Detail: 'ACSM Guidelines · Conservative hold',
-      step2Meta: '3 × 30s hold'
+      step2Meta: '3 × 30s hold',
+      tryHint: 'Tap a step to check it off.',
+      allDone: 'All done for today. Nice work.'
     },
     domainsTitle: 'Explore what we help you achieve',
     domainsSubtitle:

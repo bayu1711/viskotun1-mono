@@ -57,7 +57,96 @@ const PREVIEW_STEPS = [
   { action: PREVIEW.step1Action, detail: PREVIEW.step1Detail, meta: PREVIEW.step1Meta, done: true },
   { action: PREVIEW.step2Action, detail: PREVIEW.step2Detail, meta: PREVIEW.step2Meta, done: false }
 ];
-const PREVIEW_PERCENT = Math.round((PREVIEW_STEPS.filter((step) => step.done).length / PREVIEW_STEPS.length) * 100);
+
+/** Hero demo of a day in the app: tap a step to check it off and watch progress update. */
+function RoutinePreview() {
+  const [doneSteps, setDoneSteps] = useState(() => PREVIEW_STEPS.map((step) => step.done));
+  const doneCount = doneSteps.filter(Boolean).length;
+  const percent = Math.round((doneCount / PREVIEW_STEPS.length) * 100);
+  const allDone = doneCount === PREVIEW_STEPS.length;
+
+  const toggleStep = (index: number) =>
+    setDoneSteps((prev) => prev.map((done, i) => (i === index ? !done : done)));
+
+  return (
+    <section
+      aria-label={PREVIEW.title}
+      className="relative mx-4 -mt-10 animate-rise rounded-callout bg-white p-5 shadow-popover sm:ml-auto sm:mr-6 sm:w-[22rem]"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-display text-base font-bold text-ink">{PREVIEW.title}</p>
+        <span className="shrink-0 rounded-full bg-mint px-2.5 py-0.5 text-xs font-semibold text-ink">{PREVIEW.tag}</span>
+      </div>
+
+      <div className="mt-4 flex items-center justify-between text-xs text-ink/70">
+        <span>{PREVIEW.progressLabel}</span>
+        <span className="font-semibold tabular-nums text-ink">
+          {percent}
+          {COPY.common.percentSign}
+        </span>
+      </div>
+      {/* Outer layer plays the first-load fill; inner layer follows the user's taps */}
+      <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-ink/10">
+        <div className="h-full origin-left animate-fill">
+          <div
+            className="h-full origin-left rounded-full bg-orange transition-transform duration-500 ease-out-strong"
+            style={{ transform: `scaleX(${percent / 100})` }}
+          />
+        </div>
+      </div>
+
+      <ul className="mt-3 space-y-1">
+        {PREVIEW_STEPS.map((step, index) => {
+          const done = doneSteps[index];
+          return (
+            <li key={step.action}>
+              <button
+                type="button"
+                aria-pressed={done}
+                onClick={() => toggleStep(index)}
+                className="group -mx-2 flex min-h-11 w-[calc(100%+1rem)] items-start gap-3 rounded-2xl px-2 py-2 text-left transition-colors duration-150 hover:bg-ink/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+              >
+                <span
+                  className={cn(
+                    'mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-[background-color,border-color,transform] duration-200 ease-out-strong group-active:scale-90',
+                    done ? 'border-ink bg-ink text-white' : 'border-ink/30 group-hover:border-ink/60'
+                  )}
+                >
+                  <Icon
+                    icon={CheckIcon}
+                    size="xs"
+                    className={cn(
+                      'transition-[opacity,transform] duration-200 ease-out-strong',
+                      done ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
+                    )}
+                  />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-baseline justify-between gap-3">
+                    <span
+                      className={cn(
+                        'text-sm font-semibold leading-snug transition-colors duration-200',
+                        done ? 'text-ink/60' : 'text-ink'
+                      )}
+                    >
+                      {step.action}
+                    </span>
+                    <span className="shrink-0 text-xs font-medium tabular-nums text-ink/70">{step.meta}</span>
+                  </span>
+                  <span className="mt-0.5 block text-xs leading-snug text-ink/65">{step.detail}</span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
+      <p aria-live="polite" className="mt-2 text-xs font-medium text-ink/70">
+        {allDone ? PREVIEW.allDone : PREVIEW.tryHint}
+      </p>
+    </section>
+  );
+}
 
 export function LandingPage() {
   const router = useRouter();
@@ -195,36 +284,36 @@ export function LandingPage() {
               </p>
             )}
 
-            <h1 className="animate-enter text-balance text-[2.5rem] [animation-delay:60ms] font-semibold leading-[1.04] tracking-[-0.015em] text-ink sm:text-5xl sm:leading-[1.04] lg:text-hero-lg lg:leading-[1.04]">
+            <h1 className="animate-enter text-balance text-[2.5rem] [animation-delay:90ms] font-semibold leading-[1.04] tracking-[-0.015em] text-ink sm:text-5xl sm:leading-[1.04] lg:text-hero-lg lg:leading-[1.04]">
               {COPY.landing.heroTitle}
             </h1>
 
-            <p className="mt-6 max-w-[34rem] animate-enter text-pretty text-lg leading-relaxed text-ink/80 [animation-delay:120ms]">
+            <p className="mt-6 max-w-[34rem] animate-enter text-pretty text-lg leading-relaxed text-ink/80 [animation-delay:180ms]">
               {COPY.landing.heroSubtitle}
             </p>
 
-            <div className="mt-9 flex animate-enter flex-wrap items-center gap-3 [animation-delay:180ms]">
+            <div className="mt-9 flex animate-enter flex-wrap items-center gap-3 [animation-delay:270ms]">
               <PillButton
                 size="lg"
                 onClick={handleLaunch}
                 loading={isNavigating}
-                className="group min-h-12 gap-2 px-6 font-semibold"
+                className="group min-h-12 gap-2 px-6 font-semibold hover:-translate-y-0.5 hover:shadow-popover"
               >
                 <span>{user ? COPY.landing.ctaGoToApp : COPY.landing.heroCtaPrimary}</span>
                 <Icon icon={ArrowForwardIcon} size="sm" className="transition-transform duration-200 ease-out-strong group-hover:translate-x-1" />
               </PillButton>
               {user ? (
-                <Link href={ROUTES.dashboard} className={pillClassName('outline', 'lg', 'min-h-12 px-6 font-semibold')}>
+                <Link href={ROUTES.dashboard} className={pillClassName('outline', 'lg', 'min-h-12 px-6 font-semibold hover:-translate-y-0.5')}>
                   {COPY.nav.stats}
                 </Link>
               ) : (
-                <a href="#domains" className={pillClassName('outline', 'lg', 'min-h-12 px-6 font-semibold')}>
+                <a href="#domains" className={pillClassName('outline', 'lg', 'min-h-12 px-6 font-semibold hover:-translate-y-0.5')}>
                   {COPY.landing.heroCtaSecondary}
                 </a>
               )}
             </div>
 
-            <ul className="mt-9 flex animate-enter flex-col gap-2.5 text-sm text-ink/75 [animation-delay:240ms]">
+            <ul className="mt-9 flex animate-enter flex-col gap-2.5 text-sm text-ink/75 [animation-delay:360ms]">
               {COPY.landing.heroTrustPoints.map((point) => (
                 <li key={point} className="flex items-center gap-2">
                   <Icon icon={CheckCircleOutlineIcon} size="sm" className="text-ink/70" />
@@ -246,49 +335,7 @@ export function LandingPage() {
               />
             </div>
 
-            {/* Product preview: what a day in the app looks like (illustrative, so hidden from assistive tech) */}
-            <div
-              aria-hidden="true"
-              className="relative mx-4 -mt-10 animate-rise rounded-callout bg-white p-5 shadow-popover sm:ml-auto sm:mr-6 sm:w-[22rem]"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <p className="font-display text-base font-bold text-ink">{PREVIEW.title}</p>
-                <span className="shrink-0 rounded-full bg-mint px-2.5 py-0.5 text-xs font-semibold text-ink">{PREVIEW.tag}</span>
-              </div>
-              <div className="mt-4 flex items-center justify-between text-xs text-ink/70">
-                <span>{PREVIEW.progressLabel}</span>
-                <span className="font-semibold tabular-nums text-ink">
-                  {PREVIEW_PERCENT}
-                  {COPY.common.percentSign}
-                </span>
-              </div>
-              <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-ink/10">
-                <div className="h-full origin-left animate-fill rounded-full bg-orange" style={{ width: `${PREVIEW_PERCENT}%` }} />
-              </div>
-              <ul className="mt-4 space-y-3">
-                {PREVIEW_STEPS.map((step) => (
-                  <li key={step.action} className="flex items-start gap-3">
-                    <span
-                      className={cn(
-                        'mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full',
-                        step.done ? 'bg-ink text-white' : 'border border-ink/30'
-                      )}
-                    >
-                      {step.done && <Icon icon={CheckIcon} size="xs" className="animate-pop" />}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-baseline justify-between gap-3">
-                        <p className={cn('text-sm font-semibold leading-snug', step.done ? 'text-ink/70' : 'text-ink')}>
-                          {step.action}
-                        </p>
-                        <span className="shrink-0 text-xs font-medium tabular-nums text-ink/70">{step.meta}</span>
-                      </div>
-                      <p className="mt-0.5 text-xs leading-snug text-ink/65">{step.detail}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <RoutinePreview />
           </div>
         </div>
       </section>
@@ -424,7 +471,7 @@ export function LandingPage() {
                 size="lg"
                 onClick={handleLaunch}
                 loading={isNavigating}
-                className="group min-h-12 gap-2 px-6 font-semibold"
+                className="group min-h-12 gap-2 px-6 font-semibold hover:-translate-y-0.5 hover:shadow-popover"
               >
                 <span>{user ? COPY.landing.ctaGoToApp : COPY.landing.heroCtaPrimary}</span>
                 <Icon icon={ArrowForwardIcon} size="sm" className="transition-transform duration-200 ease-out-strong group-hover:translate-x-1" />
