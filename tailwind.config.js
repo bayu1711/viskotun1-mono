@@ -3,6 +3,9 @@ const withAlpha = (variable) => `rgb(var(${variable}) / <alpha-value>)`;
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   content: [
     './src/**/*.{js,ts,jsx,tsx}',
     './src/app/**/*.{js,ts,jsx,tsx}',
@@ -97,11 +100,11 @@ module.exports = {
       },
       keyframes: {
         rise: {
-          from: { opacity: '0', transform: 'translateY(12px)' },
-          to: { opacity: '1', transform: 'translateY(0)' }
+          from: { opacity: '0', transform: 'translateY(40px) scale(0.97)' },
+          to: { opacity: '1', transform: 'translateY(0) scale(1)' }
         },
         enter: {
-          from: { opacity: '0', transform: 'translateY(8px)' },
+          from: { opacity: '0', transform: 'translateY(24px)' },
           to: { opacity: '1', transform: 'translateY(0)' }
         },
         fill: {
@@ -109,20 +112,15 @@ module.exports = {
           to: { transform: 'scaleX(1)' }
         },
         settle: {
-          from: { transform: 'scale(1.04)' },
+          from: { transform: 'scale(1.08)' },
           to: { transform: 'scale(1)' }
-        },
-        pop: {
-          from: { opacity: '0', transform: 'scale(0.9)' },
-          to: { opacity: '1', transform: 'scale(1)' }
         }
       },
       animation: {
-        enter: 'enter 500ms cubic-bezier(0.23, 1, 0.32, 1) both',
-        rise: 'rise 600ms cubic-bezier(0.23, 1, 0.32, 1) 300ms both',
-        fill: 'fill 900ms cubic-bezier(0.23, 1, 0.32, 1) 800ms both',
-        pop: 'pop 300ms cubic-bezier(0.23, 1, 0.32, 1) 1500ms both',
-        settle: 'settle 1200ms cubic-bezier(0.23, 1, 0.32, 1) both'
+        enter: 'enter 700ms cubic-bezier(0.23, 1, 0.32, 1) both',
+        rise: 'rise 800ms cubic-bezier(0.23, 1, 0.32, 1) 450ms both',
+        fill: 'fill 1000ms cubic-bezier(0.23, 1, 0.32, 1) 1000ms both',
+        settle: 'settle 1600ms cubic-bezier(0.23, 1, 0.32, 1) both'
       },
       transitionProperty: {
         ring: 'stroke-dashoffset',

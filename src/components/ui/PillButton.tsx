@@ -23,7 +23,7 @@ const SIZES: Record<Size, string> = {
 /** Pill styles for links that must look like a PillButton without nesting a button inside them. */
 export function pillClassName(variant: Variant = 'primary', size: Size = 'lg', className?: string) {
   return cn(
-    'inline-flex items-center justify-center gap-2 rounded-full text-sm transition-[color,background-color,border-color,opacity,transform] duration-150 ease-out-strong active:scale-[0.97] disabled:scale-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:cursor-default',
+    'inline-flex items-center justify-center gap-2 rounded-full text-sm transition-[color,background-color,border-color,box-shadow,opacity,transform] duration-150 ease-out-strong active:scale-[0.97] disabled:scale-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:cursor-default',
     VARIANTS[variant],
     SIZES[size],
     className
