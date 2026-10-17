@@ -60,8 +60,7 @@ export const achillesRoutine: Routine = {
     inferred: true,
     inferredProvenance: {
       tier: 'guideline',
-      source: 'ACSM Clinical Guidelines',
-      rationale: 'Conservative standard of care for static stretching (3 × 30s hold)'
+      source: 'ACSM Clinical Guidelines'
     }
   }],
 
