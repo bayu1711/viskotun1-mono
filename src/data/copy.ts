@@ -180,7 +180,11 @@ export const COPY = {
     singleUnitStat: (label: string) => `1 ${label}`,
     holdValue: (seconds: number) => `${seconds}s`,
     holdSummary: (seconds: number) => `${seconds}s hold`,
-    repsSummary: (reps: number) => `${reps} reps`
+    repsSummary: (reps: number) => `${reps} reps`,
+    helpAriaLabel: (action: string) => `Detailed instructions for ${action}`,
+    helpTooltip: (action: string) => `How to perform ${action} · Ask assistant`,
+    taskQuestionPrompt: (action: string) =>
+      `What is "${action}" and what is needed to be done? Please provide a detailed step-by-step guide.`
   },
   protocolCard: {
     label: 'Extracted routine',
@@ -465,6 +469,10 @@ export const COPY = {
       activeEngineLabel: 'AI engine:',
       onDeviceGemmaSource: 'On-Device Gemma (Chrome Built-in AI)'
     },
+    medicalDisclaimerChip: 'Medical Disclaimer',
+    medicalDisclaimerTitle: 'Clinical Advisory & Medical Disclaimer',
+    medicalDisclaimerGotIt: 'Understood',
+    closeDisclaimer: 'Close disclaimer',
     backToToday: 'Back to today',
     meta: {
       sample: 'Sample:',
@@ -504,7 +512,29 @@ export const COPY = {
       missingParametersSummary: (paramList: string) =>
         `The trial authors did not report all execution parameters in their published Methods section. Omitted or defaulted parameters: ${paramList}. Conservative clinical defaults or lineage guidelines were applied.`,
       noMissingParameters:
-        'All execution parameters, dosages, and cadences were explicitly reported by the authors in the published Methods & Interventions section.'
+        'All execution parameters, dosages, and cadences were explicitly reported by the authors in the published Methods & Interventions section.',
+      stepGuidance: (
+        action: string,
+        detail: string,
+        volume: string,
+        tempo?: string,
+        hold?: string,
+        inferredNote?: string,
+        contraindication?: string
+      ) => {
+        const lines: string[] = [
+          `${action}`,
+          `• What it is: ${detail || action}. Grounded directly in the published study Methods & Interventions section.`,
+          `• What is needed to be done: Complete ${volume}${tempo ? `, cadence: ${tempo}` : ''}${hold ? `, hold: ${hold}` : ''}. Follow proper clinical form and complete all prescribed sets for today.`
+        ];
+        if (inferredNote) {
+          lines.push(`• Note: ${inferredNote}`);
+        }
+        if (contraindication) {
+          lines.push(`• Caution: ${contraindication}`);
+        }
+        return lines.join('\n\n');
+      }
     },
     excludeCandidateStep: 'Exclude step',
     restoreCandidateStep: 'Include step'
