@@ -35,6 +35,10 @@ function createInitialSamplePapers(): StoredPaper[] {
     protocolId: paper.routineId || paper.protocolId,
     isSample: true,
     isGuardrailRejectionTest: paper.isGuardrailRejectionTest,
+    popularityScore: paper.popularityScore ?? 0,
+    activeTrackersCount: paper.activeTrackersCount ?? 0,
+    totalLogsCount: paper.totalLogsCount ?? 0,
+    trendingRank: paper.trendingRank,
     routine: (paper.routineId ? PRECALIBRATED_SAMPLE_PROTOCOLS[paper.routineId] : undefined) || (paper.protocolId ? PRECALIBRATED_SAMPLE_PROTOCOLS[paper.protocolId] : undefined),
     protocol: (paper.routineId ? PRECALIBRATED_SAMPLE_PROTOCOLS[paper.routineId] : undefined) || (paper.protocolId ? PRECALIBRATED_SAMPLE_PROTOCOLS[paper.protocolId] : undefined),
     userId: 'system',
@@ -82,6 +86,7 @@ export async function seedSamplePapersIfEmpty(): Promise<boolean> {
  * Resolves from live Cloud Firestore when available, or gracefully falls back to memory cache.
  */
 export async function getSamplePapers(): Promise<{
+  trendingPapers: SamplePaper[];
   samplePapers: SamplePaper[];
   protocols: Record<string, Protocol>;
   source: 'firestore-live' | 'memory-cache';
@@ -120,7 +125,11 @@ export async function getSamplePapers(): Promise<{
             summary: data.summary,
             featuresTested: data.featuresTested || [],
             protocolId: data.protocolId,
-            isGuardrailRejectionTest: data.isGuardrailRejectionTest
+            isGuardrailRejectionTest: data.isGuardrailRejectionTest,
+            popularityScore: data.popularityScore ?? 0,
+            activeTrackersCount: data.activeTrackersCount ?? 0,
+            totalLogsCount: data.totalLogsCount ?? 0,
+            trendingRank: data.trendingRank
           });
 
           if (data.protocolId && data.protocol) {
@@ -135,8 +144,13 @@ export async function getSamplePapers(): Promise<{
           }
         }
 
+        const sorted = (samplePapers.length > 0 ? samplePapers : SAMPLE_PAPERS).slice().sort(
+          (a, b) => (b.popularityScore ?? 0) - (a.popularityScore ?? 0)
+        );
+
         return {
-          samplePapers: samplePapers.length > 0 ? samplePapers : SAMPLE_PAPERS,
+          trendingPapers: sorted,
+          samplePapers: sorted,
           protocols,
           source: 'firestore-live'
         };
@@ -168,7 +182,11 @@ export async function getSamplePapers(): Promise<{
         summary: item.summary,
         featuresTested: item.featuresTested,
         protocolId: item.protocolId,
-        isGuardrailRejectionTest: item.isGuardrailRejectionTest
+        isGuardrailRejectionTest: item.isGuardrailRejectionTest,
+        popularityScore: item.popularityScore ?? 0,
+        activeTrackersCount: item.activeTrackersCount ?? 0,
+        totalLogsCount: item.totalLogsCount ?? 0,
+        trendingRank: item.trendingRank
       });
       if (item.protocolId && item.protocol) {
         protocols[item.protocolId] = item.protocol;
@@ -176,12 +194,19 @@ export async function getSamplePapers(): Promise<{
     }
   }
 
+  const sorted = (samplePapers.length > 0 ? samplePapers : SAMPLE_PAPERS).slice().sort(
+    (a, b) => (b.popularityScore ?? 0) - (a.popularityScore ?? 0)
+  );
+
   return {
-    samplePapers: samplePapers.length > 0 ? samplePapers : SAMPLE_PAPERS,
+    trendingPapers: sorted,
+    samplePapers: sorted,
     protocols,
     source: 'memory-cache'
   };
 }
+
+export const getTrendingPapers = getSamplePapers;
 
 /**
  * Persist a paper document (either user-uploaded or sample) into the unified Firestore papers table.

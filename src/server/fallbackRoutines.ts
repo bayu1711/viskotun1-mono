@@ -10,7 +10,7 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
   phaseLabel: 'loading',
   totalDays: 14,
   currentDay: 1,
-  streak: 1,
+  streak: 0,
   paper: {
     title:
       'Single Dose Creatine Monohydrate Enhances Cognitive Performance and Brain Bioenergetics During Acute Sleep Deprivation',
@@ -103,7 +103,7 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
     }
   ],
   dayHistory: [],
-  initialSetsDone: { 'cr-1': 1, 'cr-2': 0, 'cr-3': 1 },
+  initialSetsDone: {},
   feedbackMetric: {
     name: 'GI distress',
     label: 'GI distress / tolerance',
@@ -158,33 +158,8 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
       escalationMessage: 'Gastric distress threshold exceeded (≥ 3/10). Escalation paused. Split daily 5g dose into two 2.5g servings with meals.'
     }
   ],
-  initialMorphingLogs: [
-    {
-      id: 'cr-m-1',
-      fieldId: 'cr-pvt-timer',
-      day: 1,
-      value: 242,
-      loggedAt: 'Today',
-      note: 'Reaction latency baseline 242ms.'
-    },
-    {
-      id: 'cr-m-2',
-      fieldId: 'cr-sleepiness-scale',
-      day: 1,
-      value: '2 · Functioning at high levels, but not at peak',
-      loggedAt: 'Today',
-      note: 'Alertness restored within 30 min of morning dose.'
-    }
-  ],
-  initialFeedbackLogs: [
-    {
-      id: 'cr-log-1',
-      day: 1,
-      score: 1,
-      note: 'Mild fullness after morning dose, mental alertness maintained.',
-      loggedAt: 'Today'
-    }
-  ],
+  initialMorphingLogs: [],
+  initialFeedbackLogs: [],
   initialMessages: [
     {
       id: 'cr-msg-1',
@@ -277,7 +252,7 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
   phaseLabel: 'week 1',
   totalDays: 14,
   currentDay: 1,
-  streak: 1,
+  streak: 0,
   paper: {
     title: 'Heavy Slow Resistance Versus Eccentric Training for Patellar Tendinopathy: A Randomized Trial',
     fileName: 'Patellar_HSR_Tendinopathy.pdf',
@@ -361,7 +336,7 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
     }
   ],
   dayHistory: [],
-  initialSetsDone: { 'pat-1': 2, 'pat-2': 0, 'pat-3': 1 },
+  initialSetsDone: {},
   feedbackMetric: {
     name: 'tendon discomfort',
     label: 'tendon discomfort / load tolerance',
@@ -399,33 +374,8 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
       instructions: 'Measure active knee flexion angle in prone position with goniometer aligned to lateral femoral condyle.'
     }
   ],
-  initialMorphingLogs: [
-    {
-      id: 'pat-m-1',
-      fieldId: 'pat-pain-scale',
-      day: 1,
-      value: 2,
-      loggedAt: 'Today',
-      note: 'Mild anterior knee warmth during last set, settled within 10 min.'
-    },
-    {
-      id: 'pat-m-2',
-      fieldId: 'pat-knee-angle',
-      day: 1,
-      value: 125,
-      loggedAt: 'Today',
-      note: 'Baseline active knee flexion angle.'
-    }
-  ],
-  initialFeedbackLogs: [
-    {
-      id: 'pat-log-1',
-      day: 1,
-      score: 2,
-      note: 'Mild anterior knee warmth during last set, settled within 10 min.',
-      loggedAt: 'Today'
-    }
-  ],
+  initialMorphingLogs: [],
+  initialFeedbackLogs: [],
   initialMessages: [
     {
       id: 'pat-msg-1',

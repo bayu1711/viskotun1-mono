@@ -4,13 +4,28 @@ import { NextRequest } from 'next/server';
 import { GET, POST } from '../../app/api/papers/route';
 
 describe('papersStorage and /api/papers endpoint', () => {
-  it('retrieves sample papers with pre-calibrated protocols', async () => {
-    const { samplePapers, protocols, source } = await getSamplePapers();
+  it('retrieves sample and trending papers with pre-calibrated protocols sorted by popularity', async () => {
+    const { samplePapers, trendingPapers, protocols, source } = await getSamplePapers();
     expect(samplePapers.length).toBeGreaterThanOrEqual(6);
+    expect(trendingPapers.length).toBeGreaterThanOrEqual(6);
     expect(protocols['achilles']).toBeDefined();
     expect(protocols['hair-loss']).toBeDefined();
     expect(protocols['creatine-sleep']).toBeDefined();
     expect(['firestore-live', 'memory-cache']).toContain(source);
+
+    // Verify trending papers are sorted descending by popularityScore
+    expect(trendingPapers[0].id).toBe('achilles-rehab');
+    expect(trendingPapers[0].trendingRank).toBe(1);
+    expect(trendingPapers[0].popularityScore).toBe(98);
+    expect(trendingPapers[0].activeTrackersCount).toBeGreaterThan(1000);
+    expect(trendingPapers[0].totalLogsCount).toBeGreaterThan(10000);
+
+    // Verify protocols start on Day 1 with empty history and no initial logs
+    expect(protocols['achilles'].currentDay).toBe(1);
+    expect(protocols['achilles'].dayHistory).toEqual([]);
+    expect(protocols['achilles'].initialSetsDone).toEqual({});
+    expect(protocols['hair-loss'].currentDay).toBe(1);
+    expect(protocols['hair-loss'].dayHistory).toEqual([]);
   });
 
   it('persists a new paper to the papers collection and retrieves it', async () => {
@@ -41,14 +56,17 @@ describe('papersStorage and /api/papers endpoint', () => {
     expect(userPapers.some((p) => p.id === 'test-paper-upload-1')).toBe(true);
   });
 
-  it('GET /api/papers returns sample papers', async () => {
-    const req = new NextRequest('http://localhost:3000/api/papers?type=samples');
+  it('GET /api/papers returns sample and trending papers', async () => {
+    const req = new NextRequest('http://localhost:3000/api/papers?type=trending');
     const res = await GET(req);
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.samplePapers).toBeDefined();
-    expect(Array.isArray(data.samplePapers)).toBe(true);
+    expect(data.trendingPapers).toBeDefined();
+    expect(Array.isArray(data.trendingPapers)).toBe(true);
+    expect(data.trendingPapers[0].trendingRank).toBe(1);
     expect(data.protocols).toBeDefined();
+    expect(data.protocols['achilles'].currentDay).toBe(1);
   });
 
   it('POST /api/papers validates paper presence', async () => {
