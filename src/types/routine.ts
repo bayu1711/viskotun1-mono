@@ -144,6 +144,7 @@ export type ChatKind =
   | 'file'
   | 'routine'
   | 'protocol'
+  | 'candidate'
   | 'alert'
   | 'confirmation'
   | 'question'
