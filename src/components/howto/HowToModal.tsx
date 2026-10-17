@@ -198,7 +198,7 @@ export function HowToModal() {
                             <div className="space-y-1">
                               <div className="flex flex-wrap items-center gap-2">
                                 {paper.trendingRank && (
-                                  <span className="rounded-full bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 text-2xs font-semibold text-amber-900">
+                                  <span className="rounded-full bg-mint/30 border border-mint/60 px-2 py-0.5 text-2xs font-semibold text-ink">
                                     {COPY.howTo.trendingRankBadge(paper.trendingRank)}
                                   </span>
                                 )}

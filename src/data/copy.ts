@@ -43,7 +43,7 @@ export const COPY = {
     community: 'Community'
   },
   shell: {
-    streak: (days: number) => `🔥 ${days} day streak`,
+    streak: (days: number) => `${days} day streak`,
     addPaper: 'Add new paper',
     openAssistant: 'Open paper assistant',
     resetDemo: 'Reset to demo defaults',
@@ -219,7 +219,7 @@ export const COPY = {
     papersLabel: 'All papers',
     papersEyebrow: 'All',
     papersTitle: 'Papers',
-    paperMeta: (day: number, total: number, streak: number) => `Day ${day}/${total} · 🔥 ${streak} days`,
+    paperMeta: (day: number, total: number, streak: number) => `Day ${day}/${total} · ${streak} days`,
     activeSuffix: ' · Active',
     sourcePaper: 'Source paper',
     emptyPapersTitle: 'No papers yet',
@@ -932,7 +932,7 @@ export const COPY = {
     downloadPdfButton: 'Download Open-Access PDF',
     doiLabel: 'View on PMC / DOI',
     loadedToast: (title: string) => `Started tracking "${title}" on Day 1`,
-    trendingRankBadge: (rank: number) => `🔥 #${rank} Trending`,
+    trendingRankBadge: (rank: number) => `#${rank} Trending`,
     activeTrackersBadge: (count: number) => `${count.toLocaleString()} active trackers`,
     totalLogsBadge: (count: number) => `${count.toLocaleString()} logs`,
     featuresHeader: 'Trial Endpoints & Morphing UI Tested:',

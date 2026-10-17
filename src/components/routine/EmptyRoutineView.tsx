@@ -114,7 +114,7 @@ export function EmptyRoutineView() {
                         <StepIcon icon={getIconForRoutine(targetId)} size="xs" />
                       </span>
                       <div className="flex items-center gap-1.5">
-                        <span className="rounded-full bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-2xs font-semibold text-amber-900">
+                        <span className="rounded-full bg-mint/30 border border-mint/60 px-2 py-0.5 text-2xs font-semibold text-ink">
                           {COPY.howTo.trendingRankBadge(rank)}
                         </span>
                         <span className="rounded-full bg-canvas px-2 py-0.5 text-2xs font-semibold text-ink/70">
