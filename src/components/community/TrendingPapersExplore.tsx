@@ -8,6 +8,7 @@ import NorthEastIcon from '@mui/icons-material/NorthEast';
 import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { toast } from 'sonner';
+import { useAssistant } from '../../contexts/AssistantContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
@@ -19,6 +20,7 @@ import { PillButton } from '../ui/PillButton';
 import { StepIcon } from '../ui/StepIcon';
 
 export function TrendingPapersExplore() {
+  const { openAssistant } = useAssistant();
   const {
     routine,
     activeRoutineId,
@@ -47,13 +49,23 @@ export function TrendingPapersExplore() {
     });
   }, [availablePapers, selectedCategory]);
 
-  const getIconForRoutine = (targetId: string): StepIconKey => {
-    const matched = PRECALIBRATED_SAMPLE_PROTOCOLS[targetId];
-    if (matched?.icon) return matched.icon;
-    if (targetId === 'achilles') return 'straight-knee';
-    if (targetId === 'hair-loss') return 'serum';
-    if (targetId === 'creatine-sleep') return 'sleep';
-    if (targetId === 'zone2-cardio') return 'fitness';
+  const getIconForRoutine = (targetId?: string, category?: string): StepIconKey => {
+    if (targetId) {
+      const matched = PRECALIBRATED_SAMPLE_PROTOCOLS[targetId];
+      if (matched?.icon) return matched.icon;
+      if (targetId === 'achilles') return 'straight-knee';
+      if (targetId === 'hair-loss') return 'serum';
+      if (targetId === 'creatine-sleep') return 'sleep';
+      if (targetId === 'zone2-cardio') return 'fitness';
+    }
+    if (category) {
+      const cat = category.toLowerCase();
+      if (cat.includes('metabol') || cat.includes('fasting')) return 'timer';
+      if (cat.includes('circadian') || cat.includes('sleep') || cat.includes('light')) return 'sun';
+      if (cat.includes('derma') || cat.includes('hair')) return 'serum';
+      if (cat.includes('nutrition')) return 'diet';
+      if (cat.includes('rehab')) return 'stretch';
+    }
     return 'pill';
   };
 
@@ -80,8 +92,12 @@ export function TrendingPapersExplore() {
     return 'bg-canvas text-ink/70 hover:bg-ink/10 border border-ink/10';
   };
 
-  const handleStartRoutine = (targetId: string) => {
-    loadRoutine(targetId);
+  const handleStartRoutine = (targetId?: string) => {
+    if (targetId) {
+      loadRoutine(targetId);
+    } else {
+      openAssistant('upload');
+    }
   };
 
   return (
@@ -111,11 +127,11 @@ export function TrendingPapersExplore() {
       {/* Grid of Trending Paper Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {filteredPapers.map((paper, index) => {
-          const targetId = paper.routineId || paper.protocolId || 'achilles';
+          const targetId = paper.routineId || paper.protocolId;
           const rank = paper.trendingRank ?? index + 1;
           const trackers = paper.activeTrackersCount;
           const logs = paper.totalLogsCount;
-          const isActive = currentActiveId === targetId;
+          const isActive = Boolean(targetId && currentActiveId === targetId);
 
           return (
             <div
@@ -131,7 +147,7 @@ export function TrendingPapersExplore() {
                 {/* Header row: Icon, Rank, Category inside the card */}
                 <div className="flex items-center justify-between gap-2">
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-orange/10 text-orange">
-                    <StepIcon icon={getIconForRoutine(targetId)} size="xs" />
+                    <StepIcon icon={getIconForRoutine(targetId, paper.category)} size="xs" />
                   </span>
                   <div className="flex items-center gap-1.5">
                     <span
