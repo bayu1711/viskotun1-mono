@@ -77,7 +77,7 @@ Return a JSON object conforming strictly to:
     "steps": [
       {
         "id": string,
-        "tone": "ink" | "cream" | "mint",
+        "tone": "orange" | "yellow" | "sky" | "lavender" | "peach" | "mint" | "cream" | "ink",
         "icon": string,
         "action": string,
         "detail": string,

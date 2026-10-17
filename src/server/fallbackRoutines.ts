@@ -27,7 +27,7 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
   steps: [
     {
       id: 'cr-1',
-      tone: 'ink',
+      tone: 'orange',
       icon: 'pill',
       action: 'Morning Creatine Monohydrate Ingestion',
       detail: 'Take 5g micronized creatine monohydrate dissolved in warm water with a light meal.',
@@ -41,7 +41,7 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
     },
     {
       id: 'cr-2',
-      tone: 'cream',
+      tone: 'sky',
       icon: 'brain',
       action: 'Cognitive Vigilance Task (PVT)',
       detail: 'Complete 10-minute reaction time psychomotor vigilance assessment.',
@@ -274,7 +274,7 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
   steps: [
     {
       id: 'pat-1',
-      tone: 'ink',
+      tone: 'orange',
       icon: 'bent-knee',
       action: 'Bilateral Squat (Heavy Slow Resistance)',
       detail: '3s concentric, 3s eccentric cadence. Moderate load allowing strict form.',
@@ -287,7 +287,7 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
     },
     {
       id: 'pat-2',
-      tone: 'cream',
+      tone: 'yellow',
       icon: 'fitness',
       action: 'Leg Press (Heavy Slow Resistance)',
       detail: 'Controlled knee flexion up to 90 degrees, slow sustained eccentric phase.',
@@ -298,7 +298,7 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
     },
     {
       id: 'pat-3',
-      tone: 'mint',
+      tone: 'lavender',
       icon: 'stretch',
       action: 'Decline Board Isometric Hold',
       detail:
@@ -533,7 +533,7 @@ export function generateFallbackRoutine(source: string): Routine {
     steps: [
       {
         id: `${slug}-1`,
-        tone: 'ink',
+        tone: 'orange',
         icon: 'science',
         action: COPY.fallbackProtocol.step1Action,
         detail: COPY.fallbackProtocol.step1Detail,
@@ -547,7 +547,7 @@ export function generateFallbackRoutine(source: string): Routine {
       },
       {
         id: `${slug}-2`,
-        tone: 'cream',
+        tone: 'yellow',
         icon: 'timer',
         action: COPY.fallbackProtocol.step2Action,
         detail: COPY.fallbackProtocol.step2Detail,
