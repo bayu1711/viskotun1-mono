@@ -455,6 +455,17 @@ export const COPY = {
     placeholderUpload: 'Paste a DOI or PubMed link…',
     placeholderStaging: 'Ask a question about this paper before confirming…',
     suggestionsLabel: 'Suggested questions',
+    suggestions: {
+      label: 'Suggested questions',
+      safetyRules: 'What are the safety stop rules & precautions?',
+      progressionCriteria: 'When and how do I progress to the next phase?',
+      biofeedbackLog: (name?: string) => `How do I track my ${name ? name.toLowerCase() : 'symptom'} score?`,
+      biofeedbackEscalation: 'What feedback score pauses escalation?',
+      routineSchedule: 'What is the prescribed daily routine and schedule?',
+      missingData: 'Which parameters were omitted or inferred?',
+      trialCitation: 'Tell me about the clinical trial and authors',
+      stepDetails: (action: string) => `What is "${action}" and how is it performed?`
+    },
     emptyTitle: 'No messages yet',
     emptyBody: 'Ask about dosing, frequency, safety or progression.',
     answerSource: 'Source · Methods section',
