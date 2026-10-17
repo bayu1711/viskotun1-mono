@@ -21,7 +21,13 @@ export interface SamplePaper {
   routineId?: string; // Pre-calibrated routine available for instant 1-click loading
   protocolId?: string; // Pre-calibrated protocol available for instant 1-click loading (alias)
   isGuardrailRejectionTest?: boolean;
+  popularityScore?: number; // Simulated popularity score for trending ranking (e.g. 0-100)
+  activeTrackersCount?: number; // Simulated active community participants tracking this paper
+  totalLogsCount?: number; // Simulated cumulative user biofeedback & compliance logs
+  trendingRank?: number; // Dynamic trending rank (#1, #2, #3, ...)
 }
+
+export type TrendingPaper = SamplePaper;
 
 export const SAMPLE_PAPERS: SamplePaper[] = [
   {
@@ -46,7 +52,11 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
       'Dynamic 20% load reduction when threshold exceeded'
     ],
     routineId: 'achilles',
-    protocolId: 'achilles'
+    protocolId: 'achilles',
+    popularityScore: 98,
+    activeTrackersCount: 1420,
+    totalLogsCount: 18450,
+    trendingRank: 1
   },
   {
     id: 'hair-regrowth',
@@ -70,7 +80,11 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
       'Scalp irritation & erythema biofeedback'
     ],
     routineId: 'hair-loss',
-    protocolId: 'hair-loss'
+    protocolId: 'hair-loss',
+    popularityScore: 95,
+    activeTrackersCount: 980,
+    totalLogsCount: 11200,
+    trendingRank: 2
   },
   {
     id: 'creatine-sleep',
@@ -94,7 +108,11 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
       'GI distress biofeedback & split dose rule'
     ],
     routineId: 'creatine-sleep',
-    protocolId: 'creatine-sleep'
+    protocolId: 'creatine-sleep',
+    popularityScore: 91,
+    activeTrackersCount: 750,
+    totalLogsCount: 8940,
+    trendingRank: 3
   },
   {
     id: 'time-restricted-eating',
@@ -116,7 +134,11 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
       'Blood glucose numeric stepper (mg/dL)',
       'Blood pressure readings (mmHg)',
       'Fasting adherence tracking'
-    ]
+    ],
+    popularityScore: 86,
+    activeTrackersCount: 430,
+    totalLogsCount: 4200,
+    trendingRank: 4
   },
   {
     id: 'light-circadian',
@@ -138,7 +160,11 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
       'Lux intensity compliance verification',
       'Sleep disturbance rating scale',
       'Circadian fatigue logs'
-    ]
+    ],
+    popularityScore: 82,
+    activeTrackersCount: 310,
+    totalLogsCount: 2800,
+    trendingRank: 5
   },
   {
     id: 'rodent-exercise-model',
@@ -160,9 +186,14 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
       'Firestore Policy Ledger keyword detection (rodent / mouse)',
       'Educational clinical guidance prompt'
     ],
-    isGuardrailRejectionTest: true
+    isGuardrailRejectionTest: true,
+    popularityScore: 0,
+    activeTrackersCount: 0,
+    totalLogsCount: 0
   }
 ];
+
+export const TRENDING_PAPERS = SAMPLE_PAPERS;
 
 export const PRECALIBRATED_SAMPLE_ROUTINES: Record<string, Routine> = {
   achilles: achillesRoutine,
@@ -171,3 +202,5 @@ export const PRECALIBRATED_SAMPLE_ROUTINES: Record<string, Routine> = {
 };
 
 export const PRECALIBRATED_SAMPLE_PROTOCOLS: Record<string, Protocol> = PRECALIBRATED_SAMPLE_ROUTINES;
+export const PRECALIBRATED_TRENDING_ROUTINES = PRECALIBRATED_SAMPLE_ROUTINES;
+export const PRECALIBRATED_TRENDING_PROTOCOLS = PRECALIBRATED_SAMPLE_PROTOCOLS;

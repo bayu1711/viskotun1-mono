@@ -291,6 +291,10 @@ export interface StoredPaper {
   protocolId?: string;
   isSample: boolean;
   isGuardrailRejectionTest?: boolean;
+  popularityScore?: number;
+  activeTrackersCount?: number;
+  totalLogsCount?: number;
+  trendingRank?: number;
   routine?: Routine;
   protocol?: Routine;
   userId?: string | null;

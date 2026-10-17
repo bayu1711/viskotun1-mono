@@ -6,10 +6,10 @@ export const achillesRoutine: Routine = {
   shortTitle: 'achilles rehab',
   icon: 'straight-knee',
   phase: 'Phase 1: Week 1–2',
-  phaseLabel: 'week 2',
-  totalDays: 14,
-  currentDay: 4,
-  streak: 4,
+  phaseLabel: 'week 1',
+  totalDays: 84,
+  currentDay: 1,
+  streak: 0,
   paper: {
     title:
     'Eccentric Loading for Mid-Portion Achilles Tendinopathy: A Randomized Controlled Trial',
@@ -87,8 +87,8 @@ export const achillesRoutine: Routine = {
     fallback: 'Conservative baseline: 3 × 30s hold'
   }],
 
-  dayHistory: [1, 0.67, 1],
-  initialSetsDone: { 'ach-1': 3, 'ach-2': 3, 'ach-3': 0 },
+  dayHistory: [],
+  initialSetsDone: {},
   feedbackMetric: {
     name: 'tendon discomfort',
     label: 'tendon discomfort / load tolerance',
@@ -126,16 +126,8 @@ export const achillesRoutine: Routine = {
       instructions: 'Measure knee-to-wall distance or goniometer joint angle at maximum comfortable knee bend.'
     }
   ],
-  initialMorphingLogs: [
-    { id: 'ach-m-1', fieldId: 'ach-pain-vas', day: 1, value: 3, loggedAt: 'Sat', note: 'Tender at first drop.' },
-    { id: 'ach-m-2', fieldId: 'ach-pain-vas', day: 2, value: 2, loggedAt: 'Sun', note: '' },
-    { id: 'ach-m-3', fieldId: 'ach-pain-vas', day: 3, value: 1, loggedAt: 'Mon', note: 'Much easier today.' },
-    { id: 'ach-m-4', fieldId: 'ach-dorsiflexion', day: 1, value: 28, loggedAt: 'Sat', note: 'Baseline knee-to-wall lunge angle.' }
-  ],
-  initialFeedbackLogs: [
-  { id: 'ach-log-1', day: 1, score: 3, note: 'Tender at first drop.', loggedAt: 'Sat' },
-  { id: 'ach-log-2', day: 2, score: 2, note: '', loggedAt: 'Sun' },
-  { id: 'ach-log-3', day: 3, score: 1, note: 'Much easier today.', loggedAt: 'Mon' }],
+  initialMorphingLogs: [],
+  initialFeedbackLogs: [],
 
   initialMessages: [
   {

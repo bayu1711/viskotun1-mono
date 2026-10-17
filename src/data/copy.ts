@@ -51,7 +51,7 @@ export const COPY = {
     todaySummaryLabel: "Today's progress",
     noActiveProtocol: 'No active routine',
     noActiveRoutine: 'No active routine',
-    noActivePrompt: 'Upload a research paper or explore sample routines to start tracking.',
+    noActivePrompt: 'Upload a research paper or explore trending routines to start tracking.',
     dayOfTotal: (day: number, total: number) => `Day ${day} / ${total}`,
     dropTitle: 'Drop to extract',
     dropSubtitle: "We'll isolate the methods & build a routine",
@@ -885,18 +885,18 @@ export const COPY = {
     dropOffUnit: 'day'
   },
   howTo: {
-    buttonLabel: 'How to use & sample papers',
+    buttonLabel: 'How to use & trending papers',
     buttonShort: 'How to',
-    buttonExploreSamples: 'Explore sample papers',
-    dialogLabel: 'How to use ViskotuN1 & sample research papers',
+    buttonExploreSamples: 'Explore trending papers',
+    dialogLabel: 'How to use ViskotuN1 & trending research papers',
     title: 'How ViskotuN1 Works',
-    eyebrow: 'User guide & clinical research papers',
+    eyebrow: 'User guide & trending clinical research papers',
     badge: 'Interactive Research Pipeline',
     intro:
       'ViskotuN1 converts dense, peer-reviewed human interventional research into executable daily routines with zero hallucinated gaps and an evidence-grounded AI safety assistant.',
     tabs: {
       guide: 'How it works',
-      samples: 'Sample papers',
+      samples: 'Trending papers',
       scope: 'Accepted papers'
     },
     steps: [
@@ -919,16 +919,22 @@ export const COPY = {
           'Track daily sets and log adverse tolerability. Escalation automatically freezes and recommends load reductions when discomfort thresholds are exceeded in the Firestore Guardrail Ledger.'
       }
     ],
-    samplesTitle: 'Curated Sample Research Papers',
+    samplesTitle: 'Trending Clinical Research Papers',
+    trendingTitle: 'Trending Clinical Research Papers',
     samplesSubtitle:
-      'Explore these pre-calibrated clinical routines or download the original open-access PDFs from PubMed Central (PMC) to test live extraction.',
+      'Explore top-ranked clinical research papers in our database. Simulated with active community participants, compliance tracking, and biofeedback logs so you can explore trending interventions or start tracking fresh on Day 1.',
+    trendingSubtitle:
+      'Explore top-ranked clinical research papers in our database. Simulated with active community participants, compliance tracking, and biofeedback logs so you can explore trending interventions or start tracking fresh on Day 1.',
     firestoreSyncLive: 'Firebase Firestore live',
     firestoreSyncLocal: 'Local verified catalog',
-    loadButton: 'Try this sample',
+    loadButton: 'Start this routine',
     loadedButton: 'Active in workspace',
     downloadPdfButton: 'Download Open-Access PDF',
     doiLabel: 'View on PMC / DOI',
-    loadedToast: (title: string) => `Loaded ${title} routine into your workspace`,
+    loadedToast: (title: string) => `Started tracking "${title}" on Day 1`,
+    trendingRankBadge: (rank: number) => `🔥 #${rank} Trending`,
+    activeTrackersBadge: (count: number) => `${count.toLocaleString()} active trackers`,
+    totalLogsBadge: (count: number) => `${count.toLocaleString()} logs`,
     featuresHeader: 'Trial Endpoints & Morphing UI Tested:',
     scopeTitle: 'Strict Gatekeeper Scope',
     scopeSubtitle:
@@ -958,16 +964,18 @@ export const COPY = {
     welcomeEyebrow: 'Getting started',
     welcomeTitle: 'Turn clinical research into daily routines',
     welcomeSubtitle:
-      'ViskotuN1 ingests peer-reviewed clinical research and transforms it into executable, adaptive daily health routines. No pre-loaded dummy papers—start fresh with your own PDF or load a curated sample.',
+      'ViskotuN1 ingests peer-reviewed clinical research and transforms it into executable, adaptive daily health routines. Start fresh with your own research PDF or pick from top trending clinical papers in our database.',
     ctaUpload: 'Upload research paper',
-    ctaHowTo: 'How to & sample papers',
+    ctaHowTo: 'How to & trending papers',
     dropPrompt: 'Drop a research PDF here to extract',
     dropSubtext: 'Clinical trials, RCTs, rehabilitation, nutrition, sleep & pharmacology',
-    samplesHeading: 'Or try a curated sample routine with one click:',
-    quickLoadButton: 'Use routine',
+    samplesHeading: 'Get started with these trending research papers:',
+    trendingHeading: 'Get started with these trending research papers:',
+    viewAllTrending: 'Explore all trending papers',
+    quickLoadButton: 'Start routine',
     noActiveProtocol: 'No active routine',
     noActiveRoutine: 'No active routine',
-    noActiveProtocolDesc: 'Upload a research paper or load a sample from the guide to start tracking.',
-    noActiveRoutineDesc: 'Upload a research paper or load a sample from the guide to start tracking.'
+    noActiveProtocolDesc: 'Upload a research paper or choose a trending clinical paper to start tracking.',
+    noActiveRoutineDesc: 'Upload a research paper or choose a trending clinical paper to start tracking.'
   }
 } as const;
