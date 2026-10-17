@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { COPY } from '../data/copy';
 import type { RoutineStep } from '../types/routine';
+import { formatVoiceName, getCuratedNaturalVoices } from '../utils/voice';
 
 interface UseVoiceCoachOptions {
   steps: RoutineStep[];
@@ -72,14 +73,51 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   const [countdownRemaining, setCountdownRemaining] = useState<number | null>(null);
   const [statusText, setStatusText] = useState<string>(COPY.voiceCoach.idle);
+  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoiceIndex, setSelectedVoiceIndex] = useState(0);
 
   const speed = SPEED_OPTIONS[speedIndex];
   const timerRef = useRef<number | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const isSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
+  const selectedVoice = availableVoices[selectedVoiceIndex] || availableVoices[0] || null;
+
+  const cycleVoice = useCallback(() => {
+    if (availableVoices.length <= 1) return;
+    setSelectedVoiceIndex((prev) => (prev + 1) % availableVoices.length);
+  }, [availableVoices.length]);
+
+  // Load and rank voices with natural/enhanced speech priority
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+
+    const loadVoices = () => {
+      const raw = window.speechSynthesis.getVoices();
+      if (raw && raw.length > 0) {
+        const curated = getCuratedNaturalVoices(raw);
+        setAvailableVoices(curated);
+      }
+    };
+
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = null;
+      }
+    };
+  }, []);
+
   const cancelSpeech = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
@@ -95,6 +133,10 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
   // Safe unmount cleanup per AGENTS.md
   useEffect(() => {
     return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
       cancelSpeech();
       clearTimer();
     };
@@ -105,24 +147,66 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
       if (!isSupported) return;
       cancelSpeech();
 
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = speed;
-      utterance.pitch = 1.0;
-      utterance.lang = 'en-US';
+      const speakWithBrowser = () => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = speed;
+        utterance.pitch = 1.0;
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+          utterance.lang = selectedVoice.lang;
+        } else {
+          utterance.lang = 'en-US';
+        }
 
-      utterance.onend = () => {
-        utteranceRef.current = null;
-        if (onEnd) onEnd();
+        utterance.onend = () => {
+          utteranceRef.current = null;
+          if (onEnd) onEnd();
+        };
+
+        utterance.onerror = () => {
+          utteranceRef.current = null;
+        };
+
+        utteranceRef.current = utterance;
+        window.speechSynthesis.speak(utterance);
       };
 
-      utterance.onerror = () => {
-        utteranceRef.current = null;
-      };
-
-      utteranceRef.current = utterance;
-      window.speechSynthesis.speak(utterance);
+      // Query server for Google Cloud TTS audio if configured
+      fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          speed,
+          voice: selectedVoice?.name
+        })
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data?.audioContent) {
+            const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
+            audio.playbackRate = speed;
+            audio.onended = () => {
+              audioRef.current = null;
+              if (onEnd) onEnd();
+            };
+            audio.onerror = () => {
+              audioRef.current = null;
+              speakWithBrowser();
+            };
+            audioRef.current = audio;
+            audio.play().catch(() => {
+              speakWithBrowser();
+            });
+          } else {
+            speakWithBrowser();
+          }
+        })
+        .catch(() => {
+          speakWithBrowser();
+        });
     },
-    [cancelSpeech, isSupported, speed]
+    [cancelSpeech, isSupported, selectedVoice, speed]
   );
 
   const buildStepScript = useCallback((step: RoutineStep, index: number, total: number) => {
@@ -304,6 +388,10 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
     nextStep,
     prevStep,
     cycleSpeed,
-    toggleSound
+    toggleSound,
+    selectedVoice,
+    cycleVoice,
+    activeVoiceDisplayName: selectedVoice ? formatVoiceName(selectedVoice.name) : null,
+    availableVoiceCount: availableVoices.length
   };
 }

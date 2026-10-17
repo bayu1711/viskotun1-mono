@@ -4,6 +4,7 @@ import React from 'react';
 import GraphicEqIcon from '@mui/icons-material/GraphicEq';
 import PauseRoundedIcon from '@mui/icons-material/PauseRounded';
 import PlayArrowRoundedIcon from '@mui/icons-material/PlayArrowRounded';
+import RecordVoiceOverRoundedIcon from '@mui/icons-material/RecordVoiceOverRounded';
 import SkipNextRoundedIcon from '@mui/icons-material/SkipNextRounded';
 import SkipPreviousRoundedIcon from '@mui/icons-material/SkipPreviousRounded';
 import VolumeOffRoundedIcon from '@mui/icons-material/VolumeOffRounded';
@@ -36,7 +37,10 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
     nextStep,
     prevStep,
     cycleSpeed,
-    toggleSound
+    toggleSound,
+    cycleVoice,
+    activeVoiceDisplayName,
+    availableVoiceCount
   } = useVoiceCoach({ steps, safetyRule, onStepComplete });
 
   if (!isSupported) {
@@ -148,6 +152,17 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
             {COPY.voiceCoach.speedDisplay(speed)}
           </button>
 
+          {/* Voice Switcher (if multiple natural voices available) */}
+          {availableVoiceCount > 1 && (
+            <CircleButton
+              label={COPY.voiceCoach.switchVoice}
+              size={36}
+              onClick={cycleVoice}
+            >
+              <Icon icon={RecordVoiceOverRoundedIcon} size="sm" />
+            </CircleButton>
+          )}
+
           {/* Audio Chime Mute Toggle */}
           <CircleButton
             label={isSoundEnabled ? COPY.voiceCoach.soundOn : COPY.voiceCoach.soundMuted}
@@ -164,7 +179,9 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
         <p className="truncate" aria-live="polite">
           {statusText}
         </p>
-        <span className="shrink-0 text-3xs text-ink/35">{COPY.voiceCoach.techNote}</span>
+        <span className="shrink-0 text-3xs text-ink/40">
+          {activeVoiceDisplayName ? COPY.voiceCoach.voiceNameDisplay(activeVoiceDisplayName) : COPY.voiceCoach.techNote}
+        </span>
       </div>
     </section>
   );
