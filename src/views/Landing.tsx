@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
@@ -41,11 +42,15 @@ export function LandingPage() {
       {/* Public Top Navigation */}
       <header className="sticky top-0 z-40 border-b border-ink/10 bg-canvas/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 lg:px-8">
-          <Link href={ROUTES.landing} className="flex items-center gap-2.5 font-medium tracking-tight">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-xs font-semibold text-white">
-              {COPY.brand.initials}
-            </span>
-            <span className="text-lg font-medium">{COPY.brand.name}</span>
+          <Link href={ROUTES.landing} className="flex items-center hover:opacity-85 transition-opacity">
+            <Image
+              src={COPY.brand.logoUrl}
+              alt={COPY.brand.name}
+              width={140}
+              height={34}
+              priority
+              className="h-8 w-auto object-contain"
+            />
           </Link>
 
           <nav className="hidden items-center gap-6 text-sm text-ink/70 md:flex">
@@ -284,7 +289,16 @@ export function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-ink/10 bg-canvas py-8 text-center text-xs text-ink/45">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 sm:flex-row lg:px-8">
-          <p>{COPY.landing.footerTagline}</p>
+          <div className="flex items-center gap-2">
+            <Image
+              src={COPY.brand.iconUrl}
+              alt=""
+              width={18}
+              height={18}
+              className="h-4.5 w-4.5 object-contain"
+            />
+            <p>{COPY.landing.footerTagline}</p>
+          </div>
           <div className="flex items-center gap-4">
             {user ? (
               <>

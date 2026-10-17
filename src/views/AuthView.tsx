@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import GoogleIcon from '@mui/icons-material/Google';
@@ -99,11 +100,15 @@ export function AuthView({ mode }: AuthViewProps) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-canvas px-5 py-12 font-sans text-ink">
       {/* Brand logo */}
-      <Link href={ROUTES.landing} className="mb-8 flex items-center gap-2.5 font-medium tracking-tight">
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white">
-          {COPY.brand.initials}
-        </span>
-        <span className="text-xl font-medium">{COPY.brand.name}</span>
+      <Link href={ROUTES.landing} className="mb-8 flex items-center hover:opacity-85 transition-opacity">
+        <Image
+          src={COPY.brand.logoUrl}
+          alt={COPY.brand.name}
+          width={160}
+          height={39}
+          priority
+          className="h-10 w-auto object-contain"
+        />
       </Link>
 
       <div className="w-full max-w-md rounded-card border border-ink/15 bg-white p-7 shadow-sm sm:p-8">

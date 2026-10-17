@@ -22,7 +22,9 @@ export const COPY = {
   brand: {
     mark: '//',
     name: 'ViskotuN1',
-    initials: 'VN'
+    initials: 'VN',
+    logoUrl: '/images/viskotun1-logo.png',
+    iconUrl: '/images/viskotun1-icon.png'
   },
   greeting: {
     morning: 'Morning,',
@@ -947,6 +949,8 @@ export const COPY = {
       'Explore top-ranked clinical research papers in our database with real-time community participants, compliance tracking, and verified biofeedback telemetry.',
     firestoreSyncLive: 'Firebase Firestore live',
     firestoreSyncLocal: 'Local verified catalog',
+    filterByTopic: 'Filtered by:',
+    clearFilter: 'Clear topic filter',
     loadButton: 'Start this routine',
     loadedButton: 'Active in workspace',
     downloadPdfButton: 'Download Open-Access PDF',

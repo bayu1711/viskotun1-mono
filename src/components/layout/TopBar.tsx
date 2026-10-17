@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import AddIcon from '@mui/icons-material/Add';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
@@ -28,6 +29,16 @@ export function TopBar() {
   return (
     <header className="mx-auto w-full max-w-6xl px-5 pt-5 lg:px-10 lg:pt-8">
       <div className="flex items-center gap-3 border-b border-ink pb-4">
+        <Link href={ROUTES.routine} className="flex items-center lg:hidden mr-0.5 hover:opacity-85 transition-opacity" aria-label={COPY.brand.name}>
+          <Image
+            src={COPY.brand.iconUrl}
+            alt={COPY.brand.name}
+            width={28}
+            height={28}
+            priority
+            className="h-7 w-7 object-contain"
+          />
+        </Link>
         <Avatar initials={displayInitials} />
         <div className="leading-tight">
           <p className="text-xs text-ink/45">{greeting()}</p>

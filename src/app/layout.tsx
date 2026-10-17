@@ -13,13 +13,30 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://viskotun1.app'),
   title: COPY.metadata.title,
   description: COPY.metadata.description,
   keywords: [...COPY.metadata.keywords],
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    shortcut: '/icon.png',
+    apple: '/apple-icon.png',
+  },
   openGraph: {
     title: COPY.metadata.openGraphTitle,
     description: COPY.metadata.openGraphDescription,
     type: 'website',
+    images: [
+      {
+        url: COPY.brand.logoUrl,
+        width: 1013,
+        height: 246,
+        alt: COPY.brand.name,
+      },
+    ],
   },
 };
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef } from 'react';
+import Image from 'next/image';
 import CloseIcon from '@mui/icons-material/Close';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -119,9 +120,13 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
               <div className="flex items-start justify-between border-b-2 border-ink pb-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xl font-bold italic tracking-tighter text-ink">
-                      {COPY.brand.mark}
-                    </span>
+                    <Image
+                      src={COPY.brand.iconUrl}
+                      alt=""
+                      width={20}
+                      height={20}
+                      className="h-5 w-5 object-contain"
+                    />
                     <span className="text-sm font-semibold uppercase tracking-wider text-ink">
                       {COPY.brand.name}
                     </span>
