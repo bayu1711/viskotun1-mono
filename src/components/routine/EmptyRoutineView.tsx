@@ -2,8 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
-import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
@@ -17,7 +15,7 @@ import { PillButton } from '../ui/PillButton';
 import { StepIcon } from '../ui/StepIcon';
 
 export function EmptyRoutineView() {
-  const { openHowTo, loadSampleRoutine, loadSampleProtocol, trendingPapers, samplePapers } = useRoutine();
+  const { loadSampleRoutine, loadSampleProtocol, trendingPapers, samplePapers } = useRoutine();
   const { openAssistant } = useAssistant();
   const loadRoutine = loadSampleRoutine || loadSampleProtocol;
   const availablePapers = trendingPapers || samplePapers || [];
@@ -45,19 +43,6 @@ export function EmptyRoutineView() {
         <p className="text-base leading-relaxed text-ink/70">
           {COPY.onboarding.welcomeSubtitle}
         </p>
-
-        {/* Primary Action Buttons */}
-        <div className="flex flex-wrap items-center gap-3 pt-2">
-          <PillButton size="lg" onClick={handleOpenUpload} className="gap-2">
-            <Icon icon={UploadFileOutlinedIcon} size="sm" />
-            <span>{COPY.onboarding.ctaUpload}</span>
-          </PillButton>
-
-          <PillButton size="lg" variant="outline" onClick={openHowTo} className="gap-2">
-            <Icon icon={HelpOutlineOutlinedIcon} size="sm" />
-            <span>{COPY.onboarding.ctaHowTo}</span>
-          </PillButton>
-        </div>
 
         {/* Drag & Drop Prompt Card */}
         <div
