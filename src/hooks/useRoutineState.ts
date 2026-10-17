@@ -104,12 +104,13 @@ export function useRoutineState() {
     let isMounted = true;
     async function fetchFirebaseSamplePapers() {
       try {
-        const res = await fetch('/api/papers?type=samples');
+        const res = await fetch('/api/papers?type=trending');
         if (res.ok) {
           const data = await res.json();
           if (isMounted) {
-            if (Array.isArray(data.samplePapers) && data.samplePapers.length > 0) {
-              setSamplePapers(data.samplePapers);
+            const papers = data.trendingPapers || data.samplePapers;
+            if (Array.isArray(papers) && papers.length > 0) {
+              setSamplePapers(papers);
             }
             if (data.protocols && typeof data.protocols === 'object') {
               setSampleProtocolsMap((prev) => ({ ...prev, ...data.protocols }));
@@ -120,7 +121,7 @@ export function useRoutineState() {
           }
         }
       } catch (err) {
-        console.warn('[useProtocolState] Could not fetch sample papers from Firebase, using baseline:', err);
+        console.warn('[useProtocolState] Could not fetch trending papers from Firebase, using baseline:', err);
       }
     }
 
@@ -159,7 +160,34 @@ export function useRoutineState() {
         try {
           const parsed = JSON.parse(savedRoutinesRaw);
           if (Array.isArray(parsed)) {
-            loadedProtocols = parsed;
+            // Sanitize any legacy sample protocols from prior sessions that had Day 4 or pre-filled sets
+            loadedProtocols = parsed.map((p) => {
+              if (['achilles', 'hair-loss', 'creatine-sleep'].includes(p.id)) {
+                if (p.currentDay > 1 || (p.dayHistory && p.dayHistory.length > 0)) {
+                  let r: any = null;
+                  try {
+                    if (savedRuntimeRaw) r = JSON.parse(savedRuntimeRaw)[p.id];
+                  } catch {}
+                  const hasOnlyMockLogs =
+                    !r?.feedbackLogs?.length ||
+                    r.feedbackLogs.every((l: any) =>
+                      ['ach-log-1', 'ach-log-2', 'ach-log-3', 'hair-log-1', 'hair-log-2', 'hair-log-3', 'cr-log-1'].includes(l.id)
+                    );
+                  if (hasOnlyMockLogs) {
+                    return {
+                      ...p,
+                      currentDay: 1,
+                      dayHistory: [],
+                      streak: 0,
+                      initialSetsDone: {},
+                      initialFeedbackLogs: [],
+                      initialMorphingLogs: []
+                    };
+                  }
+                }
+              }
+              return p;
+            });
             if (isMounted) {
               setProtocolList(loadedProtocols);
             }
@@ -185,6 +213,19 @@ export function useRoutineState() {
         try {
           const parsedRuntime = JSON.parse(savedRuntimeRaw);
           if (parsedRuntime && typeof parsedRuntime === 'object') {
+            for (const id of ['achilles', 'hair-loss', 'creatine-sleep']) {
+              const r = parsedRuntime[id];
+              if (r) {
+                const hasOnlyMockLogs = r.feedbackLogs?.every((l: any) =>
+                  ['ach-log-1', 'ach-log-2', 'ach-log-3', 'hair-log-1', 'hair-log-2', 'hair-log-3', 'cr-log-1'].includes(l.id)
+                );
+                if (hasOnlyMockLogs && r.feedbackLogs?.length) {
+                  r.feedbackLogs = [];
+                  r.morphingLogs = [];
+                  r.setsDone = {};
+                }
+              }
+            }
             if (isMounted) {
               setRuntime(parsedRuntime);
             }
@@ -370,23 +411,47 @@ export function useRoutineState() {
         return;
       }
 
+      // Ensure every new user or guest starts on Day 1 with clean history and 0 streak
+      const cleanProtocol: Protocol = {
+        ...sample,
+        currentDay: 1,
+        dayHistory: [],
+        streak: 0,
+        initialSetsDone: {},
+        initialFeedbackLogs: [],
+        initialMorphingLogs: []
+      };
+
       setProtocolList((prev) => {
-        const exists = prev.some((p) => p.id === sample.id);
+        const exists = prev.some((p) => p.id === cleanProtocol.id);
         if (exists) return prev;
-        return [...prev, sample];
+        return [...prev, cleanProtocol];
       });
 
-      setActiveProtocol(sample.id);
+      setActiveProtocol(cleanProtocol.id);
 
       setRuntime((prev) => {
-        if (prev[sample.id]) return prev;
+        // If the user already has runtime tracking data for this routine, keep their progress
+        if (prev[cleanProtocol.id]) return prev;
+
+        // Otherwise, initialize fresh on Day 1 with no logs and all sets at 0
         return {
           ...prev,
-          [sample.id]: {
-            setsDone: { ...(sample.initialSetsDone ?? {}) },
-            feedbackLogs: sample.initialFeedbackLogs ?? [],
-            morphingLogs: sample.initialMorphingLogs ?? [],
-            messages: sample.initialMessages ?? [],
+          [cleanProtocol.id]: {
+            setsDone: {},
+            feedbackLogs: [],
+            morphingLogs: [],
+            messages: cleanProtocol.initialMessages?.length
+              ? cleanProtocol.initialMessages
+              : [
+                  {
+                    id: createId('msg'),
+                    role: 'ai',
+                    kind: 'routine',
+                    content: cleanProtocol.id,
+                    timestamp: nowLabel()
+                  }
+                ],
             escalationPaused: false,
             assistantTyping: false
           }
@@ -394,7 +459,7 @@ export function useRoutineState() {
       });
 
       setIsHowToOpen(false);
-      toast.success(COPY.howTo.loadedToast(sample.shortTitle || sample.title));
+      toast.success(COPY.howTo.loadedToast(cleanProtocol.shortTitle || cleanProtocol.title));
     },
     [sampleProtocolsMap]
   );
@@ -1034,8 +1099,10 @@ export function useRoutineState() {
       isHowToOpen,
       openHowTo,
       closeHowTo,
+      loadTrendingRoutine: loadSampleProtocol,
       loadSampleRoutine: loadSampleProtocol,
       loadSampleProtocol,
+      trendingPapers: samplePapers,
       samplePapers,
       sampleSource,
       isStepComplete,

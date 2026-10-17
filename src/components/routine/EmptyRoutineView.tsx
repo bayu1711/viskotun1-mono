@@ -15,12 +15,21 @@ import { PillButton } from '../ui/PillButton';
 import { StepIcon } from '../ui/StepIcon';
 
 export function EmptyRoutineView() {
-  const { openHowTo, loadSampleRoutine, loadSampleProtocol } = useRoutine();
+  const { openHowTo, loadSampleRoutine, loadSampleProtocol, trendingPapers, samplePapers } = useRoutine();
   const { openAssistant } = useAssistant();
   const loadRoutine = loadSampleRoutine || loadSampleProtocol;
+  const availablePapers = trendingPapers || samplePapers || [];
+  const topTrending = availablePapers.filter((p) => !p.isGuardrailRejectionTest && (p.routineId || p.protocolId)).slice(0, 3);
 
   const handleOpenUpload = () => {
     openAssistant('upload');
+  };
+
+  const getIconForRoutine = (targetId: string) => {
+    if (targetId === 'achilles') return 'straight-knee' as const;
+    if (targetId === 'hair-loss') return 'serum' as const;
+    if (targetId === 'creatine-sleep') return 'sleep' as const;
+    return 'pill' as const;
   };
 
   return (
@@ -72,11 +81,11 @@ export function EmptyRoutineView() {
           </p>
         </div>
 
-        {/* Quick Sample Loaders */}
+        {/* Quick Trending Paper Starters */}
         <div className="space-y-3 pt-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-medium text-ink/70">
-              {COPY.onboarding.samplesHeading}
+              {COPY.onboarding.trendingHeading}
             </h3>
             <button
               type="button"
@@ -88,98 +97,62 @@ export function EmptyRoutineView() {
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {/* Sample 1: Achilles */}
-            <div className="flex flex-col justify-between rounded-card border border-ink/10 bg-white p-4 transition-all hover:border-ink/30">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-canvas text-ink">
-                    <StepIcon icon="straight-knee" size="xs" />
-                  </span>
-                  <span className="rounded-full bg-mint px-2 py-0.5 text-2xs font-semibold text-ink">
-                    rehab
-                  </span>
-                </div>
-                <h4 className="mt-3 text-sm font-medium text-ink">
-                  Achilles Tendinopathy
-                </h4>
-                <p className="mt-1 text-2xs text-ink/60">
-                  Alfredson & McCormack eccentric drops · 0–10 pain slider & load reduction.
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-ink/10">
-                <PillButton
-                  size="sm"
-                  variant="outline"
-                  onClick={() => loadRoutine('achilles')}
-                  className="w-full justify-center gap-1.5"
-                >
-                  <Icon icon={PlayArrowOutlinedIcon} size="xs" />
-                  <span>{COPY.onboarding.quickLoadButton}</span>
-                </PillButton>
-              </div>
-            </div>
+            {topTrending.map((paper, index) => {
+              const targetId = paper.routineId || paper.protocolId || 'achilles';
+              const rank = paper.trendingRank ?? index + 1;
+              const trackers = paper.activeTrackersCount;
+              const logs = paper.totalLogsCount;
 
-            {/* Sample 2: Hair Regrowth */}
-            <div className="flex flex-col justify-between rounded-card border border-ink/10 bg-white p-4 transition-all hover:border-ink/30">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-canvas text-ink">
-                    <StepIcon icon="serum" size="xs" />
-                  </span>
-                  <span className="rounded-full bg-cream px-2 py-0.5 text-2xs font-semibold text-ink">
-                    dermatology
-                  </span>
-                </div>
-                <h4 className="mt-3 text-sm font-medium text-ink">
-                  Alopecia Hair Regrowth
-                </h4>
-                <p className="mt-1 text-2xs text-ink/60">
-                  Dhurat RCT minoxidil + microneedling · milestone photo comparison.
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-ink/10">
-                <PillButton
-                  size="sm"
-                  variant="outline"
-                  onClick={() => loadRoutine('hair-loss')}
-                  className="w-full justify-center gap-1.5"
+              return (
+                <div
+                  key={paper.id}
+                  className="flex flex-col justify-between rounded-card border border-ink/10 bg-white p-4 transition-all hover:border-ink/30"
                 >
-                  <Icon icon={PlayArrowOutlinedIcon} size="xs" />
-                  <span>{COPY.onboarding.quickLoadButton}</span>
-                </PillButton>
-              </div>
-            </div>
+                  <div>
+                    <div className="flex items-center justify-between gap-1.5">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-canvas text-ink">
+                        <StepIcon icon={getIconForRoutine(targetId)} size="xs" />
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="rounded-full bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 text-2xs font-semibold text-amber-900">
+                          {COPY.howTo.trendingRankBadge(rank)}
+                        </span>
+                        <span className="rounded-full bg-canvas px-2 py-0.5 text-2xs font-semibold text-ink/70">
+                          {paper.category}
+                        </span>
+                      </div>
+                    </div>
 
-            {/* Sample 3: Creatine */}
-            <div className="flex flex-col justify-between rounded-card border border-ink/10 bg-white p-4 transition-all hover:border-ink/30">
-              <div>
-                <div className="flex items-center justify-between">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-canvas text-ink">
-                    <StepIcon icon="sleep" size="xs" />
-                  </span>
-                  <span className="rounded-full bg-mint px-2 py-0.5 text-2xs font-semibold text-ink">
-                    nutrition
-                  </span>
+                    <h4 className="mt-3 text-sm font-medium text-ink leading-snug">
+                      {paper.shortTitle || paper.title}
+                    </h4>
+                    <p className="mt-1 text-2xs text-ink/60 line-clamp-2">
+                      {paper.summary}
+                    </p>
+
+                    {(trackers || logs) && (
+                      <div className="mt-2.5 flex items-center gap-2 text-2xs text-ink/50">
+                        {trackers && <span>{COPY.howTo.activeTrackersBadge(trackers)}</span>}
+                        {trackers && logs && <span>·</span>}
+                        {logs && <span>{COPY.howTo.totalLogsBadge(logs)}</span>}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-ink/10">
+                    <PillButton
+                      size="sm"
+                      variant="outline"
+                      onClick={() => loadRoutine(targetId)}
+                      className="w-full justify-center gap-1.5"
+                    >
+                      <Icon icon={PlayArrowOutlinedIcon} size="xs" />
+                      <span>{COPY.onboarding.quickLoadButton}</span>
+                    </PillButton>
+                  </div>
                 </div>
-                <h4 className="mt-3 text-sm font-medium text-ink">
-                  Creatine & Sleep Deficit
-                </h4>
-                <p className="mt-1 text-2xs text-ink/60">
-                  Gordji-Nejad 2024 cognitive rescue · PVT reaction timer & sleepiness scale.
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-ink/10">
-                <PillButton
-                  size="sm"
-                  variant="outline"
-                  onClick={() => loadRoutine('creatine-sleep')}
-                  className="w-full justify-center gap-1.5"
-                >
-                  <Icon icon={PlayArrowOutlinedIcon} size="xs" />
-                  <span>{COPY.onboarding.quickLoadButton}</span>
-                </PillButton>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
       </div>

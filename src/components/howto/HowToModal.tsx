@@ -197,6 +197,11 @@ export function HowToModal() {
                           <div className="flex flex-wrap items-start justify-between gap-2">
                             <div className="space-y-1">
                               <div className="flex flex-wrap items-center gap-2">
+                                {paper.trendingRank && (
+                                  <span className="rounded-full bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 text-2xs font-semibold text-amber-900">
+                                    {COPY.howTo.trendingRankBadge(paper.trendingRank)}
+                                  </span>
+                                )}
                                 <span
                                   className={cn(
                                     'rounded-full px-2 py-0.5 text-2xs font-medium',
@@ -223,6 +228,19 @@ export function HowToModal() {
                               <p className="text-2xs text-ink/50">
                                 {paper.authors} · <em>{paper.journal}</em> ({paper.year})
                               </p>
+                              {(paper.activeTrackersCount || paper.totalLogsCount) && (
+                                <div className="flex flex-wrap items-center gap-2 pt-0.5 text-2xs text-ink/60">
+                                  {paper.activeTrackersCount && (
+                                    <span className="font-medium text-ink/75">
+                                      {COPY.howTo.activeTrackersBadge(paper.activeTrackersCount)}
+                                    </span>
+                                  )}
+                                  {paper.activeTrackersCount && paper.totalLogsCount && <span>·</span>}
+                                  {paper.totalLogsCount && (
+                                    <span>{COPY.howTo.totalLogsBadge(paper.totalLogsCount)}</span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
 
