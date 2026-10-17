@@ -327,7 +327,7 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
   contraindications: [
     {
       id: 'pat-c-1',
-      text: 'Stop immediately if sharp, stabbing discomfort exceeds 4/10 or joint locking occurs.',
+      text: 'Stop immediately if sharp, stabbing discomfort reaches 4/10 or joint locking occurs.',
       severity: 'stop'
     },
     {

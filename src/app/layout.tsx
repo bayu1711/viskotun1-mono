@@ -1,15 +1,23 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Bricolage_Grotesque, Figtree } from 'next/font/google';
 import '../index.css';
 import { Providers } from './providers';
 
 import { COPY } from '@/data/copy';
 
-const inter = Inter({
+// Figtree: calm, compact geometric sans for body and UI. Bricolage Grotesque: warm display face for headings.
+const bodyFont = Figtree({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-body',
+});
+
+const displayFont = Bricolage_Grotesque({
+  subsets: ['latin'],
+  display: 'swap',
+  axes: ['opsz'],
+  variable: '--font-display',
 });
 
 export const metadata: Metadata = {
@@ -46,7 +54,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang={COPY.metadata.lang} className={inter.variable}>
+    <html lang={COPY.metadata.lang} className={`${bodyFont.variable} ${displayFont.variable}`}>
       <body className="min-h-screen bg-canvas font-sans text-ink antialiased">
         <Providers>{children}</Providers>
       </body>

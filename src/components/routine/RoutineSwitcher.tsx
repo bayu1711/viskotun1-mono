@@ -40,7 +40,7 @@ export function RoutineSwitcher() {
       <button
         type="button"
         onClick={handleAddPaper}
-        className="flex items-center gap-2 rounded-full border border-dashed border-ink/40 py-1.5 px-3 text-sm text-ink/70 hover:border-ink hover:text-ink transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+        className="flex min-h-11 items-center gap-2 rounded-full border border-dashed border-ink/40 py-1.5 px-3 text-sm text-ink/70 hover:border-ink hover:text-ink transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
       >
         <Icon icon={AddIcon} size="sm" />
         <span>{COPY.switcher.addPaper}</span>
@@ -56,7 +56,7 @@ export function RoutineSwitcher() {
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-controls={isOpen ? listId : undefined}
-        className="flex items-center gap-2 rounded-full border border-ink py-1.5 pl-1.5 pr-3 text-sm transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+        className="flex min-h-11 items-center gap-2 rounded-full border border-ink py-1.5 pl-1.5 pr-3 text-sm transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
       >
         <IconTile variant="orange" shape="circle" size={28}>
           <StepIcon icon={routine.icon} size="xs" />
@@ -72,9 +72,9 @@ export function RoutineSwitcher() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: MOTION.popoverOffsetY }}
             transition={MOTION.fade}
-            className="absolute left-0 top-full z-popover mt-2 w-popover max-w-inset rounded-card border border-ink/10 bg-white p-2 shadow-popover"
+            className="absolute left-0 top-full z-popover mt-2 w-popover max-w-inset rounded-card bg-white p-2 shadow-popover"
           >
-            <p id={headingId} className="px-2 py-1 text-2xs uppercase tracking-wider text-ink/40">
+            <p id={headingId} className="px-2 py-1 text-2xs uppercase tracking-wider text-ink/60">
               {COPY.switcher.heading}
             </p>
             <ul id={listId} role="listbox" aria-labelledby={headingId} className="space-y-1">

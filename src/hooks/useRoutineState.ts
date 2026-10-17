@@ -27,6 +27,7 @@ import { createId } from '../utils/id';
 import { clamp, toPercent } from '../utils/math';
 import {
   adherenceOf,
+  applyGuardrailThreshold,
   completionOf,
   exceedsFeedbackThreshold,
   getScheduledFieldsForDay,
@@ -60,6 +61,12 @@ function createInitialRuntime(items: Routine[]): Record<string, RoutineRuntime> 
 
 function buildMessage(message: NewChatMessage): ChatMessage {
   return { ...message, id: message.id ?? createId('msg'), timestamp: nowLabel() };
+}
+
+/** Seeded chat history ships with placeholder times; stamp it with the time the routine was added. */
+function stampSeedMessages(messages: ChatMessage[]): ChatMessage[] {
+  const timestamp = nowLabel();
+  return messages.map((message) => ({ ...message, timestamp }));
 }
 
 const STORAGE_VERSION = 'v2';
@@ -520,7 +527,7 @@ export function useRoutineState() {
         feedbackLogs: [],
         morphingLogs: [],
         messages: cleanProtocol.initialMessages?.length
-          ? cleanProtocol.initialMessages
+          ? stampSeedMessages(cleanProtocol.initialMessages)
           : [
               {
                 id: createId('msg'),
@@ -990,7 +997,7 @@ export function useRoutineState() {
       setsDone: { ...(newProtocol.initialSetsDone ?? {}) },
       excludedStepIds: newProtocol.initialExcludedStepIds ?? [],
       feedbackLogs: newProtocol.initialFeedbackLogs ?? [],
-      messages: newProtocol.initialMessages ?? [],
+      messages: stampSeedMessages(newProtocol.initialMessages ?? []),
       escalationPaused: false,
       assistantTyping: false
     };
@@ -1389,35 +1396,9 @@ export function useRoutineState() {
 
   const updateGuardrailThreshold = useCallback(
     (threshold: number, message?: string) => {
-      if (!protocol) return;
+      if (!protocol || applyGuardrailThreshold(protocol, threshold, message) === protocol) return;
       setProtocolList((prev) =>
-        prev.map((p) => {
-          if (p.id !== protocol.id) return p;
-          const updatedFeedbackMetric = p.feedbackMetric
-            ? {
-                ...p.feedbackMetric,
-                escalationThreshold: threshold,
-                escalationMessage: message || p.feedbackMetric.escalationMessage
-              }
-            : p.feedbackMetric;
-
-          const updatedSpec = (p.dataCollectionSpec || []).map((field) => {
-            if (field.type === 'scale' || field.escalationThreshold !== undefined) {
-              return {
-                ...field,
-                escalationThreshold: threshold,
-                escalationMessage: message || field.escalationMessage
-              };
-            }
-            return field;
-          });
-
-          return {
-            ...p,
-            feedbackMetric: updatedFeedbackMetric,
-            dataCollectionSpec: updatedSpec
-          };
-        })
+        prev.map((p) => (p.id === protocol.id ? applyGuardrailThreshold(p, threshold, message) : p))
       );
     },
     [protocol]

@@ -14,7 +14,7 @@ const TONES: Record<StatTone, {card: string;muted: string;}> = {
   peach: { card: 'bg-peach text-ink', muted: 'text-ink/65' },
   cream: { card: 'bg-cream text-ink', muted: 'text-ink/60' },
   mint: { card: 'bg-mint text-ink', muted: 'text-ink/60' },
-  white: { card: 'bg-white text-ink border border-ink/10', muted: 'text-ink/55' }
+  white: { card: 'bg-white text-ink border border-ink/10', muted: 'text-ink/60' }
 };
 
 export interface StatCardProps {

@@ -41,7 +41,7 @@ export function FaqSuggestions({
             type="button"
             disabled={disabled}
             onClick={() => onSelect(question)}
-            className="shrink-0 rounded-full border border-ink/20 bg-white px-3.5 py-1.5 text-xs text-ink/80 transition-colors hover:border-ink hover:text-ink focus:outline-none focus-visible:border-ink cursor-pointer shadow-2xs"
+            className="shrink-0 rounded-full border border-ink/20 bg-white px-3.5 py-1.5 text-xs text-ink/80 transition-colors hover:border-ink hover:text-ink focus:outline-none focus-visible:border-ink cursor-pointer"
           >
             {question}
           </motion.button>

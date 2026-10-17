@@ -45,20 +45,20 @@ export function CandidateProtocolCard({
   ];
 
   return (
-    <article className="rounded-card border border-ink/10 bg-white p-5 shadow-sm space-y-4">
+    <article className="rounded-card border border-ink/10 bg-white p-5 space-y-4">
       <div className="flex items-center justify-between gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-mint px-2.5 py-0.5 text-xs font-medium text-ink">
           <Icon icon={AutoAwesomeIcon} size="xs" />
           {COPY.assistant.stagingEyebrow}
         </span>
-        <span className="text-2xs text-ink/40 font-mono">
+        <span className="text-2xs text-ink/60 font-mono">
           {protocol.phase || 'Clinical Research'} · {protocol.totalDays} days
         </span>
       </div>
 
       <div>
         <h3 className="text-base font-semibold leading-snug text-ink">{paper.title || protocol.title}</h3>
-        <p className="mt-1 text-xs text-ink/50">
+        <p className="mt-1 text-xs text-ink/60">
           {paper.authors} · {paper.journal}
         </p>
       </div>
@@ -82,7 +82,7 @@ export function CandidateProtocolCard({
 
       {protocol.steps && protocol.steps.length > 0 && (
         <div className="space-y-2 pt-1 border-t border-ink/10">
-          <p className="text-2xs font-semibold uppercase tracking-wider text-ink/45">
+          <p className="text-2xs font-semibold uppercase tracking-wider text-ink/60">
             {COPY.assistant.candidateStepsTitle}
           </p>
           <ul className="space-y-2.5">
@@ -100,14 +100,14 @@ export function CandidateProtocolCard({
                     <span
                       className={cn(
                         'shrink-0 rounded px-1.5 py-0.5 text-2xs font-bold',
-                        isExcluded ? 'bg-ink/5 text-ink/40' : 'bg-ink/10 text-ink'
+                        isExcluded ? 'bg-ink/5 text-ink/60' : 'bg-ink/10 text-ink'
                       )}
                     >
                       {step.sets}×
                     </span>
                     <div className="min-w-0 flex-1 text-xs">
                       <div className="flex items-center gap-1.5">
-                        <p className={cn('font-medium text-ink', isExcluded && 'line-through text-ink/40')}>
+                        <p className={cn('font-medium text-ink', isExcluded && 'line-through text-ink/60')}>
                           {step.action}
                         </p>
                         {isExcluded && (
@@ -116,9 +116,9 @@ export function CandidateProtocolCard({
                           </span>
                         )}
                       </div>
-                      {step.detail && <p className="mt-0.5 text-2xs text-ink/50">{step.detail}</p>}
+                      {step.detail && <p className="mt-0.5 text-2xs text-ink/60">{step.detail}</p>}
                       {step.inferred && (
-                        <p className="mt-1 text-3xs text-ink/50">
+                        <p className="mt-1 text-3xs text-ink/60">
                           {step.inferredProvenance?.tier === 'lineage'
                             ? COPY.task.lineageBadge(step.inferredProvenance.source)
                             : COPY.task.inferredBadge(step.inferredProvenance?.source)}
@@ -133,7 +133,7 @@ export function CandidateProtocolCard({
                           onClick={() => onAskAboutStep(step)}
                           aria-label={COPY.task.helpAriaLabel(step.action)}
                           title={COPY.task.helpTooltip(step.action)}
-                          className="flex h-6 w-6 items-center justify-center rounded-full border border-ink/15 bg-white text-ink/60 shadow-2xs transition-colors hover:border-ink hover:bg-mint hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+                          className="relative flex h-6 w-6 items-center justify-center rounded-full border border-ink/15 bg-white text-ink/60 transition-colors before:absolute before:-inset-2.5 hover:border-ink hover:bg-mint hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
                         >
                           <Icon icon={HelpOutlineOutlinedIcon} size="xs" />
                         </button>
@@ -142,7 +142,7 @@ export function CandidateProtocolCard({
                         <button
                           type="button"
                           onClick={() => onToggleExcludeStep(step.id)}
-                          className="text-3xs text-ink/50 underline decoration-dotted hover:text-ink transition-colors"
+                          className="text-3xs text-ink/60 underline decoration-dotted hover:text-ink transition-colors"
                           title={isExcluded ? COPY.task.restoreStep : COPY.missingData.candidateExclusionNotice}
                         >
                           {isExcluded ? COPY.assistant.restoreCandidateStep : COPY.assistant.excludeCandidateStep}
@@ -164,7 +164,7 @@ export function CandidateProtocolCard({
       )}
 
       {progressionRule && (
-        <p className="text-2xs text-ink/50 px-1">
+        <p className="text-2xs text-ink/60 px-1">
           {COPY.protocolCard.rulePrefix} {progressionRule.condition.toLowerCase()} {COPY.protocolCard.ruleArrow}{' '}
           <span className="font-medium text-ink">{progressionRule.action.toLowerCase()}</span>
         </p>
@@ -189,7 +189,7 @@ export function CandidateProtocolCard({
         </button>
       </div>
 
-      <p className="text-center text-3xs text-ink/40">
+      <p className="text-center text-3xs text-ink/60">
         {COPY.assistant.stagingDescription}
       </p>
     </article>

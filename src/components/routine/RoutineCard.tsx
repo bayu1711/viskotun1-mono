@@ -57,7 +57,7 @@ export function RoutineCard() {
       )}
 
       {rule && (
-        <p className="mt-3 px-1 text-xs leading-relaxed text-ink/45">
+        <p className="mt-3 px-1 text-xs leading-relaxed text-ink/60">
           {COPY.protocolCard.rulePrefix} {rule.condition.toLowerCase()} {COPY.protocolCard.ruleArrow}{' '}
           <span className="text-ink">{rule.action.toLowerCase()}</span>
         </p>

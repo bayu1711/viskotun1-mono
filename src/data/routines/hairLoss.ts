@@ -82,7 +82,7 @@ export const hairLossRoutine: Routine = {
   contraindications: [
   {
     id: 'hair-c-1',
-    text: 'Pause microneedling if scalp pain exceeds 3/10 or the skin breaks.',
+    text: 'Pause microneedling if scalp pain reaches 4/10 or the skin breaks.',
     severity: 'stop'
   },
   {

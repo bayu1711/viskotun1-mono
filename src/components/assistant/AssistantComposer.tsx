@@ -54,7 +54,7 @@ inputRef)
         onChange={(event) => setDraft(event.target.value)}
         aria-label={ariaLabel || defaultAriaLabel}
         placeholder={placeholder || defaultPlaceholder}
-        className="min-w-0 flex-1 bg-transparent py-2 text-sm placeholder:text-ink/35 focus:outline-none" />
+        className="min-w-0 flex-1 bg-transparent py-2 text-sm placeholder:text-ink/60 focus:outline-none" />
       
       <button
         type="submit"

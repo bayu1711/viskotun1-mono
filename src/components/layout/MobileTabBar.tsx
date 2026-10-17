@@ -27,8 +27,8 @@ export function MobileTabBar() {
                   href={item.href}
                   aria-label={item.label}
                   className={cn(
-                    'flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs transition-colors',
-                    isActive ? 'bg-ink text-white' : 'text-ink/40'
+                    'flex min-h-11 items-center justify-center gap-1.5 rounded-full text-xs transition-colors',
+                    isActive ? 'bg-ink text-white' : 'text-ink/60'
                   )}
                 >
                   <Icon icon={item.icon} size="md" />

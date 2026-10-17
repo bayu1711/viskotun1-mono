@@ -1,6 +1,6 @@
 'use client';
 
-import React, { type FormEvent, useEffect, useId, useMemo, useState } from 'react';
+import React, { type FormEvent, useId, useMemo, useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { toast } from 'sonner';
 import { useRoutine } from '../../contexts/RoutineContext';
@@ -86,13 +86,15 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
   }, [scheduledFields, dataCollectionSpec, activeField]);
 
   const [value, setValue] = useState<MorphingValue>(() => getInitialValueForField(activeField));
+  const [valueFieldId, setValueFieldId] = useState(activeField.id);
   const [note, setNote] = useState('');
   const noteId = useId();
 
-  // Reset value when activeField changes
-  useEffect(() => {
+  // Reset value only when the user switches field, not when the field object is re-created
+  if (valueFieldId !== activeField.id) {
+    setValueFieldId(activeField.id);
     setValue(getInitialValueForField(activeField));
-  }, [activeField]);
+  }
 
   const numericScore = typeof value === 'number' ? value : 0;
   const tone = severityTone(numericScore);
@@ -148,7 +150,7 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
             <h2 className="text-sm font-medium">
               {COPY.morphing.dialogTitle(activeField.name, currentDay)}
             </h2>
-            <span className="text-3xs uppercase tracking-wider text-ink/50">
+            <span className="text-3xs uppercase tracking-wider text-ink/60">
               {activeField.frequency === 'milestone'
                 ? COPY.morphing.milestoneTag
                 : COPY.morphing.dailyTag}
@@ -185,7 +187,7 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
           maxLength={FEEDBACK_NOTE_MAX_LENGTH}
           onChange={(event) => setNote(event.target.value)}
           placeholder={COPY.feedbackDrawer.notesPlaceholder}
-          className="w-full resize-none rounded-tile border border-ink/15 px-4 py-3 text-sm placeholder:text-ink/35 focus:border-ink focus:outline-none"
+          className="w-full resize-none rounded-tile border border-ink/15 px-4 py-3 text-sm placeholder:text-ink/60 focus:border-ink focus:outline-none"
         />
 
         <PillButton type="submit" fullWidth className="mt-4">

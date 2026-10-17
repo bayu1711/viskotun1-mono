@@ -27,7 +27,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
           </span>
         </div>
         <blockquote className="mt-2.5 text-body leading-relaxed text-ink/90">“{review.text}”</blockquote>
-        <p className="mt-2 text-xs text-ink/50">{review.handle}</p>
+        <p className="mt-2 text-xs text-ink/60">{review.handle}</p>
       </article>
     </li>
   );

@@ -26,7 +26,7 @@ export function PaperListItem({ routine, protocol = routine, active, onOpen }: P
         aria-current={active ? 'true' : undefined}
         className={cn(
           'flex w-full items-center gap-3 rounded-tile border p-2.5 pr-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30',
-          active ? 'border-orange bg-orange/5 shadow-2xs ring-1 ring-orange/30' : 'border-ink/15 hover:border-ink/40 bg-white'
+          active ? 'border-orange bg-orange/5 ring-1 ring-orange/30' : 'border-ink/15 hover:border-ink/40 bg-white'
         )}
       >
         <IconTile variant={active ? 'orange' : 'solid'} size={40}>
@@ -36,14 +36,17 @@ export function PaperListItem({ routine, protocol = routine, active, onOpen }: P
           title={item.title}
           meta={
             <>
-              {COPY.dashboard.paperMeta(item.currentDay, item.totalDays, item.streak)}
+              {COPY.dashboard.paperMeta(item.currentDay, item.totalDays)}
               {active && COPY.dashboard.activeSuffix}
             </>
           }
         />
 
         <ProgressRing value={item.todayFraction} size={36} tone={active ? 'orange' : 'ink'}>
-          <span className="text-3xs tabular-nums">{item.todayPercent}</span>
+          <span className="text-3xs tabular-nums">
+            {item.todayPercent}
+            {COPY.common.percentSign}
+          </span>
         </ProgressRing>
       </button>
     </li>

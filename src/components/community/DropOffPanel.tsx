@@ -40,7 +40,7 @@ export function DropOffPanel() {
         <DropOffChart data={insights.dropOff} peakPeriod={insights.peakPeriod} unit={unit} />
       )}
 
-      <p className="mt-4 text-sm leading-relaxed text-ink/55">
+      <p className="mt-4 text-sm leading-relaxed text-ink/60">
         <span className="text-ink">{insights.insightLead}</span> {insights.insightRest}
       </p>
     </Panel>

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { MotionConfig } from 'framer-motion';
 import { Toaster } from 'sonner';
 import { AppShell } from '../components/layout/AppShell';
 import { AssistantProvider } from '../contexts/AssistantContext';
@@ -14,15 +15,17 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <AuthProvider>
-      <RoutineProvider missingDataFlagEnabled={true}>
-        <AssistantProvider>
-          <PolicyLedgerProvider>
-            <AppShell>{children}</AppShell>
-            <Toaster position="top-center" />
-          </PolicyLedgerProvider>
-        </AssistantProvider>
-      </RoutineProvider>
-    </AuthProvider>
+    <MotionConfig reducedMotion="user">
+      <AuthProvider>
+        <RoutineProvider missingDataFlagEnabled={true}>
+          <AssistantProvider>
+            <PolicyLedgerProvider>
+              <AppShell>{children}</AppShell>
+              <Toaster position="top-center" />
+            </PolicyLedgerProvider>
+          </AssistantProvider>
+        </RoutineProvider>
+      </AuthProvider>
+    </MotionConfig>
   );
 }

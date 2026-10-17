@@ -90,7 +90,7 @@ export function RoutinePage() {
           <DayActions className="mt-2.5" />
 
           {stopRule && (
-            <p className="mt-4 px-1 text-sm text-ink/45">
+            <p className="mt-4 px-1 text-sm text-ink/60">
               {COPY.common.warningPrefix} {stopRule.text}
             </p>
           )}

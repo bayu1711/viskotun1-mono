@@ -63,7 +63,7 @@ export function HowToModal() {
                   <Icon icon={HelpOutlineOutlinedIcon} size="sm" />
                 </span>
                 <div>
-                  <p className="text-2xs font-medium text-ink/50">{COPY.howTo.eyebrow}</p>
+                  <p className="text-2xs font-medium text-ink/60">{COPY.howTo.eyebrow}</p>
                   <h2 className="text-base font-medium text-ink">{COPY.howTo.title}</h2>
                 </div>
               </div>
@@ -84,7 +84,7 @@ export function HowToModal() {
                     onClick={() => setActiveTab(tabKey)}
                     className={cn(
                       'relative px-4 py-3 text-xs font-medium transition-colors focus:outline-none focus-visible:underline',
-                      isActive ? 'text-ink' : 'text-ink/45 hover:text-ink/75'
+                      isActive ? 'text-ink' : 'text-ink/60 hover:text-ink/75'
                     )}
                   >
                     {COPY.howTo.tabs[tabKey]}
@@ -223,7 +223,7 @@ export function HowToModal() {
 
             {/* Footer */}
             <div className="flex items-center justify-between border-t border-ink/10 bg-white px-6 py-3">
-              <p className="text-2xs text-ink/45">
+              <p className="text-2xs text-ink/60">
                 ViskotuN1 · Interventional Human Science Pipeline
               </p>
               <PillButton size="sm" variant="outline" onClick={closeHowTo}>

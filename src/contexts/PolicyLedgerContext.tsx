@@ -45,24 +45,24 @@ export function PolicyLedgerProvider({ children }: { children: React.ReactNode }
         setIsLiveFirestore(data.isLiveFirestore);
         setFirestoreStatus(data.firestoreStatus);
         setLastSyncedAt(data.lastSyncedAt);
-
-        if (data.policy?.painEscalationThreshold !== undefined) {
-          updateGuardrailThreshold(
-            data.policy.painEscalationThreshold,
-            data.policy.escalationAlertMessage
-          );
-        }
       }
     } catch (err) {
       console.warn('[PolicyLedgerContext] Could not fetch live policy ledger:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [updateGuardrailThreshold]);
+  }, []);
 
+  // Fetch once on mount; re-applying on routine change happens below without refetching
   useEffect(() => {
     refreshPolicy();
   }, [refreshPolicy]);
+
+  useEffect(() => {
+    if (policy?.painEscalationThreshold !== undefined) {
+      updateGuardrailThreshold(policy.painEscalationThreshold, policy.escalationAlertMessage);
+    }
+  }, [policy, updateGuardrailThreshold]);
 
   const openPolicyDrawer = useCallback(() => setIsDrawerOpen(true), []);
   const closePolicyDrawer = useCallback(() => setIsDrawerOpen(false), []);
@@ -84,13 +84,6 @@ export function PolicyLedgerProvider({ children }: { children: React.ReactNode }
           setFirestoreStatus(data.firestoreStatus);
           setLastSyncedAt(new Date().toISOString());
 
-          if (data.policy?.painEscalationThreshold !== undefined) {
-            updateGuardrailThreshold(
-              data.policy.painEscalationThreshold,
-              data.policy.escalationAlertMessage
-            );
-          }
-
           toast.success(COPY.policyLedger.toastUpdated);
           return true;
         } else {
@@ -105,7 +98,7 @@ export function PolicyLedgerProvider({ children }: { children: React.ReactNode }
         setIsLoading(false);
       }
     },
-    [updateGuardrailThreshold]
+    []
   );
 
   const resetPolicy = useCallback(async (): Promise<boolean> => {
@@ -119,13 +112,6 @@ export function PolicyLedgerProvider({ children }: { children: React.ReactNode }
         setFirestoreStatus(data.firestoreStatus);
         setLastSyncedAt(new Date().toISOString());
 
-        if (data.policy?.painEscalationThreshold !== undefined) {
-          updateGuardrailThreshold(
-            data.policy.painEscalationThreshold,
-            data.policy.escalationAlertMessage
-          );
-        }
-
         toast.success(COPY.policyLedger.toastReset);
         return true;
       }
@@ -136,7 +122,7 @@ export function PolicyLedgerProvider({ children }: { children: React.ReactNode }
     } finally {
       setIsLoading(false);
     }
-  }, [updateGuardrailThreshold]);
+  }, []);
 
   const value = useMemo(
     () => ({

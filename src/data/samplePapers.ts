@@ -42,10 +42,10 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     authors: 'McCormack J.R., Underwood F.B., Slaven E.J., Cappaert T.A.',
     journal: 'Sports Health',
     year: 2016,
-    doi: '10.1177/1941738116630843',
+    doi: '10.1177/1941738116631498',
     pmcId: 'PMC4981065',
     openAccessUrl: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4981065/',
-    pdfUrl: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4981065/pdf/10.1177_1941738116630843.pdf',
+    pdfUrl: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4981065/pdf/10.1177_1941738116631498.pdf',
     summary:
       'A prospective randomized trial comparing eccentric heel drops versus combined soft tissue therapy across 12 weeks with long-term 52-week follow-up.',
     featuresTested: [

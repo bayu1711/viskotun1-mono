@@ -91,7 +91,7 @@ export function MilestonePhotoComparison() {
 
       {!isScheduledToday ? (
         <div className="mt-3 flex items-start gap-2.5 rounded-tile border border-ink/10 bg-canvas p-3 text-xs text-ink/75">
-          <Icon icon={InfoOutlinedIcon} size="sm" className="mt-0.5 shrink-0 text-ink/50" />
+          <Icon icon={InfoOutlinedIcon} size="sm" className="mt-0.5 shrink-0 text-ink/60" />
           <div className="flex-1 leading-relaxed">
             <span className="font-medium text-ink">
               {COPY.morphing.dashboard.notScheduledBadge}:
@@ -120,7 +120,7 @@ export function MilestonePhotoComparison() {
 
       {/* Milestone Day Switcher */}
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium text-ink/50">{COPY.morphing.dashboard.milestonePeriod}</span>
+        <span className="text-xs font-medium text-ink/60">{COPY.morphing.dashboard.milestonePeriod}</span>
         {milestoneDays
           .filter((day) => day > 1)
           .map((day) => {
@@ -220,7 +220,7 @@ export function MilestonePhotoComparison() {
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between text-[11px] text-ink/50">
+      <div className="mt-3 flex items-center justify-between text-[11px] text-ink/60">
         <span>{COPY.morphing.dashboard.dragHint}</span>
         <span>{COPY.morphing.dashboard.overheadStandard}</span>
       </div>

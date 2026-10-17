@@ -40,8 +40,8 @@ function CustomTooltip({ active, payload, label, unit }: CustomTooltipProps) {
   const val = payload[0]?.value;
 
   return (
-    <div className="rounded-card border border-ink/15 bg-white p-2.5 shadow-md">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-ink/50">
+    <div className="rounded-card bg-white p-2.5 shadow-md">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-ink/60">
         {COPY.morphing.dashboard.dayTooltip(Number(label))}
       </p>
       <p className="mt-0.5 text-sm font-medium text-ink">

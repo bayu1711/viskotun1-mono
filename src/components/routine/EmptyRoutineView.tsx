@@ -65,7 +65,7 @@ export function EmptyRoutineView() {
           <h3 className="mt-4 text-base font-medium text-ink">
             {COPY.onboarding.dropPrompt}
           </h3>
-          <p className="mx-auto mt-1 max-w-md text-xs text-ink/55">
+          <p className="mx-auto mt-1 max-w-md text-xs text-ink/60">
             {COPY.onboarding.dropSubtext}
           </p>
         </div>
@@ -78,7 +78,7 @@ export function EmptyRoutineView() {
             </h3>
             <Link
               href={`${ROUTES.community}?tab=explore`}
-              className="text-2xs font-medium text-ink/50 hover:text-ink transition-colors underline"
+              className="text-2xs font-medium text-ink/60 hover:text-ink transition-colors underline"
             >
               {COPY.howTo.buttonExploreSamples}
             </Link>
@@ -118,7 +118,7 @@ export function EmptyRoutineView() {
                       {paper.summary}
                     </p>
 
-                    <div className="mt-2.5 flex items-center gap-1.5 text-2xs text-ink/50">
+                    <div className="mt-2.5 flex items-center gap-1.5 text-2xs text-ink/60">
                       <span>{COPY.howTo.activeTrackersBadge(trackers ?? 0)}</span>
                       <span>·</span>
                       <span>{COPY.howTo.totalLogsBadge(logs ?? 0)}</span>

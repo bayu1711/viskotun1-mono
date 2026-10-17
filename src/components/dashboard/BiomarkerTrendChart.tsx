@@ -128,7 +128,7 @@ export function BiomarkerTrendChart() {
 
       {!isScheduledToday && (
         <div className="mt-3 flex items-start gap-2.5 rounded-tile border border-ink/10 bg-canvas p-3 text-xs text-ink/75">
-          <Icon icon={InfoOutlinedIcon} size="sm" className="mt-0.5 shrink-0 text-ink/50" />
+          <Icon icon={InfoOutlinedIcon} size="sm" className="mt-0.5 shrink-0 text-ink/60" />
           <div className="flex-1 leading-relaxed">
             <span className="font-medium text-ink">
               {COPY.morphing.dashboard.notScheduledBadge}:
@@ -148,9 +148,9 @@ export function BiomarkerTrendChart() {
                 key={field.id}
                 type="button"
                 onClick={() => setSelectedFieldId(field.id)}
-                className={`rounded-full px-3 py-1 text-xs transition-colors ${
+                className={`inline-flex min-h-11 items-center rounded-full px-4 text-xs transition-colors ${
                   isSelected
-                    ? 'bg-orange font-medium text-white shadow-2xs'
+                    ? 'bg-ink font-medium text-white'
                     : 'bg-canvas text-ink/70 hover:bg-ink/10'
                 }`}
               >

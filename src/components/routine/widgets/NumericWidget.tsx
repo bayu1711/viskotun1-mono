@@ -71,7 +71,7 @@ export function NumericWidget({ field, value, onChange }: NumericWidgetProps) {
         </CircleButton>
       </div>
 
-      <p className="mt-3 text-xs text-ink/50">
+      <p className="mt-3 text-xs text-ink/60">
         {COPY.morphing.widgets.numeric.referenceRange(min, max, field.unit)}
       </p>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -22,6 +22,7 @@ interface AuthViewProps {
 export function AuthView({ mode }: AuthViewProps) {
   const [activeMode, setActiveMode] = useState<'login' | 'signup'>(mode);
   const isLogin = activeMode === 'login';
+  const fieldId = useId();
   const router = useRouter();
   const { isAuthenticated, loginWithEmail, loginWithGoogle, signupWithEmail, loginAsGuest, loginAsAdmin } = useAuth();
 
@@ -98,9 +99,9 @@ export function AuthView({ mode }: AuthViewProps) {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-canvas px-5 py-12 font-sans text-ink">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-5 py-12 font-sans text-ink">
       {/* Brand logo */}
-      <Link href={ROUTES.landing} className="mb-8 flex items-center hover:opacity-85 transition-opacity">
+      <Link href={ROUTES.landing} className="mb-8 flex min-h-11 items-center transition-opacity hover:opacity-85">
         <Image
           src={COPY.brand.logoUrl}
           alt={COPY.brand.name}
@@ -111,15 +112,15 @@ export function AuthView({ mode }: AuthViewProps) {
         />
       </Link>
 
-      <div className="w-full max-w-md rounded-card border border-ink/15 bg-white p-7 shadow-sm sm:p-8">
+      <div className="w-full max-w-md rounded-callout bg-canvas p-6 sm:p-8">
         {/* Mode Switcher Tabs */}
-        <div className="mb-6 flex rounded-full border border-ink/10 bg-canvas p-1">
+        <div className="mb-6 flex rounded-full bg-ink/5 p-1">
           <button
             type="button"
             onClick={() => setActiveMode('login')}
             className={clsx(
-              'flex-1 rounded-full py-1.5 text-xs font-medium transition-colors',
-              isLogin ? 'bg-white text-ink shadow-2xs' : 'text-ink/60 hover:text-ink'
+              'min-h-11 flex-1 rounded-full text-sm font-semibold transition-colors',
+              isLogin ? 'bg-white text-ink' : 'text-ink/70 hover:text-ink'
             )}
           >
             {COPY.auth.tabSignIn}
@@ -128,8 +129,8 @@ export function AuthView({ mode }: AuthViewProps) {
             type="button"
             onClick={() => setActiveMode('signup')}
             className={clsx(
-              'flex-1 rounded-full py-1.5 text-xs font-medium transition-colors',
-              !isLogin ? 'bg-white text-ink shadow-2xs' : 'text-ink/60 hover:text-ink'
+              'min-h-11 flex-1 rounded-full text-sm font-semibold transition-colors',
+              !isLogin ? 'bg-white text-ink' : 'text-ink/70 hover:text-ink'
             )}
           >
             {COPY.auth.tabCreateAccount}
@@ -137,10 +138,10 @@ export function AuthView({ mode }: AuthViewProps) {
         </div>
 
         <div className="text-center">
-          <h1 className="text-2xl font-normal tracking-tight">
+          <h1 className="text-balance text-3xl font-bold tracking-tight">
             {isLogin ? COPY.auth.loginTitle : COPY.auth.signupTitle}
           </h1>
-          <p className="mt-2 text-xs leading-relaxed text-ink/50">
+          <p className="mt-2 text-pretty text-base leading-relaxed text-ink/75">
             {isLogin ? COPY.auth.loginSubtitle : COPY.auth.signupSubtitle}
           </p>
         </div>
@@ -150,7 +151,7 @@ export function AuthView({ mode }: AuthViewProps) {
           type="button"
           onClick={handleGoogleAuth}
           disabled={isSubmitting}
-          className="mt-6 flex w-full items-center justify-center gap-2.5 rounded-full border border-ink/20 bg-white py-2.5 text-xs font-medium text-ink transition-colors hover:bg-canvas disabled:opacity-50"
+          className="mt-6 flex min-h-12 w-full items-center justify-center gap-2.5 rounded-full border border-ink bg-white text-base font-semibold text-ink transition-colors hover:bg-ink/5 disabled:opacity-50"
         >
           <Icon icon={GoogleIcon} size="sm" />
           <span>{COPY.auth.googleButton}</span>
@@ -158,89 +159,92 @@ export function AuthView({ mode }: AuthViewProps) {
 
         <div className="relative my-6 text-center">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-ink/10" />
+            <div className="w-full border-t border-ink/15" />
           </div>
-          <span className="relative bg-white px-3 text-2xs text-ink/40">{COPY.auth.orWithEmail}</span>
+          <span className="relative bg-canvas px-3 text-sm text-ink/70">{COPY.auth.orWithEmail}</span>
         </div>
 
         {/* Email/Password Form */}
         <form onSubmit={handleEmailSubmit} className="space-y-4">
           {!isLogin && (
             <div>
-              <label className="block text-2xs font-medium text-ink/70">
+              <label htmlFor={`${fieldId}-name`} className="block text-sm font-semibold text-ink">
                 {COPY.auth.nameLabel}
               </label>
               <input
+                id={`${fieldId}-name`}
                 type="text"
+                autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={COPY.auth.namePlaceholder}
-                className="mt-1 w-full rounded-tile border border-ink/15 bg-canvas px-3.5 py-2 text-xs text-ink placeholder:text-ink/30 focus:border-ink focus:outline-none"
+                className="mt-1.5 min-h-12 w-full rounded-xl border border-ink/40 bg-white px-4 text-base text-ink placeholder:text-ink/60 focus:border-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-2xs font-medium text-ink/70">
+            <label htmlFor={`${fieldId}-email`} className="block text-sm font-semibold text-ink">
               {COPY.auth.emailLabel}
             </label>
             <input
+              id={`${fieldId}-email`}
               type="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={COPY.auth.emailPlaceholder}
               required
-              className="mt-1 w-full rounded-tile border border-ink/15 bg-canvas px-3.5 py-2 text-xs text-ink placeholder:text-ink/30 focus:border-ink focus:outline-none"
+              className="mt-1.5 min-h-12 w-full rounded-xl border border-ink/40 bg-white px-4 text-base text-ink placeholder:text-ink/60 focus:border-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
             />
           </div>
 
           <div>
-            <label className="block text-2xs font-medium text-ink/70">
+            <label htmlFor={`${fieldId}-password`} className="block text-sm font-semibold text-ink">
               {COPY.auth.passwordLabel}
             </label>
             <input
+              id={`${fieldId}-password`}
               type="password"
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder={COPY.auth.passwordPlaceholder}
               required
               minLength={6}
-              className="mt-1 w-full rounded-tile border border-ink/15 bg-canvas px-3.5 py-2 text-xs text-ink placeholder:text-ink/30 focus:border-ink focus:outline-none"
+              className="mt-1.5 min-h-12 w-full rounded-xl border border-ink/40 bg-white px-4 text-base text-ink placeholder:text-ink/60 focus:border-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
             />
           </div>
 
 
-          <PillButton type="submit" size="md" fullWidth loading={isSubmitting} className="mt-2 text-xs">
+          <PillButton type="submit" size="md" fullWidth loading={isSubmitting} className="mt-2 min-h-12 text-base font-semibold">
             {isLogin ? COPY.auth.loginButton : COPY.auth.signupButton}
           </PillButton>
         </form>
 
         {/* Quick Access Modes */}
-        <div className="mt-6 border-t border-ink/10 pt-5 space-y-4 text-center">
+        <div className="mt-6 space-y-4 border-t border-ink/15 pt-5 text-center">
           <div>
             <button
               type="button"
               onClick={handleAdminContinue}
-              className="inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-cream px-3.5 py-1.5 text-xs font-semibold lowercase text-ink transition-colors hover:bg-mint"
+              className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-ink/75 underline underline-offset-4 transition-colors hover:text-ink"
             >
               <Icon icon={ShieldOutlinedIcon} size="xs" />
               <span>{COPY.auth.adminButton}</span>
             </button>
-            <p className="mt-1 text-2xs leading-relaxed text-ink/40">
-              {COPY.auth.adminNotice}
-            </p>
           </div>
 
           <div>
             <button
               type="button"
               onClick={handleGuestContinue}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-ink/75 hover:text-ink underline underline-offset-4"
+              className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink underline underline-offset-4 hover:text-ink/80"
             >
               <span>{COPY.auth.guestButton}</span>
               <Icon icon={ArrowForwardIcon} size="xs" />
             </button>
-            <p className="mt-1 text-2xs leading-relaxed text-ink/40">
+            <p className="text-pretty text-sm leading-relaxed text-ink/70">
               {COPY.auth.guestNotice}
             </p>
           </div>
@@ -248,12 +252,12 @@ export function AuthView({ mode }: AuthViewProps) {
       </div>
 
       {/* Switch between Login and Signup */}
-      <p className="mt-6 text-xs text-ink/60">
+      <p className="mt-4 text-sm text-ink/75">
         {isLogin ? (
           <button
             type="button"
             onClick={() => setActiveMode('signup')}
-            className="hover:text-ink underline underline-offset-2"
+            className="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-ink"
           >
             {COPY.auth.needAccount}
           </button>
@@ -261,7 +265,7 @@ export function AuthView({ mode }: AuthViewProps) {
           <button
             type="button"
             onClick={() => setActiveMode('login')}
-            className="hover:text-ink underline underline-offset-2"
+            className="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-ink"
           >
             {COPY.auth.haveAccount}
           </button>

@@ -54,7 +54,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
   return (
     <section
       aria-label={COPY.voiceCoach.title}
-      className="relative overflow-hidden rounded-tile border border-ink/10 bg-white p-4 shadow-sm transition-all sm:p-5"
+      className="relative overflow-hidden rounded-tile border border-ink/10 bg-white p-4 transition-all sm:p-5"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Left: Indicator & Step Context */}
@@ -69,7 +69,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
 
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-2xs font-medium tracking-wider text-ink/45">
+              <span className="text-2xs font-medium tracking-wider text-ink/60">
                 {isPlaying ? COPY.voiceCoach.listening : COPY.voiceCoach.eyebrow}
               </span>
               <span className="text-2xs font-semibold text-ink/70">
@@ -105,30 +105,30 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
               type="button"
               onClick={pauseCoach}
               aria-label={COPY.voiceCoach.pause}
-              className="flex h-10 items-center gap-1.5 rounded-full bg-ink px-4 text-xs font-medium text-white shadow-sm transition-all hover:bg-ink/85 active:scale-95"
+              className="flex h-11 min-w-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-ink px-4 text-xs font-medium text-white shadow-sm transition-all hover:bg-ink/85 active:scale-95"
             >
               <Icon icon={PauseRoundedIcon} size="sm" />
-              <span>{COPY.voiceCoach.pause}</span>
+              <span className="hidden sm:inline">{COPY.voiceCoach.pause}</span>
             </button>
           ) : isPaused ? (
             <button
               type="button"
               onClick={resumeCoach}
               aria-label={COPY.voiceCoach.resume}
-              className="flex h-10 items-center gap-1.5 rounded-full bg-orange px-4 text-xs font-medium text-white shadow-sm transition-all hover:bg-orange/90 active:scale-95"
+              className="flex h-11 min-w-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-orange px-4 text-xs font-medium text-white shadow-sm transition-all hover:bg-orange/90 active:scale-95"
             >
               <Icon icon={PlayArrowRoundedIcon} size="sm" />
-              <span>{COPY.voiceCoach.resume}</span>
+              <span className="hidden sm:inline">{COPY.voiceCoach.resume}</span>
             </button>
           ) : (
             <button
               type="button"
               onClick={startCoach}
               aria-label={COPY.voiceCoach.play}
-              className="flex h-10 items-center gap-1.5 rounded-full bg-orange px-4 text-xs font-medium text-white shadow-sm transition-all hover:bg-orange/90 active:scale-95"
+              className="flex h-11 min-w-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-orange px-4 text-xs font-medium text-white shadow-sm transition-all hover:bg-orange/90 active:scale-95"
             >
               <Icon icon={PlayArrowRoundedIcon} size="sm" />
-              <span>{COPY.voiceCoach.play}</span>
+              <span className="hidden sm:inline">{COPY.voiceCoach.play}</span>
             </button>
           )}
 
@@ -147,7 +147,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
             type="button"
             onClick={cycleSpeed}
             aria-label={COPY.voiceCoach.speed(speed)}
-            className="flex h-9 min-w-[36px] items-center justify-center rounded-full border border-ink/15 bg-canvas px-2 text-2xs font-semibold text-ink transition-colors hover:bg-cream"
+            className="relative flex h-9 min-w-[36px] items-center justify-center rounded-full border before:absolute before:-inset-1 border-ink/15 bg-canvas px-2 text-2xs font-semibold text-ink transition-colors hover:bg-cream"
           >
             {COPY.voiceCoach.speedDisplay(speed)}
           </button>
@@ -175,11 +175,11 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
       </div>
 
       {/* Subtext ticker / cue status */}
-      <div className="mt-2.5 flex items-center justify-between border-t border-ink/5 pt-2 text-2xs text-ink/55">
+      <div className="mt-2.5 flex items-center justify-between border-t border-ink/5 pt-2 text-2xs text-ink/60">
         <p className="truncate" aria-live="polite">
           {statusText}
         </p>
-        <span className="shrink-0 text-3xs text-ink/40">
+        <span className="shrink-0 text-3xs text-ink/60">
           {activeVoiceDisplayName ? COPY.voiceCoach.voiceNameDisplay(activeVoiceDisplayName) : COPY.voiceCoach.techNote}
         </span>
       </div>

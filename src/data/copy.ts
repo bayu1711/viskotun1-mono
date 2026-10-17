@@ -234,7 +234,7 @@ export const COPY = {
     papersLabel: 'All papers',
     papersEyebrow: 'All',
     papersTitle: 'Papers',
-    paperMeta: (day: number, total: number, streak: number) => `Day ${day}/${total} · ${streak} days`,
+    paperMeta: (day: number, total: number) => `Day ${day}/${total}`,
     activeSuffix: ' · Active',
     sourcePaper: 'Source paper',
     emptyPapersTitle: 'No papers yet',
@@ -575,7 +575,7 @@ export const COPY = {
   },
   extraction: {
     title: 'Routine extraction',
-    parsing: 'Analyzing paper with Gemini 1.5...',
+    parsing: 'Analyzing paper with Gemini...',
     success: 'Routine successfully extracted and activated',
     declinedTitle: 'Paper declined by gatekeeper',
     declinedPrefix: 'Declined: ',
@@ -597,13 +597,13 @@ export const COPY = {
       'Declined: Theoretical physics, mathematics, or non-interventional topic. ViskotuN1 only builds executable routines from interventional studies conducted on human participants.'
   },
   landing: {
-    topBanner: '✨ Strictly interventional human research · Zero-hallucination daily routines →',
+    topBanner: 'Strictly interventional human research · Zero-hallucination daily routines',
     heroEyebrow: 'Evidence into action',
     heroTitle: 'Live healthier with daily routines from real human science.',
     heroSubtitle:
       'ViskotuN1 converts dense, peer-reviewed human clinical research into simple, colorful daily habits with voice coaching, parameter auditing, and zero guesswork.',
     heroCtaPrimary: 'Start your routine — Free',
-    heroCtaSecondary: 'Explore benchmarks',
+    heroCtaSecondary: 'See health domains',
     heroTrustPoints: [
       'Instant guest demo · No card required',
       '100% human interventional trials',
@@ -611,21 +611,17 @@ export const COPY = {
     ],
     heroImageAlt: 'Participant performing focused daily rehabilitation and mobility routine',
     interactivePreview: {
-      tag: 'Live Routine Preview',
-      title: "Today's Clinical Session",
-      streakBadge: '14-Day Streak',
+      tag: 'Preview',
+      title: "Today's routine",
       progressLabel: 'Progress today',
-      progressPercent: 75,
       step1Action: 'Straight-Knee Eccentric Drops',
       step1Detail: 'Alfredson et al. 1998 · 3s eccentric lowering',
       step1Meta: '3 × 15 reps',
-      step2Action: 'Morning Creatine Saturation',
-      step2Detail: 'Forbes et al. 2021 · Take with warm fluid',
-      step2Meta: '1 × 5g dose',
-      step3Action: 'Static Calf Stretch & Recovery',
-      step3Detail: 'ACSM Guidelines · Conservative hold',
-      step3Meta: '3 × 30s hold',
-      clickHint: 'Interactive demo: click checkmarks or counters to test'
+      step2Action: 'Static Calf Stretch & Recovery',
+      step2Detail: 'ACSM Guidelines · Conservative hold',
+      step2Meta: '3 × 30s hold',
+      tryHint: 'Tap a step to check it off.',
+      allDone: 'All done for today. Nice work.'
     },
     domainsTitle: 'Explore what we help you achieve',
     domainsSubtitle:
@@ -689,13 +685,8 @@ export const COPY = {
     rigorTitle: 'Built on uncompromising scientific rigor',
     rigorSubtitle:
       'ViskotuN1 is engineered strictly for human health interventions—not theoretical physics or animal models.',
-    rigorStats: [
-      { value: '100%', label: 'Interventional Human Science', sub: 'Clinical RCTs & peer-reviewed trials' },
-      { value: '0', label: 'Hallucinated Parameters', sub: 'Audited conservative clinical defaults' },
-      { value: '<2s', label: 'Safety Policy Validation', sub: 'Real-time threshold & escalation checks' }
-    ],
-    ctaGuest: 'Try as guest (instant demo)',
-    ctaLogin: 'Sign in with account',
+    ctaGuest: 'Try as guest',
+    ctaLogin: 'Sign in',
     ctaSignup: 'Create account',
     ctaGoToApp: 'Go to your routine',
     ctaContinueAsUser: (name: string) => `Continue as ${name}`,
@@ -717,9 +708,7 @@ export const COPY = {
     },
     demoTitle: 'Ready to build science-backed daily habits?',
     demoSubtitle: 'Drop any clinical research PDF or explore pre-loaded clinical routines with zero setup.',
-    architecture: 'Architecture',
     architectureTitle: 'How ViskotuN1 works',
-    capabilities: 'Capabilities',
     capabilitiesTitle: 'Built for clinical rigour',
     nav: {
       howItWorks: 'How it works',
@@ -730,7 +719,7 @@ export const COPY = {
     steps: {
       step1Number: '01',
       step1Title: 'Multimodal Ingestion',
-      step1Body: 'Drop any clinical research PDF. Gemini 1.5 processes document bytes natively without fragile text scraping.',
+      step1Body: 'Drop any clinical research PDF. Gemini processes document bytes natively without fragile text scraping.',
       step2Number: '02',
       step2Title: 'Scientific Gatekeeper & Parameter Auditing',
       step2Body: 'Verifies human interventional criteria and audits omitted hold times or dosages against conservative clinical standards.',
@@ -762,12 +751,10 @@ export const COPY = {
     googleButton: 'Continue with Google',
     guestButton: 'Continue as guest (no sign-up required)',
     guestNotice: 'Guest mode stores routines locally in your browser. Sign in anytime to sync to the cloud.',
-    adminButton: 'Continue as Clinical Administrator (Admin Mode)',
-    adminNotice: 'Administrator privileges enabled: Clinical Policy Ledger unlocked.',
+    adminButton: 'Continue as clinical administrator',
     haveAccount: 'Already have an account? Sign in',
     needAccount: "Don't have an account? Create one",
     signOut: 'Sign out',
-    guestBadge: 'Guest mode',
     adminBadge: 'Clinical Admin',
     saveNotice: 'Sign in to sync your papers to the cloud',
     orWithEmail: 'Or with email',
@@ -985,6 +972,7 @@ export const COPY = {
     },
     assistant: {
       questionRequired: 'Question is required',
+      invalidJson: 'Invalid JSON payload',
       internalError: 'Internal Server Error'
     },
     extract: {

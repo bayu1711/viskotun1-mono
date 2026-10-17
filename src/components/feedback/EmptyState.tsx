@@ -22,12 +22,12 @@ export function EmptyState({ title, description, icon, action, className }: Empt
       )}>
       
       {icon &&
-      <IconTile variant="dashed" shape="circle" size={40} className="mb-3 text-ink/45">
+      <IconTile variant="dashed" shape="circle" size={40} className="mb-3 text-ink/60">
           <Icon icon={icon} size="md" />
         </IconTile>
       }
-      <p className="text-sm text-ink/55">{title}</p>
-      {description && <p className="mt-1 max-w-xs text-xs text-ink/40">{description}</p>}
+      <p className="text-sm text-ink/60">{title}</p>
+      {description && <p className="mt-1 max-w-xs text-xs text-ink/60">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>);
 

@@ -110,11 +110,11 @@ export function TrendingPapersExplore() {
 
         {selectedCategory !== 'all' && (
           <div className="flex items-center gap-1.5 pt-1 text-2xs">
-            <span className="text-ink/50">{COPY.howTo.filterByTopic}</span>
+            <span className="text-ink/60">{COPY.howTo.filterByTopic}</span>
             <button
               type="button"
               onClick={() => setSelectedCategory('all')}
-              className="inline-flex items-center gap-1 rounded-full bg-orange px-2.5 py-0.5 font-medium text-white shadow-2xs transition-opacity hover:opacity-90"
+              className="relative inline-flex items-center gap-1 rounded-full bg-ink px-2.5 py-0.5 font-medium text-white transition-opacity hover:opacity-90 before:absolute before:-inset-y-3 before:inset-x-0"
               title={COPY.howTo.clearFilter}
             >
               <span>{selectedCategory}</span>
@@ -139,8 +139,8 @@ export function TrendingPapersExplore() {
               className={cn(
                 'flex flex-col justify-between rounded-card border bg-white p-5 transition-all',
                 isActive
-                  ? 'border-orange shadow-md ring-2 ring-orange/30'
-                  : 'border-ink/10 hover:border-ink/30 hover:shadow-xs'
+                  ? 'border-orange ring-2 ring-orange/30'
+                  : 'border-ink/10 hover:border-ink/30'
               )}
             >
               <div>
@@ -154,11 +154,11 @@ export function TrendingPapersExplore() {
                       className={cn(
                         'rounded-full px-2.5 py-0.5 text-2xs',
                         rank === 1
-                          ? 'bg-orange text-white font-semibold shadow-2xs'
+                          ? 'bg-orange text-ink font-semibold'
                           : rank === 2
-                          ? 'bg-yellow text-ink font-semibold shadow-2xs'
+                          ? 'bg-yellow text-ink font-semibold'
                           : rank === 3
-                          ? 'bg-mint text-ink font-semibold shadow-2xs'
+                          ? 'bg-mint text-ink font-semibold'
                           : 'bg-canvas text-ink/75 font-medium border border-ink/10'
                       )}
                     >
@@ -170,9 +170,9 @@ export function TrendingPapersExplore() {
                         setSelectedCategory(selectedCategory === paper.category ? 'all' : paper.category)
                       }
                       className={cn(
-                        'rounded-full px-2.5 py-0.5 text-2xs font-semibold transition-colors',
+                        'relative rounded-full px-2.5 py-0.5 text-2xs font-semibold transition-colors before:absolute before:-inset-y-3 before:inset-x-0',
                         selectedCategory === paper.category
-                          ? 'bg-orange text-white shadow-2xs'
+                          ? 'bg-ink text-white'
                           : getCategoryBadgeClass(paper.category)
                       )}
                       title={`${COPY.howTo.filterByTopic} ${paper.category}`}
@@ -186,7 +186,7 @@ export function TrendingPapersExplore() {
                 <h3 className="mt-3.5 text-sm font-medium leading-snug text-ink">
                   {paper.shortTitle || paper.title}
                 </h3>
-                <p className="mt-1 text-2xs text-ink/50 line-clamp-1">
+                <p className="mt-1 text-2xs text-ink/60 line-clamp-1">
                   {paper.authors} · <em>{paper.journal}</em> ({paper.year})
                 </p>
 
@@ -210,7 +210,7 @@ export function TrendingPapersExplore() {
                 )}
 
                 {/* Community Telemetry Badges */}
-                <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-ink/5 pt-2 text-2xs text-ink/50">
+                <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-ink/5 pt-2 text-2xs text-ink/60">
                   <span>{COPY.howTo.activeTrackersBadge(trackers ?? 0)}</span>
                   <span>·</span>
                   <span>{COPY.howTo.totalLogsBadge(logs ?? 0)}</span>
@@ -224,7 +224,7 @@ export function TrendingPapersExplore() {
                     size="sm"
                     variant={isActive ? 'outline' : 'primary'}
                     onClick={() => handleStartRoutine(targetId)}
-                    className="flex-1 justify-center gap-1.5"
+                    className="min-h-11 flex-1 justify-center gap-1.5"
                   >
                     <Icon icon={isActive ? CheckIcon : PlayArrowOutlinedIcon} size="xs" />
                     <span>{isActive ? COPY.howTo.loadedButton : COPY.onboarding.quickLoadButton}</span>
@@ -233,7 +233,7 @@ export function TrendingPapersExplore() {
                   {isActive && (
                     <Link
                       href={ROUTES.routine}
-                      className="inline-flex items-center gap-1 rounded-full border border-ink/20 bg-cream/70 px-3 py-1.5 text-2xs font-semibold text-ink transition-colors hover:bg-mint"
+                      className="inline-flex min-h-11 items-center gap-1 rounded-full border border-ink/20 bg-cream/70 px-3 text-2xs font-semibold text-ink transition-colors hover:bg-mint"
                       title={COPY.community.goToRoutine}
                     >
                       <span>Track</span>
@@ -243,13 +243,13 @@ export function TrendingPapersExplore() {
                 </div>
 
                 {/* External DOI and PDF links */}
-                <div className="flex items-center justify-between gap-2 pt-1 text-2xs text-ink/55">
+                <div className="flex items-center justify-between gap-2 pt-1 text-2xs text-ink/60">
                   {paper.pdfUrl ? (
                     <a
                       href={paper.pdfUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1 hover:text-ink underline-offset-2 hover:underline"
+                      className="inline-flex min-h-11 items-center gap-1 hover:text-ink underline-offset-2 hover:underline"
                     >
                       <Icon icon={DownloadOutlinedIcon} size="xs" />
                       <span>{COPY.howTo.downloadPdfButton}</span>
@@ -261,7 +261,7 @@ export function TrendingPapersExplore() {
                       href={paper.openAccessUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1 hover:text-ink underline-offset-2 hover:underline"
+                      className="inline-flex min-h-11 items-center gap-1 hover:text-ink underline-offset-2 hover:underline"
                     >
                       <span>{COPY.howTo.doiLabel}</span>
                       <Icon icon={NorthEastIcon} size="xs" />

@@ -100,7 +100,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
             <form onSubmit={handleSubmit} className="p-6">
               <div className="flex items-start justify-between border-b border-ink/10 pb-4">
                 <div>
-                  <span className="text-xs uppercase tracking-wider text-ink/40 font-mono">
+                  <span className="text-xs uppercase tracking-wider text-ink/60 font-mono">
                     {COPY.community.shareModalEyebrow}
                   </span>
                   <h2 className="text-lg font-medium text-ink mt-0.5">
@@ -110,7 +110,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="rounded-full p-1 text-ink/40 hover:bg-ink/5 hover:text-ink transition-colors"
+                  className="rounded-full p-1 text-ink/60 hover:bg-ink/5 hover:text-ink transition-colors"
                   aria-label={COPY.community.cancel}
                 >
                   ✕
@@ -121,7 +121,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
                 <div className="mt-3 rounded-tile bg-canvas p-3 text-xs border border-ink/10">
                   <span className="font-semibold text-ink">{protocol.title}</span>
                   {protocol.paper?.doi && (
-                    <span className="ml-2 text-ink/50 font-mono">
+                    <span className="ml-2 text-ink/60 font-mono">
                       · {protocol.paper.doi}
                     </span>
                   )}
@@ -194,7 +194,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
                     value={handle}
                     onChange={(e) => setHandle(e.target.value)}
                     maxLength={50}
-                    className="w-full rounded-tile border border-ink/20 bg-white px-3 py-1.5 text-xs text-ink placeholder:text-ink/30 focus:border-ink focus:outline-none"
+                    className="w-full rounded-tile border border-ink/20 bg-white px-3 py-1.5 text-xs text-ink placeholder:text-ink/60 focus:border-ink focus:outline-none"
                   />
                 </div>
 
@@ -210,7 +210,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     maxLength={300}
-                    className="w-full rounded-tile border border-ink/20 bg-white p-3 text-xs leading-relaxed text-ink placeholder:text-ink/30 focus:border-ink focus:outline-none resize-none"
+                    className="w-full rounded-tile border border-ink/20 bg-white p-3 text-xs leading-relaxed text-ink placeholder:text-ink/60 focus:border-ink focus:outline-none resize-none"
                   />
                 </div>
               </div>

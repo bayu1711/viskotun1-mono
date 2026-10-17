@@ -75,7 +75,7 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
               </CircleButton>
             </div>
           </div>
-          <p className="mt-2 text-2xs text-ink/45">
+          <p className="mt-2 text-2xs text-ink/60">
             {COPY.morphing.widgets.photo.attached}
           </p>
         </div>
@@ -100,7 +100,7 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
           <p className="mt-3 text-sm font-medium text-ink">
             {COPY.morphing.widgets.photo.uploadPrompt}
           </p>
-          <p className="mt-1 text-2xs text-ink/50">
+          <p className="mt-1 text-2xs text-ink/60">
             {COPY.morphing.widgets.photo.dropHint}
           </p>
 

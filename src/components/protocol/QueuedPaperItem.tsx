@@ -9,8 +9,8 @@ import { PaperRowText } from './PaperRowText';
 type QueuedVariant = 'menu' | 'card';
 
 const VARIANT_STYLES: Record<QueuedVariant, {row: string;title: string;meta: string;}> = {
-  menu: { row: 'p-2.5 text-ink/40', title: '', meta: 'text-current' },
-  card: { row: 'border border-dashed border-ink/30 p-2.5 pr-4', title: 'text-ink/55', meta: 'text-ink/40' }
+  menu: { row: 'p-2.5 text-ink/60', title: '', meta: 'text-current' },
+  card: { row: 'border border-dashed border-ink/30 p-2.5 pr-4', title: 'text-ink/60', meta: 'text-ink/60' }
 };
 
 interface QueuedPaperItemProps {
