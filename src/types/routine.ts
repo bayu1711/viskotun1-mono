@@ -13,7 +13,7 @@ export interface PaperMeta {
   pages: number;
 }
 
-export type Tone = 'ink' | 'cream' | 'mint';
+export type Tone = 'ink' | 'cream' | 'mint' | 'orange' | 'yellow' | 'sky' | 'lavender' | 'peach';
 export type StepIconKey =
   | 'straight-knee'
   | 'bent-knee'

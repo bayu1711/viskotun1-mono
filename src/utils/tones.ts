@@ -31,6 +31,14 @@ export const toneStyles: Record<Tone, ToneStyle> = {
     checkOff: 'border border-white/40 text-transparent hover:text-white/50',
     divider: 'border-white/15'
   },
+  orange: {
+    card: 'bg-orange text-ink',
+    ...LIGHT_SURFACE
+  },
+  yellow: { card: 'bg-yellow text-ink', ...LIGHT_SURFACE },
+  sky: { card: 'bg-sky text-ink', ...LIGHT_SURFACE },
+  lavender: { card: 'bg-lavender text-ink', ...LIGHT_SURFACE },
+  peach: { card: 'bg-peach text-ink', ...LIGHT_SURFACE },
   cream: { card: 'bg-cream text-ink', ...LIGHT_SURFACE },
   mint: { card: 'bg-mint text-ink', ...LIGHT_SURFACE }
 };
