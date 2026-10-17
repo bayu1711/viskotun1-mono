@@ -85,10 +85,7 @@ async function enrichPaperWithLiveTelemetry(paper: SamplePaper): Promise<SampleP
   const userStats = await getLiveUserStats(targetId);
   const reviews = await getCommunityReviews(targetId);
 
-  const realActiveTrackers = Math.max(
-    userStats.activeTrackersCount,
-    reviews.length
-  );
+  const realActiveTrackers = userStats.activeTrackersCount + reviews.length;
   const realTotalLogs = userStats.userLogsCount + reviews.length;
 
   return {

@@ -3,6 +3,9 @@ import { getSamplePapers, savePaper, getUserPapers, seedSamplePapersIfEmpty } fr
 import { COPY } from '../../../data/copy';
 import type { StoredPaper } from '../../../types/routine';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);

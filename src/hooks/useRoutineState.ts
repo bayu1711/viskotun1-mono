@@ -106,7 +106,7 @@ export function useRoutineState() {
     let isMounted = true;
     async function fetchFirebaseSamplePapers() {
       try {
-        const res = await fetch('/api/papers?type=trending');
+        const res = await fetch('/api/papers?type=trending', { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           if (isMounted) {
