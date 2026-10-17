@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useId, useRef } from 'react';
+import React, { useId, useMemo, useRef } from 'react';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -11,6 +11,7 @@ import { COPY } from '../../data/copy';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useScrollToLatest } from '../../hooks/useScrollToLatest';
 import { isPdfFile } from '../../utils/files';
+import { getDynamicSuggestions } from '../../utils/suggestions';
 import { EmptyState } from '../feedback/EmptyState';
 import { MissingDataBanner } from '../protocol/MissingDataBanner';
 import { AssistantComposer } from './AssistantComposer';
@@ -83,6 +84,16 @@ export function AssistantSheet() {
 
   const hasAskConversation = messages.length > 0 || assistantTyping;
   const isAsk = mode === 'ask';
+
+  const askSuggestions = useMemo(
+    () => getDynamicSuggestions(protocol, messages),
+    [protocol, messages]
+  );
+
+  const stagingSuggestions = useMemo(
+    () => getDynamicSuggestions(stagingProtocol, stagingMessages),
+    [stagingProtocol, stagingMessages]
+  );
 
   return (
     <AnimatePresence>
@@ -214,7 +225,11 @@ export function AssistantSheet() {
             <footer className="shrink-0 space-y-3 border-t border-ink/10 bg-canvas px-5 pb-5 pt-3">
               {isAsk ? (
                 <>
-                  <FaqSuggestions faqs={protocol?.faqs ?? []} onSelect={askQuestion} />
+                  <FaqSuggestions
+                    suggestions={askSuggestions}
+                    onSelect={askQuestion}
+                    disabled={assistantTyping}
+                  />
                   <AssistantComposer
                     ref={inputRef}
                     mode="ask"
@@ -224,15 +239,22 @@ export function AssistantSheet() {
                   />
                 </>
               ) : stagingProtocol ? (
-                <AssistantComposer
-                  ref={inputRef}
-                  mode="ask"
-                  onAsk={askStagingQuestion}
-                  onAddPaper={addPaper}
-                  onFile={handleFile}
-                  placeholder={COPY.assistant.placeholderStaging}
-                  ariaLabel={COPY.assistant.inputStaging}
-                />
+                <>
+                  <FaqSuggestions
+                    suggestions={stagingSuggestions}
+                    onSelect={askStagingQuestion}
+                    disabled={isStagingAssistantTyping}
+                  />
+                  <AssistantComposer
+                    ref={inputRef}
+                    mode="ask"
+                    onAsk={askStagingQuestion}
+                    onAddPaper={addPaper}
+                    onFile={handleFile}
+                    placeholder={COPY.assistant.placeholderStaging}
+                    ariaLabel={COPY.assistant.inputStaging}
+                  />
+                </>
               ) : isExtractingPaper ? null : (
                 <AssistantComposer
                   ref={inputRef}
