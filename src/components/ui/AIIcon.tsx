@@ -21,17 +21,18 @@ export interface AIIconProps {
   priority?: boolean;
 }
 
-/** Brand favicon representing the Viskotu AI assistant across the application. */
+/** Brand favicon representing the Viskotu AI assistant across the application. Rendered unoptimized to maintain crisp retina resolution without lossy compression. */
 export function AIIcon({ size = 'md', className, alt = '', priority = false }: AIIconProps) {
-  const { px, className: sizeClass } = AI_ICON_SIZES[size];
+  const { className: sizeClass } = AI_ICON_SIZES[size];
 
   return (
     <Image
       src={COPY.brand.iconUrl}
       alt={alt}
-      width={px}
-      height={px}
+      width={241}
+      height={239}
       priority={priority}
+      unoptimized
       className={cn('shrink-0 object-contain', sizeClass, className)}
     />
   );

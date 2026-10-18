@@ -36,6 +36,7 @@ export function TopBar() {
             width={28}
             height={28}
             priority
+            unoptimized
             className="h-7 w-7 object-contain"
           />
         </Link>
