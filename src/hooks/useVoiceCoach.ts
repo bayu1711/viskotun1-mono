@@ -340,6 +340,8 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
         const message = isDayCompleteRef.current ? COPY.voiceCoach.finishedAllSteps : COPY.voiceCoach.guidedStepsEnded;
         setIsPlaying(false);
         setIsPaused(false);
+        // The next Start begins a fresh session from step 1, with the safety reminder
+        setCurrentStepIndex(0);
         setStatusText(message);
         chime('complete');
         speak(message);
