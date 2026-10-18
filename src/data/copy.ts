@@ -851,6 +851,8 @@ export const COPY = {
     guestButton: 'Continue as guest (no sign-up required)',
     guestNotice: 'Guest mode stores routines locally in your browser. Sign in anytime to sync to the cloud.',
     adminButton: 'Continue as clinical administrator',
+    adminLifecycleNotice:
+      'Note: Clinical admin controls are temporarily surfaced for Google AI Builder Cup evaluation and will be sealed off post-competition.',
     haveAccount: 'Already have an account? Sign in',
     needAccount: "Don't have an account? Create one",
     signOut: 'Sign out',
@@ -1050,6 +1052,8 @@ export const COPY = {
   policyLedger: {
     dialogLabel: 'Clinical Guardrail Policy Ledger',
     title: 'Clinical Policy Ledger',
+    lifecycleNotice:
+      'Notice: This governance panel is temporarily unlocked for Google AI Builder Cup evaluation. Administrative endpoints will be sealed off post-competition behind enterprise IAM and clinical MFA.',
     firestoreLive: 'Firestore Live',
     memoryCache: 'Memory Hot Cache · Fail-Safe',
     versionFallback: 'Baseline',
