@@ -243,21 +243,9 @@ const TITLE_ALIASES: Record<string, string[]> = {
   return null;
 }
 
-/**
- * Saves or de-duplicates a protocol in the canonical Firestore registry.
- * If the protocol already exists, returns the existing canonical entity without duplicating.
- */
-export async function saveCanonicalProtocol(
-  protocol: Protocol
-): Promise<{ protocol: Protocol; isNew: boolean }> {
+/** Gives a protocol its canonical paper id and initial version history without registering it. */
+export function toCanonicalProtocol(protocol: Protocol): Protocol {
   const canonicalId = getCanonicalPaperId(protocol.paper, protocol.id);
-
-  // Check if already registered
-  const existing = await findCanonicalProtocol(protocol.paper, protocol.id);
-  if (existing) {
-    return { protocol: existing, isNew: false };
-  }
-
   const initialVersion = protocol.version || '1.0';
   const initialChangelog: ProtocolChangelogEntry[] =
     protocol.changelog && protocol.changelog.length > 0
@@ -271,7 +259,7 @@ export async function saveCanonicalProtocol(
           }
         ];
 
-  const canonicalProtocol: Protocol = {
+  return {
     ...protocol,
     id: canonicalId,
     canonicalId,
@@ -279,6 +267,24 @@ export async function saveCanonicalProtocol(
     changelog: initialChangelog,
     isCanonical: true
   };
+}
+
+/**
+ * Saves or de-duplicates a protocol in the canonical Firestore registry.
+ * If the protocol already exists, returns the existing canonical entity without duplicating.
+ * Only call this for routines a user has confirmed: later extractions of the same paper reuse this entry.
+ */
+export async function saveCanonicalProtocol(
+  protocol: Protocol
+): Promise<{ protocol: Protocol; isNew: boolean }> {
+  // Check if already registered
+  const existing = await findCanonicalProtocol(protocol.paper, protocol.id);
+  if (existing) {
+    return { protocol: existing, isNew: false };
+  }
+
+  const canonicalProtocol = toCanonicalProtocol(protocol);
+  const canonicalId = canonicalProtocol.id;
 
   // Update in-memory registry
   memoryProtocols.set(canonicalId, canonicalProtocol);
@@ -631,4 +637,4 @@ export async function updateCanonicalProtocolVersion(
 export const findCanonicalRoutine = findCanonicalProtocol;
 export const saveCanonicalRoutine = saveCanonicalProtocol;
 export const updateCanonicalRoutineVersion = updateCanonicalProtocolVersion;
-
+export const toCanonicalRoutine = toCanonicalProtocol;

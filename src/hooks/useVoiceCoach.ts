@@ -7,9 +7,12 @@ interface UseVoiceCoachOptions {
   steps: RoutineStep[];
   onStepComplete?: (stepIndex: number) => void;
   safetyRule?: string;
+  isDayComplete?: boolean;
 }
 
 const SPEED_OPTIONS = [0.9, 1.0, 1.15] as const;
+
+type CountdownKind = 'hold' | 'timer';
 
 function playAudioChime(kind: 'start' | 'tick' | 'complete') {
   if (typeof window === 'undefined') return;
@@ -65,25 +68,44 @@ function playAudioChime(kind: 'start' | 'tick' | 'complete') {
   }
 }
 
-export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoachOptions) {
+export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete = false }: UseVoiceCoachOptions) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [speedIndex, setSpeedIndex] = useState(1); // default 1.0x
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   const [countdownRemaining, setCountdownRemaining] = useState<number | null>(null);
+  const [countdownKind, setCountdownKind] = useState<CountdownKind>('hold');
   const [statusText, setStatusText] = useState<string>(COPY.voiceCoach.idle);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoiceIndex, setSelectedVoiceIndex] = useState(0);
 
   const speed = SPEED_OPTIONS[speedIndex];
   const timerRef = useRef<number | null>(null);
+  const restTimerRef = useRef<number | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Bumped on every cancel so in-flight TTS fetches and stale end events are ignored
+  const speechIdRef = useRef(0);
+  // Where Resume picks up: the rest of a hold, or the action after a finished hold
+  const resumeRef = useRef<(() => void) | null>(null);
+  // Read at the end of a session, after the last set credit has re-rendered
+  const isDayCompleteRef = useRef(isDayComplete);
+
+  useEffect(() => {
+    isDayCompleteRef.current = isDayComplete;
+  }, [isDayComplete]);
 
   const isSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
   const selectedVoice = availableVoices[selectedVoiceIndex] || availableVoices[0] || null;
+
+  // Speech callbacks outlive the render that queued them, so they read settings live from a ref
+  const settingsRef = useRef({ speed, selectedVoice, isSoundEnabled });
+
+  useEffect(() => {
+    settingsRef.current = { speed, selectedVoice, isSoundEnabled };
+  }, [speed, selectedVoice, isSoundEnabled]);
 
   const cycleVoice = useCallback(() => {
     if (availableVoices.length <= 1) return;
@@ -113,6 +135,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
   }, []);
 
   const cancelSpeech = useCallback(() => {
+    speechIdRef.current += 1;
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -127,6 +150,10 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
     if (timerRef.current !== null) {
       window.clearInterval(timerRef.current);
       timerRef.current = null;
+    }
+    if (restTimerRef.current !== null) {
+      window.clearTimeout(restTimerRef.current);
+      restTimerRef.current = null;
     }
   }, []);
 
@@ -146,8 +173,12 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
     (text: string, onEnd?: () => void) => {
       if (!isSupported) return;
       cancelSpeech();
+      const speechId = speechIdRef.current;
+      const isCurrent = () => speechId === speechIdRef.current;
+      const { speed, selectedVoice } = settingsRef.current;
 
       const speakWithBrowser = () => {
+        if (!isCurrent()) return;
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.rate = speed;
         utterance.pitch = 1.0;
@@ -160,11 +191,14 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
 
         utterance.onend = () => {
           utteranceRef.current = null;
-          if (onEnd) onEnd();
+          if (onEnd && isCurrent()) onEnd();
         };
 
-        utterance.onerror = () => {
+        utterance.onerror = (event) => {
           utteranceRef.current = null;
+          // A cancel is intentional; any other failure must not leave the coach waiting forever
+          const wasCancelled = event.error === 'interrupted' || event.error === 'canceled';
+          if (!wasCancelled && onEnd && isCurrent()) onEnd();
         };
 
         utteranceRef.current = utterance;
@@ -183,12 +217,13 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
       })
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
+          if (!isCurrent()) return;
           if (data?.audioContent) {
             const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
             audio.playbackRate = speed;
             audio.onended = () => {
               audioRef.current = null;
-              if (onEnd) onEnd();
+              if (onEnd && isCurrent()) onEnd();
             };
             audio.onerror = () => {
               audioRef.current = null;
@@ -206,15 +241,24 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
           speakWithBrowser();
         });
     },
-    [cancelSpeech, isSupported, selectedVoice, speed]
+    [cancelSpeech, isSupported]
   );
+
+  const chime = useCallback((kind: 'start' | 'tick' | 'complete') => {
+    if (settingsRef.current.isSoundEnabled) playAudioChime(kind);
+  }, []);
 
   const buildStepScript = useCallback((step: RoutineStep, index: number, total: number) => {
     const stepNum = index + 1;
     let details = '';
 
-    if (step.durationSeconds && step.durationSeconds > 0) {
+    if (step.durationSeconds && step.durationSeconds > 0 && step.reps <= 1) {
       details = COPY.voiceCoach.script.timedHoldDetail(step.sets, step.durationSeconds, step.detail);
+    } else if (step.durationSeconds && step.durationSeconds > 0) {
+      // A timed session or repeated holds, not one long hold (e.g. 30 breaths in a 5 minute session)
+      const unit = step.setLabel || COPY.voiceCoach.script.defaultSetsUnit;
+      const perSet = step.perSetLabel?.replace(/^×\s*/, '') || COPY.voiceCoach.script.repsUnit(step.reps);
+      details = COPY.voiceCoach.script.timedSessionDetail(step.sets, unit, perSet, step.detail);
     } else if (step.reps > 0) {
       details = COPY.voiceCoach.script.repsDetail(step.sets, step.reps, step.detail);
     } else {
@@ -231,17 +275,33 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
   }, []);
 
   const startHoldCountdown = useCallback(
-    (seconds: number, nextStepCallback: () => void) => {
+    (seconds: number, nextStepCallback: () => void, intro = '', kind: CountdownKind = 'hold') => {
       clearTimer();
+      const text =
+        kind === 'hold'
+          ? {
+              start: COPY.voiceCoach.holdCountdownStart,
+              active: COPY.voiceCoach.countdownActive,
+              complete: COPY.voiceCoach.countdownComplete,
+              finished: COPY.voiceCoach.holdFinished
+            }
+          : {
+              start: COPY.voiceCoach.timerStart,
+              active: COPY.voiceCoach.timerActive,
+              complete: COPY.voiceCoach.timerComplete,
+              finished: COPY.voiceCoach.timerFinished
+            };
+      let remaining = seconds;
+      setCountdownKind(kind);
       setCountdownRemaining(seconds);
-      setStatusText(COPY.voiceCoach.countdownActive(seconds));
+      setStatusText(text.active(seconds));
 
-      if (isSoundEnabled) {
-        playAudioChime('start');
-      }
+      const finish = () => {
+        resumeRef.current = null;
+        nextStepCallback();
+      };
 
-      speak(COPY.voiceCoach.holdCountdownStart(seconds), () => {
-        let remaining = seconds;
+      const runCountdown = () => {
         timerRef.current = window.setInterval(() => {
           remaining -= 1;
           setCountdownRemaining(remaining);
@@ -249,58 +309,96 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
           if (remaining === 10 && remaining > 0) {
             speak(COPY.voiceCoach.secondsRemaining);
           } else if (remaining <= 3 && remaining > 0) {
-            if (isSoundEnabled) playAudioChime('tick');
+            chime('tick');
           }
 
           if (remaining <= 0) {
             clearTimer();
             setCountdownRemaining(null);
-            setStatusText(COPY.voiceCoach.countdownComplete);
-            if (isSoundEnabled) playAudioChime('complete');
-            speak(COPY.voiceCoach.holdFinished, nextStepCallback);
+            setStatusText(text.complete);
+            chime('complete');
+            // Pausing during "Hold complete" resumes straight into what comes next
+            resumeRef.current = finish;
+            speak(text.finished, finish);
           }
         }, 1000);
-      });
+      };
+
+      // Resuming after a pause continues this hold from the seconds left
+      resumeRef.current = () => {
+        setCountdownRemaining(remaining);
+        setStatusText(text.active(remaining));
+        speak(COPY.voiceCoach.holdResumed(remaining), runCountdown);
+      };
+
+      chime('start');
+      speak(`${intro}${text.start(seconds)}`, runCountdown);
     },
-    [clearTimer, isSoundEnabled, speak]
+    [chime, clearTimer, speak]
   );
 
   const guideStep = useCallback(
     (index: number) => {
       if (index >= steps.length) {
+        const message = isDayCompleteRef.current ? COPY.voiceCoach.finishedAllSteps : COPY.voiceCoach.guidedStepsEnded;
         setIsPlaying(false);
         setIsPaused(false);
-        setStatusText(COPY.voiceCoach.finishedAllSteps);
-        if (isSoundEnabled) playAudioChime('complete');
-        speak(COPY.voiceCoach.finishedAllSteps);
+        // The next Start begins a fresh session from step 1, with the safety reminder
+        setCurrentStepIndex(0);
+        setStatusText(message);
+        chime('complete');
+        speak(message);
         return;
       }
 
       const step = steps[index];
+      resumeRef.current = null;
       setCurrentStepIndex(index);
+      setCountdownRemaining(null);
       setStatusText(COPY.voiceCoach.stepPacing(index + 1, steps.length));
 
-      if (isSoundEnabled) playAudioChime('start');
+      chime('start');
 
       const script = buildStepScript(step, index, steps.length);
 
+      // Wait 2 seconds rest, then run the next action
+      const restThen = (next: () => void) => {
+        const proceed = () => {
+          restTimerRef.current = null;
+          resumeRef.current = null;
+          next();
+        };
+        resumeRef.current = proceed;
+        restTimerRef.current = window.setTimeout(proceed, 2000);
+      };
+
       speak(script, () => {
-        // If step has a timed hold, start the countdown
-        if (step.durationSeconds && step.durationSeconds > 0) {
-          startHoldCountdown(step.durationSeconds, () => {
-            if (onStepComplete) onStepComplete(index);
-            // Wait 2 seconds rest, then advance to next step
-            window.setTimeout(() => {
-              guideStep(index + 1);
-            }, 2000);
-          });
+        const holdSeconds = step.durationSeconds ?? 0;
+        if (holdSeconds > 0 && step.reps <= 1) {
+          // One hold per set: the coach guides the whole set, so it credits it
+          const runHoldSet = (setNumber: number) => {
+            const intro = setNumber > 1 ? COPY.voiceCoach.setAnnouncement(setNumber, step.sets) : '';
+            startHoldCountdown(
+              holdSeconds,
+              () => {
+                if (onStepComplete) onStepComplete(index);
+                restThen(() => (setNumber < step.sets ? runHoldSet(setNumber + 1) : guideStep(index + 1)));
+              },
+              intro
+            );
+          };
+          runHoldSet(1);
+        } else if (holdSeconds > 0) {
+          // Repeated holds or a session timer: the coach only times it, the user logs sets on the card
+          startHoldCountdown(holdSeconds, () => restThen(() => guideStep(index + 1)), '', 'timer');
         } else {
-          // Non-timed step: complete and optionally pause or wait for user action
-          if (onStepComplete) onStepComplete(index);
+          // Rep-based steps are logged by the user on the step card, then the user moves on
+          setStatusText(COPY.voiceCoach.awaitingNext);
+          speak(COPY.voiceCoach.awaitNextPrompt);
         }
       });
     },
-    [buildStepScript, isSoundEnabled, onStepComplete, speak, startHoldCountdown, steps]
+    [buildStepScript, chime, onStepComplete, speak, startHoldCountdown, steps]
   );
 
   const startCoach = useCallback(() => {
@@ -329,12 +427,17 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
   const resumeCoach = useCallback(() => {
     setIsPlaying(true);
     setIsPaused(false);
-    guideStep(currentStepIndex);
+    if (resumeRef.current) {
+      resumeRef.current();
+    } else {
+      guideStep(currentStepIndex);
+    }
   }, [currentStepIndex, guideStep]);
 
   const stopCoach = useCallback(() => {
     cancelSpeech();
     clearTimer();
+    resumeRef.current = null;
     setIsPlaying(false);
     setIsPaused(false);
     setCountdownRemaining(null);
@@ -346,6 +449,12 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
     cancelSpeech();
     clearTimer();
     setCountdownRemaining(null);
+    resumeRef.current = null;
+    // On the last step, Next ends the session instead of staying put
+    if (isPlaying && currentStepIndex >= steps.length - 1) {
+      guideStep(steps.length);
+      return;
+    }
     const nextIdx = Math.min(steps.length - 1, currentStepIndex + 1);
     setCurrentStepIndex(nextIdx);
     if (isPlaying) {
@@ -357,6 +466,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
     cancelSpeech();
     clearTimer();
     setCountdownRemaining(null);
+    resumeRef.current = null;
     const prevIdx = Math.max(0, currentStepIndex - 1);
     setCurrentStepIndex(prevIdx);
     if (isPlaying) {
@@ -379,6 +489,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
     speed,
     isSoundEnabled,
     countdownRemaining,
+    countdownKind,
     statusText,
     isSupported,
     startCoach,

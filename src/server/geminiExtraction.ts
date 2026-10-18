@@ -8,6 +8,7 @@ import { getEffectiveGuardrails } from './guardrailLedger';
 import { findCanonicalProtocol } from './routineRegistry';
 import { validateAndRegisterProtocolWidgets } from './widgetRegistry';
 import { executeWithGeminiFailover, getGeminiApiKeys } from './geminiKeys';
+import { resolvePaperSource, type PaperResolution } from './paperSource';
 
 export interface ExtractInput {
   file?: File | null;
@@ -170,14 +171,20 @@ Return a JSON object conforming strictly to:
 }
 `;
 
-export async function extractPaperProtocol(input: ExtractInput): Promise<ExtractResult> {
-  const sourceName = input.file ? input.file.name : input.url || input.text || 'uploaded-document.pdf';
+type GuardrailPolicy = Awaited<ReturnType<typeof getEffectiveGuardrails>>;
 
-  // 1. Resolve live policy from Cloud Firestore Guardrail Ledger
-  const activePolicy = await getEffectiveGuardrails();
-
+/**
+ * Checks that settle a paper without an LLM call. `screenText` is matched against the gatekeeper and
+ * banned keywords; `lookup` (DOI and title) against the canonical protocol registry.
+ */
+async function screenPaper(
+  screenText: string,
+  lookup: { doi?: string; title: string },
+  sourceName: string,
+  activePolicy: GuardrailPolicy
+): Promise<ExtractResult | null> {
   // Local gatekeeper first: it names the specific category (animal, in vitro, theoretical, observational)
-  const localCheck = classifyPaperSource(sourceName);
+  const localCheck = classifyPaperSource(screenText);
   if (localCheck.declined) {
     return {
       success: true,
@@ -188,7 +195,7 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
   }
 
   // Then any extra criteria an admin added to the live Firestore policy (whole-word match)
-  const matchedBannedKeyword = activePolicy.bannedKeywords.find((kw) => containsTerm(sourceName, kw));
+  const matchedBannedKeyword = activePolicy.bannedKeywords.find((kw) => containsTerm(screenText, kw));
   if (matchedBannedKeyword) {
     return {
       success: true,
@@ -199,14 +206,10 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
   }
 
   // Check if paper is already cataloged in the Canonical Protocol Registry
-  const doiMatch = sourceName.match(/10\.\d{4,9}\/[^\s"<>]+/i);
-  const detectedDoi = doiMatch ? doiMatch[0].replace(/[.,;)]+$/, '') : undefined;
-  const cleanTitle = sourceName.replace(/\.pdf$/i, '').trim();
-
   const existing = await findCanonicalProtocol({
-    doi: detectedDoi,
-    title: cleanTitle,
-    id: cleanTitle
+    doi: lookup.doi,
+    title: lookup.title,
+    id: lookup.title
   });
 
   if (existing) {
@@ -224,6 +227,64 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
       source: sourceName
     };
   }
+
+  return null;
+}
+
+const UNRESOLVED_LINK_REASONS: Record<Exclude<PaperResolution, { ok: true }>['reason'], string> = {
+  unrecognized: COPY.extraction.linkNotRecognized,
+  'not-found': COPY.extraction.paperNotFound,
+  'no-full-text': COPY.extraction.fullTextUnavailable
+};
+
+export async function extractPaperProtocol(input: ExtractInput): Promise<ExtractResult> {
+  const sourceName = input.file ? input.file.name : input.url || input.text || 'uploaded-document.pdf';
+
+  // 1. Resolve live policy from Cloud Firestore Guardrail Ledger
+  const activePolicy = await getEffectiveGuardrails();
+
+  const doiMatch = sourceName.match(/10\.\d{4,9}\/[^\s"<>]+/i);
+  const screened = await screenPaper(
+    sourceName,
+    {
+      doi: doiMatch ? doiMatch[0].replace(/[.,;)]+$/, '') : undefined,
+      title: sourceName.replace(/\.pdf$/i, '').trim()
+    },
+    sourceName,
+    activePolicy
+  );
+  if (screened) return screened;
+
+  // A link is never sent to the model on its own: it would guess the paper from the URL string.
+  // Fetch the real open-access full text first, or ask for the PDF.
+  let linkedPaper: Extract<PaperResolution, { ok: true }>['paper'] | null = null;
+  if (!input.file && input.url) {
+    let resolution: PaperResolution;
+    try {
+      resolution = await resolvePaperSource(input.url);
+    } catch (err) {
+      console.warn('[GeminiExtraction] Europe PMC lookup failed:', err);
+      return { success: false, eligible: false, rejectionReason: COPY.extraction.paperLookupFailed, source: sourceName };
+    }
+    if (!resolution.ok) {
+      return {
+        success: false,
+        eligible: false,
+        rejectionReason: UNRESOLVED_LINK_REASONS[resolution.reason],
+        source: sourceName
+      };
+    }
+    linkedPaper = resolution.paper;
+
+    const screenedPaper = await screenPaper(
+      linkedPaper.title,
+      { doi: linkedPaper.doi, title: linkedPaper.title },
+      sourceName,
+      activePolicy
+    );
+    if (screenedPaper) return screenedPaper;
+  }
+  const paperFromLink = linkedPaper;
 
   // If Gemini API keys are configured, execute real multimodal extraction with failover
   const geminiKeys = getGeminiApiKeys();
@@ -260,11 +321,18 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
             dynamicPolicyInstruction,
             `Analyze this attached PDF (${input.file.name}). First check the strict gatekeeper criteria. If interventional human science, extract the full protocol.`
           ];
+        } else if (paperFromLink) {
+          promptParts = [
+            SYSTEM_PROMPT,
+            dynamicPolicyInstruction,
+            `Analyze this paper: ${paperFromLink.citation}. Its full text, retrieved from Europe PMC, is between the markers below. Take every title, author, sample size and parameter from this text only. First check gatekeeper criteria, then extract the protocol if eligible.`,
+            `<<<PAPER FULL TEXT>>>\n${paperFromLink.fullText}\n<<<END PAPER FULL TEXT>>>`
+          ];
         } else {
           promptParts = [
             SYSTEM_PROMPT,
             dynamicPolicyInstruction,
-            `Analyze this paper link or text: ${input.url || input.text}. First check gatekeeper criteria, then extract the protocol if eligible.`
+            `Analyze this paper text: ${input.text}. First check gatekeeper criteria, then extract the protocol if eligible.`
           ];
         }
 
@@ -355,6 +423,16 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
     } catch (err) {
       console.error('[GeminiExtraction] Error calling Gemini API, falling back to simulated extraction:', err);
     }
+  }
+
+  // A real paper was fetched from the link: never stand in a simulated routine for it
+  if (linkedPaper) {
+    return {
+      success: false,
+      eligible: false,
+      rejectionReason: COPY.extraction.modelUnavailable,
+      source: sourceName
+    };
   }
 
   // Development / fallback mode: provides instant, calibrated routine extraction
