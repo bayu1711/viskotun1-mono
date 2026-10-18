@@ -353,6 +353,7 @@ cp .env.example .env.local
 ├── tailwind.config.js              # Design system color & typography tokens
 ├── tsconfig.json                   # TypeScript path alias configuration
 ├── Dockerfile                      # Production multi-stage Docker build
+├── AI Builder Cup - Viskotu.pdf    # Official Google AI Builder Cup presentation & submission deck
 └── AGENTS.md                       # Engineering rulebook & architectural guidelines
 ```
 
@@ -374,7 +375,8 @@ Welcome to the team! Before pushing code, please review [`AGENTS.md`](./AGENTS.m
 
 ---
 
-## License
+## Submission & License
 
-Private / Proprietary. Built for the Google AI Builder Cup.
+- **Google AI Builder Cup Presentation**: [`AI Builder Cup - Viskotu.pdf`](./AI%20Builder%20Cup%20-%20Viskotu.pdf)
+- **License**: Private / Proprietary. Built for the Google AI Builder Cup.
 
