@@ -356,6 +356,7 @@ export const COPY = {
     setAnnouncement: (setNumber: number, totalSets: number) => `Set ${setNumber} of ${totalSets}. `,
     holdFinished: 'Hold complete. Relax.',
     finishedAllSteps: 'Great work! You have completed all prescribed plan steps for today.',
+    guidedStepsEnded: 'That was the last guided step. Log any remaining sets on your step cards.',
     unsupported: 'Voice synthesis is not supported on this browser.',
     voiceNameDisplay: (name: string) => `Voice: ${name}`,
     switchVoice: 'Switch coach voice',

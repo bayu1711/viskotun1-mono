@@ -7,6 +7,7 @@ interface UseVoiceCoachOptions {
   steps: RoutineStep[];
   onStepComplete?: (stepIndex: number) => void;
   safetyRule?: string;
+  isDayComplete?: boolean;
 }
 
 const SPEED_OPTIONS = [0.9, 1.0, 1.15] as const;
@@ -65,7 +66,7 @@ function playAudioChime(kind: 'start' | 'tick' | 'complete') {
   }
 }
 
-export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoachOptions) {
+export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete = false }: UseVoiceCoachOptions) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -83,6 +84,12 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
   const audioRef = useRef<HTMLAudioElement | null>(null);
   // Bumped on every cancel so in-flight TTS fetches and stale end events are ignored
   const speechIdRef = useRef(0);
+  // Read at the end of a session, after the last set credit has re-rendered
+  const isDayCompleteRef = useRef(isDayComplete);
+
+  useEffect(() => {
+    isDayCompleteRef.current = isDayComplete;
+  }, [isDayComplete]);
 
   const isSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
@@ -280,11 +287,12 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
   const guideStep = useCallback(
     (index: number) => {
       if (index >= steps.length) {
+        const message = isDayCompleteRef.current ? COPY.voiceCoach.finishedAllSteps : COPY.voiceCoach.guidedStepsEnded;
         setIsPlaying(false);
         setIsPaused(false);
-        setStatusText(COPY.voiceCoach.finishedAllSteps);
+        setStatusText(message);
         if (isSoundEnabled) playAudioChime('complete');
-        speak(COPY.voiceCoach.finishedAllSteps);
+        speak(message);
         return;
       }
 

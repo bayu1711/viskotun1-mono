@@ -19,9 +19,10 @@ interface VoiceCoachBarProps {
   steps: (RoutineStep | ProtocolStep)[];
   safetyRule?: string;
   onStepComplete?: (stepIndex: number) => void;
+  isDayComplete?: boolean;
 }
 
-export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachBarProps) {
+export function VoiceCoachBar({ steps, safetyRule, onStepComplete, isDayComplete }: VoiceCoachBarProps) {
   const {
     isPlaying,
     isPaused,
@@ -41,7 +42,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
     cycleVoice,
     activeVoiceDisplayName,
     availableVoiceCount
-  } = useVoiceCoach({ steps, safetyRule, onStepComplete });
+  } = useVoiceCoach({ steps, safetyRule, onStepComplete, isDayComplete });
 
   if (!isSupported) {
     return null;
