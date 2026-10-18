@@ -8,6 +8,7 @@ import {
   complianceLevel,
   exceedsFeedbackThreshold,
   isProgressionReady,
+  isRoutineCompleted,
   progressionStatus,
   resolveFeedbackMetric
 } from '../routineMetrics';
@@ -253,6 +254,42 @@ describe('routineMetrics', () => {
       expect(progressionStatus(true, false)).toBe('paused');
       expect(progressionStatus(false, true)).toBe('ready');
       expect(progressionStatus(false, false)).toBe('holding');
+    });
+  });
+
+  describe('isRoutineCompleted', () => {
+    it('returns false for null or undefined routine', () => {
+      expect(isRoutineCompleted(null)).toBe(false);
+      expect(isRoutineCompleted(undefined)).toBe(false);
+    });
+
+    it('returns false if totalDays is zero or negative', () => {
+      expect(isRoutineCompleted({ currentDay: 5, totalDays: 0 })).toBe(false);
+      expect(isRoutineCompleted({ currentDay: 5, totalDays: -1 })).toBe(false);
+    });
+
+    it('returns false if currentDay is less than totalDays', () => {
+      expect(isRoutineCompleted({ currentDay: 1, totalDays: 14 }, false)).toBe(false);
+      expect(isRoutineCompleted({ currentDay: 1, totalDays: 14 }, true)).toBe(false);
+      expect(isRoutineCompleted({ currentDay: 13, totalDays: 14 }, true)).toBe(false);
+    });
+
+    it('returns false if on final day but today is not complete', () => {
+      expect(isRoutineCompleted({ currentDay: 14, totalDays: 14 }, false)).toBe(false);
+    });
+
+    it('returns true if on final day and today is complete', () => {
+      expect(isRoutineCompleted({ currentDay: 14, totalDays: 14 }, true)).toBe(true);
+    });
+
+    it('returns true if currentDay exceeds totalDays', () => {
+      expect(isRoutineCompleted({ currentDay: 15, totalDays: 14 }, false)).toBe(true);
+      expect(isRoutineCompleted({ currentDay: 15, totalDays: 14 }, true)).toBe(true);
+    });
+
+    it('returns true if recorded dayHistory count meets or exceeds totalDays', () => {
+      const history = new Array(14).fill(1);
+      expect(isRoutineCompleted({ currentDay: 14, totalDays: 14, dayHistory: history }, false)).toBe(true);
     });
   });
 });

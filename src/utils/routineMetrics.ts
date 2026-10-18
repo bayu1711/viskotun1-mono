@@ -135,6 +135,23 @@ export function isRandomizedTrial(paper: PaperMeta) {
   return paper.evidenceBadges.includes('rct');
 }
 
+/**
+ * Evaluates whether all days in a routine schedule have been fully completed.
+ * Returns true if:
+ * - currentDay > totalDays
+ * - currentDay >= totalDays and today's prescribed sets are completed (isTodayComplete)
+ * - Or recorded dayHistory entries count meets or exceeds totalDays
+ */
+export function isRoutineCompleted(
+  routine?: { currentDay: number; totalDays: number; dayHistory?: number[] } | null,
+  isTodayComplete = false
+): boolean {
+  if (!routine || !routine.totalDays || routine.totalDays <= 0) return false;
+  if (routine.dayHistory && routine.dayHistory.length >= routine.totalDays) return true;
+  if (routine.currentDay > routine.totalDays) return true;
+  return routine.currentDay >= routine.totalDays && isTodayComplete;
+}
+
 /** Applies the policy ledger threshold; returns the same routine when nothing changes. */
 export function applyGuardrailThreshold(routine: Routine, threshold: number, message?: string): Routine {
   const needsUpdate = (target: { escalationThreshold?: number; escalationMessage?: string }) =>
