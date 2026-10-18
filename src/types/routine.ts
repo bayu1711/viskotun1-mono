@@ -314,3 +314,10 @@ export interface StoredPaper {
   createdAt: number;
   updatedAt: number;
 }
+
+export interface PaperUploadResult {
+  success: boolean;
+  eligible: boolean;
+  reason?: string;
+  protocol?: Routine;
+}

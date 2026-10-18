@@ -10,6 +10,7 @@ import type {
   DataCollectionField,
   MorphingDataLog,
   NewChatMessage,
+  PaperUploadResult,
   Protocol,
   ProtocolRuntime,
   ProtocolStep,
@@ -116,6 +117,7 @@ export function useRoutineState() {
   const [extractingSourceName, setExtractingSourceName] = useState('');
   const [stagingMessages, setStagingMessages] = useState<ChatMessage[]>([]);
   const [stagingError, setStagingError] = useState<string | null>(null);
+  const [unboundMessages, setUnboundMessages] = useState<ChatMessage[]>([]);
   const [isStagingAssistantTyping, setIsStagingAssistantTyping] = useState(false);
 
   // Dynamic sample research papers pulled from Firebase Firestore
@@ -500,7 +502,7 @@ export function useRoutineState() {
   const closeHowTo = useCallback(() => setIsHowToOpen(false), []);
 
   const loadSampleProtocol = useCallback(
-    (sampleId: string) => {
+    (sampleId: string, options?: { forceRestart?: boolean }) => {
       const sample =
         sampleProtocolsMap[sampleId] ||
         PRECALIBRATED_SAMPLE_PROTOCOLS[sampleId] ||
@@ -544,7 +546,13 @@ export function useRoutineState() {
       let updatedList: Protocol[] = [];
       setProtocolList((prev) => {
         const exists = prev.some((p) => p.id === cleanProtocol.id);
-        updatedList = exists ? prev : [...prev, cleanProtocol];
+        if (options?.forceRestart) {
+          updatedList = exists
+            ? prev.map((p) => (p.id === cleanProtocol.id ? cleanProtocol : p))
+            : [...prev, cleanProtocol];
+        } else {
+          updatedList = exists ? prev : [...prev, cleanProtocol];
+        }
 
         // Synchronous write to localStorage guarantees persistence even on immediate page refresh
         const keys = getStorageKeys(isAuthenticated ? userId : undefined);
@@ -562,9 +570,13 @@ export function useRoutineState() {
 
       let updatedRuntime: Record<string, ProtocolRuntime> = {};
       setRuntime((prev) => {
-        updatedRuntime = prev[cleanProtocol.id]
-          ? prev
-          : { ...prev, [cleanProtocol.id]: initialRuntimeEntry };
+        if (options?.forceRestart) {
+          updatedRuntime = { ...prev, [cleanProtocol.id]: initialRuntimeEntry };
+        } else {
+          updatedRuntime = prev[cleanProtocol.id]
+            ? prev
+            : { ...prev, [cleanProtocol.id]: initialRuntimeEntry };
+        }
 
         const keys = getStorageKeys(isAuthenticated ? userId : undefined);
         try {
@@ -595,9 +607,17 @@ export function useRoutineState() {
       }
 
       setIsHowToOpen(false);
-      toast.success(COPY.howTo.loadedToast(cleanProtocol.shortTitle || cleanProtocol.title));
+      const toastMessage = options?.forceRestart
+        ? COPY.howTo.redoToast(cleanProtocol.shortTitle || cleanProtocol.title)
+        : COPY.howTo.loadedToast(cleanProtocol.shortTitle || cleanProtocol.title);
+      toast.success(toastMessage);
     },
     [sampleProtocolsMap, isAuthenticated, userId]
+  );
+
+  const redoRoutine = useCallback(
+    (targetId: string) => loadSampleProtocol(targetId, { forceRestart: true }),
+    [loadSampleProtocol]
   );
 
   const protocol = (protocolList.find((item) => item.id === activeProtocolId) ?? protocolList[0]) || null;
@@ -607,7 +627,7 @@ export function useRoutineState() {
         setsDone: {},
         feedbackLogs: [],
         morphingLogs: [],
-        messages: [],
+        messages: unboundMessages,
         escalationPaused: false,
         assistantTyping: false
       };
@@ -662,7 +682,10 @@ export function useRoutineState() {
 
   const pushMessages = useCallback(
     (id: string, ...messages: NewChatMessage[]) => {
-      if (!id) return;
+      if (!id) {
+        setUnboundMessages((prev) => [...prev, ...messages.map(buildMessage)]);
+        return;
+      }
       updateRuntime(id, (prev) => ({
         ...prev,
         messages: [...prev.messages, ...messages.map(buildMessage)]
@@ -1037,7 +1060,7 @@ export function useRoutineState() {
   const addRoutine = addProtocol;
 
   const uploadPaper = useCallback(
-    async (source: string | File, extractedProtocol?: Protocol) => {
+    async (source: string | File, extractedProtocol?: Protocol): Promise<PaperUploadResult> => {
       if (extractedProtocol) {
         setStagingProtocol(extractedProtocol);
         setStagingError(null);
@@ -1057,7 +1080,7 @@ export function useRoutineState() {
             timestamp: nowLabel()
           }
         ]);
-        return;
+        return { success: true, eligible: true, protocol: extractedProtocol };
       }
 
       const fileName = typeof source === 'string' ? source : source.name;
@@ -1108,6 +1131,7 @@ export function useRoutineState() {
             }
           ]);
           toast.success(COPY.processing.ready);
+          return { success: true, eligible: true, protocol: extractedRoutine };
         } else {
           const reason = result.rejectionReason || COPY.extraction.declinedNonHuman;
           setStagingError(reason);
@@ -1121,7 +1145,22 @@ export function useRoutineState() {
               timestamp: nowLabel()
             }
           ]);
+          const targetId = activeProtocolIdRef.current || protocol?.id || '';
+          pushMessages(
+            targetId,
+            {
+              role: 'user',
+              kind: 'file',
+              content: fileName
+            },
+            {
+              role: 'ai',
+              kind: 'alert',
+              content: reason
+            }
+          );
           toast.error(reason);
+          return { success: false, eligible: false, reason };
         }
       } catch (err) {
         console.error('[uploadPaper] Extraction failed:', err);
@@ -1137,13 +1176,32 @@ export function useRoutineState() {
             timestamp: nowLabel()
           }
         ]);
+        const targetId = activeProtocolIdRef.current || protocol?.id || '';
+        pushMessages(
+          targetId,
+          {
+            role: 'user',
+            kind: 'file',
+            content: fileName
+          },
+          {
+            role: 'ai',
+            kind: 'alert',
+            content: errorMsg
+          }
+        );
         toast.error(errorMsg);
+        return { success: false, eligible: false, reason: errorMsg };
       } finally {
         setIsExtractingPaper(false);
       }
     },
-    []
+    [protocol?.id, pushMessages]
   );
+
+  const clearStagingError = useCallback(() => {
+    setStagingError(null);
+  }, []);
 
   const confirmStagingProtocol = useCallback(() => {
     if (!stagingProtocol) return;
@@ -1450,6 +1508,8 @@ export function useRoutineState() {
       loadTrendingRoutine: loadSampleProtocol,
       loadSampleRoutine: loadSampleProtocol,
       loadSampleProtocol,
+      redoRoutine,
+      redoProtocol: redoRoutine,
       trendingPapers: samplePapers,
       samplePapers,
       sampleSource,
@@ -1471,6 +1531,7 @@ export function useRoutineState() {
       extractingSourceName,
       stagingMessages,
       stagingError,
+      clearStagingError,
       isStagingAssistantTyping,
       confirmStagingProtocol,
       discardStagingProtocol,
@@ -1514,6 +1575,7 @@ export function useRoutineState() {
       openHowTo,
       closeHowTo,
       loadSampleProtocol,
+      redoRoutine,
       samplePapers,
       sampleSource,
       isStepComplete,
@@ -1534,6 +1596,7 @@ export function useRoutineState() {
       extractingSourceName,
       stagingMessages,
       stagingError,
+      clearStagingError,
       isStagingAssistantTyping,
       confirmStagingProtocol,
       discardStagingProtocol,
