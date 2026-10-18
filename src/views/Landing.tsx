@@ -360,33 +360,58 @@ export function LandingPage() {
                 <div
                   key={domain.id}
                   className={cn(
-                    'reveal flex flex-col justify-between rounded-callout p-6',
-                    isFeatured && 'sm:col-span-2 lg:row-span-2 lg:p-8',
+                    'reveal relative overflow-hidden flex flex-col justify-between rounded-callout p-6',
+                    isFeatured && 'sm:col-span-2 lg:row-span-2 sm:min-h-[380px] lg:min-h-0 lg:p-8',
                     cardTone.card
                   )}
                 >
                   <div className={cn(isFeatured && 'flex flex-1 flex-col')}>
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="relative z-10 flex items-center justify-between gap-3">
                       <span className="text-sm font-semibold text-ink/80">{domain.tag}</span>
                       <IconTile variant="inverse" shape="circle" size={isFeatured ? 48 : 32}>
                         <Icon icon={DomainIcon} size={isFeatured ? 'md' : 'sm'} />
                       </IconTile>
                     </div>
 
+                    {'image' in domain && domain.image && (
+                      <div className="pointer-events-none select-none relative my-4 flex justify-center sm:absolute sm:bottom-0 sm:right-4 sm:my-0 lg:right-8">
+                        <Image
+                          src={domain.image}
+                          alt={'imageAlt' in domain && domain.imageAlt ? domain.imageAlt : domain.title}
+                          width={407}
+                          height={612}
+                          className="h-48 w-auto object-contain sm:h-72 md:h-80 lg:h-[360px] xl:h-[400px]"
+                          priority
+                        />
+                      </div>
+                    )}
+
                     <h3
                       className={cn(
-                        'mt-4 text-balance font-display font-bold leading-snug text-ink',
-                        isFeatured ? 'text-3xl sm:text-4xl lg:mt-auto lg:pt-16' : 'text-xl'
+                        'relative z-10 mt-4 text-balance font-display font-bold leading-snug text-ink',
+                        isFeatured ? 'text-3xl sm:text-4xl sm:max-w-xs md:max-w-sm lg:max-w-[340px] xl:max-w-md lg:mt-auto lg:pt-16' : 'text-xl'
                       )}
                     >
                       {domain.title}
                     </h3>
-                    <p className={cn('mt-2 leading-relaxed text-ink/85', isFeatured ? 'max-w-md text-lg' : 'text-base')}>
+                    <p
+                      className={cn(
+                        'relative z-10 mt-2 leading-relaxed text-ink/85',
+                        isFeatured ? 'text-base sm:text-lg sm:max-w-xs md:max-w-sm lg:max-w-[340px] xl:max-w-md' : 'text-base'
+                      )}
+                    >
                       {domain.description}
                     </p>
                   </div>
 
-                  <p className="mt-6 border-t border-ink/15 pt-4 text-sm font-semibold text-ink/80">{domain.stat}</p>
+                  <p
+                    className={cn(
+                      'relative z-10 mt-6 border-t border-ink/15 pt-4 text-sm font-semibold text-ink/80',
+                      isFeatured && 'sm:max-w-xs md:max-w-sm lg:max-w-[340px] xl:max-w-md'
+                    )}
+                  >
+                    {domain.stat}
+                  </p>
                 </div>
               );
             })}
