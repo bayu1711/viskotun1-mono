@@ -548,7 +548,8 @@ export function useRoutineState() {
       const sample =
         sampleProtocolsMap[sampleId] ||
         PRECALIBRATED_SAMPLE_PROTOCOLS[sampleId] ||
-        sampleProtocols.find((p) => p.id === sampleId);
+        sampleProtocols.find((p) => p.id === sampleId) ||
+        protocolList.find((p) => p.id === sampleId);
       if (!sample) {
         toast.error(`Sample protocol "${sampleId}" not found`);
         return;
@@ -656,7 +657,7 @@ export function useRoutineState() {
         : COPY.howTo.loadedToast(cleanProtocol.shortTitle || cleanProtocol.title);
       toast.success(toastMessage);
     },
-    [sampleProtocolsMap, isAuthenticated, userId]
+    [sampleProtocolsMap, protocolList, isAuthenticated, userId]
   );
 
   const redoRoutine = useCallback(
@@ -790,6 +791,8 @@ export function useRoutineState() {
           icon: item.icon,
           currentDay: item.currentDay,
           totalDays: item.totalDays,
+          dayHistory: item.dayHistory,
+          doi: item.paper?.doi,
           streak: item.streak,
           todayFraction: fraction,
           todayPercent: toPercent(fraction)
