@@ -9,7 +9,9 @@ import {
   signOut as firebaseSignOut,
   updateProfile
 } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 import { COPY } from '../data/copy';
+import { ROUTES } from '../data/navigation';
 import { getFirebaseAuth } from '../lib/firebase';
 import type { AuthState, User } from '../types/auth';
 
@@ -76,6 +78,7 @@ const ADMIN_USER: User = {
 export const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -270,7 +273,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
     persistUser(null);
-  }, [persistUser]);
+    router.push(ROUTES.login);
+  }, [persistUser, router]);
 
   const isAdmin = Boolean(
     user &&
