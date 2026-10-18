@@ -233,6 +233,9 @@ export function AuthView({ mode }: AuthViewProps) {
               <Icon icon={ShieldOutlinedIcon} size="xs" />
               <span>{COPY.auth.adminButton}</span>
             </button>
+            <p className="mt-1 text-pretty text-2xs leading-relaxed text-ink/60">
+              {COPY.auth.adminLifecycleNotice}
+            </p>
           </div>
 
           <div>

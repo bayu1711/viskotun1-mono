@@ -220,6 +220,12 @@ export function PolicyLedgerDrawer() {
                 </p>
               </div>
 
+              {/* Competition Evaluation Lifecycle Notice */}
+              <div className="rounded-card border border-ink/10 bg-cream/50 p-3.5 text-xs leading-relaxed text-ink/80">
+                <span className="font-semibold text-ink">Google AI Builder Cup Note:</span>{' '}
+                {COPY.policyLedger.lifecycleNotice}
+              </div>
+
               {/* Dynamic Parameter 1: Adverse Escalation Threshold */}
               <div className="rounded-card border border-ink/10 bg-white p-4">
                 <div className="flex items-center justify-between">
