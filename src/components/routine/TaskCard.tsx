@@ -93,6 +93,12 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
             {step.action}
           </h3>
 
+          {step.tempo && (
+            <span className="mt-1.5 inline-flex items-center rounded-full bg-white/70 px-2 py-0.5 text-3xs font-medium tabular-nums text-ink">
+              {COPY.task.tempoBadge(step.tempo)}
+            </span>
+          )}
+
           {step.inferred && (
             <div className="mt-1 flex flex-wrap items-center gap-1.5 text-2xs">
               <span className="text-3xs text-ink/60">

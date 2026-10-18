@@ -1,7 +1,10 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { COPY } from '../data/copy';
 import type { Routine, Protocol } from '../types/routine';
-import { generateFallbackRoutine, isTheoreticalOrNonHuman } from './fallbackRoutines';
+import { applyGuardrailThreshold } from '../utils/routineMetrics';
+import { findCalibratedRoutine } from './calibratedRoutines';
+import { generateFallbackRoutine } from './fallbackRoutines';
+import { classifyPaperSource, containsTerm } from './gatekeeper';
 import { getEffectiveGuardrails } from './guardrailLedger';
 
 export interface ExtractInput {
@@ -30,7 +33,9 @@ Your role is to transform dense peer-reviewed research papers into executable, a
    - Non-human (in vitro, cell cultures, animal models such as mice, rats, rabbits).
    - Purely observational or demographic without a prescribed executable intervention.
    - Theoretical physics, mathematics, cosmology, quantum theory, computer science, economics, or general non-human science.
-   Provide a clear educational rejectionReason explaining why.
+   Provide a clear educational rejectionReason explaining why. Start it with the matching label:
+   "Declined: Non-human / rodent model.", "Declined: In vitro / cell culture study.",
+   "Declined: Theoretical / non-human science." or "Declined: Observational study lacking an executable routine."
 3. ADAPTIVE BIOFEEDBACK & SAFETY METRIC (feedbackMetric):
    Dynamically extract the study's primary subjective adverse effect, symptom, or tolerability measure:
    - Musculoskeletal / rehab -> name: "tendon discomfort" or "joint soreness", label: "tendon discomfort / load tolerance", eyebrow: "discomfort"
@@ -169,11 +174,19 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
   // 1. Resolve live policy from Cloud Firestore Guardrail Ledger
   const activePolicy = await getEffectiveGuardrails();
 
-  // Dynamic gatekeeper check against live Firestore policy banned keywords
-  const lowerSource = sourceName.toLowerCase();
-  const matchedBannedKeyword = activePolicy.bannedKeywords.find((kw) =>
-    lowerSource.includes(kw.toLowerCase())
-  );
+  // Local gatekeeper first: it names the specific category (animal, in vitro, theoretical, observational)
+  const localCheck = classifyPaperSource(sourceName);
+  if (localCheck.declined) {
+    return {
+      success: true,
+      eligible: false,
+      rejectionReason: localCheck.reason,
+      source: sourceName
+    };
+  }
+
+  // Then any extra criteria an admin added to the live Firestore policy (whole-word match)
+  const matchedBannedKeyword = activePolicy.bannedKeywords.find((kw) => containsTerm(sourceName, kw));
   if (matchedBannedKeyword) {
     return {
       success: true,
@@ -183,15 +196,15 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
     };
   }
 
-  // Gatekeeper local pre-check for non-human / theoretical keywords
-  const localCheck = isTheoreticalOrNonHuman(sourceName);
-  if (localCheck.declined) {
-    return {
-      success: true,
-      eligible: false,
-      rejectionReason: localCheck.reason,
-      source: sourceName
-    };
+  // Pre-calibrated reference papers resolve deterministically without an LLM call
+  const calibrated = findCalibratedRoutine(sourceName);
+  if (calibrated) {
+    const routine = applyGuardrailThreshold(
+      calibrated,
+      activePolicy.painEscalationThreshold,
+      activePolicy.escalationAlertMessage
+    );
+    return { success: true, eligible: true, routine, protocol: routine, source: sourceName };
   }
 
   // If Gemini API key is configured, execute real multimodal extraction

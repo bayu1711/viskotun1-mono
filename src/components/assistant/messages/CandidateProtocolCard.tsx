@@ -165,7 +165,7 @@ export function CandidateProtocolCard({
 
       {progressionRule && (
         <p className="text-2xs text-ink/60 px-1">
-          {COPY.protocolCard.rulePrefix} {progressionRule.condition.toLowerCase()} {COPY.protocolCard.ruleArrow}{' '}
+          {COPY.protocolCard.rulePrefix} {COPY.protocolCard.ruleCondition(progressionRule.condition)} {COPY.protocolCard.ruleArrow}{' '}
           <span className="font-medium text-ink">{progressionRule.action.toLowerCase()}</span>
         </p>
       )}

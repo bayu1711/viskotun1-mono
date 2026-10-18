@@ -4,15 +4,11 @@ import React, { type FormEvent, useId, useMemo, useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { toast } from 'sonner';
 import { useRoutine } from '../../contexts/RoutineContext';
-import {
-  FEEDBACK_ESCALATION_THRESHOLD,
-  FEEDBACK_NOTE_MAX_LENGTH,
-  FEEDBACK_SCORE_DEFAULT
-} from '../../data/config';
+import { FEEDBACK_NOTE_MAX_LENGTH, FEEDBACK_SCORE_DEFAULT } from '../../data/config';
 import { COPY } from '../../data/copy';
-import type { DataCollectionField } from '../../types/routine';
+import type { DataCollectionField, MorphingDataLog } from '../../types/routine';
 import { cn } from '../../utils/cn';
-import { exceedsFeedbackThreshold } from '../../utils/routineMetrics';
+import { fieldValueExceedsThreshold } from '../../utils/routineMetrics';
 import { severityTone } from '../../utils/tones';
 import { Callout } from '../feedback/Callout';
 import { CircleButton } from '../ui/CircleButton';
@@ -26,7 +22,15 @@ interface FeedbackLogFormProps {
 
 type MorphingValue = number | string | boolean;
 
-function getInitialValueForField(field: DataCollectionField): MorphingValue {
+function getInitialValueForField(field: DataCollectionField, logs: MorphingDataLog[], day: number): MorphingValue {
+  // Re-opening the drawer shows today's saved answer for choice-style fields
+  if (field.type === 'multichoice' || field.type === 'boolean') {
+    const todaysLog = [...logs].reverse().find((log) => log.fieldId === field.id && log.day === day);
+    const expectedType = field.type === 'multichoice' ? 'string' : 'boolean';
+    if (todaysLog && typeof todaysLog.value === expectedType) {
+      return todaysLog.value;
+    }
+  }
   switch (field.type) {
     case 'scale':
       return FEEDBACK_SCORE_DEFAULT;
@@ -53,6 +57,7 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
     activeFieldId,
     setActiveFieldId,
     logMorphingData,
+    morphingLogs,
     feedbackMetric,
     dataCollectionSpec
   } = useRoutine();
@@ -85,7 +90,9 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
     return baseList;
   }, [scheduledFields, dataCollectionSpec, activeField]);
 
-  const [value, setValue] = useState<MorphingValue>(() => getInitialValueForField(activeField));
+  const [value, setValue] = useState<MorphingValue>(() =>
+    getInitialValueForField(activeField, morphingLogs, currentDay)
+  );
   const [valueFieldId, setValueFieldId] = useState(activeField.id);
   const [note, setNote] = useState('');
   const noteId = useId();
@@ -93,13 +100,12 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
   // Reset value only when the user switches field, not when the field object is re-created
   if (valueFieldId !== activeField.id) {
     setValueFieldId(activeField.id);
-    setValue(getInitialValueForField(activeField));
+    setValue(getInitialValueForField(activeField, morphingLogs, currentDay));
   }
 
   const numericScore = typeof value === 'number' ? value : 0;
   const tone = severityTone(numericScore);
-  const threshold = activeField.escalationThreshold ?? FEEDBACK_ESCALATION_THRESHOLD;
-  const isExceeded = typeof value === 'number' && exceedsFeedbackThreshold(value, threshold);
+  const isExceeded = fieldValueExceedsThreshold(activeField, value);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -162,6 +168,7 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
         {/* Polymorphic Dynamic Widget Renderer */}
         <div className="pt-2">
           <DynamicFieldRenderer
+            key={activeField.id}
             field={activeField}
             value={value}
             onChange={setValue}

@@ -11,6 +11,7 @@
 import { getFirestore } from './guardrailLedger';
 import { achillesProtocol } from '../data/protocols/achilles';
 import { hairLossProtocol } from '../data/protocols/hairLoss';
+import { calibratedRoutines } from '../data/routines/calibrated';
 import {
   FALLBACK_CREATINE_SLEEP,
   FALLBACK_PATELLAR_REHAB
@@ -40,7 +41,10 @@ const BUILTIN_PROTOCOLS: Record<string, Protocol> = {
   achilles: { ...achillesProtocol, canonicalId: 'achilles', isCanonical: true },
   'hair-loss': { ...hairLossProtocol, canonicalId: 'hair-loss', isCanonical: true },
   'creatine-sleep': { ...FALLBACK_CREATINE_SLEEP, canonicalId: 'creatine-sleep', isCanonical: true },
-  'patellar-rehab': { ...FALLBACK_PATELLAR_REHAB, canonicalId: 'patellar-rehab', isCanonical: true }
+  'patellar-rehab': { ...FALLBACK_PATELLAR_REHAB, canonicalId: 'patellar-rehab', isCanonical: true },
+  ...Object.fromEntries(
+    calibratedRoutines.map((routine) => [routine.id, { ...routine, canonicalId: routine.id, isCanonical: true }])
+  )
 };
 
 // In-memory fallback stores
