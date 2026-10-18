@@ -31,6 +31,7 @@ import {
   applyGuardrailThreshold,
   completionOf,
   exceedsFeedbackThreshold,
+  fieldValueExceedsThreshold,
   getScheduledFieldsForDay,
   isMilestoneDay,
   isProgressionReady,
@@ -846,9 +847,8 @@ export function useRoutineState() {
       const spec = resolveDataCollectionSpec(protocol);
       const field = spec.find((f) => f.id === fieldId) ?? spec[0];
       if (!field) return;
-      const threshold = field.escalationThreshold ?? FEEDBACK_ESCALATION_THRESHOLD;
       const isNumeric = typeof value === 'number';
-      const exceeded = isNumeric && exceedsFeedbackThreshold(value, threshold);
+      const exceeded = fieldValueExceedsThreshold(field, value);
 
       const newMorphLog: MorphingDataLog = {
         id: createId('morph'),

@@ -33,5 +33,5 @@ function progressionMessage(
 ) {
   if (status === 'paused') return escalationMessage || COPY.safety.pausedRecommendation;
   if (status === 'ready' && rule) return COPY.dashboard.progressionReady(rule.condition, rule.action);
-  return COPY.dashboard.progressionHolding;
+  return rule ? COPY.dashboard.progressionHoldingRule(rule.condition, rule.action) : COPY.dashboard.progressionHolding;
 }
