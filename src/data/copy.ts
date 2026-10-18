@@ -731,7 +731,9 @@ export const COPY = {
         description:
           'Eccentric loading and heavy-slow resistance routines proven in clinical trials.',
         tone: 'orange' as const,
-        stat: '84-day benchmark'
+        stat: '84-day benchmark',
+        image: '/images/image2.png',
+        imageAlt: 'Participant demonstrating mobility and joint rehabilitation stretch'
       },
       {
         id: 'cognitive',
