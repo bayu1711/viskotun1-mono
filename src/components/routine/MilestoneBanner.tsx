@@ -7,21 +7,64 @@ import EventAvailableOutlinedIcon from '@mui/icons-material/EventAvailableOutlin
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { Callout } from '../feedback/Callout';
+import { AIIcon } from '../ui/AIIcon';
 import { Icon } from '../ui/Icon';
 import { IconTile } from '../ui/IconTile';
 import { PillButton } from '../ui/PillButton';
 
 export function MilestoneBanner() {
-  const { currentDay, scheduledFields, isCurrentDayMilestone, morphingLogs, openFeedbackDrawer } =
-    useRoutine();
+  const {
+    currentDay,
+    scheduledFields,
+    dataCollectionSpec,
+    isCurrentDayMilestone,
+    morphingLogs,
+    openFeedbackDrawer
+  } = useRoutine();
 
-  if (!isCurrentDayMilestone) return null;
+  const pendingWidgetFields = (dataCollectionSpec ?? []).filter(
+    (f) => f.proposedWidget?.status === 'pending_review'
+  );
+  const milestoneFields = isCurrentDayMilestone
+    ? scheduledFields.filter((f) => f.frequency === 'milestone')
+    : [];
 
-  const milestoneFields = scheduledFields.filter((f) => f.frequency === 'milestone');
-  if (milestoneFields.length === 0) return null;
+  if (milestoneFields.length === 0 && pendingWidgetFields.length === 0) return null;
 
   return (
     <div className="space-y-2.5">
+      {pendingWidgetFields.map((field) => (
+        <Callout
+          key={`pending-${field.id}`}
+          tone="mint"
+          role="status"
+          icon={
+            <IconTile variant="outline" shape="circle" size={36} className="bg-white/80">
+              <AIIcon size="sm" />
+            </IconTile>
+          }
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h4 className="font-semibold text-ink">
+                {COPY.morphing.widgets.custom.pendingNotice}
+              </h4>
+              <p className="mt-0.5 text-xs text-ink/75">
+                {field.proposedWidget?.title || field.label} — {COPY.morphing.widgets.custom.pendingSubtext}
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center">
+              <PillButton
+                size="sm"
+                variant="outline"
+                onClick={() => openFeedbackDrawer(field.id)}
+              >
+                {COPY.morphing.milestone.reviewAction}
+              </PillButton>
+            </div>
+          </div>
+        </Callout>
+      ))}
       {milestoneFields.map((field) => {
         const isCompleted = morphingLogs.some(
           (log) => log.fieldId === field.id && log.day === currentDay

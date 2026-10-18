@@ -80,6 +80,23 @@ export function CandidateProtocolCard({
       {/* Missing Parameters / Lineage Banner */}
       <MissingDataBanner protocol={protocol} className="rounded-tile text-xs" />
 
+      {protocol.dataCollectionSpec?.some(
+        (field) => field.proposedWidget?.status === 'pending_review'
+      ) && (
+        <div
+          role="status"
+          className="rounded-tile border border-ink/15 bg-mint/40 p-3 text-xs text-ink space-y-1"
+        >
+          <div className="flex items-center gap-1.5 font-semibold">
+            <AIIcon size="xs" />
+            <span>{COPY.morphing.widgets.custom.pendingNotice}</span>
+          </div>
+          <p className="text-2xs text-ink/70">
+            {COPY.morphing.widgets.custom.pendingSubtext}
+          </p>
+        </div>
+      )}
+
       {protocol.steps && protocol.steps.length > 0 && (
         <div className="space-y-2 pt-1 border-t border-ink/10">
           <p className="text-2xs font-semibold uppercase tracking-wider text-ink/60">
