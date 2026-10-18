@@ -2,10 +2,12 @@
 
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import CheckIcon from '@mui/icons-material/Check';
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import NorthEastIcon from '@mui/icons-material/NorthEast';
 import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { toast } from 'sonner';
 import { useAssistant } from '../../contexts/AssistantContext';
@@ -15,18 +17,26 @@ import { ROUTES } from '../../data/navigation';
 import { PRECALIBRATED_SAMPLE_PROTOCOLS, SAMPLE_PAPERS, type SamplePaper } from '../../data/samplePapers';
 import type { StepIconKey } from '../../types/routine';
 import { cn } from '../../utils/cn';
+import { isRoutineCompleted } from '../../utils/routineMetrics';
 import { Icon } from '../ui/Icon';
 import { PillButton } from '../ui/PillButton';
 import { StepIcon } from '../ui/StepIcon';
 
 export function TrendingPapersExplore() {
+  const router = useRouter();
   const { openAssistant } = useAssistant();
   const {
     routine,
+    routines,
     activeRoutineId,
     activeProtocolId,
+    dayIsComplete,
+    todayFraction,
+    currentDay,
+    totalDays,
     loadSampleRoutine,
     loadSampleProtocol,
+    redoRoutine,
     samplePapers,
     trendingPapers
   } = useRoutine();
@@ -92,9 +102,13 @@ export function TrendingPapersExplore() {
     return 'bg-canvas text-ink/70 hover:bg-ink/10 border border-ink/10';
   };
 
-  const handleStartRoutine = (targetId?: string) => {
+  const handleStartRoutine = (targetId?: string, isRedo = false) => {
     if (targetId) {
-      loadRoutine(targetId);
+      if (isRedo) {
+        redoRoutine(targetId);
+      } else {
+        loadRoutine(targetId);
+      }
     } else {
       openAssistant('upload');
     }
@@ -132,6 +146,18 @@ export function TrendingPapersExplore() {
           const trackers = paper.activeTrackersCount;
           const logs = paper.totalLogsCount;
           const isActive = Boolean(targetId && currentActiveId === targetId);
+
+          const matchedSummary = targetId ? routines.find((r) => r.id === targetId) : undefined;
+          const isCompleted = targetId
+            ? isActive
+              ? isRoutineCompleted(
+                  routine ?? matchedSummary ?? { currentDay, totalDays },
+                  dayIsComplete || todayFraction >= 1
+                )
+              : matchedSummary
+              ? isRoutineCompleted(matchedSummary, matchedSummary.todayFraction >= 1)
+              : false
+            : false;
 
           return (
             <div
@@ -223,11 +249,28 @@ export function TrendingPapersExplore() {
                   <PillButton
                     size="sm"
                     variant={isActive ? 'outline' : 'primary'}
-                    onClick={() => handleStartRoutine(targetId)}
+                    onClick={() => {
+                      if (isActive && !isCompleted) {
+                        router.push(ROUTES.routine);
+                      } else if (isCompleted) {
+                        handleStartRoutine(targetId, true);
+                      } else {
+                        handleStartRoutine(targetId);
+                      }
+                    }}
                     className="min-h-11 flex-1 justify-center gap-1.5"
                   >
-                    <Icon icon={isActive ? CheckIcon : PlayArrowOutlinedIcon} size="xs" />
-                    <span>{isActive ? COPY.howTo.loadedButton : COPY.onboarding.quickLoadButton}</span>
+                    <Icon
+                      icon={isCompleted ? RestartAltIcon : isActive ? CheckIcon : PlayArrowOutlinedIcon}
+                      size="xs"
+                    />
+                    <span>
+                      {isCompleted
+                        ? COPY.howTo.redoButton
+                        : isActive
+                        ? COPY.howTo.inProgressButton
+                        : COPY.onboarding.quickLoadButton}
+                    </span>
                   </PillButton>
 
                   {isActive && (
