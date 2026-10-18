@@ -361,7 +361,7 @@ export function LandingPage() {
                   key={domain.id}
                   className={cn(
                     'reveal relative overflow-hidden flex flex-col justify-between rounded-callout p-6',
-                    isFeatured && 'sm:col-span-2 lg:row-span-2 sm:min-h-[380px] lg:min-h-0 lg:p-8',
+                    isFeatured && 'sm:col-span-2 lg:row-span-2 sm:min-h-[420px] lg:min-h-0 lg:p-8',
                     cardTone.card
                   )}
                 >
@@ -374,13 +374,13 @@ export function LandingPage() {
                     </div>
 
                     {'image' in domain && domain.image && (
-                      <div className="pointer-events-none select-none relative my-4 flex justify-center sm:absolute sm:bottom-0 sm:right-4 sm:my-0 lg:right-8">
+                      <div className="pointer-events-none select-none relative my-4 flex justify-center sm:absolute sm:bottom-0 sm:right-0 sm:my-0 md:right-2 lg:right-4 xl:right-8">
                         <Image
                           src={domain.image}
                           alt={'imageAlt' in domain && domain.imageAlt ? domain.imageAlt : domain.title}
                           width={407}
                           height={612}
-                          className="h-48 w-auto object-contain sm:h-72 md:h-80 lg:h-[360px] xl:h-[400px]"
+                          className="h-64 w-auto object-contain sm:h-[360px] md:h-[420px] lg:h-[480px] xl:h-[530px]"
                           priority
                         />
                       </div>
