@@ -11,23 +11,23 @@ describe('Scientific Gatekeeper & Fallback Routines', () => {
     it('declines non-human animal models with educational reasoning', () => {
       const mouseCheck = isTheoreticalOrNonHuman('Effects of Metformin in Aging Mouse Models.pdf');
       expect(mouseCheck.declined).toBe(true);
-      expect(mouseCheck.reason).toContain('Non-human animal or in-vitro study');
+      expect(mouseCheck.reason).toContain('Non-human / rodent model');
 
       const ratCheck = isTheoreticalOrNonHuman('Tendon Healing in Wistar Rat Achilles Model.pdf');
       expect(ratCheck.declined).toBe(true);
-      expect(ratCheck.reason).toContain('Non-human animal or in-vitro study');
+      expect(ratCheck.reason).toContain('Non-human / rodent model');
     });
 
     it('declines in vitro and cell culture studies', () => {
       const inVitroCheck = isTheoreticalOrNonHuman('In Vitro Collagen Synthesis in Tenocyte Cell Culture');
       expect(inVitroCheck.declined).toBe(true);
-      expect(inVitroCheck.reason).toContain('in-vitro study');
+      expect(inVitroCheck.reason).toContain('In vitro / cell culture study');
     });
 
     it('declines theoretical physics, math, and cosmology', () => {
       const physicsCheck = isTheoreticalOrNonHuman('Quantum Gravitational Fluctuations in String Theory.pdf');
       expect(physicsCheck.declined).toBe(true);
-      expect(physicsCheck.reason).toContain('Theoretical physics');
+      expect(physicsCheck.reason).toContain('Theoretical / non-human science');
 
       const mathCheck = isTheoreticalOrNonHuman('Topology of High-Dimensional Manifolds and Pure Math');
       expect(mathCheck.declined).toBe(true);
