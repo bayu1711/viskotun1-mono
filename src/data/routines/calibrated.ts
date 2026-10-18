@@ -278,6 +278,8 @@ export const imstBloodPressureRoutine: Routine = {
       unit: 'mmHg',
       min: 70,
       max: 250,
+      targetMin: 90,
+      targetMax: 120,
       step: 1,
       instructions: 'Seated, after 5 minutes of rest, before the training session. Use the upper-arm cuff.'
     },

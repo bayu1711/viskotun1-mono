@@ -110,6 +110,7 @@ export function BiomarkerChartContent({
             stroke="#FF7E1D"
             strokeWidth={3}
             fill="url(#biomarkerGrad)"
+            dot={{ r: 4, fill: '#FF7E1D', stroke: '#ffffff', strokeWidth: 2 }}
             activeDot={{ r: 6, fill: '#FF7E1D', stroke: '#ffffff', strokeWidth: 2 }}
           />
         </AreaChart>

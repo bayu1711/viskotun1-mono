@@ -114,6 +114,8 @@ export const achillesRoutine: Routine = {
       frequency: 'daily',
       min: 0,
       max: 10,
+      targetMin: 0,
+      targetMax: 3,
       step: 1,
       escalationThreshold: 4,
       escalationMessage: 'Tendon discomfort threshold exceeded (≥ 4/10). Escalation paused. Reduce load by 20% tomorrow.'
@@ -127,6 +129,8 @@ export const achillesRoutine: Routine = {
       unit: '°',
       min: 0,
       max: 45,
+      targetMin: 35,
+      targetMax: 45,
       step: 1,
       instructions: 'Measure knee-to-wall distance or goniometer joint angle at maximum comfortable knee bend.'
     }

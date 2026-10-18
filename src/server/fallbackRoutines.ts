@@ -132,6 +132,8 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
       unit: 'seconds',
       min: 10,
       max: 600,
+      targetMin: 200,
+      targetMax: 260,
       step: 1,
       instructions: 'Record reaction time performance across standard 10-minute assessment window.'
     },
@@ -379,6 +381,8 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
       unit: '°',
       min: 0,
       max: 150,
+      targetMin: 120,
+      targetMax: 145,
       step: 1,
       instructions: 'Measure active knee flexion angle in prone position with goniometer aligned to lateral femoral condyle.'
     }

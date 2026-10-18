@@ -134,6 +134,8 @@ Return a JSON object conforming strictly to:
         "unit": string,
         "min": number,
         "max": number,
+        "targetMin": number,
+        "targetMax": number,
         "step": number,
         "options": ["string"],
         "instructions": string,

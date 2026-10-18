@@ -123,6 +123,8 @@ export const hairLossRoutine: Routine = {
       frequency: 'daily',
       min: 0,
       max: 10,
+      targetMin: 0,
+      targetMax: 3,
       step: 1,
       escalationThreshold: 4,
       escalationMessage: 'Scalp irritation threshold exceeded (≥ 4/10). Escalation paused. Pause microneedling for 1 week and continue minoxidil only.'

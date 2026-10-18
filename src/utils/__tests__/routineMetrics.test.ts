@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_FEEDBACK_METRIC } from '../../data/config';
-import type { FeedbackLog, Routine, RoutineSummary } from '../../types/routine';
+import type {
+  DataCollectionField,
+  FeedbackLog,
+  MorphingDataLog,
+  Routine,
+  RoutineSummary
+} from '../../types/routine';
 import {
   adherenceOf,
   clampFeedbackScore,
@@ -10,7 +16,10 @@ import {
   isProgressionReady,
   isRoutineCompleted,
   progressionStatus,
+  resolveBiomarkerPoints,
   resolveFeedbackMetric,
+  resolveFieldTargetBounds,
+  resolveMilestoneDays,
   resolvePaperRoutineStatus
 } from '../routineMetrics';
 
@@ -388,6 +397,86 @@ describe('routineMetrics', () => {
       expect(status.isActive).toBe(false);
       expect(status.isInRoutine).toBe(false);
       expect(status.isCompleted).toBe(false);
+    });
+  });
+
+  describe('resolveBiomarkerPoints, resolveFieldTargetBounds & resolveMilestoneDays', () => {
+    const numericField: DataCollectionField = {
+      id: 'ach-dorsiflexion',
+      name: 'Ankle Dorsiflexion Angle',
+      label: 'Weight-Bearing Lunge Dorsiflexion',
+      type: 'numeric',
+      frequency: 'weekly',
+      unit: '°',
+      min: 0,
+      max: 45,
+      targetMin: 35,
+      targetMax: 45
+    };
+
+    const scaleField: DataCollectionField = {
+      id: 'ach-pain-vas',
+      name: 'Tendon Discomfort',
+      label: 'Tendon Discomfort (VAS 0–10)',
+      type: 'scale',
+      frequency: 'daily',
+      min: 0,
+      max: 10,
+      step: 1,
+      escalationThreshold: 4
+    };
+
+    it('returns empty array when user has 0 logs instead of generating fake progression points', () => {
+      expect(resolveBiomarkerPoints(numericField, [], [])).toEqual([]);
+      expect(resolveBiomarkerPoints(scaleField, [], [])).toEqual([]);
+    });
+
+    it('preserves a single logged data point on Day 1 without falling back to simulated data', () => {
+      const logs: MorphingDataLog[] = [
+        { id: 'm-1', fieldId: 'ach-dorsiflexion', day: 1, value: 28, loggedAt: '9:00 AM' }
+      ];
+      expect(resolveBiomarkerPoints(numericField, logs, [])).toEqual([{ day: 1, value: 28 }]);
+    });
+
+    it('deduplicates same-day readings by keeping the latest entry and sorts chronologically', () => {
+      const logs: MorphingDataLog[] = [
+        { id: 'm-2', fieldId: 'ach-dorsiflexion', day: 7, value: 34, loggedAt: '9:00 AM' },
+        { id: 'm-1', fieldId: 'ach-dorsiflexion', day: 1, value: 26, loggedAt: '8:00 AM' },
+        { id: 'm-3', fieldId: 'ach-dorsiflexion', day: 1, value: 29, loggedAt: '6:00 PM' }
+      ];
+      expect(resolveBiomarkerPoints(numericField, logs, [])).toEqual([
+        { day: 1, value: 29 },
+        { day: 7, value: 34 }
+      ]);
+    });
+
+    it('falls back to feedbackLogs for scale fields when morphingLogs are empty', () => {
+      const feedback: FeedbackLog[] = [
+        { id: 'f-1', day: 1, score: 2, note: '', loggedAt: '8:00 AM' },
+        { id: 'f-2', day: 2, score: 1, note: '', loggedAt: '8:00 AM' }
+      ];
+      expect(resolveBiomarkerPoints(scaleField, [], feedback)).toEqual([
+        { day: 1, value: 2 },
+        { day: 2, value: 1 }
+      ]);
+    });
+
+    it('resolves explicit targetMin/targetMax or derives safe range from escalationThreshold', () => {
+      expect(resolveFieldTargetBounds(numericField)).toEqual({ targetMin: 35, targetMax: 45 });
+      expect(resolveFieldTargetBounds(scaleField)).toEqual({ targetMin: 0, targetMax: 3 });
+    });
+
+    it('clips milestone days to routine totalDays and derives sensible defaults when omitted', () => {
+      const photoField: DataCollectionField = {
+        id: 'photo-1',
+        name: 'Posture Photo',
+        label: 'Posture Photo',
+        type: 'photo',
+        frequency: 'milestone',
+        milestoneDays: [1, 14, 30, 84]
+      };
+      expect(resolveMilestoneDays(photoField, 30)).toEqual([1, 14, 30]);
+      expect(resolveMilestoneDays({ ...photoField, milestoneDays: undefined }, 14)).toEqual([1, 7, 14]);
     });
   });
 });
