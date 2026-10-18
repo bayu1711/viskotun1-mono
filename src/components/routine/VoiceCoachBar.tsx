@@ -105,30 +105,33 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
               type="button"
               onClick={pauseCoach}
               aria-label={COPY.voiceCoach.pause}
-              className="flex h-11 min-w-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-ink px-4 text-xs font-medium text-white shadow-sm transition-all hover:bg-ink/85 active:scale-95"
+              className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-ink px-3 sm:px-4 text-xs font-medium text-white shadow-sm transition-all hover:bg-ink/85 active:scale-95"
             >
               <Icon icon={PauseRoundedIcon} size="sm" />
               <span className="hidden sm:inline">{COPY.voiceCoach.pause}</span>
+              <span className="inline sm:hidden">{COPY.voiceCoach.pauseShort}</span>
             </button>
           ) : isPaused ? (
             <button
               type="button"
               onClick={resumeCoach}
               aria-label={COPY.voiceCoach.resume}
-              className="flex h-11 min-w-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-orange px-4 text-xs font-medium text-white shadow-sm transition-all hover:bg-orange/90 active:scale-95"
+              className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-orange px-3 sm:px-4 text-xs font-medium text-white shadow-sm transition-all hover:bg-orange/90 active:scale-95"
             >
               <Icon icon={PlayArrowRoundedIcon} size="sm" />
               <span className="hidden sm:inline">{COPY.voiceCoach.resume}</span>
+              <span className="inline sm:hidden">{COPY.voiceCoach.resumeShort}</span>
             </button>
           ) : (
             <button
               type="button"
               onClick={startCoach}
               aria-label={COPY.voiceCoach.play}
-              className="flex h-11 min-w-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-orange px-4 text-xs font-medium text-white shadow-sm transition-all hover:bg-orange/90 active:scale-95"
+              className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-orange px-3 sm:px-4 text-xs font-medium text-white shadow-sm transition-all hover:bg-orange/90 active:scale-95"
             >
               <Icon icon={PlayArrowRoundedIcon} size="sm" />
               <span className="hidden sm:inline">{COPY.voiceCoach.play}</span>
+              <span className="inline sm:hidden">{COPY.voiceCoach.playShort}</span>
             </button>
           )}
 
@@ -147,7 +150,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
             type="button"
             onClick={cycleSpeed}
             aria-label={COPY.voiceCoach.speed(speed)}
-            className="relative flex h-9 min-w-[36px] items-center justify-center rounded-full border before:absolute before:-inset-1 border-ink/15 bg-canvas px-2 text-2xs font-semibold text-ink transition-colors hover:bg-cream"
+            className="relative flex h-9 min-w-[36px] shrink-0 items-center justify-center rounded-full border before:absolute before:-inset-1 border-ink/15 bg-canvas px-2 text-2xs font-semibold text-ink transition-colors hover:bg-cream"
           >
             {COPY.voiceCoach.speedDisplay(speed)}
           </button>
