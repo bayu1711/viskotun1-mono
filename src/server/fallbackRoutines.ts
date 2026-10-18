@@ -1,5 +1,6 @@
 import type { Routine, Protocol } from '../types/routine';
 import { COPY } from '../data/copy';
+import { classifyPaperSource } from './gatekeeper';
 
 export const FALLBACK_CREATINE_SLEEP: Routine = {
   id: 'creatine-sleep',
@@ -450,46 +451,10 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
   ]
 };
 
-const THEORETICAL_OR_NON_HUMAN_KEYWORDS = [
-  'quantum',
-  'physics',
-  'cosmology',
-  'relativity',
-  'particle',
-  'astronomy',
-  'string theory',
-  'gravitational',
-  'thermodynamic',
-  'rodent',
-  'mouse',
-  'mice',
-  'rat',
-  'in vitro',
-  'cell culture',
-  'petri',
-  'macroeconomic',
-  'monetary policy',
-  'pure math',
-  'topology'
-];
-
+/** Backward-compatible wrapper around the local gatekeeper. */
 export function isTheoreticalOrNonHuman(input: string): { declined: boolean; reason?: string } {
-  const normalized = input.toLowerCase();
-  for (const keyword of THEORETICAL_OR_NON_HUMAN_KEYWORDS) {
-    if (normalized.includes(keyword)) {
-      if (['rodent', 'mouse', 'mice', 'rat', 'in vitro', 'cell culture', 'petri'].includes(keyword)) {
-        return {
-          declined: true,
-          reason: COPY.extraction.declinedAnimalReason
-        };
-      }
-      return {
-        declined: true,
-        reason: COPY.extraction.declinedTheoreticalReason
-      };
-    }
-  }
-  return { declined: false };
+  const verdict = classifyPaperSource(input);
+  return verdict.declined ? { declined: true, reason: verdict.reason } : { declined: false };
 }
 
 export function generateFallbackRoutine(source: string): Routine {

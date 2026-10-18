@@ -39,7 +39,13 @@ const KNOWN_PRESET_MAP: Record<string, string> = {
   'creatine-sleep': 'creatine-sleep',
   'zone2-cardio': 'zone2-cardio',
   'time-restricted-feeding': 'time-restricted-feeding',
-  'melatonin-sleep': 'melatonin-sleep'
+  'melatonin-sleep': 'melatonin-sleep',
+  'plantar-fasciitis': 'plantar-fasciitis',
+  'imst-blood-pressure': 'imst-blood-pressure',
+  'warm-bath-sleep': 'warm-bath-sleep',
+  'cervical-posture': 'cervical-posture',
+  'ashwagandha-stress': 'ashwagandha-stress',
+  'dual-n-back': 'dual-n-back'
 };
 
 const KNOWN_DOI_MAP: Record<string, string> = {
@@ -48,7 +54,13 @@ const KNOWN_DOI_MAP: Record<string, string> = {
   '10.1038/s41598-024-54249-9': 'creatine-sleep',
   '10.1249/mss.0000000000002130': 'zone2-cardio',
   '10.1056/nejmoa2114833': 'time-restricted-feeding',
-  '10.1016/j.smrv.2023.101784': 'melatonin-sleep'
+  '10.1016/j.smrv.2023.101784': 'melatonin-sleep',
+  '10.1111/sms.12313': 'plantar-fasciitis',
+  '10.1161/jaha.121.020982': 'imst-blood-pressure',
+  '10.1016/j.smrv.2019.04.008': 'warm-bath-sleep',
+  '10.1179/106698105790824888': 'cervical-posture',
+  '10.4103/0253-7176.106022': 'ashwagandha-stress',
+  '10.1073/pnas.0801268105': 'dual-n-back'
 };
 
 export interface PaperIdentifierInput {

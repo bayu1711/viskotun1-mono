@@ -152,10 +152,32 @@ export function isRoutineCompleted(
   return routine.currentDay >= routine.totalDays && isTodayComplete;
 }
 
+type EscalationTarget = Pick<FeedbackMetric, 'escalationThreshold' | 'escalationMessage' | 'escalationSource'>;
+
+/** Paper-specific advice (escalationSource 'protocol') survives policy message changes. */
+function policyMessageFor<T extends EscalationTarget>(target: T, message?: string) {
+  return message && target.escalationSource !== 'protocol' ? message : target.escalationMessage;
+}
+
+/**
+ * Threshold that triggers an escalation for a logged field value, or undefined when the field
+ * never escalates. Scale fields fall back to the default pain threshold; numeric, timer and
+ * other measurements (blood pressure, minutes asleep) escalate only with an explicit threshold.
+ */
+export function fieldEscalationThreshold(field: DataCollectionField): number | undefined {
+  if (field.escalationThreshold !== undefined) return field.escalationThreshold;
+  return field.type === 'scale' ? FEEDBACK_ESCALATION_THRESHOLD : undefined;
+}
+
+export function fieldValueExceedsThreshold(field: DataCollectionField, value: unknown): boolean {
+  const threshold = fieldEscalationThreshold(field);
+  return typeof value === 'number' && threshold !== undefined && exceedsFeedbackThreshold(value, threshold);
+}
+
 /** Applies the policy ledger threshold; returns the same routine when nothing changes. */
 export function applyGuardrailThreshold(routine: Routine, threshold: number, message?: string): Routine {
-  const needsUpdate = (target: { escalationThreshold?: number; escalationMessage?: string }) =>
-    target.escalationThreshold !== threshold || (!!message && target.escalationMessage !== message);
+  const needsUpdate = (target: EscalationTarget) =>
+    target.escalationThreshold !== threshold || target.escalationMessage !== policyMessageFor(target, message);
   const appliesTo = (field: DataCollectionField) => field.type === 'scale' || field.escalationThreshold !== undefined;
 
   const metricChanged = !!routine.feedbackMetric && needsUpdate(routine.feedbackMetric);
@@ -168,12 +190,12 @@ export function applyGuardrailThreshold(routine: Routine, threshold: number, mes
       ? {
           ...routine.feedbackMetric,
           escalationThreshold: threshold,
-          escalationMessage: message || routine.feedbackMetric.escalationMessage
+          escalationMessage: policyMessageFor(routine.feedbackMetric, message)
         }
       : routine.feedbackMetric,
     dataCollectionSpec: (routine.dataCollectionSpec || []).map((field) =>
       appliesTo(field)
-        ? { ...field, escalationThreshold: threshold, escalationMessage: message || field.escalationMessage }
+        ? { ...field, escalationThreshold: threshold, escalationMessage: policyMessageFor(field, message) }
         : field
     )
   };
