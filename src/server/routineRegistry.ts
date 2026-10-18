@@ -22,7 +22,8 @@ import type {
   CommunityReview,
   NewCommunityReview,
   CommunityInsights,
-  PaperMeta
+  PaperMeta,
+  ProposedWidgetSpec
 } from '../types/routine';
 import {
   getCanonicalPaperId,
@@ -369,5 +370,66 @@ export async function getCommunityMetrics(
   };
 }
 
+/**
+ * Updates a canonical protocol's dataCollectionSpec when an admin confirms an AI-proposed widget.
+ */
+export async function injectApprovedWidgetIntoCanonicalProtocol(
+  approvedProposal: ProposedWidgetSpec
+): Promise<Protocol | null> {
+  if (!approvedProposal.protocolId) return null;
+
+  const canonicalId = getCanonicalPaperId(
+    { id: approvedProposal.protocolId },
+    approvedProposal.protocolId
+  );
+  const existing =
+    memoryProtocols.get(canonicalId) ||
+    memoryProtocols.get(approvedProposal.protocolId) ||
+    (await findCanonicalProtocol({ id: approvedProposal.protocolId }, approvedProposal.protocolId));
+
+  if (!existing || !existing.dataCollectionSpec) {
+    return null;
+  }
+
+  const updatedSpec = existing.dataCollectionSpec.map((field) => {
+    if (
+      field.id === approvedProposal.fieldId ||
+      field.proposedWidget?.id === approvedProposal.id
+    ) {
+      return {
+        ...field,
+        proposedWidget: approvedProposal
+      };
+    }
+    return field;
+  });
+
+  const updatedProtocol: Protocol = {
+    ...existing,
+    dataCollectionSpec: updatedSpec
+  };
+
+  memoryProtocols.set(canonicalId, updatedProtocol);
+  if (approvedProposal.protocolId !== canonicalId) {
+    memoryProtocols.set(approvedProposal.protocolId, updatedProtocol);
+  }
+
+  const db = getFirestore();
+  if (db) {
+    try {
+      await db
+        .collection(PROTOCOLS_COLLECTION)
+        .doc(canonicalId)
+        .set({ dataCollectionSpec: updatedSpec }, { merge: true });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn('[ProtocolRegistry] Failed to persist approved widget to canonical protocol:', message);
+    }
+  }
+
+  return updatedProtocol;
+}
+
 export const findCanonicalRoutine = findCanonicalProtocol;
 export const saveCanonicalRoutine = saveCanonicalProtocol;
+
