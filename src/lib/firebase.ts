@@ -5,6 +5,7 @@
 
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, type Auth } from 'firebase/auth';
+import { getStorage, type FirebaseStorage } from 'firebase/storage';
 
 interface FirebaseRuntimeConfig {
   apiKey?: string;
@@ -54,6 +55,21 @@ export function getFirebaseConfig(): FirebaseRuntimeConfig {
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let googleProvider: GoogleAuthProvider | null = null;
+let storage: FirebaseStorage | null = null;
+
+export function getFirebaseApp(): FirebaseApp | null {
+  if (typeof window === 'undefined') return null;
+  if (!app && isFirebaseConfigured()) {
+    try {
+      const config = getFirebaseConfig();
+      app = getApps().length ? getApp() : initializeApp(config);
+    } catch (err) {
+      console.warn('[Firebase] Client initialization failed:', err);
+      return null;
+    }
+  }
+  return app;
+}
 
 export function isFirebaseConfigured(): boolean {
   const config = getFirebaseConfig();
@@ -73,16 +89,40 @@ export function getFirebaseAuth(): {
 
   if (!auth && isFirebaseConfigured()) {
     try {
-      const config = getFirebaseConfig();
-      app = getApps().length ? getApp() : initializeApp(config);
-      auth = getAuth(app);
-      googleProvider = new GoogleAuthProvider();
-      googleProvider.setCustomParameters({ prompt: 'select_account' });
+      const firebaseApp = getFirebaseApp();
+      if (firebaseApp) {
+        auth = getAuth(firebaseApp);
+        googleProvider = new GoogleAuthProvider();
+        googleProvider.setCustomParameters({ prompt: 'select_account' });
+      }
     } catch (err) {
-      console.warn('[Firebase] Client initialization failed, operating in evaluation mode:', err);
+      console.warn('[Firebase] Auth initialization failed, operating in evaluation mode:', err);
       return { auth: null, googleProvider: null };
     }
   }
 
   return { auth, googleProvider };
+}
+
+export function getFirebaseStorage(): FirebaseStorage | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  if (!storage && isFirebaseConfigured()) {
+    try {
+      const firebaseApp = getFirebaseApp();
+      if (firebaseApp) {
+        const config = getFirebaseConfig();
+        const rawBucket = config.storageBucket || 'viskotun1-media-0064688276';
+        const bucketUrl = rawBucket.startsWith('gs://') ? rawBucket : `gs://${rawBucket}`;
+        storage = getStorage(firebaseApp, bucketUrl);
+      }
+    } catch (err) {
+      console.warn('[Firebase] Storage initialization failed:', err);
+      return null;
+    }
+  }
+
+  return storage;
 }
