@@ -337,6 +337,12 @@ export const COPY = {
     countdown: (seconds: number) => `Hold: ${seconds}s`,
     countdownComplete: 'Hold complete',
     countdownActive: (seconds: number) => `${seconds}s hold timer running`,
+    timerCountdown: (seconds: number) => `Timer: ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`,
+    timerComplete: 'Timer complete',
+    timerActive: (seconds: number) => `${seconds}s timer running`,
+    timerStart: (seconds: number) =>
+      `Starting a ${seconds >= 120 && seconds % 60 === 0 ? `${seconds / 60} minute` : `${seconds} second`} timer. Begin now.`,
+    timerFinished: 'Time is up. Well done.',
     stepAnnouncement: (stepNum: number, total: number, title: string, details: string) =>
       `Step ${stepNum} of ${total}: ${title}. ${details}`,
     safetyReminder: (rule: string) => `Safety reminder: ${rule}`,
@@ -345,11 +351,15 @@ export const COPY = {
     script: {
       timedHoldDetail: (sets: number, seconds: number, detail: string) =>
         `${sets} sets with a ${seconds} second hold. ${detail}.`,
+      timedSessionDetail: (sets: number, unit: string, perSet: string, detail: string) =>
+        `${sets} ${unit}, ${perSet}. ${detail}.`,
+      repsUnit: (reps: number) => `${reps} repetitions`,
       repsDetail: (sets: number, reps: number, detail: string) =>
         `${sets} sets of ${reps} repetitions. ${detail}.`,
       dosageDetail: (sets: number, unit: string, dose: string, detail: string) =>
         `${sets} ${unit}${dose}. ${detail}.`,
       defaultDosesUnit: 'doses',
+      defaultSetsUnit: 'sets',
       prescribedTempo: (tempo: string) => ` Prescribed tempo is ${tempo}.`
     },
     holdCountdownStart: (seconds: number) => `Begin hold for ${seconds} seconds. 3, 2, 1, start.`,

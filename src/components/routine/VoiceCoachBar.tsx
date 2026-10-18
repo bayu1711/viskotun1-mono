@@ -30,6 +30,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete, isDayComplete
     speed,
     isSoundEnabled,
     countdownRemaining,
+    countdownKind,
     statusText,
     isSupported,
     startCoach,
@@ -89,7 +90,9 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete, isDayComplete
 
           {isHolding && (
             <span className="shrink-0 animate-pulse rounded-full bg-blush px-2.5 py-1 text-2xs font-bold text-ink">
-              {COPY.voiceCoach.countdown(countdownRemaining)}
+              {countdownKind === 'timer'
+                ? COPY.voiceCoach.timerCountdown(countdownRemaining)
+                : COPY.voiceCoach.countdown(countdownRemaining)}
             </span>
           )}
         </div>

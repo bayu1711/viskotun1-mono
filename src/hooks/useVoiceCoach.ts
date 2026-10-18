@@ -12,6 +12,8 @@ interface UseVoiceCoachOptions {
 
 const SPEED_OPTIONS = [0.9, 1.0, 1.15] as const;
 
+type CountdownKind = 'hold' | 'timer';
+
 function playAudioChime(kind: 'start' | 'tick' | 'complete') {
   if (typeof window === 'undefined') return;
   try {
@@ -73,6 +75,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
   const [speedIndex, setSpeedIndex] = useState(1); // default 1.0x
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   const [countdownRemaining, setCountdownRemaining] = useState<number | null>(null);
+  const [countdownKind, setCountdownKind] = useState<CountdownKind>('hold');
   const [statusText, setStatusText] = useState<string>(COPY.voiceCoach.idle);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoiceIndex, setSelectedVoiceIndex] = useState(0);
@@ -246,8 +249,13 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
     const stepNum = index + 1;
     let details = '';
 
-    if (step.durationSeconds && step.durationSeconds > 0) {
+    if (step.durationSeconds && step.durationSeconds > 0 && step.reps <= 1) {
       details = COPY.voiceCoach.script.timedHoldDetail(step.sets, step.durationSeconds, step.detail);
+    } else if (step.durationSeconds && step.durationSeconds > 0) {
+      // A timed session or repeated holds, not one long hold (e.g. 30 breaths in a 5 minute session)
+      const unit = step.setLabel || COPY.voiceCoach.script.defaultSetsUnit;
+      const perSet = step.perSetLabel?.replace(/^×\s*/, '') || COPY.voiceCoach.script.repsUnit(step.reps);
+      details = COPY.voiceCoach.script.timedSessionDetail(step.sets, unit, perSet, step.detail);
     } else if (step.reps > 0) {
       details = COPY.voiceCoach.script.repsDetail(step.sets, step.reps, step.detail);
     } else {
@@ -264,11 +272,26 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
   }, []);
 
   const startHoldCountdown = useCallback(
-    (seconds: number, nextStepCallback: () => void, intro = '') => {
+    (seconds: number, nextStepCallback: () => void, intro = '', kind: CountdownKind = 'hold') => {
       clearTimer();
+      const text =
+        kind === 'hold'
+          ? {
+              start: COPY.voiceCoach.holdCountdownStart,
+              active: COPY.voiceCoach.countdownActive,
+              complete: COPY.voiceCoach.countdownComplete,
+              finished: COPY.voiceCoach.holdFinished
+            }
+          : {
+              start: COPY.voiceCoach.timerStart,
+              active: COPY.voiceCoach.timerActive,
+              complete: COPY.voiceCoach.timerComplete,
+              finished: COPY.voiceCoach.timerFinished
+            };
       let remaining = seconds;
+      setCountdownKind(kind);
       setCountdownRemaining(seconds);
-      setStatusText(COPY.voiceCoach.countdownActive(seconds));
+      setStatusText(text.active(seconds));
 
       const finish = () => {
         resumeRef.current = null;
@@ -289,11 +312,11 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
           if (remaining <= 0) {
             clearTimer();
             setCountdownRemaining(null);
-            setStatusText(COPY.voiceCoach.countdownComplete);
+            setStatusText(text.complete);
             chime('complete');
             // Pausing during "Hold complete" resumes straight into what comes next
             resumeRef.current = finish;
-            speak(COPY.voiceCoach.holdFinished, finish);
+            speak(text.finished, finish);
           }
         }, 1000);
       };
@@ -301,12 +324,12 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
       // Resuming after a pause continues this hold from the seconds left
       resumeRef.current = () => {
         setCountdownRemaining(remaining);
-        setStatusText(COPY.voiceCoach.countdownActive(remaining));
+        setStatusText(text.active(remaining));
         speak(COPY.voiceCoach.holdResumed(remaining), runCountdown);
       };
 
       chime('start');
-      speak(`${intro}${COPY.voiceCoach.holdCountdownStart(seconds)}`, runCountdown);
+      speak(`${intro}${text.start(seconds)}`, runCountdown);
     },
     [chime, clearTimer, speak]
   );
@@ -362,7 +385,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
           runHoldSet(1);
         } else if (holdSeconds > 0) {
           // Repeated holds or a session timer: the coach only times it, the user logs sets on the card
-          startHoldCountdown(holdSeconds, () => restThen(() => guideStep(index + 1)));
+          startHoldCountdown(holdSeconds, () => restThen(() => guideStep(index + 1)), '', 'timer');
         } else {
           // Rep-based steps are logged by the user on the step card, then the user moves on
           setStatusText(COPY.voiceCoach.awaitingNext);
@@ -461,6 +484,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
     speed,
     isSoundEnabled,
     countdownRemaining,
+    countdownKind,
     statusText,
     isSupported,
     startCoach,
