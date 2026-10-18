@@ -7,9 +7,8 @@ vi.mock('../guardrailLedger', async (importOriginal) => {
 
 import { COPY } from '../../data/copy';
 import type { Routine } from '../../types/routine';
-import { findCalibratedRoutine } from '../calibratedRoutines';
 import { extractPaperProtocol } from '../geminiExtraction';
-import { findCanonicalRoutine } from '../routineRegistry';
+import { findCanonicalRoutine, updateCanonicalRoutineVersion } from '../routineRegistry';
 
 async function extract(text: string): Promise<Routine> {
   const result = await extractPaperProtocol({ text });
@@ -20,25 +19,43 @@ async function extract(text: string): Promise<Routine> {
 
 const field = (routine: Routine, id: string) => routine.dataCollectionSpec?.find((f) => f.id === id);
 
-describe('calibrated paper lookup', () => {
+describe('canonical paper lookup & versioning', () => {
   it.each([
     ['10.1111/sms.12313', 'plantar-fasciitis'],
-    ['https://doi.org/10.1161/JAHA.121.020982', 'imst-blood-pressure'],
-    ['doi: 10.1016/j.smrv.2019.04.008', 'warm-bath-sleep'],
+    ['10.1161/JAHA.121.020982', 'imst-blood-pressure'],
+    ['10.1016/j.smrv.2019.04.008', 'warm-bath-sleep'],
     ['10.1179/106698105790824888', 'cervical-posture'],
     ['10.4103/0253-7176.106022', 'ashwagandha-stress'],
     ['10.1073/pnas.0801268105', 'dual-n-back']
-  ])('resolves DOI %s to %s', (doi, id) => {
-    expect(findCalibratedRoutine(doi)?.id).toBe(id);
+  ])('resolves DOI %s to canonical protocol %s', async (doi, id) => {
+    const routine = await findCanonicalRoutine({ doi });
+    expect(routine?.id).toBe(id);
+    expect(routine?.version).toBe('1.0');
+    expect(routine?.changelog?.[0]?.version).toBe('1.0');
   });
 
-  it('returns null for unknown papers', () => {
-    expect(findCalibratedRoutine('Eccentric Loading for Mid-Portion Achilles Tendinopathy')).toBeNull();
+  it('returns null for unknown papers', async () => {
+    expect(await findCanonicalRoutine({ doi: '10.9999/unknown.doi' })).toBeNull();
   });
 
-  it('registers each calibrated routine as a canonical built-in', async () => {
+  it('registers each calibrated routine as a canonical built-in with version 1.0', async () => {
     const byDoi = await findCanonicalRoutine({ doi: '10.1111/sms.12313' });
     expect(byDoi?.id).toBe('plantar-fasciitis');
+    expect(byDoi?.version).toBe('1.0');
+  });
+
+  it('updates protocol version and records changelog on improvement', async () => {
+    const updated = await updateCanonicalRoutineVersion(
+      'plantar-fasciitis',
+      { phase: 'Updated Clinical Phase' },
+      'Adjusted rest interval based on ACSM consensus',
+      'Clinical Contributor',
+      ['acsm-rest-timer']
+    );
+    expect(updated?.version).toBe('1.1');
+    expect(updated?.changelog?.[0].version).toBe('1.1');
+    expect(updated?.changelog?.[0].summary).toBe('Adjusted rest interval based on ACSM consensus');
+    expect(updated?.changelog?.[0].addedFields).toEqual(['acsm-rest-timer']);
   });
 });
 

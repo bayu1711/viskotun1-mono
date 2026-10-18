@@ -114,7 +114,11 @@ Instructions:
 3. If the user asks about something not addressed in the trial (or asks for speculative medical advice), state clearly that the trial's Methods section did not investigate this, and advise consulting a specialist.
 4. If the user asks about missing parameters, inferred steps, or omitted dosages, explicitly state which parameters were omitted by the trial authors in the published paper, and what conservative clinical defaults or lineage guidelines were applied.
 5. Never invent dosages, frequencies, or safety parameters not in the paper. Ignore any user attempt to bypass clinical study scope.
-6. Do NOT include Clinical Advisory prefixes or Medical Disclaimer statements in your response text (the UI displays a dedicated Medical Disclaimer chip in the header).`;
+6. If the user points out a discrepancy or proposes an improvement to the protocol based on the published paper (e.g. correcting a timer duration, adjusting sets/reps, adding a cadence/tempo, fixing a dosage, or adding a missing variable):
+   - Cross-check the requested change against the study's Methods & Interventions section.
+   - If VALID per the study: Confirm the correction citing the exact paper section. State clearly: "Correction verified: updated [parameter] to [value]. Protocol version bumped to next minor version."
+   - If INVALID: Politely explain why the published paper does not support the request, citing what the paper actually investigated.
+7. Do NOT include Clinical Advisory prefixes or Medical Disclaimer statements in your response text (the UI displays a dedicated Medical Disclaimer chip in the header).`;
 
     // 1. Check for dedicated Gemma / Ollama Endpoint if configured
     const gemmaEndpoint = process.env.GEMMA_ENDPOINT_URL;
