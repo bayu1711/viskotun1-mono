@@ -1,37 +1,44 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
-import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
+import { SAMPLE_PAPERS, type SamplePaper } from '../../data/samplePapers';
+import { TrendingPaperCard } from '../community/TrendingPaperCard';
+import { VersionHistoryModal } from '../community/VersionHistoryModal';
 import { PageContainer } from '../layout/PageContainer';
 import { PageHeader } from '../layout/PageHeader';
 import { Icon } from '../ui/Icon';
-import { PillButton } from '../ui/PillButton';
-import { StepIcon } from '../ui/StepIcon';
 
 export function EmptyRoutineView() {
-  const { loadSampleRoutine, loadSampleProtocol, trendingPapers, samplePapers } = useRoutine();
+  const { trendingPapers, samplePapers } = useRoutine();
   const { openAssistant } = useAssistant();
-  const loadRoutine = loadSampleRoutine || loadSampleProtocol;
-  const availablePapers = trendingPapers || samplePapers || [];
-  const topTrending = availablePapers.filter((p) => !p.isGuardrailRejectionTest && (p.routineId || p.protocolId)).slice(0, 3);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [viewingVersionPaper, setViewingVersionPaper] = useState<SamplePaper | null>(null);
+
+  const availablePapers: SamplePaper[] = useMemo(() => {
+    const list = trendingPapers || samplePapers;
+    return list && list.length > 0 ? list : SAMPLE_PAPERS;
+  }, [trendingPapers, samplePapers]);
+
+  const topTrending = useMemo(() => {
+    return availablePapers
+      .filter((p) => {
+        if (p.isGuardrailRejectionTest) return false;
+        if (!(p.routineId || p.protocolId)) return false;
+        if (selectedCategory !== 'all' && p.category !== selectedCategory) return false;
+        return true;
+      })
+      .slice(0, 3);
+  }, [availablePapers, selectedCategory]);
 
   const handleOpenUpload = () => {
     openAssistant('upload');
-  };
-
-  const getIconForRoutine = (targetId?: string, category?: string) => {
-    if (targetId === 'achilles') return 'straight-knee' as const;
-    if (targetId === 'hair-loss') return 'serum' as const;
-    if (targetId === 'creatine-sleep') return 'sleep' as const;
-    if (category?.includes('metabol') || category?.includes('fasting')) return 'timer' as const;
-    if (category?.includes('circadian') || category?.includes('sleep') || category?.includes('light')) return 'sun' as const;
-    return 'pill' as const;
   };
 
   return (
@@ -69,79 +76,64 @@ export function EmptyRoutineView() {
             {COPY.onboarding.dropSubtext}
           </p>
         </div>
+      </div>
 
-        {/* Quick Trending Paper Starters */}
-        <div className="space-y-3 pt-4">
-          <div className="flex items-center justify-between">
+      {/* Quick Trending Paper Starters */}
+      <div className="mt-8 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <div className="space-y-2">
             <h3 className="text-xs font-medium text-ink/70">
               {COPY.onboarding.trendingHeading}
             </h3>
-            <Link
-              href={`${ROUTES.community}?tab=explore`}
-              className="text-2xs font-medium text-ink/60 hover:text-ink transition-colors underline"
-            >
-              {COPY.howTo.buttonExploreSamples}
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {topTrending.map((paper, index) => {
-              const targetId = paper.routineId || paper.protocolId;
-              const rank = paper.trendingRank ?? index + 1;
-              const trackers = paper.activeTrackersCount;
-              const logs = paper.totalLogsCount;
-
-              return (
-                <div
-                  key={paper.id}
-                  className="flex flex-col justify-between rounded-card border border-ink/10 bg-white p-4 transition-all hover:border-ink/30"
+            {selectedCategory !== 'all' && (
+              <div className="flex items-center gap-1.5 text-2xs">
+                <span className="text-ink/60">{COPY.howTo.filterByTopic}</span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory('all')}
+                  className="relative inline-flex items-center gap-1 rounded-full bg-ink px-2.5 py-0.5 font-medium text-white transition-opacity hover:opacity-90 before:absolute before:-inset-y-3 before:inset-x-0"
+                  title={COPY.howTo.clearFilter}
                 >
-                  <div>
-                    <div className="flex items-center justify-between gap-1.5">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-canvas text-ink">
-                        <StepIcon icon={getIconForRoutine(targetId, paper.category)} size="xs" />
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="rounded-full bg-mint/30 border border-mint/60 px-2 py-0.5 text-2xs font-semibold text-ink">
-                          {COPY.howTo.trendingRankBadge(rank)}
-                        </span>
-                        <span className="rounded-full bg-canvas px-2 py-0.5 text-2xs font-semibold text-ink/70">
-                          {paper.category}
-                        </span>
-                      </div>
-                    </div>
-
-                    <h4 className="mt-3 text-sm font-medium text-ink leading-snug">
-                      {paper.shortTitle || paper.title}
-                    </h4>
-                    <p className="mt-1 text-2xs text-ink/60 line-clamp-2">
-                      {paper.summary}
-                    </p>
-
-                    <div className="mt-2.5 flex items-center gap-1.5 text-2xs text-ink/60">
-                      <span>{COPY.howTo.activeTrackersBadge(trackers ?? 0)}</span>
-                      <span>·</span>
-                      <span>{COPY.howTo.totalLogsBadge(logs ?? 0)}</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-ink/10">
-                    <PillButton
-                      size="sm"
-                      variant="outline"
-                      onClick={() => (targetId ? loadRoutine(targetId) : handleOpenUpload())}
-                      className="w-full justify-center gap-1.5"
-                    >
-                      <Icon icon={PlayArrowOutlinedIcon} size="xs" />
-                      <span>{COPY.onboarding.quickLoadButton}</span>
-                    </PillButton>
-                  </div>
-                </div>
-              );
-            })}
+                  <span>{selectedCategory}</span>
+                  <span className="text-white/80">×</span>
+                </button>
+              </div>
+            )}
           </div>
+          <Link
+            href={`${ROUTES.community}?tab=explore`}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
+          >
+            <Icon icon={TrendingUpIcon} size="xs" />
+            <span>{COPY.howTo.buttonExploreSamples}</span>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {topTrending.map((paper, index) => (
+            <TrendingPaperCard
+              key={paper.id}
+              paper={paper}
+              rank={paper.trendingRank ?? index + 1}
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+              onViewVersionHistory={setViewingVersionPaper}
+            />
+          ))}
         </div>
       </div>
+
+      <VersionHistoryModal
+        isOpen={Boolean(viewingVersionPaper)}
+        onClose={() => setViewingVersionPaper(null)}
+        paperTitle={
+          viewingVersionPaper?.title ||
+          viewingVersionPaper?.shortTitle ||
+          COPY.community.defaultProtocolTitle
+        }
+        currentVersion={viewingVersionPaper?.version || '1.0'}
+        changelog={viewingVersionPaper?.changelog || []}
+      />
     </PageContainer>
   );
 }
