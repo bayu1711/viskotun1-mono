@@ -30,7 +30,7 @@ export function PageHeader({ eyebrow, title, children, switcherExtra }: PageHead
         ) : !routine ? (
           <Link
             href={`${ROUTES.community}?tab=explore`}
-            className="inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
           >
             <Icon icon={TrendingUpIcon} size="xs" />
             <span>{COPY.howTo.buttonExploreSamples}</span>

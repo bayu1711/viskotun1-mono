@@ -381,6 +381,8 @@ export const COPY = {
     activeTab: 'Active routine insights',
     exploreTab: 'Explore trending papers',
     goToRoutine: 'Go to daily routine',
+    trackButton: 'Track',
+    defaultProtocolTitle: 'Research Protocol',
     versionPill: (v: string) => `v${v}`,
     versionUpdatedPill: (v: string) => `v${v} · Updated`,
     versionHistoryTitle: 'Protocol Version History & Changelog',

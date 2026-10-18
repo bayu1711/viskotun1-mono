@@ -100,7 +100,7 @@ export function CommunityPage() {
       </button>
     )
   ) : (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-mint/40 px-3 py-1.5 text-xs font-semibold text-ink">
+    <span className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-mint/40 px-3 text-xs font-semibold text-ink">
       <Icon icon={TrendingUpIcon} size="xs" />
       <span>{COPY.howTo.buttonExploreSamples}</span>
     </span>
