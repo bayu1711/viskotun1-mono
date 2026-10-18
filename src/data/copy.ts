@@ -457,6 +457,26 @@ export const COPY = {
     placeholderAsk: 'Ask Viskotu about this paper…',
     placeholderUpload: 'Paste a DOI or PubMed link…',
     placeholderStaging: 'Ask Viskotu about candidate paper before confirming…',
+    rejection: {
+      inputLabel: 'Ask why this paper was declined',
+      placeholder: 'Ask why it was declined, or paste a DOI to try another…',
+      source: 'Source · Gatekeeper policy',
+      suggestions: {
+        why: 'Why was this paper declined?',
+        whatToUpload: 'What kind of paper can I upload instead?',
+        nonHuman: 'Can findings from animal studies still be used?'
+      },
+      answers: {
+        whyPrefix: "Here is the gatekeeper's reasoning: ",
+        criteria:
+          'ViskotuN1 only builds routines from interventional studies in which human participants followed a defined routine, such as rehabilitation, pharmacology, sleep, nutrition or fasting, cognitive focus, or ergonomics. Upload a study like that (PDF or DOI/PubMed link) and I can extract a routine you can follow.',
+        nonHuman:
+          'Results from animal or lab models have not been shown to work the same way in people, so turning them into a routine for you would be guesswork. A human interventional trial that tested the routine directly is needed.',
+        scopeNote: "I can only speak to why this paper wasn't suitable, not to its content.",
+        outOfScope:
+          "I can only explain why this paper wasn't suitable for ViskotuN1. I can't discuss the study's methods or findings. Upload a human interventional paper and I can help with its routine."
+      }
+    },
     suggestionsLabel: 'Suggested questions',
     suggestions: {
       label: 'Suggested questions',
