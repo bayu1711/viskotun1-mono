@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSamplePapers, savePaper, getUserPapers, seedSamplePapersIfEmpty } from '../../../server/papersStorage';
+import { saveCanonicalRoutine } from '../../../server/routineRegistry';
 import { COPY } from '../../../data/copy';
 import type { StoredPaper } from '../../../types/routine';
 
@@ -71,6 +72,14 @@ export async function POST(request: Request) {
     };
 
     const result = await savePaper(paperDocument);
+
+    // The user confirmed this routine, so it may now become the shared canonical entry for its paper
+    if (paperDocument.routine) {
+      await saveCanonicalRoutine(paperDocument.routine).catch((err) => {
+        console.warn('[/api/papers] Could not register canonical routine:', err);
+      });
+    }
+
     return NextResponse.json({
       success: true,
       source: result.source,

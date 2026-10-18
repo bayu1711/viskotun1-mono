@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { extractPaperRoutine } from '../../../server/geminiExtraction';
-import { saveCanonicalRoutine } from '../../../server/routineRegistry';
+import { findCanonicalRoutine, toCanonicalRoutine } from '../../../server/routineRegistry';
 import { COPY } from '../../../data/copy';
 
 export async function POST(request: Request) {
@@ -30,12 +30,15 @@ export async function POST(request: Request) {
 
     if (result.success && (result.routine || result.protocol)) {
       const targetRoutine = (result.routine || result.protocol)!;
-      const { protocol: canonicalRoutine, isNew } = await saveCanonicalRoutine(targetRoutine);
+      // Reuse a routine users already confirmed for this paper. A new extraction is only a candidate:
+      // it is registered when the user confirms it (POST /api/papers), never here.
+      const existing = await findCanonicalRoutine(targetRoutine.paper, targetRoutine.id);
+      const canonicalRoutine = existing ?? toCanonicalRoutine(targetRoutine);
       return NextResponse.json({
         ...result,
         routine: canonicalRoutine,
         protocol: canonicalRoutine,
-        isExistingCanonical: !isNew
+        isExistingCanonical: Boolean(existing)
       });
     }
 

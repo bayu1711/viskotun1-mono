@@ -337,6 +337,12 @@ export const COPY = {
     countdown: (seconds: number) => `Hold: ${seconds}s`,
     countdownComplete: 'Hold complete',
     countdownActive: (seconds: number) => `${seconds}s hold timer running`,
+    timerCountdown: (seconds: number) => `Timer: ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`,
+    timerComplete: 'Timer complete',
+    timerActive: (seconds: number) => `${seconds}s timer running`,
+    timerStart: (seconds: number) =>
+      `Starting a ${seconds >= 120 && seconds % 60 === 0 ? `${seconds / 60} minute` : `${seconds} second`} timer. Begin now.`,
+    timerFinished: 'Time is up. Well done.',
     stepAnnouncement: (stepNum: number, total: number, title: string, details: string) =>
       `Step ${stepNum} of ${total}: ${title}. ${details}`,
     safetyReminder: (rule: string) => `Safety reminder: ${rule}`,
@@ -345,16 +351,25 @@ export const COPY = {
     script: {
       timedHoldDetail: (sets: number, seconds: number, detail: string) =>
         `${sets} sets with a ${seconds} second hold. ${detail}.`,
+      timedSessionDetail: (sets: number, unit: string, perSet: string, detail: string) =>
+        `${sets} ${unit}, ${perSet}. ${detail}.`,
+      repsUnit: (reps: number) => `${reps} repetitions`,
       repsDetail: (sets: number, reps: number, detail: string) =>
         `${sets} sets of ${reps} repetitions. ${detail}.`,
       dosageDetail: (sets: number, unit: string, dose: string, detail: string) =>
         `${sets} ${unit}${dose}. ${detail}.`,
       defaultDosesUnit: 'doses',
+      defaultSetsUnit: 'sets',
       prescribedTempo: (tempo: string) => ` Prescribed tempo is ${tempo}.`
     },
     holdCountdownStart: (seconds: number) => `Begin hold for ${seconds} seconds. 3, 2, 1, start.`,
+    setAnnouncement: (setNumber: number, totalSets: number) => `Set ${setNumber} of ${totalSets}. `,
+    holdResumed: (seconds: number) => `Resuming. ${seconds} seconds left.`,
     holdFinished: 'Hold complete. Relax.',
     finishedAllSteps: 'Great work! You have completed all prescribed plan steps for today.',
+    guidedStepsEnded: 'That was the last guided step. Log any remaining sets on your step cards.',
+    awaitNextPrompt: 'When you finish your sets, log them on the step card and tap next step.',
+    awaitingNext: 'Log your sets, then tap Next',
     unsupported: 'Voice synthesis is not supported on this browser.',
     voiceNameDisplay: (name: string) => `Voice: ${name}`,
     switchVoice: 'Switch coach voice',
@@ -647,6 +662,13 @@ export const COPY = {
     protocolReady: (title: string) => `Routine ready: ${title}`,
     routineReady: (title: string) => `Routine ready: ${title}`,
     failedWithStatus: (status: number) => `Extraction failed with HTTP ${status}`,
+    linkNotRecognized:
+      'No DOI, PubMed or PMC ID found in that link. Paste the paper DOI (for example 10.1177/1941738116631498) or upload the PDF.',
+    paperNotFound: 'No paper with that DOI or ID was found in Europe PMC. Check the identifier or upload the PDF.',
+    fullTextUnavailable:
+      'This paper is not open access, so its methods cannot be read from the link. Upload the PDF to extract the routine.',
+    paperLookupFailed: 'Could not reach Europe PMC to fetch this paper. Try again or upload the PDF.',
+    modelUnavailable: 'The paper was found, but the extraction model is busy right now. Try again in a minute.',
     matchedBannedKeyword: (keyword: string, version: string) =>
       `Paper declined: Matched restricted non-human / theoretical policy criterion ("${keyword}"). ViskotuN1 enforces interventional human science only per clinical policy v${version}.`,
     declinedAnimalReason:

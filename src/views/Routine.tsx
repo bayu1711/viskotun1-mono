@@ -75,8 +75,10 @@ export function RoutinePage() {
               </Callout>
             )}
             <VoiceCoachBar
+              key={routine.id}
               steps={activeVoiceSteps}
               safetyRule={stopRule?.text}
+              isDayComplete={todayFraction >= 1}
               onStepComplete={(stepIndex) => {
                 const step = activeVoiceSteps[stepIndex];
                 if (step) {

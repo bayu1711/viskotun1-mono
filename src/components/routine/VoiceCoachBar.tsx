@@ -19,9 +19,10 @@ interface VoiceCoachBarProps {
   steps: (RoutineStep | ProtocolStep)[];
   safetyRule?: string;
   onStepComplete?: (stepIndex: number) => void;
+  isDayComplete?: boolean;
 }
 
-export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachBarProps) {
+export function VoiceCoachBar({ steps, safetyRule, onStepComplete, isDayComplete }: VoiceCoachBarProps) {
   const {
     isPlaying,
     isPaused,
@@ -29,6 +30,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
     speed,
     isSoundEnabled,
     countdownRemaining,
+    countdownKind,
     statusText,
     isSupported,
     startCoach,
@@ -41,7 +43,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
     cycleVoice,
     activeVoiceDisplayName,
     availableVoiceCount
-  } = useVoiceCoach({ steps, safetyRule, onStepComplete });
+  } = useVoiceCoach({ steps, safetyRule, onStepComplete, isDayComplete });
 
   if (!isSupported) {
     return null;
@@ -88,7 +90,9 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
 
           {isHolding && (
             <span className="shrink-0 animate-pulse rounded-full bg-blush px-2.5 py-1 text-2xs font-bold text-ink">
-              {COPY.voiceCoach.countdown(countdownRemaining)}
+              {countdownKind === 'timer'
+                ? COPY.voiceCoach.timerCountdown(countdownRemaining)
+                : COPY.voiceCoach.countdown(countdownRemaining)}
             </span>
           )}
         </div>
@@ -141,7 +145,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete }: VoiceCoachB
             <CircleButton
               label={COPY.voiceCoach.nextStep}
               size={36}
-              disabled={currentStepIndex >= stepCount - 1}
+              disabled={!isPlaying && currentStepIndex >= stepCount - 1}
               onClick={nextStep}
             >
               <Icon icon={SkipNextRoundedIcon} size="md" />
