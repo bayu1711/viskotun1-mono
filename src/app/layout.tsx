@@ -65,7 +65,7 @@ export default function RootLayout({
           'gen-lang-client-0064688276',
         storageBucket:
           process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
-          `${process.env.GOOGLE_CLOUD_PROJECT || 'gen-lang-client-0064688276'}.firebasestorage.app`,
+          'viskotun1-media-0064688276',
         messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
         appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || ''
       }

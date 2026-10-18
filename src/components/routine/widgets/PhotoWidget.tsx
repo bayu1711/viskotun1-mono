@@ -5,10 +5,8 @@ import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
 import CloudDoneOutlinedIcon from '@mui/icons-material/CloudDoneOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { toast } from 'sonner';
 import { COPY } from '../../../data/copy';
-import { getFirebaseStorage } from '../../../lib/firebase';
 import type { DataCollectionField } from '../../../types/routine';
 import { Spinner } from '../../feedback/Spinner';
 import { CircleButton } from '../../ui/CircleButton';
@@ -29,7 +27,10 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const currentPhoto = typeof value === 'string' && value.length > 0 ? value : '';
-  const isCloudStored = currentPhoto.startsWith('http://') || currentPhoto.startsWith('https://');
+  const isCloudStored =
+    currentPhoto.startsWith('http://') ||
+    currentPhoto.startsWith('https://') ||
+    currentPhoto.startsWith('/api/media/');
 
   const processAndUploadFile = async (file: File) => {
     if (!file || !file.type.startsWith('image/')) {
@@ -40,22 +41,26 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
     setIsUploading(true);
 
     try {
-      const storage = getFirebaseStorage();
-      if (!storage) {
-        throw new Error('Storage client unconfigured');
-      }
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('category', 'photos');
 
-      const fileExt = file.name.split('.').pop() || 'jpg';
-      const cleanName = file.name.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 30);
-      const storagePath = `routines/photos/${Date.now()}_${cleanName}.${fileExt}`;
-      const storageRef = ref(storage, storagePath);
-
-      await uploadBytes(storageRef, file, {
-        contentType: file.type
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
       });
 
-      const downloadUrl = await getDownloadURL(storageRef);
-      onChange(downloadUrl);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || `Upload failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!data?.url) {
+        throw new Error('No media URL returned from upload server');
+      }
+
+      onChange(data.url);
       toast.success(COPY.morphing.widgets.photo.uploadSuccess);
     } catch (err: any) {
       console.warn('[PhotoWidget] Cloud Storage upload failed, falling back to local preview:', err?.message || err);

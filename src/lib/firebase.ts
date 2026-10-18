@@ -42,7 +42,7 @@ export function getFirebaseConfig(): FirebaseRuntimeConfig {
     projectId,
     storageBucket:
       process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
-      `${projectId}.firebasestorage.app`,
+      'viskotun1-media-0064688276',
     messagingSenderId:
       process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ||
       '536575310594',
