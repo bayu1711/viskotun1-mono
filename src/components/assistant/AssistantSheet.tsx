@@ -18,7 +18,6 @@ import { AssistantComposer } from './AssistantComposer';
 import { AssistantHeader } from './AssistantHeader';
 import { AssistantMessage } from './AssistantMessage';
 import { FaqSuggestions } from './FaqSuggestions';
-import { AlertCard } from './messages/AlertCard';
 import { CandidateProtocolCard } from './messages/CandidateProtocolCard';
 import { ProcessingCard } from './ProcessingCard';
 import { TypingIndicator } from './TypingIndicator';
@@ -38,7 +37,6 @@ export function AssistantSheet() {
     extractingSourceName,
     stagingMessages,
     stagingError,
-    clearStagingError,
     isStagingAssistantTyping,
     confirmStagingProtocol,
     discardStagingProtocol,
@@ -50,12 +48,7 @@ export function AssistantSheet() {
   const inputRef = useRef<HTMLInputElement>(null);
   const titleId = useId();
 
-  const handleClose = () => {
-    clearStagingError();
-    closeAssistant();
-  };
-
-  useDialogA11y(panelRef, { open: isOpen, onClose: handleClose, initialFocusRef: inputRef });
+  useDialogA11y(panelRef, { open: isOpen, onClose: closeAssistant, initialFocusRef: inputRef });
 
   const currentMessageCount =
     mode === 'ask'
@@ -67,18 +60,12 @@ export function AssistantSheet() {
   const endRef = useScrollToLatest<HTMLDivElement>(isOpen, `${mode}-${currentMessageCount}`);
 
   const handleModeChange = (next: AssistantMode) => {
-    if (next === 'upload') {
-      clearStagingError();
-    }
     setMode(next);
     inputRef.current?.focus();
   };
 
-  const addPaper = async (source: string | File) => {
-    const result = await uploadPaper(source);
-    if (result && !result.eligible) {
-      setMode('ask');
-    }
+  const addPaper = (source: string | File) => {
+    uploadPaper(source);
   };
 
   const handleFile = (file: File) => {
@@ -95,8 +82,12 @@ export function AssistantSheet() {
   };
 
   const hasAskConversation = messages.length > 0 || assistantTyping;
-  const lastEngine = useMemo(() => [...messages].reverse().find((m) => m.engine)?.engine, [messages]);
   const isAsk = mode === 'ask';
+  const activeMessages = isAsk ? messages : stagingMessages;
+  const lastEngine = useMemo(
+    () => [...activeMessages].reverse().find((m) => m.engine)?.engine,
+    [activeMessages]
+  );
 
   const askSuggestions = useMemo(
     () => getDynamicSuggestions(protocol, messages),
@@ -108,6 +99,20 @@ export function AssistantSheet() {
     [stagingProtocol, stagingMessages]
   );
 
+  const rejectionSuggestions = useMemo(() => {
+    if (!stagingError) return [];
+    const asked = new Set(
+      stagingMessages
+        .filter((m) => m.role === 'user' && m.kind === 'question')
+        .map((m) => m.content.trim().toLowerCase())
+    );
+    return [
+      COPY.assistant.rejection.suggestions.why,
+      COPY.assistant.rejection.suggestions.whatToUpload,
+      COPY.assistant.rejection.suggestions.nonHuman
+    ].filter((s) => !asked.has(s.toLowerCase()));
+  }, [stagingError, stagingMessages]);
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -118,7 +123,7 @@ export function AssistantSheet() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={handleClose}
+            onClick={closeAssistant}
             aria-hidden="true"
           />
 
@@ -150,7 +155,7 @@ export function AssistantSheet() {
               }
               titleId={titleId}
               onModeChange={handleModeChange}
-              onClose={handleClose}
+              onClose={closeAssistant}
               lastEngine={lastEngine}
             />
 
@@ -217,6 +222,15 @@ export function AssistantSheet() {
                     </div>
                   ) : (
                     <div className="space-y-4">
+                      {stagingMessages.length > 0 && (
+                        <div className="space-y-3">
+                          {stagingMessages.map((message) => (
+                            <AssistantMessage key={message.id} message={message} />
+                          ))}
+                          {isStagingAssistantTyping && <TypingIndicator />}
+                        </div>
+                      )}
+
                       <div className="rounded-card border border-ink/10 bg-white p-4 space-y-2">
                         <h3 className="text-sm font-semibold text-ink">
                           {COPY.assistant.intakeInstructionTitle}
@@ -267,7 +281,24 @@ export function AssistantSheet() {
                     ariaLabel={COPY.assistant.inputStaging}
                   />
                 </>
-              ) : isExtractingPaper ? null : (
+              ) : isExtractingPaper ? null : stagingError ? (
+                <>
+                  <FaqSuggestions
+                    suggestions={rejectionSuggestions}
+                    onSelect={askStagingQuestion}
+                    disabled={isStagingAssistantTyping}
+                  />
+                  <AssistantComposer
+                    ref={inputRef}
+                    mode="ask"
+                    onAsk={askStagingQuestion}
+                    onAddPaper={addPaper}
+                    onFile={handleFile}
+                    placeholder={COPY.assistant.rejection.placeholder}
+                    ariaLabel={COPY.assistant.rejection.inputLabel}
+                  />
+                </>
+              ) : (
                 <AssistantComposer
                   ref={inputRef}
                   mode="upload"

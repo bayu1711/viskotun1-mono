@@ -26,6 +26,7 @@ import { answerFor } from '../utils/assistant';
 import { stripClinicalDisclaimer } from '../utils/disclaimer';
 import { isEdgeGemmaAvailable, queryEdgeGemma } from '../utils/edgeGemma';
 import { createId } from '../utils/id';
+import { answerForRejection } from '../utils/rejectionAssistant';
 import { clamp, toPercent } from '../utils/math';
 import {
   adherenceOf,
@@ -1433,20 +1434,6 @@ export function useRoutineState() {
               timestamp: nowLabel()
             }
           ]);
-          const targetId = activeProtocolIdRef.current || protocol?.id || '';
-          pushMessages(
-            targetId,
-            {
-              role: 'user',
-              kind: 'file',
-              content: fileName
-            },
-            {
-              role: 'ai',
-              kind: 'alert',
-              content: reason
-            }
-          );
           toast.error(reason);
           return { success: false, eligible: false, reason };
         }
@@ -1464,32 +1451,21 @@ export function useRoutineState() {
             timestamp: nowLabel()
           }
         ]);
-        const targetId = activeProtocolIdRef.current || protocol?.id || '';
-        pushMessages(
-          targetId,
-          {
-            role: 'user',
-            kind: 'file',
-            content: fileName
-          },
-          {
-            role: 'ai',
-            kind: 'alert',
-            content: errorMsg
-          }
-        );
         toast.error(errorMsg);
         return { success: false, eligible: false, reason: errorMsg };
       } finally {
         setIsExtractingPaper(false);
       }
     },
-    [protocol?.id, pushMessages]
+    []
   );
 
   const clearStagingError = useCallback(() => {
     setStagingError(null);
-  }, []);
+    if (!stagingProtocol) {
+      setStagingMessages([]);
+    }
+  }, [stagingProtocol]);
 
   const confirmStagingProtocol = useCallback(() => {
     if (!stagingProtocol) return;
@@ -1544,8 +1520,7 @@ export function useRoutineState() {
 
   const askStagingQuestion = useCallback(
     async (text: string) => {
-      if (!stagingProtocol) return;
-      const target = stagingProtocol;
+      if (!stagingProtocol && !stagingError) return;
       const userMsg: ChatMessage = {
         id: createId('msg'),
         role: 'user',
@@ -1555,6 +1530,70 @@ export function useRoutineState() {
       };
       setStagingMessages((prev) => [...prev, userMsg]);
       setIsStagingAssistantTyping(true);
+
+      if (!stagingProtocol && stagingError) {
+        try {
+          const res = await fetch('/api/assistant', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              question: text,
+              rejectionReason: stagingError,
+              rejectedFileName: extractingSourceName
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            if (data?.answer) {
+              setStagingMessages((prev) => [
+                ...prev,
+                {
+                  id: createId('msg'),
+                  role: 'ai',
+                  kind: 'answer',
+                  content: stripClinicalDisclaimer(data.answer),
+                  engine: data.engine ?? 'local-rules',
+                  source: data.source ?? COPY.assistant.rejection.source,
+                  timestamp: nowLabel()
+                }
+              ]);
+              return;
+            }
+          }
+
+          setStagingMessages((prev) => [
+            ...prev,
+            {
+              id: createId('msg'),
+              role: 'ai',
+              kind: 'answer',
+              content: answerForRejection(stagingError, text),
+              engine: 'local-rules',
+              source: COPY.assistant.rejection.source,
+              timestamp: nowLabel()
+            }
+          ]);
+        } catch {
+          setStagingMessages((prev) => [
+            ...prev,
+            {
+              id: createId('msg'),
+              role: 'ai',
+              kind: 'answer',
+              content: answerForRejection(stagingError, text),
+              engine: 'local-rules',
+              source: COPY.assistant.rejection.source,
+              timestamp: nowLabel()
+            }
+          ]);
+        } finally {
+          setIsStagingAssistantTyping(false);
+        }
+        return;
+      }
+
+      const target = stagingProtocol!;
 
       try {
         const canUseEdgeGemma = await isEdgeGemmaAvailable();
@@ -1646,7 +1685,7 @@ export function useRoutineState() {
         setIsStagingAssistantTyping(false);
       }
     },
-    [stagingProtocol]
+    [stagingProtocol, stagingError, extractingSourceName]
   );
 
   const toggleStagingExcludeStep = useCallback((stepId: string) => {
