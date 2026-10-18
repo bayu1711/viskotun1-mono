@@ -194,8 +194,11 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
           if (onEnd && isCurrent()) onEnd();
         };
 
-        utterance.onerror = () => {
+        utterance.onerror = (event) => {
           utteranceRef.current = null;
+          // A cancel is intentional; any other failure must not leave the coach waiting forever
+          const wasCancelled = event.error === 'interrupted' || event.error === 'canceled';
+          if (!wasCancelled && onEnd && isCurrent()) onEnd();
         };
 
         utteranceRef.current = utterance;
