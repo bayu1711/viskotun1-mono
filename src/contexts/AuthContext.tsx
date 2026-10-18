@@ -41,6 +41,11 @@ function formatFirebaseAuthError(err: unknown): Error {
         return new Error(COPY.auth.toastInvalidCredentials);
       case 'auth/too-many-requests':
         return new Error(COPY.auth.toastTooManyRequests);
+      case 'auth/unauthorized-domain':
+        return new Error('This domain is not authorized in Firebase. Please add it to Firebase Console -> Authentication -> Settings -> Authorized Domains.');
+      case 'auth/popup-closed-by-user':
+      case 'auth/cancelled-popup-request':
+        return new Error('Sign-in cancelled or popup closed.');
       default:
         break;
     }
@@ -154,43 +159,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const isTargetAdmin = Boolean(asAdmin || email.toLowerCase().includes('admin'));
       const { auth } = getFirebaseAuth();
 
-      if (auth) {
-        if (!password) {
-          throw new Error(COPY.auth.toastPasswordRequired);
-        }
-        try {
-          const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
-          const fbUser = credential.user;
-          const name = fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultClinicalUser;
-          const authenticatedUser: User = {
-            id: fbUser.uid,
-            name,
-            email: fbUser.email || email.trim(),
-            initials: deriveInitials(name, COPY.auth.initials.clinicalUser),
-            isGuest: false,
-            role: isTargetAdmin ? 'admin' : 'user',
-            createdAt: Date.now()
-          };
-          persistUser(authenticatedUser);
-          return;
-        } catch (err: unknown) {
-          throw formatFirebaseAuthError(err);
-        }
+      if (!auth) {
+        throw new Error('Authentication service is currently unavailable. Please reload the page.');
       }
 
-      // Evaluation fallback if Firebase client is unconfigured
-      const derivedName = email.split('@')[0].replace(/[._-]/g, ' ');
-      const formattedName = derivedName.charAt(0).toUpperCase() + derivedName.slice(1);
-      const fallbackUser: User = {
-        id: `usr-${Date.now()}`,
-        name: formattedName || COPY.auth.defaultClinicalUser,
-        email: email.trim(),
-        initials: deriveInitials(formattedName, COPY.auth.initials.clinicalUser),
-        isGuest: false,
-        role: isTargetAdmin ? 'admin' : 'user',
-        createdAt: Date.now()
-      };
-      persistUser(fallbackUser);
+      if (!password) {
+        throw new Error(COPY.auth.toastPasswordRequired);
+      }
+
+      try {
+        const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
+        const fbUser = credential.user;
+        const name = fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultClinicalUser;
+        const authenticatedUser: User = {
+          id: fbUser.uid,
+          name,
+          email: fbUser.email || email.trim(),
+          initials: deriveInitials(name, COPY.auth.initials.clinicalUser),
+          isGuest: false,
+          role: isTargetAdmin ? 'admin' : 'user',
+          createdAt: Date.now()
+        };
+        persistUser(authenticatedUser);
+        return;
+      } catch (err: unknown) {
+        throw formatFirebaseAuthError(err);
+      }
     },
     [persistUser]
   );
@@ -198,39 +192,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithGoogle = useCallback(async () => {
     const { auth, googleProvider } = getFirebaseAuth();
 
-    if (auth && googleProvider) {
-      try {
-        const result = await signInWithPopup(auth, googleProvider);
-        const fbUser = result.user;
-        const name = fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultGoogleUser;
-        const isAdminRole = Boolean(fbUser.email?.toLowerCase().includes('admin'));
-        const authenticatedUser: User = {
-          id: fbUser.uid,
-          name,
-          email: fbUser.email || '',
-          initials: deriveInitials(name, COPY.auth.initials.googleUser),
-          isGuest: false,
-          role: isAdminRole ? 'admin' : 'user',
-          createdAt: Date.now()
-        };
-        persistUser(authenticatedUser);
-        return;
-      } catch (err: unknown) {
-        console.warn('[AuthContext] Firebase popup closed or failed, using evaluation profile:', err);
-      }
+    if (!auth || !googleProvider) {
+      throw new Error('Google authentication service is currently unavailable. Please reload the page.');
     }
 
-    // Evaluation profile fallback if Firebase keys are unconfigured
-    const googleUser: User = {
-      id: `usr-google-${Date.now()}`,
-      name: COPY.auth.googleResearcher,
-      email: 'researcher@gmail.com',
-      initials: COPY.auth.initials.googleResearcher,
-      isGuest: false,
-      role: 'user',
-      createdAt: Date.now()
-    };
-    persistUser(googleUser);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const fbUser = result.user;
+      const name = fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultGoogleUser;
+      const isAdminRole = Boolean(fbUser.email?.toLowerCase().includes('admin'));
+      const authenticatedUser: User = {
+        id: fbUser.uid,
+        name,
+        email: fbUser.email || '',
+        initials: deriveInitials(name, COPY.auth.initials.googleUser),
+        isGuest: false,
+        role: isAdminRole ? 'admin' : 'user',
+        createdAt: Date.now()
+      };
+      persistUser(authenticatedUser);
+      return;
+    } catch (err: unknown) {
+      throw formatFirebaseAuthError(err);
+    }
   }, [persistUser]);
 
   const signupWithEmail = useCallback(
@@ -238,50 +222,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const isTargetAdmin = Boolean(asAdmin || email.toLowerCase().includes('admin'));
       const { auth } = getFirebaseAuth();
 
-      if (auth) {
-        if (!password) {
-          throw new Error(COPY.auth.toastPasswordRequired);
-        }
-        try {
-          const credential = await createUserWithEmailAndPassword(auth, email.trim(), password);
-          const fbUser = credential.user;
-          const trimmedName = name.trim();
-          if (trimmedName) {
-            try {
-              await updateProfile(fbUser, { displayName: trimmedName });
-            } catch (profileErr) {
-              console.warn('[AuthContext] Could not update displayName in Firebase profile:', profileErr);
-            }
-          }
-          const displayName = trimmedName || fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultClinicalUser;
-          const authenticatedUser: User = {
-            id: fbUser.uid,
-            name: displayName,
-            email: fbUser.email || email.trim(),
-            initials: deriveInitials(displayName, COPY.auth.initials.clinicalUser),
-            isGuest: false,
-            role: isTargetAdmin ? 'admin' : 'user',
-            createdAt: Date.now()
-          };
-          persistUser(authenticatedUser);
-          return;
-        } catch (err: unknown) {
-          throw formatFirebaseAuthError(err);
-        }
+      if (!auth) {
+        throw new Error('Authentication service is currently unavailable. Please reload the page.');
       }
 
-      // Evaluation fallback if Firebase client is unconfigured
-      const trimmedName = name.trim() || COPY.auth.defaultInvestigator;
-      const newUser: User = {
-        id: `usr-${Date.now()}`,
-        name: trimmedName,
-        email: email.trim(),
-        initials: deriveInitials(trimmedName, COPY.auth.initials.investigator),
-        isGuest: false,
-        role: isTargetAdmin ? 'admin' : 'user',
-        createdAt: Date.now()
-      };
-      persistUser(newUser);
+      if (!password) {
+        throw new Error(COPY.auth.toastPasswordRequired);
+      }
+
+      try {
+        const credential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+        const fbUser = credential.user;
+        const trimmedName = name.trim();
+        if (trimmedName) {
+          try {
+            await updateProfile(fbUser, { displayName: trimmedName });
+          } catch (profileErr) {
+            console.warn('[AuthContext] Could not update displayName in Firebase profile:', profileErr);
+          }
+        }
+        const displayName = trimmedName || fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultClinicalUser;
+        const authenticatedUser: User = {
+          id: fbUser.uid,
+          name: displayName,
+          email: fbUser.email || email.trim(),
+          initials: deriveInitials(displayName, COPY.auth.initials.clinicalUser),
+          isGuest: false,
+          role: isTargetAdmin ? 'admin' : 'user',
+          createdAt: Date.now()
+        };
+        persistUser(authenticatedUser);
+        return;
+      } catch (err: unknown) {
+        throw formatFirebaseAuthError(err);
+      }
     },
     [persistUser]
   );

@@ -26,20 +26,28 @@ export function getFirebaseConfig(): FirebaseRuntimeConfig {
     return window.__FIREBASE_CONFIG__;
   }
 
+  const projectId =
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+    process.env.GOOGLE_CLOUD_PROJECT ||
+    'gen-lang-client-0064688276';
+
   return {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    apiKey:
+      process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
+      'AIzaSyB6edKU-gKOcCliCC3MrBJCGIhdkhWJcPY',
     authDomain:
       process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
-      `${process.env.GOOGLE_CLOUD_PROJECT || 'gen-lang-client-0064688276'}.firebaseapp.com`,
-    projectId:
-      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
-      process.env.GOOGLE_CLOUD_PROJECT ||
-      'gen-lang-client-0064688276',
+      `${projectId}.firebaseapp.com`,
+    projectId,
     storageBucket:
       process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
-      `${process.env.GOOGLE_CLOUD_PROJECT || 'gen-lang-client-0064688276'}.firebasestorage.app`,
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
+      `${projectId}.firebasestorage.app`,
+    messagingSenderId:
+      process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ||
+      '536575310594',
+    appId:
+      process.env.NEXT_PUBLIC_FIREBASE_APP_ID ||
+      '1:536575310594:web:2252e378e1e4dbabe1a01b'
   };
 }
 
