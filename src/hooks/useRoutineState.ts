@@ -8,6 +8,7 @@ import { PRECALIBRATED_SAMPLE_PROTOCOLS, SAMPLE_PAPERS, type SamplePaper } from 
 import type {
   ChatMessage,
   DataCollectionField,
+  FeedbackLog,
   MorphingDataLog,
   NewChatMessage,
   PaperUploadResult,
@@ -37,9 +38,10 @@ import {
   resolveDataCollectionSpec,
   resolveFeedbackMetric
 } from '../utils/routineMetrics';
-import { nowLabel } from '../utils/time';
+import { getDaysDifference, getLocalTodayDateString, getMsUntilNextLocalMidnight, nowLabel } from '../utils/time';
 
 function createInitialRuntime(items: Routine[]): Record<string, RoutineRuntime> {
+  const todayStr = getLocalTodayDateString();
   return Object.fromEntries(
     items.map((item) => {
       const logs = item.initialFeedbackLogs ?? [];
@@ -53,7 +55,8 @@ function createInitialRuntime(items: Routine[]): Record<string, RoutineRuntime> 
           morphingLogs: morphLogs,
           messages: item.initialMessages,
           escalationPaused: false,
-          assistantTyping: false
+          assistantTyping: false,
+          lastActiveDate: item.lastActiveDate || todayStr
         }
       ];
     })
@@ -110,6 +113,7 @@ export function useRoutineState() {
   activeProtocolIdRef.current = activeProtocolId;
   const runtimeRef = useRef(runtime);
   runtimeRef.current = runtime;
+  const rolloverTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Staging candidate paper for pre-confirmation review & discussion
   const [stagingProtocol, setStagingProtocol] = useState<Protocol | null>(null);
@@ -396,7 +400,42 @@ export function useRoutineState() {
                 }
 
                 if (data.runtime && typeof data.runtime === 'object') {
-                  setRuntime((prev) => ({ ...data.runtime, ...prev }));
+                  setRuntime((prev) => {
+                    const merged: Record<string, ProtocolRuntime> = { ...prev };
+                    for (const [id, remoteRt] of Object.entries(data.runtime)) {
+                      const remote = remoteRt as ProtocolRuntime;
+                      if (!merged[id]) {
+                        merged[id] = remote;
+                      } else {
+                        const local = merged[id];
+                        // Deduplicate feedback logs by ID
+                        const seenLogIds = new Set((remote.feedbackLogs || []).map((l) => l.id));
+                        const extraLocalLogs = (local.feedbackLogs || []).filter((l) => !seenLogIds.has(l.id));
+                        const mergedFeedback = [...(remote.feedbackLogs || []), ...extraLocalLogs];
+
+                        // Deduplicate morphing logs by ID
+                        const seenMorphIds = new Set((remote.morphingLogs || []).map((m) => m.id));
+                        const extraLocalMorph = (local.morphingLogs || []).filter((m) => !seenMorphIds.has(m.id));
+                        const mergedMorph = [...(remote.morphingLogs || []), ...extraLocalMorph];
+
+                        // Prefer remote setsDone if local is empty or remote has records
+                        const localSetsCount = Object.keys(local.setsDone || {}).length;
+                        const remoteSetsCount = Object.keys(remote.setsDone || {}).length;
+                        const resolvedSetsDone = remoteSetsCount > 0 && localSetsCount === 0 ? remote.setsDone : local.setsDone;
+
+                        merged[id] = {
+                          ...local,
+                          ...remote,
+                          setsDone: resolvedSetsDone,
+                          feedbackLogs: mergedFeedback,
+                          morphingLogs: mergedMorph,
+                          messages: remote.messages?.length ? remote.messages : local.messages,
+                          lastActiveDate: remote.lastActiveDate || local.lastActiveDate
+                        };
+                      }
+                    }
+                    return merged;
+                  });
                 }
               }
             } else {
@@ -518,6 +557,7 @@ export function useRoutineState() {
         currentDay: 1,
         dayHistory: [],
         streak: 0,
+        lastActiveDate: getLocalTodayDateString(),
         initialSetsDone: {},
         initialFeedbackLogs: [],
         initialMorphingLogs: []
@@ -528,6 +568,7 @@ export function useRoutineState() {
         excludedStepIds: cleanProtocol.initialExcludedStepIds ?? [],
         feedbackLogs: [],
         morphingLogs: [],
+        lastActiveDate: getLocalTodayDateString(),
         messages: cleanProtocol.initialMessages?.length
           ? stampSeedMessages(cleanProtocol.initialMessages)
           : [
@@ -809,6 +850,253 @@ export function useRoutineState() {
       content: COPY.assistant.confirmLogged(protocol.currentDay, latestScore)
     });
   }, [protocol, state.excludedStepIds, state.feedbackLogs, updateRuntime, pushMessages]);
+
+  const advanceToNextDay = useCallback(() => {
+    if (!protocol) return;
+    if (protocol.currentDay >= protocol.totalDays) {
+      toast.info(`Already at maximum Day ${protocol.totalDays}`);
+      return;
+    }
+
+    const prevDay = protocol.currentDay;
+    const nextDay = prevDay + 1;
+    const fraction = completionOf(protocol, state.setsDone, state.excludedStepIds);
+    const nextHistory = [...(protocol.dayHistory || [])];
+    // Record current day's progress (at least 1.0 when manually advancing)
+    nextHistory[prevDay - 1] = Math.max(fraction, 1);
+    const nextStreak = (protocol.streak || 0) + 1;
+    const todayStr = getLocalTodayDateString();
+
+    setProtocolList((prev) =>
+      prev.map((p) =>
+        p.id === protocol.id
+          ? {
+              ...p,
+              currentDay: nextDay,
+              streak: nextStreak,
+              dayHistory: nextHistory,
+              lastActiveDate: todayStr
+            }
+          : p
+      )
+    );
+
+    updateRuntime(protocol.id, (prev) => ({
+      ...prev,
+      setsDone: {},
+      lastActiveDate: todayStr
+    }));
+
+    pushMessages(protocol.id, {
+      role: 'ai',
+      kind: 'confirmation',
+      content: COPY.assistant.dayAdvancedConfirmation(prevDay, nextDay)
+    });
+
+    toast.success(COPY.dayActions.advancedToast(nextDay));
+  }, [protocol, state.setsDone, state.excludedStepIds, updateRuntime, pushMessages]);
+
+  const simulatePastDays = useCallback(
+    (daysCount = 4) => {
+      if (!protocol) return;
+      const count = Math.min(daysCount, protocol.totalDays - 1);
+      const targetDay = count + 1;
+      const history = Array.from({ length: count }, () => 1.0);
+      const todayStr = getLocalTodayDateString();
+
+      const pastFeedbackLogs: FeedbackLog[] = [];
+      const pastMorphingLogs: MorphingDataLog[] = [];
+
+      if (protocol.id === 'achilles') {
+        const achNotes = [
+          'Initial eccentric loading, mild morning tendon tenderness',
+          'Soreness manageable during lowering phase',
+          'Slight ache after bent-knee drops',
+          'Discomfort easing, full eccentric sets completed'
+        ];
+        const achScores = [2, 2, 3, 2];
+        for (let i = 1; i <= count; i++) {
+          const score = achScores[(i - 1) % achScores.length];
+          const note = achNotes[(i - 1) % achNotes.length];
+          pastFeedbackLogs.push({
+            id: createId('log'),
+            day: i,
+            score,
+            note,
+            loggedAt: `Day ${i} · 8:15 AM`
+          });
+          pastMorphingLogs.push({
+            id: createId('morph'),
+            fieldId: 'ach-pain-vas',
+            day: i,
+            value: score,
+            loggedAt: `Day ${i} · 8:15 AM`
+          });
+        }
+      } else if (protocol.id === 'hair-loss') {
+        const hairNotes = [
+          'Scalp tolerated 1.5mm dermaroller with mild pinkness',
+          'Minoxidil applied 2x daily without irritation',
+          'Mild tingling sensation, scalp clear',
+          'Regimen well tolerated, adhering strictly to timing'
+        ];
+        const hairScores = [1, 1, 2, 1];
+        for (let i = 1; i <= count; i++) {
+          const score = hairScores[(i - 1) % hairScores.length];
+          const note = hairNotes[(i - 1) % hairNotes.length];
+          pastFeedbackLogs.push({
+            id: createId('log'),
+            day: i,
+            score,
+            note,
+            loggedAt: `Day ${i} · 8:00 AM`
+          });
+          pastMorphingLogs.push({
+            id: createId('morph'),
+            fieldId: 'hair-irritation-scale',
+            day: i,
+            value: score,
+            loggedAt: `Day ${i} · 8:00 AM`
+          });
+        }
+      } else {
+        for (let i = 1; i <= count; i++) {
+          pastFeedbackLogs.push({
+            id: createId('log'),
+            day: i,
+            score: 1,
+            note: `Completed Day ${i} protocol as prescribed`,
+            loggedAt: `Day ${i} · 8:00 AM`
+          });
+        }
+      }
+
+      setProtocolList((prev) =>
+        prev.map((p) =>
+          p.id === protocol.id
+            ? {
+                ...p,
+                currentDay: targetDay,
+                streak: count,
+                dayHistory: history,
+                lastActiveDate: todayStr
+              }
+            : p
+        )
+      );
+
+      updateRuntime(protocol.id, (prev) => ({
+        ...prev,
+        setsDone: {},
+        feedbackLogs: pastFeedbackLogs,
+        morphingLogs: pastMorphingLogs,
+        lastActiveDate: todayStr
+      }));
+
+      pushMessages(protocol.id, {
+        role: 'ai',
+        kind: 'confirmation',
+        content: COPY.assistant.simulatedHistoryConfirmation(count, targetDay)
+      });
+
+      toast.success(COPY.dayActions.simulatedToast(count));
+    },
+    [protocol, updateRuntime, pushMessages]
+  );
+
+  const checkMidnightRollover = useCallback(() => {
+    const todayStr = getLocalTodayDateString();
+
+    setProtocolList((currentProtocols) => {
+      let hasAnyChanges = false;
+      const updated = currentProtocols.map((p) => {
+        if (!p.lastActiveDate) {
+          hasAnyChanges = true;
+          return { ...p, lastActiveDate: todayStr };
+        }
+
+        const daysPassed = getDaysDifference(p.lastActiveDate, todayStr);
+        if (daysPassed <= 0) return p;
+
+        hasAnyChanges = true;
+        const currentRt = runtimeRef.current[p.id];
+        const currentSets = currentRt?.setsDone ?? {};
+        const excluded = currentRt?.excludedStepIds ?? p.initialExcludedStepIds ?? [];
+        const todayFraction = completionOf(p, currentSets, excluded);
+
+        const nextHistory = [...(p.dayHistory || [])];
+        if (p.currentDay > 0) {
+          nextHistory[p.currentDay - 1] = todayFraction;
+        }
+        for (let d = p.currentDay + 1; d < p.currentDay + daysPassed; d++) {
+          if (d <= p.totalDays) {
+            nextHistory[d - 1] = 0;
+          }
+        }
+
+        const nextDay = Math.min(p.totalDays, p.currentDay + daysPassed);
+        const streakContinues = todayFraction >= 0.8 && daysPassed === 1;
+        const nextStreak = streakContinues ? (p.streak || 0) + 1 : 0;
+
+        updateRuntime(p.id, (prev) => ({
+          ...prev,
+          setsDone: {},
+          lastActiveDate: todayStr
+        }));
+
+        pushMessages(p.id, {
+          role: 'ai',
+          kind: 'confirmation',
+          content: COPY.assistant.dayRolloverNotification(nextDay)
+        });
+
+        return {
+          ...p,
+          currentDay: nextDay,
+          streak: nextStreak,
+          dayHistory: nextHistory,
+          lastActiveDate: todayStr
+        };
+      });
+
+      return hasAnyChanges ? updated : currentProtocols;
+    });
+  }, [updateRuntime, pushMessages]);
+
+  useEffect(() => {
+    if (!hasHydrated) return;
+
+    checkMidnightRollover();
+
+    function scheduleNextMidnight() {
+      const ms = getMsUntilNextLocalMidnight();
+      if (rolloverTimerRef.current) {
+        clearTimeout(rolloverTimerRef.current);
+      }
+      rolloverTimerRef.current = setTimeout(() => {
+        checkMidnightRollover();
+        scheduleNextMidnight();
+      }, ms);
+    }
+
+    scheduleNextMidnight();
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible') {
+        checkMidnightRollover();
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      if (rolloverTimerRef.current) {
+        clearTimeout(rolloverTimerRef.current);
+        rolloverTimerRef.current = null;
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [hasHydrated, checkMidnightRollover]);
 
   const logFeedback = useCallback(
     (score: number, note: string) => {
@@ -1521,6 +1809,9 @@ export function useRoutineState() {
       decrementSet,
       toggleStep,
       markTodayComplete,
+      advanceToNextDay,
+      simulatePastDays,
+      isAdmin: Boolean(isAdmin),
       logFeedback,
       logMorphingData,
       askQuestion,
@@ -1586,6 +1877,9 @@ export function useRoutineState() {
       decrementSet,
       toggleStep,
       markTodayComplete,
+      advanceToNextDay,
+      simulatePastDays,
+      isAdmin,
       logFeedback,
       logMorphingData,
       askQuestion,
