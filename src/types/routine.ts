@@ -140,6 +140,8 @@ export interface DataCollectionField {
   unit?: string;
   min?: number;
   max?: number;
+  targetMin?: number;
+  targetMax?: number;
   step?: number;
   options?: string[];
   instructions?: string;

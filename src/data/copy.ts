@@ -1016,6 +1016,14 @@ export const COPY = {
       notScheduledBiomarkerTooltip: 'Metric not scheduled for today',
       scheduledTodayBadge: 'Scheduled Today',
       notScheduledBadge: 'Not Scheduled Today',
+      noReadingsBadge: 'No readings yet',
+      emptyBiomarkerTitle: 'No biomarker readings logged yet',
+      emptyBiomarkerBody: (label: string) =>
+        `Log your first ${label.toLowerCase()} reading to track your trend against the study reference zone.`,
+      logFirstReading: 'Log reading',
+      missingBaselinePhoto: 'No Day 1 baseline photo logged yet',
+      missingMilestonePhoto: (day: number) => `No Day ${day} milestone photo logged yet`,
+      uploadPhotoPrompt: 'Log a clinical photo on its scheduled milestone day to compare progression.',
       baselineMockupSvgText: 'Day 1 baseline · vertex thinning',
       progressionMockupSvgText: 'Day 28 milestone · increased terminal density',
       baselineMockupSvg: (text: string) =>
