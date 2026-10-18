@@ -6,6 +6,7 @@ import { findCalibratedRoutine } from './calibratedRoutines';
 import { generateFallbackRoutine } from './fallbackRoutines';
 import { classifyPaperSource, containsTerm } from './gatekeeper';
 import { getEffectiveGuardrails } from './guardrailLedger';
+import { validateAndRegisterProtocolWidgets } from './widgetRegistry';
 
 export interface ExtractInput {
   file?: File | null;
@@ -51,6 +52,7 @@ Your role is to transform dense peer-reviewed research papers into executable, a
    - Functional timed performance (reaction time, balance hold) -> type: "timer", unit: "seconds"
    - Validated categorical criteria (sleepiness scale, stool scale) -> type: "multichoice", with options
    - Symptoms / perceived discomfort -> type: "scale", min: 0, max: 10, with escalationThreshold
+   - If the paper requires a specialized measurement widget not covered by ["scale", "numeric", "photo", "timer", "multichoice", "boolean"] (e.g. breath-pacer, body-pain-map, goniometer, composite-index), include a "proposedWidget" object on the field with { "requestedType": string, "title": string, "description": string, "unit": string, "min": number, "max": number, "step": number } so it can be validated with human oversight.
 
 ### OUTPUT JSON FORMAT:
 Return a JSON object conforming strictly to:
@@ -304,11 +306,13 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
           ]
         };
 
+        const validatedProtocol = await validateAndRegisterProtocolWidgets(protocol);
+
         return {
           success: true,
           eligible: true,
-          routine: protocol,
-          protocol,
+          routine: validatedProtocol,
+          protocol: validatedProtocol,
           source: sourceName
         };
       }
@@ -318,7 +322,9 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
   }
 
   // Development / fallback mode: provides instant, calibrated routine extraction
-  const fallbackRoutine = generateFallbackRoutine(sourceName);
+  const fallbackRoutine = await validateAndRegisterProtocolWidgets(
+    generateFallbackRoutine(sourceName)
+  );
   if (fallbackRoutine.feedbackMetric) {
     fallbackRoutine.feedbackMetric = {
       ...fallbackRoutine.feedbackMetric,

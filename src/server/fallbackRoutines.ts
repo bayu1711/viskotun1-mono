@@ -565,6 +565,48 @@ export function generateFallbackRoutine(source: string): Routine {
       escalationThreshold: 4,
       escalationMessage: COPY.safety.baselineEscalationAlert
     },
+    dataCollectionSpec: [
+      {
+        id: `${slug}-custom-endpoint`,
+        name: `${cleanTitle.split(' ').slice(0, 2).join(' ')} Composite Index`,
+        label: `Study-Specific ${cleanTitle.split(' ').slice(0, 2).join(' ')} Instrument`,
+        type: 'numeric',
+        frequency: 'daily',
+        unit: 'index',
+        min: 0,
+        max: 100,
+        step: 5,
+        instructions: `Record composite study endpoint prescribed in ${cleanTitle}.`,
+        proposedWidget: {
+          id: `widget_${slug}_custom_endpoint`,
+          requestedType: 'composite-biomarker-instrument',
+          title: `${cleanTitle.split(' ').slice(0, 2).join(' ')} Interactive Calibrator`,
+          description: `Bespoke multi-parameter calibration widget synthesized from ${cleanTitle} study methodology.`,
+          status: 'pending_review',
+          protocolId: slug,
+          paperTitle: cleanTitle,
+          fieldId: `${slug}-custom-endpoint`,
+          unit: 'index pts',
+          min: 0,
+          max: 100,
+          step: 5,
+          submittedAt: new Date().toISOString()
+        }
+      },
+      {
+        id: `${slug}-tolerability-scale`,
+        name: COPY.fallbackProtocol.metricName,
+        label: COPY.fallbackProtocol.metricLabel,
+        type: 'scale',
+        frequency: 'daily',
+        min: 0,
+        max: 10,
+        step: 1,
+        escalationThreshold: 4,
+        escalationMessage: COPY.safety.baselineEscalationAlert
+      }
+    ],
+    initialMorphingLogs: [],
     initialFeedbackLogs: [],
     initialMessages: [
       {

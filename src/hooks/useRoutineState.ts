@@ -12,6 +12,7 @@ import type {
   MorphingDataLog,
   NewChatMessage,
   PaperUploadResult,
+  ProposedWidgetSpec,
   Protocol,
   ProtocolRuntime,
   ProtocolStep,
@@ -1789,6 +1790,27 @@ export function useRoutineState() {
     [protocol]
   );
 
+  const approveProposedWidget = useCallback((proposal: ProposedWidgetSpec) => {
+    const applyApproval = (p: Protocol): Protocol => {
+      if (!p.dataCollectionSpec) return p;
+      const matches = p.dataCollectionSpec.some(
+        (f) => f.proposedWidget?.id === proposal.id || (p.id === proposal.protocolId && f.id === proposal.fieldId)
+      );
+      if (!matches) return p;
+      return {
+        ...p,
+        dataCollectionSpec: p.dataCollectionSpec.map((f) =>
+          f.proposedWidget?.id === proposal.id || (p.id === proposal.protocolId && f.id === proposal.fieldId)
+            ? { ...f, proposedWidget: { ...proposal, status: 'approved' } }
+            : f
+        )
+      };
+    };
+
+    setProtocolList((prev) => prev.map(applyApproval));
+    setStagingProtocol((prev) => (prev ? applyApproval(prev) : null));
+  }, []);
+
   return useMemo(
     () => ({
       routines: summaries,
@@ -1871,6 +1893,7 @@ export function useRoutineState() {
       addProtocol,
       resetToDefaults,
       updateGuardrailThreshold,
+      approveProposedWidget,
       hasHydrated
     }),
     [
@@ -1938,6 +1961,7 @@ export function useRoutineState() {
       addProtocol,
       resetToDefaults,
       updateGuardrailThreshold,
+      approveProposedWidget,
       hasHydrated
     ]
   );

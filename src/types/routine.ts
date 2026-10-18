@@ -84,13 +84,36 @@ export interface MissingDataFlag {
   sourceGuideline?: string;
 }
 
-export type WidgetType =
-  | 'scale'
-  | 'numeric'
-  | 'photo'
-  | 'timer'
-  | 'multichoice'
-  | 'boolean';
+export const SUPPORTED_WIDGET_TYPES = [
+  'scale',
+  'numeric',
+  'photo',
+  'timer',
+  'multichoice',
+  'boolean'
+] as const;
+
+export type WidgetType = (typeof SUPPORTED_WIDGET_TYPES)[number];
+
+export type ProposedWidgetStatus = 'pending_review' | 'approved';
+
+export interface ProposedWidgetSpec {
+  id: string;
+  requestedType: string;
+  title: string;
+  description: string;
+  status: ProposedWidgetStatus;
+  protocolId?: string;
+  paperTitle?: string;
+  fieldId?: string;
+  unit?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  options?: string[];
+  submittedAt: string;
+  approvedAt?: string;
+}
 
 /**
  * Who owns an escalation message. 'policy' messages are replaced when the guardrail ledger
@@ -116,6 +139,7 @@ export interface DataCollectionField {
   escalationThreshold?: number;
   escalationMessage?: string;
   escalationSource?: EscalationSource;
+  proposedWidget?: ProposedWidgetSpec;
 }
 
 export interface MorphingDataLog {

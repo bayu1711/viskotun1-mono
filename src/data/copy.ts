@@ -927,6 +927,13 @@ export const COPY = {
       scale: {
         minimalSuffix: '· minimal',
         severeSuffix: '· severe'
+      },
+      custom: {
+        pendingNotice: 'A New Widget! Viskotu will have this added iN few hours with human oversight!',
+        pendingSubtext:
+          'You can continue tracking with the baseline control below. Once confirmed by clinical oversight, the bespoke AI-generated widget will automatically render here.',
+        approvedBadge: 'AI-Generated Widget · Human Verified',
+        proposedTypeLabel: (type: string) => `Synthesized UI: ${type}`
       }
     },
     milestone: {
@@ -1002,6 +1009,14 @@ export const COPY = {
     loadReductionDisplay: (reduction: number) => `${reduction}%`,
     bannedLabel: 'Automated Gatekeeper Banned Criteria',
     bannedDesc: 'Studies matching these keywords are immediately rejected by Gemini',
+    pendingWidgetsLabel: 'AI Widget Oversight Queue',
+    pendingWidgetsDesc:
+      'Confirm AI-generated widgets synthesized for novel study endpoints to inject them into the database and render them for users.',
+    noPendingWidgets: 'No pending custom widgets awaiting human confirmation.',
+    approveWidgetButton: 'Confirm & Inject UI',
+    approvedWidgetStatus: 'Confirmed & Live',
+    toastWidgetApproved: (title: string) => `Confirmed & injected "${title}" widget for user frontend`,
+    toastWidgetApproveError: 'Failed to confirm AI widget',
     syncActive: 'Live Cloud Firestore sync active',
     syncFallback: (status: string) => `Cloud Firestore ${status} (using hot memory ledger)`,
     resetBaseline: 'Reset baseline',
@@ -1024,6 +1039,13 @@ export const COPY = {
       updateError: 'Failed to update guardrail policy',
       resetSuccess: 'Guardrail policy ledger reset to baseline clinical standards',
       resetError: 'Failed to reset guardrail policy'
+    },
+    widgets: {
+      proposalIdRequired: 'Widget proposal ID is required',
+      notFound: 'Widget proposal not found',
+      approveSuccess: 'AI widget confirmed and injected into database',
+      approveError: 'Failed to confirm AI widget proposal',
+      fetchError: 'Failed to retrieve AI widget proposals'
     },
     assistant: {
       questionRequired: 'Question is required',

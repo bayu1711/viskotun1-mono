@@ -1,24 +1,30 @@
 'use client';
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import CloudDoneOutlinedIcon from '@mui/icons-material/CloudDoneOutlined';
 import CloudOffOutlinedIcon from '@mui/icons-material/CloudOffOutlined';
 import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
+import { toast } from 'sonner';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePolicyLedger } from '../../contexts/PolicyLedgerContext';
+import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
 import { COPY } from '../../data/copy';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
+import type { ProposedWidgetSpec } from '../../types/routine';
+import { AIIcon } from '../ui/AIIcon';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 import { PillButton } from '../ui/PillButton';
 
 export function PolicyLedgerDrawer() {
   const { isAdmin } = useAuth();
+  const { dataCollectionSpec, stagingProtocol, approveProposedWidget } = useRoutine();
   const {
     policy,
     isLiveFirestore,
@@ -33,6 +39,8 @@ export function PolicyLedgerDrawer() {
   const [threshold, setThreshold] = useState(4);
   const [loadReduction, setLoadReduction] = useState(20);
   const [hasChanges, setHasChanges] = useState(false);
+  const [remoteProposals, setRemoteProposals] = useState<ProposedWidgetSpec[]>([]);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (policy) {
@@ -41,6 +49,40 @@ export function PolicyLedgerDrawer() {
       setHasChanges(false);
     }
   }, [policy]);
+
+  useEffect(() => {
+    if (!isDrawerOpen) return;
+    let active = true;
+    fetch('/api/admin/widgets')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && Array.isArray(data?.proposals)) {
+          setRemoteProposals(data.proposals);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [isDrawerOpen]);
+
+  const widgetProposals = useMemo(() => {
+    const map = new Map<string, ProposedWidgetSpec>();
+    for (const p of remoteProposals) {
+      map.set(p.id, p);
+    }
+    for (const field of dataCollectionSpec ?? []) {
+      if (field.proposedWidget) {
+        map.set(field.proposedWidget.id, field.proposedWidget);
+      }
+    }
+    for (const field of stagingProtocol?.dataCollectionSpec ?? []) {
+      if (field.proposedWidget) {
+        map.set(field.proposedWidget.id, field.proposedWidget);
+      }
+    }
+    return Array.from(map.values());
+  }, [remoteProposals, dataCollectionSpec, stagingProtocol]);
 
   const panelRef = useRef<HTMLDivElement>(null);
   useDialogA11y(panelRef, { open: isDrawerOpen, onClose: closePolicyDrawer });
@@ -53,6 +95,45 @@ export function PolicyLedgerDrawer() {
   const handleReductionChange = (val: number) => {
     setLoadReduction(val);
     setHasChanges(true);
+  };
+
+  const handleApproveWidget = async (proposal: ProposedWidgetSpec) => {
+    try {
+      setApprovingId(proposal.id);
+      const res = await fetch('/api/admin/widgets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ proposalId: proposal.id })
+      });
+      const approvedSpec: ProposedWidgetSpec = {
+        ...proposal,
+        status: 'approved',
+        approvedAt: new Date().toISOString()
+      };
+      if (res.ok) {
+        const data = await res.json();
+        const resolved = data?.proposal ?? approvedSpec;
+        setRemoteProposals((prev) =>
+          prev.some((p) => p.id === resolved.id)
+            ? prev.map((p) => (p.id === resolved.id ? resolved : p))
+            : [resolved, ...prev]
+        );
+        approveProposedWidget(resolved);
+      } else {
+        // Still apply to client session if proposal originated in local storage
+        setRemoteProposals((prev) =>
+          prev.some((p) => p.id === approvedSpec.id)
+            ? prev.map((p) => (p.id === approvedSpec.id ? approvedSpec : p))
+            : [approvedSpec, ...prev]
+        );
+        approveProposedWidget(approvedSpec);
+      }
+      toast.success(COPY.policyLedger.toastWidgetApproved(proposal.title));
+    } catch {
+      toast.error(COPY.policyLedger.toastWidgetApproveError);
+    } finally {
+      setApprovingId(null);
+    }
   };
 
   const handleSave = async () => {
@@ -219,6 +300,75 @@ export function PolicyLedgerDrawer() {
                     </span>
                   ))}
                 </div>
+              </div>
+
+              {/* AI Widget Oversight Queue */}
+              <div className="rounded-card border border-ink/10 bg-white p-4 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="flex items-center gap-1.5 text-sm font-medium text-ink">
+                      <AIIcon size="xs" />
+                      <span>{COPY.policyLedger.pendingWidgetsLabel}</span>
+                    </p>
+                    <p className="mt-0.5 text-xs text-ink/60">
+                      {COPY.policyLedger.pendingWidgetsDesc}
+                    </p>
+                  </div>
+                </div>
+
+                {widgetProposals.length === 0 ? (
+                  <p className="rounded-tile bg-canvas px-3 py-2.5 text-xs text-ink/60">
+                    {COPY.policyLedger.noPendingWidgets}
+                  </p>
+                ) : (
+                  <ul className="space-y-2.5">
+                    {widgetProposals.map((proposal) => {
+                      const isApproved = proposal.status === 'approved';
+                      const isApproving = approvingId === proposal.id;
+                      return (
+                        <li
+                          key={proposal.id}
+                          className="flex flex-col gap-2.5 rounded-tile border border-ink/10 bg-canvas p-3 sm:flex-row sm:items-center sm:justify-between"
+                        >
+                          <div className="min-w-0 flex-1 space-y-0.5">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span className="text-xs font-semibold text-ink">
+                                {proposal.title}
+                              </span>
+                              <span className="rounded-full border border-ink/15 bg-white px-2 py-0.5 font-mono text-3xs text-ink/70">
+                                {proposal.requestedType}
+                              </span>
+                            </div>
+                            {proposal.paperTitle && (
+                              <p className="truncate text-2xs text-ink/60">
+                                {proposal.paperTitle}
+                              </p>
+                            )}
+                            <p className="text-2xs text-ink/70">{proposal.description}</p>
+                          </div>
+
+                          <div className="shrink-0">
+                            {isApproved ? (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-mint px-2.5 py-1 text-2xs font-semibold text-ink">
+                                <Icon icon={CheckIcon} size="xs" />
+                                {COPY.policyLedger.approvedWidgetStatus}
+                              </span>
+                            ) : (
+                              <PillButton
+                                size="sm"
+                                variant="primary"
+                                disabled={isApproving}
+                                onClick={() => handleApproveWidget(proposal)}
+                              >
+                                {COPY.policyLedger.approveWidgetButton}
+                              </PillButton>
+                            )}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
               </div>
 
               {/* Cloud Connection Provenance */}
