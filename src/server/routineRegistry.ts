@@ -23,7 +23,8 @@ import type {
   NewCommunityReview,
   CommunityInsights,
   PaperMeta,
-  ProposedWidgetSpec
+  ProposedWidgetSpec,
+  ProtocolChangelogEntry
 } from '../types/routine';
 import {
   getCanonicalPaperId,
@@ -39,12 +40,80 @@ const METRICS_SUBCOLLECTION = 'community_metrics';
 
 // Built-in verified seed protocols
 const BUILTIN_PROTOCOLS: Record<string, Protocol> = {
-  achilles: { ...achillesProtocol, canonicalId: 'achilles', isCanonical: true },
-  'hair-loss': { ...hairLossProtocol, canonicalId: 'hair-loss', isCanonical: true },
-  'creatine-sleep': { ...FALLBACK_CREATINE_SLEEP, canonicalId: 'creatine-sleep', isCanonical: true },
-  'patellar-rehab': { ...FALLBACK_PATELLAR_REHAB, canonicalId: 'patellar-rehab', isCanonical: true },
+  achilles: {
+    ...achillesProtocol,
+    canonicalId: 'achilles',
+    isCanonical: true,
+    version: '1.0',
+    changelog: [
+      {
+        version: '1.0',
+        date: '2026-10-18T00:00:00.000Z',
+        summary: 'Initial clinical protocol extraction',
+        author: 'Viskotu Scientific Board'
+      }
+    ]
+  },
+  'hair-loss': {
+    ...hairLossProtocol,
+    canonicalId: 'hair-loss',
+    isCanonical: true,
+    version: '1.0',
+    changelog: [
+      {
+        version: '1.0',
+        date: '2026-10-18T00:00:00.000Z',
+        summary: 'Initial clinical protocol extraction',
+        author: 'Viskotu Scientific Board'
+      }
+    ]
+  },
+  'creatine-sleep': {
+    ...FALLBACK_CREATINE_SLEEP,
+    canonicalId: 'creatine-sleep',
+    isCanonical: true,
+    version: '1.0',
+    changelog: [
+      {
+        version: '1.0',
+        date: '2026-10-18T00:00:00.000Z',
+        summary: 'Initial clinical protocol extraction',
+        author: 'Viskotu Scientific Board'
+      }
+    ]
+  },
+  'patellar-rehab': {
+    ...FALLBACK_PATELLAR_REHAB,
+    canonicalId: 'patellar-rehab',
+    isCanonical: true,
+    version: '1.0',
+    changelog: [
+      {
+        version: '1.0',
+        date: '2026-10-18T00:00:00.000Z',
+        summary: 'Initial clinical protocol extraction',
+        author: 'Viskotu Scientific Board'
+      }
+    ]
+  },
   ...Object.fromEntries(
-    calibratedRoutines.map((routine) => [routine.id, { ...routine, canonicalId: routine.id, isCanonical: true }])
+    calibratedRoutines.map((routine) => [
+      routine.id,
+      {
+        ...routine,
+        canonicalId: routine.id,
+        isCanonical: true,
+        version: routine.version || '1.0',
+        changelog: routine.changelog || [
+          {
+            version: '1.0',
+            date: '2026-10-18T00:00:00.000Z',
+            summary: 'Initial clinical protocol extraction',
+            author: 'Viskotu Scientific Board'
+          }
+        ]
+      }
+    ])
   )
 };
 
@@ -80,6 +149,45 @@ export async function findCanonicalProtocol(
     for (const p of memoryProtocols.values()) {
       if (normalizeDoi(p.paper?.doi) === normDoi) {
         return p;
+      }
+    }
+  }
+
+const TITLE_ALIASES: Record<string, string[]> = {
+  'plantar-fasciitis': ['high load strength training improves outcome in patients with plantar fasciitis'],
+  'imst-blood-pressure': ['novel high resistance inspiratory muscle strength training lowers blood pressure'],
+  'warm-bath-sleep': [
+    'before bedtime passive body heating by warm shower or bath to improve sleep',
+    'before bedtime passive water heating by warm shower or bath to improve sleep',
+    'warm shower or bath to improve sleep'
+  ],
+  'cervical-posture': ['effectiveness of an exercise program to improve forward head posture in normal adults'],
+  'ashwagandha-stress': [
+    'study of safety and efficacy of a high concentration full spectrum extract of ashwagandha root in reducing stress and anxiety'
+  ],
+  'dual-n-back': ['improving fluid intelligence with training on working memory']
+};
+
+  // Check Title and Filename match across in-memory catalog
+  if (paper.title) {
+    const searchSlug = normalizeTitle(paper.title);
+    const cleanSearch = paper.title.toLowerCase().replace(/\.pdf$/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
+    if (searchSlug && searchSlug !== 'untitled-paper') {
+      for (const p of memoryProtocols.values()) {
+        const pSlug = normalizeTitle(p.paper?.title || p.title);
+        if (pSlug === searchSlug || searchSlug.includes(pSlug) || pSlug.includes(searchSlug)) {
+          return p;
+        }
+        const aliases = TITLE_ALIASES[p.id] || [];
+        if (aliases.some((alias) => cleanSearch.includes(alias) || alias.includes(cleanSearch))) {
+          return p;
+        }
+        if (p.paper?.fileName) {
+          const fn = p.paper.fileName.toLowerCase().replace(/\.pdf$/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
+          if (fn && (cleanSearch.includes(fn) || fn.includes(cleanSearch))) {
+            return p;
+          }
+        }
       }
     }
   }
@@ -150,10 +258,25 @@ export async function saveCanonicalProtocol(
     return { protocol: existing, isNew: false };
   }
 
+  const initialVersion = protocol.version || '1.0';
+  const initialChangelog: ProtocolChangelogEntry[] =
+    protocol.changelog && protocol.changelog.length > 0
+      ? protocol.changelog
+      : [
+          {
+            version: initialVersion,
+            date: new Date().toISOString(),
+            summary: 'Initial clinical protocol extraction',
+            author: 'Viskotu Extraction Engine'
+          }
+        ];
+
   const canonicalProtocol: Protocol = {
     ...protocol,
     id: canonicalId,
     canonicalId,
+    version: initialVersion,
+    changelog: initialChangelog,
     isCanonical: true
   };
 
@@ -430,6 +553,82 @@ export async function injectApprovedWidgetIntoCanonicalProtocol(
   return updatedProtocol;
 }
 
+/**
+ * Updates a canonical protocol with user or clinical improvements, bumping its version.
+ */
+export async function updateCanonicalProtocolVersion(
+  protocolId: string,
+  updates: Partial<Protocol>,
+  summary: string,
+  author = 'Community Contributor',
+  addedFields?: string[],
+  updatedFields?: string[]
+): Promise<Protocol | null> {
+  const canonicalId = getCanonicalPaperId({ id: protocolId }, protocolId);
+  const existing =
+    memoryProtocols.get(canonicalId) ||
+    memoryProtocols.get(protocolId) ||
+    (await findCanonicalProtocol({ id: protocolId }, protocolId));
+
+  if (!existing) return null;
+
+  // Calculate next version: e.g. 1.0 -> 1.1, 1.1 -> 1.2
+  const currentVersion = existing.version || '1.0';
+  const parts = currentVersion.split('.');
+  const major = parseInt(parts[0] || '1', 10);
+  const minor = parseInt(parts[1] || '0', 10);
+  const nextVersion = `${major}.${minor + 1}`;
+
+  const newEntry: ProtocolChangelogEntry = {
+    version: nextVersion,
+    date: new Date().toISOString(),
+    summary,
+    author,
+    addedFields,
+    updatedFields
+  };
+
+  const updatedChangelog = [newEntry, ...(existing.changelog || [])];
+
+  const updatedProtocol: Protocol = {
+    ...existing,
+    ...updates,
+    id: existing.id,
+    canonicalId: existing.canonicalId || canonicalId,
+    version: nextVersion,
+    changelog: updatedChangelog,
+    isCanonical: true
+  };
+
+  memoryProtocols.set(canonicalId, updatedProtocol);
+  if (protocolId !== canonicalId) {
+    memoryProtocols.set(protocolId, updatedProtocol);
+  }
+
+  const db = getFirestore();
+  if (db) {
+    try {
+      await db
+        .collection(PROTOCOLS_COLLECTION)
+        .doc(canonicalId)
+        .set(
+          {
+            ...updates,
+            version: nextVersion,
+            changelog: updatedChangelog,
+            updatedAt: new Date().toISOString()
+          },
+          { merge: true }
+        );
+    } catch (err: unknown) {
+      console.warn('[ProtocolRegistry] Failed to persist protocol version bump:', err);
+    }
+  }
+
+  return updatedProtocol;
+}
+
 export const findCanonicalRoutine = findCanonicalProtocol;
 export const saveCanonicalRoutine = saveCanonicalProtocol;
+export const updateCanonicalRoutineVersion = updateCanonicalProtocolVersion;
 

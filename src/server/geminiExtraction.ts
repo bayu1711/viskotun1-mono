@@ -2,10 +2,10 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { COPY } from '../data/copy';
 import type { Routine, Protocol } from '../types/routine';
 import { applyGuardrailThreshold } from '../utils/routineMetrics';
-import { findCalibratedRoutine } from './calibratedRoutines';
 import { generateFallbackRoutine } from './fallbackRoutines';
 import { classifyPaperSource, containsTerm } from './gatekeeper';
 import { getEffectiveGuardrails } from './guardrailLedger';
+import { findCanonicalProtocol } from './routineRegistry';
 import { validateAndRegisterProtocolWidgets } from './widgetRegistry';
 
 export interface ExtractInput {
@@ -20,6 +20,7 @@ export interface ExtractResult {
   rejectionReason?: string;
   routine?: Routine;
   protocol?: Routine;
+  isExistingCanonical?: boolean;
   source: string;
 }
 
@@ -198,15 +199,31 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
     };
   }
 
-  // Pre-calibrated reference papers resolve deterministically without an LLM call
-  const calibrated = findCalibratedRoutine(sourceName);
-  if (calibrated) {
+  // Check if paper is already cataloged in the Canonical Protocol Registry
+  const doiMatch = sourceName.match(/10\.\d{4,9}\/[^\s"<>]+/i);
+  const detectedDoi = doiMatch ? doiMatch[0].replace(/[.,;)]+$/, '') : undefined;
+  const cleanTitle = sourceName.replace(/\.pdf$/i, '').trim();
+
+  const existing = await findCanonicalProtocol({
+    doi: detectedDoi,
+    title: cleanTitle,
+    id: cleanTitle
+  });
+
+  if (existing) {
     const routine = applyGuardrailThreshold(
-      calibrated,
+      existing,
       activePolicy.painEscalationThreshold,
       activePolicy.escalationAlertMessage
     );
-    return { success: true, eligible: true, routine, protocol: routine, source: sourceName };
+    return {
+      success: true,
+      eligible: true,
+      routine,
+      protocol: routine,
+      isExistingCanonical: true,
+      source: sourceName
+    };
   }
 
   // If Gemini API key is configured, execute real multimodal extraction
@@ -271,6 +288,17 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
       if (parsed.protocol) {
         const protocol: Protocol = {
           ...parsed.protocol,
+          version: parsed.protocol.version || '1.0',
+          changelog: parsed.protocol.changelog && parsed.protocol.changelog.length > 0
+            ? parsed.protocol.changelog
+            : [
+                {
+                  version: '1.0',
+                  date: new Date().toISOString(),
+                  summary: 'Initial clinical protocol extraction',
+                  author: 'Gemini Multimodal Extraction'
+                }
+              ],
           dayHistory: parsed.protocol.dayHistory ?? [],
           initialSetsDone: parsed.protocol.initialSetsDone ?? {},
           initialFeedbackLogs: parsed.protocol.initialFeedbackLogs ?? [],

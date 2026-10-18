@@ -97,6 +97,15 @@ export type WidgetType = (typeof SUPPORTED_WIDGET_TYPES)[number];
 
 export type ProposedWidgetStatus = 'pending_review' | 'approved';
 
+export interface ProtocolChangelogEntry {
+  version: string;
+  date: string;
+  summary: string;
+  author?: string;
+  addedFields?: string[];
+  updatedFields?: string[];
+}
+
 export interface ProposedWidgetSpec {
   id: string;
   requestedType: string;
@@ -246,6 +255,8 @@ export interface Routine {
   id: string;
   canonicalId?: string;
   isCanonical?: boolean;
+  version?: string;
+  changelog?: ProtocolChangelogEntry[];
   title: string;
   shortTitle: string;
   icon: StepIconKey;

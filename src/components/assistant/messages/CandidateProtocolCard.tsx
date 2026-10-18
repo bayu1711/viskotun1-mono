@@ -47,14 +47,31 @@ export function CandidateProtocolCard({
   return (
     <article className="rounded-card border border-ink/10 bg-white p-5 space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-mint px-2.5 py-0.5 text-xs font-medium text-ink">
-          <AIIcon size="xs" />
-          {COPY.assistant.stagingEyebrow}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-mint px-2.5 py-0.5 text-xs font-medium text-ink">
+            <AIIcon size="xs" />
+            {COPY.assistant.stagingEyebrow}
+          </span>
+          <span className="inline-flex items-center rounded-full bg-cream border border-ink/15 px-2 py-0.5 text-3xs font-semibold text-ink">
+            v{protocol.version || '1.0'}
+          </span>
+        </div>
         <span className="text-2xs text-ink/60 font-mono">
           {protocol.phase || 'Clinical Research'} · {protocol.totalDays} days
         </span>
       </div>
+
+      {protocol.isCanonical && (
+        <div className="rounded-tile border border-ink/15 bg-cream/70 p-3 text-xs text-ink space-y-1">
+          <div className="flex items-center gap-1.5 font-semibold text-ink">
+            <AIIcon size="xs" />
+            <span>{COPY.assistant.existingCanonicalPill(protocol.version || '1.0')}</span>
+          </div>
+          <p className="text-2xs text-ink/75 leading-relaxed">
+            {COPY.assistant.existingCanonicalNotice(protocol.version || '1.0')}
+          </p>
+        </div>
+      )}
 
       <div>
         <h3 className="text-base font-semibold leading-snug text-ink">{paper.title || protocol.title}</h3>
@@ -187,23 +204,40 @@ export function CandidateProtocolCard({
         </p>
       )}
 
-      <div className="flex items-center gap-2 pt-2 border-t border-ink/10">
-        <button
-          type="button"
-          onClick={onConfirm}
-          className="flex flex-1 items-center justify-center gap-2 rounded-full bg-ink px-4 py-2.5 text-xs font-medium text-white transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
-        >
-          <Icon icon={CheckIcon} size="xs" />
-          <span>{COPY.assistant.confirmAddPaper}</span>
-        </button>
-        <button
-          type="button"
-          onClick={onDiscard}
-          className="flex items-center gap-1 rounded-full border border-ink/20 px-3 py-2.5 text-xs font-medium text-ink/65 hover:bg-ink/5 hover:text-ink transition-colors focus:outline-none"
-        >
-          <Icon icon={CloseIcon} size="xs" />
-          <span>{COPY.assistant.discardCandidate}</span>
-        </button>
+      <div className="pt-2 border-t border-ink/10 space-y-2">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="flex flex-1 items-center justify-center gap-2 rounded-full bg-ink px-4 py-2.5 text-xs font-medium text-white transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+          >
+            <Icon icon={CheckIcon} size="xs" />
+            <span>{protocol.isCanonical ? COPY.assistant.adoptExistingRoutine : COPY.assistant.confirmAddPaper}</span>
+          </button>
+          <button
+            type="button"
+            onClick={onDiscard}
+            className="flex items-center gap-1 rounded-full border border-ink/20 px-3 py-2.5 text-xs font-medium text-ink/65 hover:bg-ink/5 hover:text-ink transition-colors focus:outline-none"
+          >
+            <Icon icon={CloseIcon} size="xs" />
+            <span>{COPY.assistant.discardCandidate}</span>
+          </button>
+        </div>
+
+        {onAskAboutStep && (
+          <button
+            type="button"
+            onClick={() => {
+              onAskAboutStep({
+                id: 'improvement',
+                action: COPY.assistant.proposeImprovementPrompt
+              } as unknown as ProtocolStep);
+            }}
+            className="w-full text-center text-2xs font-medium text-ink/65 hover:text-ink underline decoration-dotted transition-colors py-1"
+          >
+            {COPY.assistant.proposeImprovementButton}
+          </button>
+        )}
       </div>
 
       <p className="text-center text-3xs text-ink/60">

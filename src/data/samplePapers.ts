@@ -25,6 +25,8 @@ export interface SamplePaper {
   activeTrackersCount?: number; // Real-world active community participants tracking this paper
   totalLogsCount?: number; // Real-world cumulative user biofeedback & compliance logs
   trendingRank?: number; // Dynamic trending rank (#1, #2, #3, ...)
+  version?: string; // Current clinical protocol version (e.g. '1.0', '1.1')
+  changelog?: import('../types/routine').ProtocolChangelogEntry[];
   userId?: string | null;
   userEmail?: string | null;
   uploadedBy?: string | null;

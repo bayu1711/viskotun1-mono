@@ -477,6 +477,15 @@ export function generateFallbackRoutine(source: string): Routine {
 
   return {
     id: slug,
+    version: '1.0',
+    changelog: [
+      {
+        version: '1.0',
+        date: new Date().toISOString(),
+        summary: 'Initial clinical protocol extraction',
+        author: 'Viskotu Extraction Engine'
+      }
+    ],
     title: cleanTitle,
     shortTitle: cleanTitle.split(' ').slice(0, 2).join(' ').toLowerCase(),
     icon: 'science',

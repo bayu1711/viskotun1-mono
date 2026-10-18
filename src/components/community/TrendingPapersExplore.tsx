@@ -21,6 +21,7 @@ import { isRoutineCompleted } from '../../utils/routineMetrics';
 import { Icon } from '../ui/Icon';
 import { PillButton } from '../ui/PillButton';
 import { StepIcon } from '../ui/StepIcon';
+import { VersionHistoryModal } from './VersionHistoryModal';
 
 export function TrendingPapersExplore() {
   const router = useRouter();
@@ -45,6 +46,7 @@ export function TrendingPapersExplore() {
   const currentActiveId = routine?.id || activeRoutineId || activeProtocolId;
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [viewingVersionPaper, setViewingVersionPaper] = useState<SamplePaper | null>(null);
 
   const availablePapers: SamplePaper[] = useMemo(() => {
     const list = trendingPapers || samplePapers;
@@ -205,6 +207,14 @@ export function TrendingPapersExplore() {
                     >
                       {paper.category}
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => setViewingVersionPaper(paper)}
+                      className="rounded-full bg-cream border border-ink/15 px-2 py-0.5 text-3xs font-semibold text-ink hover:bg-mint/40 hover:border-ink transition-colors"
+                      title={COPY.community.versionHistoryTitle}
+                    >
+                      {paper.version ? `v${paper.version}` : 'v1.0'}
+                    </button>
                   </div>
                 </div>
 
@@ -316,6 +326,14 @@ export function TrendingPapersExplore() {
           );
         })}
       </div>
+
+      <VersionHistoryModal
+        isOpen={Boolean(viewingVersionPaper)}
+        onClose={() => setViewingVersionPaper(null)}
+        paperTitle={viewingVersionPaper?.title || viewingVersionPaper?.shortTitle || 'Research Protocol'}
+        currentVersion={viewingVersionPaper?.version || '1.0'}
+        changelog={viewingVersionPaper?.changelog || []}
+      />
     </div>
   );
 }
