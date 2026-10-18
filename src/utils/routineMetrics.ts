@@ -13,9 +13,11 @@ import type {
   FeedbackLog,
   FeedbackMetric,
   PaperMeta,
-  Routine
+  Routine,
+  RoutineSummary
 } from '../types/routine';
 import { clamp, toPercent } from './math';
+import { normalizeDoi } from './paperFingerprint';
 
 export function resolveFeedbackMetric(routine?: { feedbackMetric?: FeedbackMetric }): FeedbackMetric {
   return routine?.feedbackMetric ?? DEFAULT_FEEDBACK_METRIC;
@@ -150,6 +152,96 @@ export function isRoutineCompleted(
   if (routine.dayHistory && routine.dayHistory.length >= routine.totalDays) return true;
   if (routine.currentDay > routine.totalDays) return true;
   return routine.currentDay >= routine.totalDays && isTodayComplete;
+}
+
+export interface PaperRoutineStatusInput {
+  paper: {
+    id: string;
+    routineId?: string;
+    protocolId?: string;
+    doi?: string;
+  };
+  routines: RoutineSummary[];
+  activeRoutine?: {
+    id: string;
+    currentDay: number;
+    totalDays: number;
+    dayHistory?: number[];
+    paper?: { doi?: string };
+  } | null;
+  currentActiveId?: string;
+  dayIsComplete?: boolean;
+  todayFraction?: number;
+  currentDay?: number;
+  totalDays?: number;
+}
+
+export interface PaperRoutineStatusResult {
+  targetId?: string;
+  routineIdForActions?: string;
+  matchedSummary?: RoutineSummary;
+  isActive: boolean;
+  isInRoutine: boolean;
+  isCompleted: boolean;
+}
+
+/**
+ * Resolves whether a trending/sample paper is currently in the user's routines
+ * (either selected as the active routine or saved as another routine in progress/completed).
+ */
+export function resolvePaperRoutineStatus({
+  paper,
+  routines,
+  activeRoutine,
+  currentActiveId,
+  dayIsComplete = false,
+  todayFraction = 0,
+  currentDay = 1,
+  totalDays = 14
+}: PaperRoutineStatusInput): PaperRoutineStatusResult {
+  const targetId = paper.routineId || paper.protocolId;
+  const normPaperDoi = normalizeDoi(paper.doi);
+
+  const matchedSummary = routines.find(
+    (r) =>
+      (targetId && r.id === targetId) ||
+      r.id === paper.id ||
+      Boolean(normPaperDoi && r.doi && normalizeDoi(r.doi) === normPaperDoi)
+  );
+
+  const resolvedActiveId = activeRoutine?.id || currentActiveId;
+  const isActive = Boolean(
+    resolvedActiveId &&
+      ((targetId && resolvedActiveId === targetId) ||
+        resolvedActiveId === paper.id ||
+        (matchedSummary && resolvedActiveId === matchedSummary.id) ||
+        (normPaperDoi &&
+          activeRoutine?.paper?.doi &&
+          normalizeDoi(activeRoutine.paper.doi) === normPaperDoi))
+  );
+
+  const isInRoutine = Boolean(matchedSummary || isActive);
+  const routineIdForActions = matchedSummary?.id || targetId;
+
+  const isCompleted = isInRoutine
+    ? isActive
+      ? isRoutineCompleted(
+          activeRoutine ?? matchedSummary ?? { currentDay, totalDays },
+          dayIsComplete || todayFraction >= 1
+        )
+      : matchedSummary
+      ? isRoutineCompleted(matchedSummary, matchedSummary.todayFraction >= 1)
+      : false
+    : false;
+
+  return {
+    targetId,
+    routineIdForActions,
+    matchedSummary,
+    isActive,
+    isInRoutine,
+    isCompleted
+  };
 }
 
 type EscalationTarget = Pick<FeedbackMetric, 'escalationThreshold' | 'escalationMessage' | 'escalationSource'>;

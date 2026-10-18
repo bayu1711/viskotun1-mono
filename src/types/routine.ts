@@ -323,6 +323,8 @@ export interface RoutineSummary {
   todayPercent: number;
   todayFraction: number;
   streak: number;
+  dayHistory?: number[];
+  doi?: string;
 }
 
 /** Backward-compatibility alias */

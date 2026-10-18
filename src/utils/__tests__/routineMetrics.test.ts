@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_FEEDBACK_METRIC } from '../../data/config';
-import type { FeedbackLog, Routine } from '../../types/routine';
+import type { FeedbackLog, Routine, RoutineSummary } from '../../types/routine';
 import {
   adherenceOf,
   clampFeedbackScore,
@@ -10,7 +10,8 @@ import {
   isProgressionReady,
   isRoutineCompleted,
   progressionStatus,
-  resolveFeedbackMetric
+  resolveFeedbackMetric,
+  resolvePaperRoutineStatus
 } from '../routineMetrics';
 
 const mockRoutine: Routine = {
@@ -290,6 +291,103 @@ describe('routineMetrics', () => {
     it('returns true if recorded dayHistory count meets or exceeds totalDays', () => {
       const history = new Array(14).fill(1);
       expect(isRoutineCompleted({ currentDay: 14, totalDays: 14, dayHistory: history }, false)).toBe(true);
+    });
+  });
+
+  describe('resolvePaperRoutineStatus', () => {
+    const routines: RoutineSummary[] = [
+      {
+        id: 'hair-loss',
+        title: 'Alopecia Hair Regrowth',
+        shortTitle: 'hair regrowth',
+        icon: 'serum',
+        currentDay: 2,
+        totalDays: 84,
+        todayPercent: 50,
+        todayFraction: 0.5,
+        streak: 1,
+        doi: '10.4103/0974-7753.114700'
+      },
+      {
+        id: 'achilles',
+        title: 'Achilles Tendinopathy Rehab',
+        shortTitle: 'achilles rehab',
+        icon: 'straight-knee',
+        currentDay: 4,
+        totalDays: 84,
+        todayPercent: 0,
+        todayFraction: 0,
+        streak: 3,
+        doi: '10.1177/1941738116631498'
+      },
+      {
+        id: 'creatine-sleep',
+        title: 'Creatine & Cognitive Fatigue',
+        shortTitle: 'creatine sleep',
+        icon: 'sleep',
+        currentDay: 14,
+        totalDays: 14,
+        todayPercent: 100,
+        todayFraction: 1,
+        streak: 14,
+        dayHistory: new Array(14).fill(1),
+        doi: '10.1038/s41598-024-54249-9'
+      }
+    ];
+
+    it('marks the currently selected paper as both isActive and isInRoutine', () => {
+      const status = resolvePaperRoutineStatus({
+        paper: { id: 'hair-regrowth', routineId: 'hair-loss', doi: '10.4103/0974-7753.114700' },
+        routines,
+        currentActiveId: 'hair-loss',
+        dayIsComplete: false,
+        todayFraction: 0.5
+      });
+
+      expect(status.isActive).toBe(true);
+      expect(status.isInRoutine).toBe(true);
+      expect(status.isCompleted).toBe(false);
+    });
+
+    it('marks another paper in user routines (not currently selected) as isInRoutine and in progress', () => {
+      const status = resolvePaperRoutineStatus({
+        paper: { id: 'achilles-rehab', routineId: 'achilles', doi: '10.1177/1941738116631498' },
+        routines,
+        currentActiveId: 'hair-loss',
+        dayIsComplete: false,
+        todayFraction: 0.5
+      });
+
+      expect(status.isActive).toBe(false);
+      expect(status.isInRoutine).toBe(true);
+      expect(status.isCompleted).toBe(false);
+      expect(status.routineIdForActions).toBe('achilles');
+    });
+
+    it('marks another paper in user routines (not currently selected) as isCompleted when finished', () => {
+      const status = resolvePaperRoutineStatus({
+        paper: { id: 'creatine-sleep', routineId: 'creatine-sleep', doi: '10.1038/s41598-024-54249-9' },
+        routines,
+        currentActiveId: 'hair-loss',
+        dayIsComplete: false,
+        todayFraction: 0.5
+      });
+
+      expect(status.isActive).toBe(false);
+      expect(status.isInRoutine).toBe(true);
+      expect(status.isCompleted).toBe(true);
+    });
+
+    it('returns isInRoutine false for a paper not in user routines', () => {
+      const status = resolvePaperRoutineStatus({
+        paper: { id: 'time-restricted-eating', doi: '10.1016/j.cmet.2018.04.010' },
+        routines,
+        currentActiveId: 'hair-loss'
+      });
+
+      expect(status.isActive).toBe(false);
+      expect(status.isInRoutine).toBe(false);
+      expect(status.isCompleted).toBe(false);
     });
   });
 });
