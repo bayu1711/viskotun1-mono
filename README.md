@@ -257,6 +257,62 @@ npm test
 npm run start
 ```
 
+---
+
+## Testing & Authentication Modes Guide
+
+ViskotuN1 offers multiple authentication and testing pathways designed for evaluators, clinical researchers, patients, and administrators. You can test each tier without needing pre-existing credentials.
+
+### Authentication Pathways
+
+1. **Guest Mode (Quick Test / Anonymous Explorer)**
+   - **How to test**: Navigate to `/login` or `/signup` and click **"Continue as guest"** (or browse directly without logging in).
+   - **Persistence**: Fast client-side `localStorage` caching. Perfect for quick UI/UX reviews and offline exploration.
+   - **Badge**: Shows a *"Sign in to sync"* prompt in the top navigation bar.
+
+2. **Standard Email / Password (Normal Login & Registration)**
+   - **How to test**:
+     - Navigate to `/signup` to register a new account (Name, Email, Password with at least 6 characters) or `/login` to sign in.
+     - Any standard email (e.g. `patient@example.com`, `clinician@hospital.org`) creates an authenticated clinical user account.
+   - **Persistence**: Synchronized with Firebase Auth and the cloud user persistence endpoint (`/api/user/sync`).
+
+3. **Google Authentication (OAuth Sign-In)**
+   - **How to test**:
+     - Navigate to `/login` or `/signup` and click **"Continue with Google"**.
+     - Sign in using any Google account via the Firebase OAuth popup modal.
+   - **Persistence**: Full cloud synchronization via Firebase Client SDK and Google OAuth profile.
+
+4. **Admin Role (Clinical Lead & System Administration)**
+   - **How to test**:
+     - **1-Click Quick Access**: On `/login` or `/signup`, click the **"Continue as Admin"** button (`Dr. Evelyn Reed`).
+     - **Email Keyword**: Sign up or log in using any email containing `admin` (e.g. `admin@viskotun1.internal`, `admin@example.com`).
+   - **Badge**: Shows the green active dot with the `admin` badge in the top navigation bar.
+   - **Unlocked Features**: Activates the Guardrail Policy Ledger drawer, AI-proposed widget approval queue, fast-forward protocol day simulations, and one-click demo reset.
+
+---
+
+### Feature Matrix by Authentication Mode
+
+| Feature / Capability | Guest Explorer | Normal User (Email) | Google Auth | Admin (Clinical Lead) | How to Access & Test |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **Daily Routine Execution** | ✅ | ✅ | ✅ | ✅ | Navigate to `/routine`; test set counters, hold timers, and completion toggles |
+| **Interactive Voice Coach** | ✅ | ✅ | ✅ | ✅ | Tap *"Voice Coach"* bar at the bottom of `/routine`; tests Google Cloud TTS (`/api/tts`) with fallback |
+| **Biofeedback & Dynamic Logging** | ✅ | ✅ | ✅ | ✅ | Tap *"Log Discomfort"* or complete steps to submit scale (0–10), numeric, or boolean scores |
+| **Multimodal Paper Ingestion** | ✅ | ✅ | ✅ | ✅ | Tap `+` button in top bar or drop PDF into `/routine`; tests Gemini extraction & gatekeeping |
+| **Suitability Q&A Flow** | ✅ | ✅ | ✅ | ✅ | Upload an ineligible paper (e.g. animal/in-vitro) to trigger interactive rejection explanation |
+| **Grounded AI Clinical Assistant** | ✅ | ✅ | ✅ | ✅ | Open Assistant sheet; ask questions grounded strictly in paper's Methods section |
+| **Protocol Switcher** | ✅ | ✅ | ✅ | ✅ | Switch between pre-loaded studies (Achilles Rehab, Hair Density, Calibrated Protocols) |
+| **Morphing Visualizer Dashboard** | ✅ | ✅ | ✅ | ✅ | Navigate to `/dashboard`; view Before/After photo comparison slider & biomarker trend curves |
+| **Community Evidence & Reviews** | ✅ | ✅ | ✅ | ✅ | Navigate to `/community`; view pooled drop-off curves, efficacy scores, and public version history |
+| **Cross-Device Cloud Sync** | ❌ (Local only) | ✅ | ✅ | ✅ | State synced to Firebase & `/api/user/sync`; preserves streak across devices |
+| **Cloud Storage Photo Uploads** | Fallback (Data URL) | ✅ (GCS Bucket) | ✅ (GCS Bucket) | ✅ (GCS Bucket) | Complete a photo check-in step; tests `/api/upload` and `/api/media/...` streaming |
+| **Fast-Forward Protocol Simulation** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Under *"Today's Progress"*: test *"Advance to Next Day"*, *"Simulate +4 Days"*, & *"Simulate Full Completion"* |
+| **Dynamic Guardrail Policy Ledger** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Click Shield icon in TopBar; adjust pain lockout threshold slider & load reduction % |
+| **AI Widget Approval Queue** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Open Policy Ledger drawer; review & approve pending Gemini-extracted `ProposedWidgetSpec` |
+| **One-Click Demo Reset** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Click Restart icon in TopBar; resets routine, telemetry, and protocols to default state |
+
+---
+
 ### Google Cloud Run Deployment
 
 ViskotuN1 uses Next.js 14 `output: 'standalone'` and a multi-stage Dockerfile producing a minimal (<150MB) production container image.
