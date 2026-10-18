@@ -7,19 +7,11 @@ import GridOnOutlinedIcon from '@mui/icons-material/GridOnOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
-import { isFieldScheduledForDay } from '../../utils/routineMetrics';
+import { isFieldScheduledForDay, resolveMilestoneDays } from '../../utils/routineMetrics';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 import { Panel } from '../ui/Panel';
 import { SectionHeading } from '../ui/SectionHeading';
-
-const STANDARDIZED_BASELINE_MOCKUP = COPY.morphing.dashboard.baselineMockupSvg(
-  COPY.morphing.dashboard.baselineMockupSvgText
-);
-
-const SAMPLE_PROGRESSION_MOCKUP = COPY.morphing.dashboard.progressionMockupSvg(
-  COPY.morphing.dashboard.progressionMockupSvgText
-);
 
 export function MilestonePhotoComparison() {
   const { routine, morphingLogs, openFeedbackDrawer } = useRoutine();
@@ -30,28 +22,33 @@ export function MilestonePhotoComparison() {
   const [sliderPos, setSliderPos] = useState<number>(50);
   const [showGrid, setShowGrid] = useState<boolean>(true);
 
-  const milestoneDays = photoField?.milestoneDays || [1, 14, 28, 56, 84];
-  const [selectedMilestoneDay, setSelectedMilestoneDay] = useState<number>(() => {
-    const nonBaseline = milestoneDays.filter((d) => d > 1);
-    return nonBaseline[0] ?? 14;
-  });
+  const milestoneDays = resolveMilestoneDays(photoField, routine.totalDays);
+  const nonBaselineDays = milestoneDays.filter((d) => d > 1);
+  const defaultMilestoneDay = nonBaselineDays[0] ?? routine.totalDays;
+
+  const [selectedMilestoneDay, setSelectedMilestoneDay] = useState<number>(defaultMilestoneDay);
+  const activeMilestoneDay = nonBaselineDays.includes(selectedMilestoneDay)
+    ? selectedMilestoneDay
+    : defaultMilestoneDay;
 
   if (!photoField) return null;
 
   const isScheduledToday = isFieldScheduledForDay(photoField, routine.currentDay);
-  const nextMilestoneDay = photoField.milestoneDays?.find((d) => d > routine.currentDay);
+  const nextMilestoneDay = milestoneDays.find((d) => d > routine.currentDay);
   const daysUntilNext = nextMilestoneDay ? nextMilestoneDay - routine.currentDay : null;
 
   const baselineLog = morphingLogs.find(
     (log) => log.fieldId === photoField.id && log.day === 1 && typeof log.value === 'string'
   );
   const milestoneLog = morphingLogs.find(
-    (log) => log.fieldId === photoField.id && log.day === selectedMilestoneDay && typeof log.value === 'string'
+    (log) =>
+      log.fieldId === photoField.id &&
+      log.day === activeMilestoneDay &&
+      typeof log.value === 'string'
   );
 
-  const baselineSrc = (baselineLog?.value as string) || STANDARDIZED_BASELINE_MOCKUP;
-  const milestoneSrc = (milestoneLog?.value as string) || SAMPLE_PROGRESSION_MOCKUP;
-  const isSimulated = !milestoneLog;
+  const baselineSrc = typeof baselineLog?.value === 'string' ? baselineLog.value : null;
+  const milestoneSrc = typeof milestoneLog?.value === 'string' ? milestoneLog.value : null;
 
   return (
     <Panel aria-labelledby={headingId} className="overflow-hidden">
@@ -121,52 +118,74 @@ export function MilestonePhotoComparison() {
       {/* Milestone Day Switcher */}
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <span className="text-xs font-medium text-ink/60">{COPY.morphing.dashboard.milestonePeriod}</span>
-        {milestoneDays
-          .filter((day) => day > 1)
-          .map((day) => {
-            const hasLog = morphingLogs.some(
-              (log) => log.fieldId === photoField.id && log.day === day
-            );
-            const isSelected = selectedMilestoneDay === day;
-            return (
-              <button
-                key={day}
-                type="button"
-                onClick={() => setSelectedMilestoneDay(day)}
-                className={`rounded-full px-3 py-1 text-xs transition-colors ${
-                  isSelected
-                    ? 'bg-orange font-medium text-white shadow-2xs'
-                    : 'bg-canvas text-ink/70 hover:bg-ink/10'
-                }`}
-              >
-                {COPY.morphing.dashboard.dayPill(day, hasLog)}
-              </button>
-            );
-          })}
+        {nonBaselineDays.map((day) => {
+          const hasLog = morphingLogs.some(
+            (log) => log.fieldId === photoField.id && log.day === day
+          );
+          const isSelected = activeMilestoneDay === day;
+          return (
+            <button
+              key={day}
+              type="button"
+              onClick={() => setSelectedMilestoneDay(day)}
+              className={`rounded-full px-3 py-1 text-xs transition-colors ${
+                isSelected
+                  ? 'bg-orange font-medium text-white shadow-2xs'
+                  : 'bg-canvas text-ink/70 hover:bg-ink/10'
+              }`}
+            >
+              {COPY.morphing.dashboard.dayPill(day, hasLog)}
+            </button>
+          );
+        })}
       </div>
 
       {/* Interactive Split View Container */}
       <div className="relative mt-4 aspect-[4/3] w-full select-none overflow-hidden rounded-panel border border-ink/15 bg-canvas shadow-inner">
         {/* Right / Milestone Layer (Full width underneath) */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={milestoneSrc}
-          alt={COPY.morphing.dashboard.milestoneAlt(selectedMilestoneDay)}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+        {milestoneSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={milestoneSrc}
+            alt={COPY.morphing.dashboard.milestoneAlt(activeMilestoneDay)}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-canvas px-6 text-center">
+            <Icon icon={CameraAltOutlinedIcon} size="md" className="text-ink/40" />
+            <p className="mt-2 text-xs font-medium text-ink/75">
+              {COPY.morphing.dashboard.missingMilestonePhoto(activeMilestoneDay)}
+            </p>
+            <p className="mt-1 max-w-xs text-[11px] text-ink/55">
+              {COPY.morphing.dashboard.uploadPhotoPrompt}
+            </p>
+          </div>
+        )}
 
         {/* Left / Baseline Layer (Clipped to slider position) */}
         <div
           className="absolute inset-0 h-full overflow-hidden"
           style={{ width: `${sliderPos}%` }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={baselineSrc}
-            alt={COPY.morphing.dashboard.baselineAlt}
-            className="absolute inset-0 h-full max-w-none object-cover"
-            style={{ width: '100%', minWidth: '100%', height: '100%' }}
-          />
+          {baselineSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={baselineSrc}
+              alt={COPY.morphing.dashboard.baselineAlt}
+              className="absolute inset-0 h-full max-w-none object-cover"
+              style={{ width: '100%', minWidth: '100%', height: '100%' }}
+            />
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/90 px-6 text-center">
+              <Icon icon={CameraAltOutlinedIcon} size="md" className="text-ink/40" />
+              <p className="mt-2 text-xs font-medium text-ink/75">
+                {COPY.morphing.dashboard.missingBaselinePhoto}
+              </p>
+              <p className="mt-1 max-w-xs text-[11px] text-ink/55">
+                {COPY.morphing.dashboard.uploadPhotoPrompt}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Optional Clinical Standardization Grid Overlay */}
@@ -215,8 +234,7 @@ export function MilestonePhotoComparison() {
           {COPY.morphing.dashboard.baselineLabel}
         </div>
         <div className="pointer-events-none absolute top-3 right-3 rounded-full bg-ink/80 px-3 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
-          {COPY.morphing.dashboard.currentLabel(selectedMilestoneDay)}
-          {isSimulated && COPY.morphing.dashboard.previewBadge}
+          {COPY.morphing.dashboard.currentLabel(activeMilestoneDay)}
         </div>
       </div>
 

@@ -8,10 +8,16 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import type { DataCollectionField } from '../../types/routine';
-import { isFieldScheduledForDay } from '../../utils/routineMetrics';
+import {
+  isFieldScheduledForDay,
+  resolveBiomarkerPoints,
+  resolveFieldTargetBounds
+} from '../../utils/routineMetrics';
+import { EmptyState } from '../feedback/EmptyState';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 import { Panel } from '../ui/Panel';
+import { PillButton } from '../ui/PillButton';
 import { SectionHeading } from '../ui/SectionHeading';
 import type { BiomarkerDataPoint } from './BiomarkerChartContent';
 
@@ -40,64 +46,15 @@ export function BiomarkerTrendChart() {
     return trackableFields.find((f) => f.id === selectedFieldId) || trackableFields[0];
   }, [trackableFields, selectedFieldId]);
 
-  const chartData: BiomarkerDataPoint[] = useMemo(() => {
-    if (!activeField) return [];
-
-    // Check actual morphing logs
-    const fieldLogs = morphingLogs
-      .filter((l) => l.fieldId === activeField.id && typeof l.value === 'number')
-      .map((l) => ({ day: l.day, value: Number(l.value) }));
-
-    if (fieldLogs.length >= 2) {
-      return fieldLogs.sort((a, b) => a.day - b.day);
-    }
-
-    // If activeField is default scale and we have feedbackLogs
-    if (activeField.type === 'scale' && feedbackLogs.length > 0) {
-      return feedbackLogs.map((log) => ({ day: log.day, value: log.score }));
-    }
-
-    // Default simulated progression data based on trial parameters
-    const totalPoints = Math.max(currentDay, 7);
-    const minVal = activeField.min ?? 0;
-    const maxVal = activeField.max ?? 10;
-    const points: BiomarkerDataPoint[] = [];
-
-    const isImprovingDown = activeField.name.includes('pain') || activeField.name.includes('irritation');
-
-    for (let day = 1; day <= totalPoints; day++) {
-      let val: number;
-      if (isImprovingDown) {
-        // e.g. Pain starting at 7.5 dropping towards 2
-        val = Number((maxVal * 0.75 - ((day - 1) / totalPoints) * (maxVal * 0.5)).toFixed(1));
-      } else {
-        // e.g. Dorsiflexion starting at 24 rising towards 42
-        val = Number((minVal + ((day - 1) / totalPoints) * (maxVal - minVal) * 0.8).toFixed(1));
-      }
-      points.push({ day, value: Math.max(minVal, Math.min(maxVal, val)) });
-    }
-
-    return points;
-  }, [activeField, morphingLogs, feedbackLogs, currentDay]);
+  const chartData: BiomarkerDataPoint[] = useMemo(
+    () => resolveBiomarkerPoints(activeField, morphingLogs, feedbackLogs),
+    [activeField, morphingLogs, feedbackLogs]
+  );
 
   if (!activeField) return null;
 
-  // Determine target bounds for reference shading
-  let targetMin: number | undefined;
-  let targetMax: number | undefined;
-
-  if (activeField.name.includes('pain') || activeField.name.includes('irritation')) {
-    targetMin = 0;
-    targetMax = activeField.escalationThreshold ?? 3;
-  } else if (activeField.name.includes('dorsiflexion') || activeField.name.includes('flexion')) {
-    targetMin = 38;
-    targetMax = 48;
-  } else if (activeField.type === 'timer') {
-    targetMin = 200;
-    targetMax = 260;
-  }
-
-  const latestVal = chartData[chartData.length - 1]?.value ?? activeField.min ?? 0;
+  const { targetMin, targetMax } = resolveFieldTargetBounds(activeField);
+  const latestPoint = chartData[chartData.length - 1];
   const isScheduledToday = isFieldScheduledForDay(activeField, currentDay);
 
   return (
@@ -109,7 +66,9 @@ export function BiomarkerTrendChart() {
         action={
           <div className="flex items-center gap-2">
             <span className="rounded-full bg-mint px-2.5 py-1 text-xs font-medium text-ink">
-              {COPY.morphing.dashboard.currentReading(latestVal, activeField.unit)}
+              {latestPoint
+                ? COPY.morphing.dashboard.currentReading(latestPoint.value, activeField.unit)
+                : COPY.morphing.dashboard.noReadingsBadge}
             </span>
             <CircleButton
               label={
@@ -161,14 +120,30 @@ export function BiomarkerTrendChart() {
         </div>
       )}
 
-      <BiomarkerChartContent
-        data={chartData}
-        targetMin={targetMin}
-        targetMax={targetMax}
-        unit={activeField.unit}
-        min={activeField.min}
-        max={activeField.max}
-      />
+      {chartData.length > 0 ? (
+        <BiomarkerChartContent
+          data={chartData}
+          targetMin={targetMin}
+          targetMax={targetMax}
+          unit={activeField.unit}
+          min={activeField.min}
+          max={activeField.max}
+        />
+      ) : (
+        <EmptyState
+          className="mt-4"
+          icon={ShowChartOutlinedIcon}
+          title={COPY.morphing.dashboard.emptyBiomarkerTitle}
+          description={COPY.morphing.dashboard.emptyBiomarkerBody(activeField.label)}
+          action={
+            isScheduledToday ? (
+              <PillButton size="sm" onClick={() => openFeedbackDrawer(activeField.id)}>
+                {COPY.morphing.dashboard.logFirstReading}
+              </PillButton>
+            ) : undefined
+          }
+        />
+      )}
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-ink/10 pt-3 text-xs text-ink/60">
         <div className="flex items-center gap-2">
