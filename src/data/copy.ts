@@ -98,9 +98,14 @@ export const COPY = {
     logFeedback: (name?: string) => (name ? `Log ${name}` : 'Log feedback'),
     advanceToNextDay: (day: number) => `Advance to Day ${day}`,
     simulatePastDays: (count: number) => `Simulate ${count} past days (Admin)`,
+    simulateFullCompletion: 'Simulate fully complete paper (Admin)',
     adminControlEyebrow: 'Admin Testing Controls',
     advancedToast: (day: number) => `Advanced to Day ${day}`,
-    simulatedToast: (days: number) => `Simulated ${days} days of tracking history`
+    simulatedToast: (days: number) => `Simulated ${days} days of tracking history`,
+    simulateFullCompletionToast: (title: string, days: number) =>
+      `Simulated full research trial for ${title} (${days} days)`,
+    simulatedFullCompletionToast: (title: string, days: number) =>
+      `Simulated full research trial for ${title} (${days} days)`
   },
   safety: {
     escalationAlert: `Feedback threshold exceeded. Escalation paused. Recommendation: Reduce load/dose by ${DEFAULT_LOAD_REDUCTION_PERCENT}% tomorrow or consult a specialist.`,
@@ -572,6 +577,8 @@ export const COPY = {
       `Day ${prevDay} marked complete. Advanced to Day ${nextDay}.`,
     simulatedHistoryConfirmation: (days: number, currentDay: number) =>
       `Simulated ${days} days of historical adherence and biofeedback. Currently tracking Day ${currentDay}.`,
+    simulatedFullCompletionConfirmation: (title: string, days: number) =>
+      `Simulated complete clinical research trial for ${title}. All ${days} days recorded with 100% adherence and verified outcome measurements.`,
     serverGemmaSource: 'Gemma 2 (Private Endpoint)',
     methodsSectionSource: 'Methods & Interventions Section',
     timestampJustNow: 'Just now',
