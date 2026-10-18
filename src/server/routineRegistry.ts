@@ -265,7 +265,8 @@ export function toCanonicalProtocol(protocol: Protocol): Protocol {
     canonicalId,
     version: initialVersion,
     changelog: initialChangelog,
-    isCanonical: true
+    // Only a registered routine is canonical; a fresh extraction is still a candidate for review
+    isCanonical: false
   };
 }
 
@@ -283,7 +284,7 @@ export async function saveCanonicalProtocol(
     return { protocol: existing, isNew: false };
   }
 
-  const canonicalProtocol = toCanonicalProtocol(protocol);
+  const canonicalProtocol: Protocol = { ...toCanonicalProtocol(protocol), isCanonical: true };
   const canonicalId = canonicalProtocol.id;
 
   // Update in-memory registry
