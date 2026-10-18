@@ -490,6 +490,7 @@ export function LandingPage() {
               alt=""
               width={20}
               height={20}
+              unoptimized
               className="h-5 w-5 object-contain"
             />
             <p>{COPY.landing.footerTagline}</p>
