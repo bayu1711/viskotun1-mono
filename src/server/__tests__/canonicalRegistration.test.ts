@@ -53,6 +53,8 @@ describe('canonical registration', () => {
     expect(saveCanonicalRoutine).not.toHaveBeenCalled();
     expect(data.routine.id).toBe('doi__10_1177_1941738116631498');
     expect(data.isExistingCanonical).toBe(false);
+    // The candidate card shows "already cataloged" for canonical routines, so a fresh one must not be
+    expect(data.routine.isCanonical).toBe(false);
   });
 
   it('reuses a routine already confirmed for the same paper', async () => {
