@@ -17,7 +17,7 @@ export const COPY = {
     ],
     openGraphTitle: 'ViskotuN1 // AI Research & Daily Routines',
     openGraphDescription:
-      'Transforming complex research papers into executable daily routines with an adaptive AI safety assistant.'
+      'Transforming complex research papers into executable daily routines with Viskotu, an adaptive safety companion.'
   },
   brand: {
     mark: '//',
@@ -47,9 +47,9 @@ export const COPY = {
   shell: {
     streak: (days: number) => `${days} day streak`,
     addPaper: 'Add new paper',
-    openAssistant: 'Open paper assistant',
+    openAssistant: 'Ask Viskotu',
     resetDemo: 'Reset to demo defaults',
-    assistantFab: (title: string) => `Ask about ${title} or drop a PDF`,
+    assistantFab: (title: string) => `Ask Viskotu about ${title} or drop a PDF`,
     todaySummaryLabel: "Today's progress",
     noActiveProtocol: 'No active routine',
     noActiveRoutine: 'No active routine',
@@ -147,7 +147,7 @@ export const COPY = {
     minLabel: (min: number) => `${min} · None`,
     maxLabel: (max: number) => `${max} · Severe`,
     notesLabel: 'Notes',
-    notesPlaceholder: 'Optional notes for AI adjustment...',
+    notesPlaceholder: 'Optional notes for Viskotu adjustment...',
     save: 'Save log to plan',
     saved: 'Log saved to your plan',
     savedMetric: (name?: string) => `${name || 'Feedback'} saved to your plan`
@@ -182,7 +182,7 @@ export const COPY = {
     holdSummary: (seconds: number) => `${seconds}s hold`,
     repsSummary: (reps: number) => `${reps} reps`,
     helpAriaLabel: (action: string) => `Detailed instructions for ${action}`,
-    helpTooltip: (action: string) => `How to perform ${action} · Ask assistant`,
+    helpTooltip: (action: string) => `How to perform ${action} · Ask Viskotu`,
     taskQuestionPrompt: (action: string) =>
       `What is "${action}" and what is needed to be done? Please provide a detailed step-by-step guide.`
   },
@@ -422,19 +422,19 @@ export const COPY = {
     missingParameters: '⚠ Missing parameters'
   },
   assistant: {
-    dialogLabel: 'Paper assistant',
-    close: 'Close assistant',
-    modeLabel: 'Assistant mode',
+    dialogLabel: 'Viskotu',
+    close: 'Close Viskotu',
+    modeLabel: 'Viskotu mode',
     modes: {
       ask: 'Ask',
       upload: 'Add paper'
     },
     eyebrowUpload: 'New research',
-    titleAsk: 'Ask your paper',
+    titleAsk: 'Ask Viskotu',
     titleUpload: 'Add a paper',
     stagingTitle: 'Review candidate routine',
     stagingEyebrow: 'Extracted protocol',
-    stagingDescription: 'Inspect the extracted clinical routine and discuss with AI before confirming.',
+    stagingDescription: 'Inspect the extracted clinical routine and discuss with Viskotu before confirming.',
     confirmAddPaper: 'Confirm & start routine',
     discardCandidate: 'Discard',
     uploadAnother: 'Upload another paper',
@@ -448,15 +448,15 @@ export const COPY = {
     switchToUpload: 'Add a paper',
     intakeInstructionTitle: 'Add an interventional study',
     intakeInstructionBody: 'Upload a clinical trial PDF or enter a DOI/PubMed link. Gemini will extract the protocol, steps, and safety rules so you can review and discuss it before adding it to your schedule.',
-    typing: 'Assistant is typing',
+    typing: 'Viskotu is typing…',
     attach: 'Attach a PDF',
     send: 'Send',
-    inputAsk: 'Ask about this paper',
+    inputAsk: 'Ask Viskotu about this paper',
     inputUpload: 'Paste a DOI or PubMed link',
-    inputStaging: 'Ask about candidate paper',
-    placeholderAsk: 'Ask about this paper…',
+    inputStaging: 'Ask Viskotu about candidate paper',
+    placeholderAsk: 'Ask Viskotu about this paper…',
     placeholderUpload: 'Paste a DOI or PubMed link…',
-    placeholderStaging: 'Ask a question about this paper before confirming…',
+    placeholderStaging: 'Ask Viskotu about candidate paper before confirming…',
     suggestionsLabel: 'Suggested questions',
     suggestions: {
       label: 'Suggested questions',
@@ -704,7 +704,7 @@ export const COPY = {
       gatekeeperBody: 'Auto-filters non-human models and theoretical papers with educational feedback.',
       auditingTitle: 'Missing Parameter Auditing',
       auditingBody: 'Detects omitted dosages, hold durations, and execution parameters, applying conservative clinical defaults.',
-      safetyTitle: 'AI Safety Assistant',
+      safetyTitle: 'Viskotu Safety Companion',
       safetyBody: 'Ask dosage, frequency, and contraindication questions grounded strictly in the trial Methods.',
       summaryTitle: '1-Page Clinical Brief',
       summaryBody: 'Export formatted adherence and biofeedback trends for your specialist or personal records.'
@@ -1077,7 +1077,7 @@ export const COPY = {
     eyebrow: 'User guide & trending clinical research papers',
     badge: 'Interactive Research Pipeline',
     intro:
-      'ViskotuN1 converts dense, peer-reviewed human interventional research into executable daily routines with zero hallucinated gaps and an evidence-grounded AI safety assistant.',
+      'ViskotuN1 converts dense, peer-reviewed human interventional research into executable daily routines with zero hallucinated gaps and Viskotu, an evidence-grounded safety companion.',
     tabs: {
       guide: 'How it works',
       samples: 'Trending papers',
