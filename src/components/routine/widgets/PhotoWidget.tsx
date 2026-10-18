@@ -1,11 +1,16 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
+import CloudDoneOutlinedIcon from '@mui/icons-material/CloudDoneOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { toast } from 'sonner';
 import { COPY } from '../../../data/copy';
+import { getFirebaseStorage } from '../../../lib/firebase';
 import type { DataCollectionField } from '../../../types/routine';
+import { Spinner } from '../../feedback/Spinner';
 import { CircleButton } from '../../ui/CircleButton';
 import { Icon } from '../../ui/Icon';
 import { PillButton } from '../../ui/PillButton';
@@ -22,40 +27,78 @@ const DEFAULT_DEMO_PHOTO = COPY.morphing.widgets.photo.demoPhotoSvg(
 
 export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const currentPhoto = typeof value === 'string' && value.length > 0 ? value : '';
+  const isCloudStored = currentPhoto.startsWith('http://') || currentPhoto.startsWith('https://');
+
+  const processAndUploadFile = async (file: File) => {
+    if (!file || !file.type.startsWith('image/')) {
+      toast.error(COPY.morphing.widgets.photo.invalidFile);
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const storage = getFirebaseStorage();
+      if (!storage) {
+        throw new Error('Storage client unconfigured');
+      }
+
+      const fileExt = file.name.split('.').pop() || 'jpg';
+      const cleanName = file.name.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 30);
+      const storagePath = `routines/photos/${Date.now()}_${cleanName}.${fileExt}`;
+      const storageRef = ref(storage, storagePath);
+
+      await uploadBytes(storageRef, file, {
+        contentType: file.type
+      });
+
+      const downloadUrl = await getDownloadURL(storageRef);
+      onChange(downloadUrl);
+      toast.success(COPY.morphing.widgets.photo.uploadSuccess);
+    } catch (err: any) {
+      console.warn('[PhotoWidget] Cloud Storage upload failed, falling back to local preview:', err?.message || err);
+      // Fallback seamlessly to local data URL so the user's routine workflow isn't blocked
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target?.result;
+        if (typeof result === 'string') {
+          onChange(result);
+          toast.info(COPY.morphing.widgets.photo.uploadError);
+        }
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const result = event.target?.result;
-      if (typeof result === 'string') {
-        onChange(result);
-      }
-    };
-    reader.readAsDataURL(file);
+    if (file) {
+      void processAndUploadFile(file);
+    }
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
     if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const result = event.target?.result;
-        if (typeof result === 'string') {
-          onChange(result);
-        }
-      };
-      reader.readAsDataURL(file);
+      void processAndUploadFile(file);
     }
   };
 
   return (
     <div className="w-full">
-      {currentPhoto ? (
+      {isUploading ? (
+        <div className="mt-4 flex flex-col items-center justify-center rounded-tile border border-ink/15 bg-canvas p-8 shadow-inner">
+          <Spinner className="h-7 w-7 text-ink" />
+          <p className="mt-3 text-xs font-medium text-ink">
+            {COPY.morphing.widgets.photo.uploading}
+          </p>
+        </div>
+      ) : currentPhoto ? (
         <div className="mt-4 flex flex-col items-center">
           <div className="relative aspect-video w-full max-w-sm overflow-hidden rounded-tile border border-ink/15 bg-canvas shadow-inner">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -74,6 +117,12 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
                 <Icon icon={DeleteOutlineIcon} size="sm" />
               </CircleButton>
             </div>
+            {isCloudStored && (
+              <div className="absolute left-2 bottom-2 flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-3xs font-medium text-ink/80 backdrop-blur shadow-2xs">
+                <Icon icon={CloudDoneOutlinedIcon} size="xs" className="text-mint" />
+                <span>Cloud Storage</span>
+              </div>
+            )}
           </div>
           <p className="mt-2 text-2xs text-ink/60">
             {COPY.morphing.widgets.photo.attached}
