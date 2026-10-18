@@ -227,6 +227,8 @@ export interface Routine {
   missingDataFlags: MissingDataFlag[];
   /** Completion ratio (0–1) for each day before the current day, index 0 = day 1. */
   dayHistory: number[];
+  /** Calendar date of last active progress (YYYY-MM-DD in user's local timezone). */
+  lastActiveDate?: string;
   initialSetsDone: Record<string, number>;
   initialExcludedStepIds?: string[];
   initialFeedbackLogs?: FeedbackLog[];
@@ -260,6 +262,7 @@ export interface RoutineRuntime {
   messages: ChatMessage[];
   escalationPaused: boolean;
   assistantTyping?: boolean;
+  lastActiveDate?: string;
 }
 
 /** Backward-compatibility alias */

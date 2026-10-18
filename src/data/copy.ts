@@ -91,7 +91,12 @@ export const COPY = {
   dayActions: {
     markComplete: 'Mark today complete',
     dayLogged: (day: number) => `✓ Day ${day} logged`,
-    logFeedback: (name?: string) => (name ? `Log ${name}` : 'Log feedback')
+    logFeedback: (name?: string) => (name ? `Log ${name}` : 'Log feedback'),
+    advanceToNextDay: (day: number) => `Advance to Day ${day}`,
+    simulatePastDays: (count: number) => `Simulate ${count} past days (Admin)`,
+    adminControlEyebrow: 'Admin Testing Controls',
+    advancedToast: (day: number) => `Advanced to Day ${day}`,
+    simulatedToast: (days: number) => `Simulated ${days} days of tracking history`
   },
   safety: {
     escalationAlert: `Feedback threshold exceeded. Escalation paused. Recommendation: Reduce load/dose by ${DEFAULT_LOAD_REDUCTION_PERCENT}% tomorrow or consult a specialist.`,
@@ -500,6 +505,12 @@ export const COPY = {
       `Logged Day ${day}. Biofeedback score ${score}/10. Ready for tomorrow's target.`,
     confirmSafe: (day: number, score: number) =>
       `Logged Day ${day}. Biofeedback score ${score}/10. Within the study's safe range — progression stays on track.`,
+    dayRolloverNotification: (day: number) =>
+      `A new calendar day has begun in your local timezone. Welcome to Day ${day}. Today's prescribed routine is ready.`,
+    dayAdvancedConfirmation: (prevDay: number, nextDay: number) =>
+      `Day ${prevDay} marked complete. Advanced to Day ${nextDay}.`,
+    simulatedHistoryConfirmation: (days: number, currentDay: number) =>
+      `Simulated ${days} days of historical adherence and biofeedback. Currently tracking Day ${currentDay}.`,
     serverGemmaSource: 'Gemma 2 (Private Endpoint)',
     methodsSectionSource: 'Methods & Interventions Section',
     timestampJustNow: 'Just now',
