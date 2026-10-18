@@ -10,6 +10,7 @@ import { stripClinicalDisclaimer } from '../../../utils/disclaimer';
 import { COPY } from '../../../data/copy';
 import type { Routine } from '../../../types/routine';
 import { getEffectiveGuardrails } from '@/server/guardrailLedger';
+import { executeWithGeminiFailover, getGeminiApiKeys } from '@/server/geminiKeys';
 
 export async function POST(request: Request) {
   try {
@@ -151,22 +152,26 @@ Instructions:
       }
     }
 
-    // 2. Cloud Gemini Flash
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (apiKey) {
+    // 2. Cloud Gemini Flash (with multi-key rotation and automatic failover)
+    const geminiKeys = getGeminiApiKeys();
+    if (geminiKeys.length > 0) {
       try {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({
-          model: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
-          systemInstruction
+        const responseJson = await executeWithGeminiFailover(async (apiKey) => {
+          const genAI = new GoogleGenerativeAI(apiKey);
+          const model = genAI.getGenerativeModel({
+            model: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
+            systemInstruction
+          });
+
+          const res = await model.generateContent(question);
+          return {
+            answer: stripClinicalDisclaimer(res.response.text().trim()),
+            source: COPY.assistant.methodsSectionSource,
+            engine: 'cloud-gemini'
+          };
         });
 
-        const res = await model.generateContent(question);
-        return NextResponse.json({
-          answer: stripClinicalDisclaimer(res.response.text().trim()),
-          source: COPY.assistant.methodsSectionSource,
-          engine: 'cloud-gemini'
-        });
+        return NextResponse.json(responseJson);
       } catch (err) {
         console.error('[AssistantRoute] Gemini API error, falling back to local protocol matcher:', err);
       }

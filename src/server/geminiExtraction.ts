@@ -7,6 +7,7 @@ import { classifyPaperSource, containsTerm } from './gatekeeper';
 import { getEffectiveGuardrails } from './guardrailLedger';
 import { findCanonicalProtocol } from './routineRegistry';
 import { validateAndRegisterProtocolWidgets } from './widgetRegistry';
+import { executeWithGeminiFailover, getGeminiApiKeys } from './geminiKeys';
 
 export interface ExtractInput {
   file?: File | null;
@@ -172,8 +173,6 @@ Return a JSON object conforming strictly to:
 export async function extractPaperProtocol(input: ExtractInput): Promise<ExtractResult> {
   const sourceName = input.file ? input.file.name : input.url || input.text || 'uploaded-document.pdf';
 
-  const apiKey = process.env.GEMINI_API_KEY;
-
   // 1. Resolve live policy from Cloud Firestore Guardrail Ledger
   const activePolicy = await getEffectiveGuardrails();
 
@@ -226,123 +225,132 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
     };
   }
 
-  // If Gemini API key is configured, execute real multimodal extraction
-  if (apiKey) {
+  // If Gemini API keys are configured, execute real multimodal extraction with failover
+  const geminiKeys = getGeminiApiKeys();
+  if (geminiKeys.length > 0) {
     try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const modelName = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite';
-      const model = genAI.getGenerativeModel({
-        model: modelName,
-        generationConfig: {
-          responseMimeType: 'application/json'
-        }
-      });
+      const extracted = await executeWithGeminiFailover(async (apiKey) => {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const modelName = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite';
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            responseMimeType: 'application/json'
+          }
+        });
 
-      const dynamicPolicyInstruction = `\n### ACTIVE CLINICAL GUARDRAIL POLICY (Version: ${activePolicy.version}):
+        const dynamicPolicyInstruction = `\n### ACTIVE CLINICAL GUARDRAIL POLICY (Version: ${activePolicy.version}):
 - Escalation Threshold: If subjective discomfort/pain reaches ${activePolicy.painEscalationThreshold}/10 or higher, escalation MUST be paused with a ${activePolicy.loadReductionPercent}% load reduction.
 - Mandatory Clinical Disclaimer: "${activePolicy.clinicalDisclaimer}"
 - Banned criteria: Studies matching [${activePolicy.bannedKeywords.join(', ')}] MUST be marked eligible=false.`;
 
-      let promptParts: (string | { inlineData: { data: string; mimeType: string } })[] = [];
+        let promptParts: (string | { inlineData: { data: string; mimeType: string } })[] = [];
 
-      if (input.file) {
-        const buffer = Buffer.from(await input.file.arrayBuffer());
-        const base64Data = buffer.toString('base64');
-        promptParts = [
-          {
-            inlineData: {
-              data: base64Data,
-              mimeType: 'application/pdf'
-            }
-          },
-          SYSTEM_PROMPT,
-          dynamicPolicyInstruction,
-          `Analyze this attached PDF (${input.file.name}). First check the strict gatekeeper criteria. If interventional human science, extract the full protocol.`
-        ];
-      } else {
-        promptParts = [
-          SYSTEM_PROMPT,
-          dynamicPolicyInstruction,
-          `Analyze this paper link or text: ${input.url || input.text}. First check gatekeeper criteria, then extract the protocol if eligible.`
-        ];
-      }
-
-      const response = await model.generateContent(promptParts);
-      const text = response.response.text();
-      const cleanJson = text
-        .replace(/^```(?:json)?\s*/i, '')
-        .replace(/\s*```$/i, '')
-        .trim();
-      const parsed = JSON.parse(cleanJson);
-
-      if (!parsed.eligible) {
-        return {
-          success: true,
-          eligible: false,
-          rejectionReason:
-            parsed.rejectionReason || COPY.processing.rejectionFallback,
-          source: sourceName
-        };
-      }
-
-      if (parsed.protocol) {
-        const protocol: Protocol = {
-          ...parsed.protocol,
-          version: parsed.protocol.version || '1.0',
-          changelog: parsed.protocol.changelog && parsed.protocol.changelog.length > 0
-            ? parsed.protocol.changelog
-            : [
-                {
-                  version: '1.0',
-                  date: new Date().toISOString(),
-                  summary: 'Initial clinical protocol extraction',
-                  author: 'Gemini Multimodal Extraction'
-                }
-              ],
-          dayHistory: parsed.protocol.dayHistory ?? [],
-          initialSetsDone: parsed.protocol.initialSetsDone ?? {},
-          initialFeedbackLogs: parsed.protocol.initialFeedbackLogs ?? [],
-          feedbackMetric: parsed.protocol.feedbackMetric
-            ? {
-                ...parsed.protocol.feedbackMetric,
-                escalationThreshold: activePolicy.painEscalationThreshold,
-                escalationMessage: activePolicy.escalationAlertMessage
+        if (input.file) {
+          const buffer = Buffer.from(await input.file.arrayBuffer());
+          const base64Data = buffer.toString('base64');
+          promptParts = [
+            {
+              inlineData: {
+                data: base64Data,
+                mimeType: 'application/pdf'
               }
-            : undefined,
-          initialMessages: parsed.protocol.initialMessages ?? [
-            {
-              id: `${parsed.protocol.id}-msg-1`,
-              role: 'user',
-              kind: 'file',
-              content: sourceName,
-              timestamp: COPY.assistant.timestampJustNow
             },
-            {
-              id: `${parsed.protocol.id}-msg-2`,
-              role: 'ai',
-              kind: 'text',
-              content: COPY.assistant.parsedSummary(parsed.protocol.paper?.pages ?? 'the'),
-              timestamp: COPY.assistant.timestampJustNow
-            },
-            {
-              id: `${parsed.protocol.id}-msg-3`,
-              role: 'ai',
-              kind: 'protocol',
-              content: parsed.protocol.id,
-              timestamp: COPY.assistant.timestampJustNow
-            }
-          ]
-        };
+            SYSTEM_PROMPT,
+            dynamicPolicyInstruction,
+            `Analyze this attached PDF (${input.file.name}). First check the strict gatekeeper criteria. If interventional human science, extract the full protocol.`
+          ];
+        } else {
+          promptParts = [
+            SYSTEM_PROMPT,
+            dynamicPolicyInstruction,
+            `Analyze this paper link or text: ${input.url || input.text}. First check gatekeeper criteria, then extract the protocol if eligible.`
+          ];
+        }
 
-        const validatedProtocol = await validateAndRegisterProtocolWidgets(protocol);
+        const response = await model.generateContent(promptParts);
+        const text = response.response.text();
+        const cleanJson = text
+          .replace(/^```(?:json)?\s*/i, '')
+          .replace(/\s*```$/i, '')
+          .trim();
+        const parsed = JSON.parse(cleanJson);
 
-        return {
-          success: true,
-          eligible: true,
-          routine: validatedProtocol,
-          protocol: validatedProtocol,
-          source: sourceName
-        };
+        if (!parsed.eligible) {
+          return {
+            success: true,
+            eligible: false,
+            rejectionReason:
+              parsed.rejectionReason || COPY.processing.rejectionFallback,
+            source: sourceName
+          };
+        }
+
+        if (parsed.protocol) {
+          const protocol: Protocol = {
+            ...parsed.protocol,
+            version: parsed.protocol.version || '1.0',
+            changelog: parsed.protocol.changelog && parsed.protocol.changelog.length > 0
+              ? parsed.protocol.changelog
+              : [
+                  {
+                    version: '1.0',
+                    date: new Date().toISOString(),
+                    summary: 'Initial clinical protocol extraction',
+                    author: 'Gemini Multimodal Extraction'
+                  }
+                ],
+            dayHistory: parsed.protocol.dayHistory ?? [],
+            initialSetsDone: parsed.protocol.initialSetsDone ?? {},
+            initialFeedbackLogs: parsed.protocol.initialFeedbackLogs ?? [],
+            feedbackMetric: parsed.protocol.feedbackMetric
+              ? {
+                  ...parsed.protocol.feedbackMetric,
+                  escalationThreshold: activePolicy.painEscalationThreshold,
+                  escalationMessage: activePolicy.escalationAlertMessage
+                }
+              : undefined,
+            initialMessages: parsed.protocol.initialMessages ?? [
+              {
+                id: `${parsed.protocol.id}-msg-1`,
+                role: 'user',
+                kind: 'file',
+                content: sourceName,
+                timestamp: COPY.assistant.timestampJustNow
+              },
+              {
+                id: `${parsed.protocol.id}-msg-2`,
+                role: 'ai',
+                kind: 'text',
+                content: COPY.assistant.parsedSummary(parsed.protocol.paper?.pages ?? 'the'),
+                timestamp: COPY.assistant.timestampJustNow
+              },
+              {
+                id: `${parsed.protocol.id}-msg-3`,
+                role: 'ai',
+                kind: 'protocol',
+                content: parsed.protocol.id,
+                timestamp: COPY.assistant.timestampJustNow
+              }
+            ]
+          };
+
+          const validatedProtocol = await validateAndRegisterProtocolWidgets(protocol);
+
+          return {
+            success: true,
+            eligible: true,
+            routine: validatedProtocol,
+            protocol: validatedProtocol,
+            source: sourceName
+          };
+        }
+
+        throw new Error('Gemini output missing protocol or eligible field');
+      });
+
+      if (extracted) {
+        return extracted;
       }
     } catch (err) {
       console.error('[GeminiExtraction] Error calling Gemini API, falling back to simulated extraction:', err);
