@@ -35,11 +35,7 @@ export function AppShell({ children }: AppShellProps) {
       return;
     }
     openAssistant('upload');
-    uploadPaper(file).then((result) => {
-      if (result && !result.eligible) {
-        openAssistant('ask');
-      }
-    });
+    uploadPaper(file);
   });
 
   const isPublicPage = pathname === '/' || pathname === '/login' || pathname === '/signup';
