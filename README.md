@@ -288,6 +288,7 @@ ViskotuN1 offers multiple authentication and testing pathways designed for evalu
      - **Email Keyword**: Sign up or log in using any email containing `admin` (e.g. `admin@viskotun1.internal`, `admin@example.com`).
    - **Badge**: Shows the green active dot with the `admin` badge in the top navigation bar.
    - **Unlocked Features**: Activates the Guardrail Policy Ledger drawer, AI-proposed widget approval queue, fast-forward protocol day simulations, and one-click demo reset.
+   - **Post-Competition Security**: *Following the completion of the Google AI Builder Cup evaluation, public admin entry points and one-click tester buttons will be sealed off and restricted strictly behind internal clinical staff credentials and enterprise IAM governance.*
 
 ---
 
@@ -310,6 +311,9 @@ ViskotuN1 offers multiple authentication and testing pathways designed for evalu
 | **Dynamic Guardrail Policy Ledger** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Click Shield icon in TopBar; adjust pain lockout threshold slider & load reduction % |
 | **AI Widget Approval Queue** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Open Policy Ledger drawer; review & approve pending Gemini-extracted `ProposedWidgetSpec` |
 | **One-Click Demo Reset** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Click Restart icon in TopBar; resets routine, telemetry, and protocols to default state |
+
+> [!NOTE]
+> **Admin Panel Lifecycle & Post-Competition Sealing**: The 1-click admin sign-in, Policy Ledger drawer, AI-proposed widget approval queue, and fast-forward protocol simulation controls are temporarily surfaced in the public UI exclusively to facilitate evaluation and technical grading for the **Google AI Builder Cup**. Once the competition concludes, the entire admin panel will be sealed off and placed behind private multi-factor authentication (MFA) and Google Cloud IAM role restrictions.
 
 ---
 
