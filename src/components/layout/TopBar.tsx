@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import AddIcon from '@mui/icons-material/Add';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
+import LocalFireDepartmentOutlinedIcon from '@mui/icons-material/LocalFireDepartmentOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
@@ -70,7 +71,7 @@ export function TopBar() {
         <div className="ml-auto">
           {streak > 0 && (
             <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-orange/15 px-3 py-1 text-xs font-semibold text-ink">
-              <span aria-hidden="true">🔥</span>
+              <Icon icon={LocalFireDepartmentOutlinedIcon} size="xs" />
               {COPY.shell.streak(streak)}
             </span>
           )}
