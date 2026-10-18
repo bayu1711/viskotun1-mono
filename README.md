@@ -43,7 +43,7 @@ Research Paper (PDF / Full-Text Link)
 [3. Registry Layer — Polymorphic Component Factory]
   <DynamicFieldRenderer /> mounts exact matching UI primitives:
   • 'scale'       ➔ Severity-toned 0–10 visual analog slider (ScaleWidget)
-  • 'photo'       ➔ Firebase Cloud Storage upload (`routines/photos/...`)
+  • 'photo'       ➔ Google Cloud Storage upload (`/api/upload` & `/api/media/...`)
                     with offline data-URL fallback & alignment guide (PhotoWidget)
   • 'numeric'     ➔ Validated stepper with clinical units, e.g. mg/dL, mmHg (NumericWidget)
   • 'timer'       ➔ Dual-mode `stopwatch` or `countdown` timer (TimerWidget)
@@ -219,7 +219,7 @@ Paper Omission Detected (e.g., Calf Stretch hold duration missing)
 - **UI & Animation**: Framer Motion, Material UI Icons (`@mui/icons-material`)
 - **Data Visualization**: Recharts (with SSR-safe client-side dynamic rendering)
 - **Notifications**: Sonner
-- **Persistence & Storage**: Google Cloud Firestore & Firebase Cloud Storage (with hot in-memory and local storage fallbacks)
+- **Persistence & Storage**: Google Cloud Firestore & Google Cloud Storage (with proxy streaming, private bucket security, and local disk fallbacks)
 - **AI & Cloud Backend**: Gemini on Vertex AI / Google AI Studio, Google Cloud Text-to-Speech (`/api/tts`), and Google Cloud Run (`output: 'standalone'`)
 
 ---
