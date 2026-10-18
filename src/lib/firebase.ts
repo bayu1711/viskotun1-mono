@@ -6,30 +6,52 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, type Auth } from 'firebase/auth';
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain:
-    process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
-    `${process.env.GOOGLE_CLOUD_PROJECT || 'gen-lang-client-0064688276'}.firebaseapp.com`,
-  projectId:
-    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
-    process.env.GOOGLE_CLOUD_PROJECT ||
-    'gen-lang-client-0064688276',
-  storageBucket:
-    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
-    `${process.env.GOOGLE_CLOUD_PROJECT || 'gen-lang-client-0064688276'}.firebasestorage.app`,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
-};
+interface FirebaseRuntimeConfig {
+  apiKey?: string;
+  authDomain?: string;
+  projectId?: string;
+  storageBucket?: string;
+  messagingSenderId?: string;
+  appId?: string;
+}
+
+declare global {
+  interface Window {
+    __FIREBASE_CONFIG__?: FirebaseRuntimeConfig;
+  }
+}
+
+export function getFirebaseConfig(): FirebaseRuntimeConfig {
+  if (typeof window !== 'undefined' && window.__FIREBASE_CONFIG__) {
+    return window.__FIREBASE_CONFIG__;
+  }
+
+  return {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain:
+      process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
+      `${process.env.GOOGLE_CLOUD_PROJECT || 'gen-lang-client-0064688276'}.firebaseapp.com`,
+    projectId:
+      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+      process.env.GOOGLE_CLOUD_PROJECT ||
+      'gen-lang-client-0064688276',
+    storageBucket:
+      process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+      `${process.env.GOOGLE_CLOUD_PROJECT || 'gen-lang-client-0064688276'}.firebasestorage.app`,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
+  };
+}
 
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let googleProvider: GoogleAuthProvider | null = null;
 
 export function isFirebaseConfigured(): boolean {
+  const config = getFirebaseConfig();
   return Boolean(
-    process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
-      (process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT)
+    config.apiKey &&
+      (config.projectId || process.env.GOOGLE_CLOUD_PROJECT)
   );
 }
 
@@ -43,7 +65,8 @@ export function getFirebaseAuth(): {
 
   if (!auth && isFirebaseConfigured()) {
     try {
-      app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+      const config = getFirebaseConfig();
+      app = getApps().length ? getApp() : initializeApp(config);
       auth = getAuth(app);
       googleProvider = new GoogleAuthProvider();
       googleProvider.setCustomParameters({ prompt: 'select_account' });

@@ -53,8 +53,36 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const runtimeFirebaseConfig = process.env.NEXT_PUBLIC_FIREBASE_API_KEY
+    ? {
+        apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+        authDomain:
+          process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
+          `${process.env.GOOGLE_CLOUD_PROJECT || 'gen-lang-client-0064688276'}.firebaseapp.com`,
+        projectId:
+          process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+          process.env.GOOGLE_CLOUD_PROJECT ||
+          'gen-lang-client-0064688276',
+        storageBucket:
+          process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+          `${process.env.GOOGLE_CLOUD_PROJECT || 'gen-lang-client-0064688276'}.firebasestorage.app`,
+        messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
+        appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || ''
+      }
+    : null;
+
   return (
     <html lang={COPY.metadata.lang} className={`${bodyFont.variable} ${displayFont.variable}`}>
+      <head>
+        {runtimeFirebaseConfig && (
+          <script
+            id="firebase-runtime-config"
+            dangerouslySetInnerHTML={{
+              __html: `window.__FIREBASE_CONFIG__ = ${JSON.stringify(runtimeFirebaseConfig)};`
+            }}
+          />
+        )}
+      </head>
       <body className="min-h-screen bg-canvas font-sans text-ink antialiased">
         <Providers>{children}</Providers>
       </body>
