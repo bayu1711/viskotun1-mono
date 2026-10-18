@@ -354,6 +354,7 @@ export const COPY = {
     },
     holdCountdownStart: (seconds: number) => `Begin hold for ${seconds} seconds. 3, 2, 1, start.`,
     setAnnouncement: (setNumber: number, totalSets: number) => `Set ${setNumber} of ${totalSets}. `,
+    holdResumed: (seconds: number) => `Resuming. ${seconds} seconds left.`,
     holdFinished: 'Hold complete. Relax.',
     finishedAllSteps: 'Great work! You have completed all prescribed plan steps for today.',
     guidedStepsEnded: 'That was the last guided step. Log any remaining sets on your step cards.',

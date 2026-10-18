@@ -84,6 +84,8 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
   const audioRef = useRef<HTMLAudioElement | null>(null);
   // Bumped on every cancel so in-flight TTS fetches and stale end events are ignored
   const speechIdRef = useRef(0);
+  // Where Resume picks up: the rest of a hold, or the action after a finished hold
+  const resumeRef = useRef<(() => void) | null>(null);
   // Read at the end of a session, after the last set credit has re-rendered
   const isDayCompleteRef = useRef(isDayComplete);
 
@@ -264,13 +266,16 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
   const startHoldCountdown = useCallback(
     (seconds: number, nextStepCallback: () => void, intro = '') => {
       clearTimer();
+      let remaining = seconds;
       setCountdownRemaining(seconds);
       setStatusText(COPY.voiceCoach.countdownActive(seconds));
 
-      chime('start');
+      const finish = () => {
+        resumeRef.current = null;
+        nextStepCallback();
+      };
 
-      speak(`${intro}${COPY.voiceCoach.holdCountdownStart(seconds)}`, () => {
-        let remaining = seconds;
+      const runCountdown = () => {
         timerRef.current = window.setInterval(() => {
           remaining -= 1;
           setCountdownRemaining(remaining);
@@ -286,10 +291,22 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
             setCountdownRemaining(null);
             setStatusText(COPY.voiceCoach.countdownComplete);
             chime('complete');
-            speak(COPY.voiceCoach.holdFinished, nextStepCallback);
+            // Pausing during "Hold complete" resumes straight into what comes next
+            resumeRef.current = finish;
+            speak(COPY.voiceCoach.holdFinished, finish);
           }
         }, 1000);
-      });
+      };
+
+      // Resuming after a pause continues this hold from the seconds left
+      resumeRef.current = () => {
+        setCountdownRemaining(remaining);
+        setStatusText(COPY.voiceCoach.countdownActive(remaining));
+        speak(COPY.voiceCoach.holdResumed(remaining), runCountdown);
+      };
+
+      chime('start');
+      speak(`${intro}${COPY.voiceCoach.holdCountdownStart(seconds)}`, runCountdown);
     },
     [chime, clearTimer, speak]
   );
@@ -307,7 +324,9 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
       }
 
       const step = steps[index];
+      resumeRef.current = null;
       setCurrentStepIndex(index);
+      setCountdownRemaining(null);
       setStatusText(COPY.voiceCoach.stepPacing(index + 1, steps.length));
 
       chime('start');
@@ -316,10 +335,13 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
 
       // Wait 2 seconds rest, then run the next action
       const restThen = (next: () => void) => {
-        restTimerRef.current = window.setTimeout(() => {
+        const proceed = () => {
           restTimerRef.current = null;
+          resumeRef.current = null;
           next();
-        }, 2000);
+        };
+        resumeRef.current = proceed;
+        restTimerRef.current = window.setTimeout(proceed, 2000);
       };
 
       speak(script, () => {
@@ -377,12 +399,17 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
   const resumeCoach = useCallback(() => {
     setIsPlaying(true);
     setIsPaused(false);
-    guideStep(currentStepIndex);
+    if (resumeRef.current) {
+      resumeRef.current();
+    } else {
+      guideStep(currentStepIndex);
+    }
   }, [currentStepIndex, guideStep]);
 
   const stopCoach = useCallback(() => {
     cancelSpeech();
     clearTimer();
+    resumeRef.current = null;
     setIsPlaying(false);
     setIsPaused(false);
     setCountdownRemaining(null);
@@ -394,6 +421,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
     cancelSpeech();
     clearTimer();
     setCountdownRemaining(null);
+    resumeRef.current = null;
     // On the last step, Next ends the session instead of staying put
     if (isPlaying && currentStepIndex >= steps.length - 1) {
       guideStep(steps.length);
@@ -410,6 +438,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
     cancelSpeech();
     clearTimer();
     setCountdownRemaining(null);
+    resumeRef.current = null;
     const prevIdx = Math.max(0, currentStepIndex - 1);
     setCurrentStepIndex(prevIdx);
     if (isPlaying) {
