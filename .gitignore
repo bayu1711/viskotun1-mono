@@ -18,6 +18,7 @@ out
 .env*.local
 .env.production
 !.env.example
+.viskotun1_uploads
 
 # Editor directories and files
 .vscode/*
