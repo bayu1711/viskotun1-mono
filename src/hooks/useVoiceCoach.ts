@@ -95,6 +95,13 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
 
   const selectedVoice = availableVoices[selectedVoiceIndex] || availableVoices[0] || null;
 
+  // Speech callbacks outlive the render that queued them, so they read settings live from a ref
+  const settingsRef = useRef({ speed, selectedVoice, isSoundEnabled });
+
+  useEffect(() => {
+    settingsRef.current = { speed, selectedVoice, isSoundEnabled };
+  }, [speed, selectedVoice, isSoundEnabled]);
+
   const cycleVoice = useCallback(() => {
     if (availableVoices.length <= 1) return;
     setSelectedVoiceIndex((prev) => (prev + 1) % availableVoices.length);
@@ -163,6 +170,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
       cancelSpeech();
       const speechId = speechIdRef.current;
       const isCurrent = () => speechId === speechIdRef.current;
+      const { speed, selectedVoice } = settingsRef.current;
 
       const speakWithBrowser = () => {
         if (!isCurrent()) return;
@@ -225,8 +233,12 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
           speakWithBrowser();
         });
     },
-    [cancelSpeech, isSupported, selectedVoice, speed]
+    [cancelSpeech, isSupported]
   );
+
+  const chime = useCallback((kind: 'start' | 'tick' | 'complete') => {
+    if (settingsRef.current.isSoundEnabled) playAudioChime(kind);
+  }, []);
 
   const buildStepScript = useCallback((step: RoutineStep, index: number, total: number) => {
     const stepNum = index + 1;
@@ -255,9 +267,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
       setCountdownRemaining(seconds);
       setStatusText(COPY.voiceCoach.countdownActive(seconds));
 
-      if (isSoundEnabled) {
-        playAudioChime('start');
-      }
+      chime('start');
 
       speak(`${intro}${COPY.voiceCoach.holdCountdownStart(seconds)}`, () => {
         let remaining = seconds;
@@ -268,20 +278,20 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
           if (remaining === 10 && remaining > 0) {
             speak(COPY.voiceCoach.secondsRemaining);
           } else if (remaining <= 3 && remaining > 0) {
-            if (isSoundEnabled) playAudioChime('tick');
+            chime('tick');
           }
 
           if (remaining <= 0) {
             clearTimer();
             setCountdownRemaining(null);
             setStatusText(COPY.voiceCoach.countdownComplete);
-            if (isSoundEnabled) playAudioChime('complete');
+            chime('complete');
             speak(COPY.voiceCoach.holdFinished, nextStepCallback);
           }
         }, 1000);
       });
     },
-    [clearTimer, isSoundEnabled, speak]
+    [chime, clearTimer, speak]
   );
 
   const guideStep = useCallback(
@@ -291,7 +301,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
         setIsPlaying(false);
         setIsPaused(false);
         setStatusText(message);
-        if (isSoundEnabled) playAudioChime('complete');
+        chime('complete');
         speak(message);
         return;
       }
@@ -300,7 +310,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
       setCurrentStepIndex(index);
       setStatusText(COPY.voiceCoach.stepPacing(index + 1, steps.length));
 
-      if (isSoundEnabled) playAudioChime('start');
+      chime('start');
 
       const script = buildStepScript(step, index, steps.length);
 
@@ -338,7 +348,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
         }
       });
     },
-    [buildStepScript, isSoundEnabled, onStepComplete, speak, startHoldCountdown, steps]
+    [buildStepScript, chime, onStepComplete, speak, startHoldCountdown, steps]
   );
 
   const startCoach = useCallback(() => {
