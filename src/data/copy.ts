@@ -938,6 +938,10 @@ export const COPY = {
         removePhoto: 'Remove photo',
         attached: '✓ Photo attached to milestone record',
         uploadButton: 'Upload file',
+        uploading: 'Uploading to Cloud Storage...',
+        uploadSuccess: 'Photo uploaded securely to Cloud Storage',
+        uploadError: 'Cloud Storage upload failed. Saved local preview.',
+        invalidFile: 'Please choose an image file (PNG, JPG, WebP).',
         demoCaptureButton: 'Load Demo Capture',
         demoPhotoSvgText: 'Milestone Clinical Photograph',
         demoPhotoSvg: (text: string) =>
