@@ -1130,6 +1130,13 @@ export const COPY = {
       internalError: 'Internal Server Error during user sync',
       fetchError: 'Internal Server Error fetching user sync'
     },
+    upload: {
+      noFileProvided: 'No file provided for upload',
+      invalidFileType: 'Invalid file type. Only image files (JPEG, PNG, WebP, GIF) are accepted.',
+      fileTooLarge: 'File size exceeds 10MB limit',
+      uploadFailed: 'Failed to upload file to Cloud Storage',
+      uploadSuccess: 'File uploaded successfully'
+    },
     papers: {
       fetchError: 'Internal Server Error fetching papers',
       saveError: 'Internal Server Error saving paper',
