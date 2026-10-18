@@ -256,7 +256,7 @@ export const COPY = {
     cardTitle: '1-Page brief',
     body: (title: string) =>
       `1-Page brief of ${title}: trial citation, daily routine, adherence rate, and logs to share with your coach, specialist, or personal records.`,
-    export: '📄 View & print 1-page summary',
+    export: 'View & print 1-page summary',
     exporting: 'Preparing 1-page summary…',
     success: '✓ 1-Page summary ready',
     successToast: 'Shareable summary generated',
