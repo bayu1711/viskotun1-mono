@@ -38,8 +38,10 @@ import {
   getScheduledFieldsForDay,
   isMilestoneDay,
   isProgressionReady,
+  isRoutineCompleted,
   resolveDataCollectionSpec,
-  resolveFeedbackMetric
+  resolveFeedbackMetric,
+  resolveMilestoneDays
 } from '../utils/routineMetrics';
 import { getDaysDifference, getLocalTodayDateString, getMsUntilNextLocalMidnight, nowLabel } from '../utils/time';
 
@@ -769,6 +771,9 @@ export function useRoutineState() {
     [protocol, state.excludedStepIds]
   );
   const dayIsComplete = protocol && activeSteps.length > 0 ? todayFraction === 1 : false;
+  const isCompleted = protocol
+    ? isRoutineCompleted(protocol, dayIsComplete || todayFraction >= 1)
+    : false;
   const adherenceRate = protocol ? adherenceOf(protocol, todayFraction) : 0;
   const progressionReady = protocol
     ? isProgressionReady(
@@ -1009,6 +1014,211 @@ export function useRoutineState() {
     },
     [protocol, updateRuntime, pushMessages]
   );
+
+  const simulateFullCompletion = useCallback(() => {
+    if (!protocol) return;
+    const totalDays = protocol.totalDays;
+    const history = Array.from({ length: totalDays }, () => 1.0);
+    const todayStr = getLocalTodayDateString();
+
+    const pastFeedbackLogs: FeedbackLog[] = [];
+    const pastMorphingLogs: MorphingDataLog[] = [];
+
+    const spec = resolveDataCollectionSpec(protocol);
+
+    if (protocol.id === 'achilles') {
+      const achProgressions = [
+        { day: 1, score: 3, note: 'Initial eccentric loading, mild morning tendon tenderness', dorsi: 28 },
+        { day: 7, score: 3, note: 'Soreness manageable during lowering phase, completing all sets', dorsi: 30 },
+        { day: 14, score: 2, note: 'Slight ache after bent-knee drops, adapting well to volume', dorsi: 32 },
+        { day: 21, score: 2, note: 'Discomfort easing, full eccentric sets completed smoothly', dorsi: 33 },
+        { day: 28, score: 2, note: 'Morning tendon stiffness substantially reduced', dorsi: 35 },
+        { day: 42, score: 1, note: 'Eccentric drops feel controlled, minimal discomfort reported', dorsi: 37 },
+        { day: 56, score: 1, note: 'Excellent tendon tolerance, progression ready', dorsi: 38 },
+        { day: 70, score: 1, note: 'High loading tolerance with zero morning stiffness', dorsi: 40 },
+        { day: 84, score: 0, note: 'Final evaluation: completely symptom-free, full tendon strength restored', dorsi: 42 }
+      ];
+
+      for (const item of achProgressions) {
+        pastFeedbackLogs.push({
+          id: createId('log'),
+          day: item.day,
+          score: item.score,
+          note: item.note,
+          loggedAt: `Day ${item.day} · 8:15 AM`
+        });
+        pastMorphingLogs.push({
+          id: createId('morph'),
+          fieldId: 'ach-pain-vas',
+          day: item.day,
+          value: item.score,
+          loggedAt: `Day ${item.day} · 8:15 AM`
+        });
+        pastMorphingLogs.push({
+          id: createId('morph'),
+          fieldId: 'ach-dorsiflexion',
+          day: item.day,
+          value: item.dorsi,
+          loggedAt: `Day ${item.day} · 8:15 AM`
+        });
+      }
+    } else if (protocol.id === 'hair-loss') {
+      const hairProgressions = [
+        { day: 1, score: 2, note: 'Baseline scalp clinical photo captured, 1.5mm dermaroller well tolerated' },
+        { day: 14, score: 2, note: 'Minoxidil applied 2x daily without irritation, mild pinkness after microneedling' },
+        { day: 28, score: 1, note: 'Mild shedding phase stabilized, early follicular stimulation visible' },
+        { day: 56, score: 1, note: 'Visible vellus hair emergence on vertex, excellent scalp compliance' },
+        { day: 84, score: 0, note: 'Trial endpoint: documented terminal hair density increase, scalp calm' }
+      ];
+
+      for (const item of hairProgressions) {
+        pastFeedbackLogs.push({
+          id: createId('log'),
+          day: item.day,
+          score: item.score,
+          note: item.note,
+          loggedAt: `Day ${item.day} · 8:00 AM`
+        });
+        pastMorphingLogs.push({
+          id: createId('morph'),
+          fieldId: 'hair-irritation-scale',
+          day: item.day,
+          value: item.score,
+          loggedAt: `Day ${item.day} · 8:00 AM`
+        });
+        pastMorphingLogs.push({
+          id: createId('morph'),
+          fieldId: 'hair-vertex-photo',
+          day: item.day,
+          value: COPY.morphing.widgets.photo.demoPhotoSvg(`Day ${item.day} Clinical Assessment`),
+          loggedAt: `Day ${item.day} · 8:00 AM`
+        });
+      }
+    } else {
+      const sampleInterval = Math.max(1, Math.floor(totalDays / 8));
+      const sampleDays = Array.from(
+        new Set([1, ...Array.from({ length: totalDays }, (_, i) => i + 1).filter((d) => d % sampleInterval === 0), totalDays])
+      ).sort((a, b) => a - b);
+
+      for (const day of sampleDays) {
+        const isEnd = day === totalDays;
+        const progressFraction = day / totalDays;
+        const score = Math.max(0, Math.round(2 * (1 - progressFraction)));
+
+        pastFeedbackLogs.push({
+          id: createId('log'),
+          day,
+          score,
+          note: isEnd
+            ? `Completed final Day ${totalDays} intervention. Full clinical trial routine completed.`
+            : `Completed Day ${day} protocol as prescribed with high adherence.`,
+          loggedAt: `Day ${day} · 8:00 AM`
+        });
+
+        for (const field of spec) {
+          if (field.type === 'scale') {
+            const min = field.min ?? 0;
+            const target = field.targetMin ?? min;
+            const val = Math.round(target + (field.max ?? 10) * 0.2 * (1 - progressFraction));
+            pastMorphingLogs.push({
+              id: createId('morph'),
+              fieldId: field.id,
+              day,
+              value: Math.max(min, val),
+              loggedAt: `Day ${day} · 8:00 AM`
+            });
+          } else if (field.type === 'numeric') {
+            const target = field.targetMax ?? field.targetMin ?? field.max ?? 50;
+            const baseline = field.min ?? 10;
+            const val = Math.round(baseline + (target - baseline) * progressFraction);
+            pastMorphingLogs.push({
+              id: createId('morph'),
+              fieldId: field.id,
+              day,
+              value: val,
+              loggedAt: `Day ${day} · 8:00 AM`
+            });
+          } else if (field.type === 'photo') {
+            const milestoneDays = resolveMilestoneDays(field, totalDays);
+            if (milestoneDays.includes(day)) {
+              pastMorphingLogs.push({
+                id: createId('morph'),
+                fieldId: field.id,
+                day,
+                value: COPY.morphing.widgets.photo.demoPhotoSvg(`Day ${day} Clinical Assessment`),
+                loggedAt: `Day ${day} · 8:00 AM`
+              });
+            }
+          } else if (field.type === 'timer') {
+            pastMorphingLogs.push({
+              id: createId('morph'),
+              fieldId: field.id,
+              day,
+              value: field.max ?? 300,
+              loggedAt: `Day ${day} · 8:00 AM`
+            });
+          } else if (field.type === 'boolean') {
+            pastMorphingLogs.push({
+              id: createId('morph'),
+              fieldId: field.id,
+              day,
+              value: true,
+              loggedAt: `Day ${day} · 8:00 AM`
+            });
+          } else if (field.type === 'multichoice') {
+            pastMorphingLogs.push({
+              id: createId('morph'),
+              fieldId: field.id,
+              day,
+              value: field.options?.[0] ?? 'Optimal',
+              loggedAt: `Day ${day} · 8:00 AM`
+            });
+          }
+        }
+      }
+    }
+
+    const nonExcludedSteps = protocol.steps.filter(
+      (step) => !(state.excludedStepIds ?? []).includes(step.id)
+    );
+    const allSetsDone = Object.fromEntries(nonExcludedSteps.map((step) => [step.id, step.sets]));
+
+    setProtocolList((prev) =>
+      prev.map((p) =>
+        p.id === protocol.id
+          ? {
+              ...p,
+              currentDay: totalDays,
+              streak: totalDays,
+              dayHistory: history,
+              lastActiveDate: todayStr
+            }
+          : p
+      )
+    );
+
+    updateRuntime(protocol.id, (prev) => ({
+      ...prev,
+      setsDone: allSetsDone,
+      feedbackLogs: pastFeedbackLogs,
+      morphingLogs: pastMorphingLogs,
+      escalationPaused: false,
+      lastActiveDate: todayStr
+    }));
+
+    pushMessages(protocol.id, {
+      role: 'ai',
+      kind: 'confirmation',
+      content: COPY.assistant.simulatedFullCompletionConfirmation(
+        protocol.shortTitle || protocol.title,
+        totalDays
+      )
+    });
+
+    toast.success(
+      COPY.dayActions.simulateFullCompletionToast(protocol.shortTitle || protocol.title, totalDays)
+    );
+  }, [protocol, state.excludedStepIds, updateRuntime, pushMessages]);
 
   const checkMidnightRollover = useCallback(() => {
     const todayStr = getLocalTodayDateString();
@@ -1845,6 +2055,7 @@ export function useRoutineState() {
       todayPercent,
       adherenceRate,
       dayIsComplete,
+      isCompleted,
       progressionReady,
       assistantTyping: state.assistantTyping ?? false,
       isFeedbackDrawerOpen,
@@ -1875,6 +2086,7 @@ export function useRoutineState() {
       markTodayComplete,
       advanceToNextDay,
       simulatePastDays,
+      simulateFullCompletion,
       isAdmin: Boolean(isAdmin),
       logFeedback,
       logMorphingData,
@@ -1919,6 +2131,7 @@ export function useRoutineState() {
       todayPercent,
       adherenceRate,
       dayIsComplete,
+      isCompleted,
       progressionReady,
       isFeedbackDrawerOpen,
       openFeedbackDrawer,
@@ -1944,6 +2157,7 @@ export function useRoutineState() {
       markTodayComplete,
       advanceToNextDay,
       simulatePastDays,
+      simulateFullCompletion,
       isAdmin,
       logFeedback,
       logMorphingData,
