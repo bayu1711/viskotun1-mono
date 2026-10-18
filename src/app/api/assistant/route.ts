@@ -119,7 +119,8 @@ Instructions:
    - Cross-check the requested change against the study's Methods & Interventions section.
    - If VALID per the study: Confirm the correction citing the exact paper section. State clearly: "Correction verified: updated [parameter] to [value]. Protocol version bumped to next minor version."
    - If INVALID: Politely explain why the published paper does not support the request, citing what the paper actually investigated.
-7. Do NOT include Clinical Advisory prefixes or Medical Disclaimer statements in your response text (the UI displays a dedicated Medical Disclaimer chip in the header).`;
+7. Do NOT include Clinical Advisory prefixes or Medical Disclaimer statements in your response text (the UI displays a dedicated Medical Disclaimer chip in the header).
+8. Never show internal identifiers from the context (step, rule, contraindication or field ids such as "ach-rule-2" or "ach-c-1"). Refer to steps, rules and safety limits by their wording instead.`;
 
     // 1. Check for dedicated Gemma / Ollama Endpoint if configured
     const gemmaEndpoint = process.env.GEMMA_ENDPOINT_URL;
