@@ -38,6 +38,7 @@ export function AssistantSheet() {
     extractingSourceName,
     stagingMessages,
     stagingError,
+    clearStagingError,
     isStagingAssistantTyping,
     confirmStagingProtocol,
     discardStagingProtocol,
@@ -49,7 +50,12 @@ export function AssistantSheet() {
   const inputRef = useRef<HTMLInputElement>(null);
   const titleId = useId();
 
-  useDialogA11y(panelRef, { open: isOpen, onClose: closeAssistant, initialFocusRef: inputRef });
+  const handleClose = () => {
+    clearStagingError();
+    closeAssistant();
+  };
+
+  useDialogA11y(panelRef, { open: isOpen, onClose: handleClose, initialFocusRef: inputRef });
 
   const currentMessageCount =
     mode === 'ask'
@@ -61,12 +67,18 @@ export function AssistantSheet() {
   const endRef = useScrollToLatest<HTMLDivElement>(isOpen, `${mode}-${currentMessageCount}`);
 
   const handleModeChange = (next: AssistantMode) => {
+    if (next === 'upload') {
+      clearStagingError();
+    }
     setMode(next);
     inputRef.current?.focus();
   };
 
-  const addPaper = (source: string | File) => {
-    uploadPaper(source);
+  const addPaper = async (source: string | File) => {
+    const result = await uploadPaper(source);
+    if (result && !result.eligible) {
+      setMode('ask');
+    }
   };
 
   const handleFile = (file: File) => {
@@ -106,7 +118,7 @@ export function AssistantSheet() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={closeAssistant}
+            onClick={handleClose}
             aria-hidden="true"
           />
 
@@ -138,16 +150,16 @@ export function AssistantSheet() {
               }
               titleId={titleId}
               onModeChange={handleModeChange}
-              onClose={closeAssistant}
+              onClose={handleClose}
               lastEngine={lastEngine}
             />
 
             <div role="log" aria-live="polite" className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
               {isAsk ? (
                 /* Ask Mode: Contextual to Active Routine */
-                protocol ? (
+                protocol || messages.length > 0 ? (
                   <>
-                    <MissingDataBanner />
+                    {protocol && <MissingDataBanner />}
                     {hasAskConversation ? (
                       messages.map((message) => (
                         <AssistantMessage key={message.id} message={message} />
@@ -215,8 +227,6 @@ export function AssistantSheet() {
                       </div>
 
                       <UploadDropzone onFile={addPaper} />
-
-                      {stagingError && <AlertCard content={stagingError} />}
                     </div>
                   )}
                 </div>

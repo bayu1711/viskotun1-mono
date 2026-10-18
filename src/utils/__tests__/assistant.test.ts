@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Routine } from '../../types/routine';
-import { answerFor } from '../assistant';
+import { answerFor, isPaperLink } from '../assistant';
 
 const sampleProtocol: Routine = {
   id: 'creatine-test',
@@ -206,4 +206,12 @@ describe('Assistant answerFor generalization', () => {
     expect(answer).toContain("I couldn't find that in the Methods section");
     expect(answer).toContain('creatine sleep');
   });
+
+  it('detects DOI and paper URLs with isPaperLink', () => {
+    expect(isPaperLink('https://doi.org/10.1016/j.clinbiomech.2014.11.005')).toBe(true);
+    expect(isPaperLink('10.1016/j.clinbiomech.2014.11.005')).toBe(true);
+    expect(isPaperLink('https://pubmed.ncbi.nlm.nih.gov/25498305/')).toBe(true);
+    expect(isPaperLink('What is the protocol sets count?')).toBe(false);
+  });
 });
+

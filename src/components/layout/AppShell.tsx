@@ -34,8 +34,12 @@ export function AppShell({ children }: AppShellProps) {
       toast.error(COPY.upload.invalidType);
       return;
     }
-    uploadPaper(file);
     openAssistant('upload');
+    uploadPaper(file).then((result) => {
+      if (result && !result.eligible) {
+        openAssistant('ask');
+      }
+    });
   });
 
   const isPublicPage = pathname === '/' || pathname === '/login' || pathname === '/signup';
