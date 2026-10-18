@@ -243,7 +243,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
   }, []);
 
   const startHoldCountdown = useCallback(
-    (seconds: number, nextStepCallback: () => void) => {
+    (seconds: number, nextStepCallback: () => void, intro = '') => {
       clearTimer();
       setCountdownRemaining(seconds);
       setStatusText(COPY.voiceCoach.countdownActive(seconds));
@@ -252,7 +252,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
         playAudioChime('start');
       }
 
-      speak(COPY.voiceCoach.holdCountdownStart(seconds), () => {
+      speak(`${intro}${COPY.voiceCoach.holdCountdownStart(seconds)}`, () => {
         let remaining = seconds;
         timerRef.current = window.setInterval(() => {
           remaining -= 1;
@@ -296,21 +296,35 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
 
       const script = buildStepScript(step, index, steps.length);
 
+      // Wait 2 seconds rest, then run the next action
+      const restThen = (next: () => void) => {
+        restTimerRef.current = window.setTimeout(() => {
+          restTimerRef.current = null;
+          next();
+        }, 2000);
+      };
+
       speak(script, () => {
-        // If step has a timed hold, start the countdown
-        if (step.durationSeconds && step.durationSeconds > 0) {
-          startHoldCountdown(step.durationSeconds, () => {
-            if (onStepComplete) onStepComplete(index);
-            // Wait 2 seconds rest, then advance to next step
-            restTimerRef.current = window.setTimeout(() => {
-              restTimerRef.current = null;
-              guideStep(index + 1);
-            }, 2000);
-          });
-        } else {
-          // Non-timed step: complete and optionally pause or wait for user action
-          if (onStepComplete) onStepComplete(index);
+        const holdSeconds = step.durationSeconds ?? 0;
+        if (holdSeconds > 0 && step.reps <= 1) {
+          // One hold per set: the coach guides the whole set, so it credits it
+          const runHoldSet = (setNumber: number) => {
+            const intro = setNumber > 1 ? COPY.voiceCoach.setAnnouncement(setNumber, step.sets) : '';
+            startHoldCountdown(
+              holdSeconds,
+              () => {
+                if (onStepComplete) onStepComplete(index);
+                restThen(() => (setNumber < step.sets ? runHoldSet(setNumber + 1) : guideStep(index + 1)));
+              },
+              intro
+            );
+          };
+          runHoldSet(1);
+        } else if (holdSeconds > 0) {
+          // Repeated holds or a session timer: the coach only times it, the user logs sets on the card
+          startHoldCountdown(holdSeconds, () => restThen(() => guideStep(index + 1)));
         }
+        // Rep-based steps are logged by the user on the step card
       });
     },
     [buildStepScript, isSoundEnabled, onStepComplete, speak, startHoldCountdown, steps]

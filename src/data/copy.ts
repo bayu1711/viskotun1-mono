@@ -353,6 +353,7 @@ export const COPY = {
       prescribedTempo: (tempo: string) => ` Prescribed tempo is ${tempo}.`
     },
     holdCountdownStart: (seconds: number) => `Begin hold for ${seconds} seconds. 3, 2, 1, start.`,
+    setAnnouncement: (setNumber: number, totalSets: number) => `Set ${setNumber} of ${totalSets}. `,
     holdFinished: 'Hold complete. Relax.',
     finishedAllSteps: 'Great work! You have completed all prescribed plan steps for today.',
     unsupported: 'Voice synthesis is not supported on this browser.',
