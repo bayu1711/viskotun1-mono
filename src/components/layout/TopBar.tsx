@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import AddIcon from '@mui/icons-material/Add';
@@ -26,6 +26,12 @@ export function TopBar() {
   const displayName = user?.name || COPY.auth.defaultGuestName;
   const displayInitials = user?.initials || COPY.brand.initials;
 
+  // The server clock is not in the viewer's timezone, so the greeting is only computed in the browser
+  const [greetingText, setGreetingText] = useState<string | null>(null);
+  useEffect(() => {
+    setGreetingText(greeting());
+  }, []);
+
   return (
     <header className="mx-auto w-full max-w-6xl px-5 pt-5 lg:px-10 lg:pt-8">
       <div className="flex items-center gap-3 border-b border-ink pb-4">
@@ -42,7 +48,7 @@ export function TopBar() {
         </Link>
         <Avatar initials={displayInitials} />
         <div className="min-w-0 leading-tight">
-          <p className="hidden text-xs text-ink/60 sm:block">{greeting()}</p>
+          <p className="hidden text-xs text-ink/60 sm:block">{greetingText ?? ' '}</p>
           <div className="flex flex-wrap items-center gap-x-2">
             <p className="truncate text-sm font-medium">{displayName}</p>
             {isGuest ? (
