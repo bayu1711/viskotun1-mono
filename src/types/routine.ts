@@ -92,6 +92,12 @@ export type WidgetType =
   | 'multichoice'
   | 'boolean';
 
+/**
+ * Who owns an escalation message. 'policy' messages are replaced when the guardrail ledger
+ * changes; 'protocol' messages carry paper-specific advice (e.g. split the dose) and are kept.
+ */
+export type EscalationSource = 'policy' | 'protocol';
+
 export interface DataCollectionField {
   id: string;
   name: string;
@@ -105,8 +111,11 @@ export interface DataCollectionField {
   step?: number;
   options?: string[];
   instructions?: string;
+  /** Timer fields only: 'countdown' counts down from `max` seconds; defaults to a stopwatch. */
+  timerMode?: 'stopwatch' | 'countdown';
   escalationThreshold?: number;
   escalationMessage?: string;
+  escalationSource?: EscalationSource;
 }
 
 export interface MorphingDataLog {
@@ -128,6 +137,7 @@ export interface FeedbackMetric {
   maxScore?: number;
   escalationThreshold?: number;
   escalationMessage?: string;
+  escalationSource?: EscalationSource;
 }
 
 export interface FeedbackLog {

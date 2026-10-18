@@ -1,4 +1,8 @@
 const DEFAULT_LOAD_REDUCTION_PERCENT = 20;
+const DEFAULT_ESCALATION_THRESHOLD = 4;
+
+/** Rule conditions read after "if"; drop a leading "If" an extractor may already have written. */
+const ruleCondition = (condition: string) => condition.replace(/^if\s+/i, '').toLowerCase();
 
 /** Centralized UI copy. Routine-specific content lives in data/routines. */
 export const COPY = {
@@ -103,7 +107,7 @@ export const COPY = {
     clinicalDisclaimer:
       'Medical Disclaimer: ViskotuN1 provides educational routine extraction grounded strictly in human interventional clinical literature. It does not provide medical diagnosis, prescription, or replace personalized clinical supervision from a licensed physician or physical therapist.',
     baselineEscalationAlert:
-      `Pain threshold exceeded. Escalation paused. Recommendation: Reduce load by ${DEFAULT_LOAD_REDUCTION_PERCENT}% tomorrow or consult your therapist.`
+      `Pain threshold exceeded (≥ ${DEFAULT_ESCALATION_THRESHOLD}/10). Escalation paused. Recommendation: Reduce load by ${DEFAULT_LOAD_REDUCTION_PERCENT}% tomorrow or consult your therapist.`
   },
   calendar: {
     listLabel: 'Routine day history',
@@ -165,6 +169,7 @@ export const COPY = {
     inferredMarker: ' *',
     inferredNote: '* Parameter not reported by authors — conservative clinical default applied',
     inferredBadge: (source?: string) => source ? `Inferred · ${source}` : 'Inferred baseline',
+    tempoBadge: (tempo: string) => `Tempo · ${tempo}`,
     lineageBadge: (source?: string) => source ? `Lineage · ${source}` : 'Lineage',
     excludeStep: 'Exclude step',
     restoreStep: 'Restore step',
@@ -193,6 +198,7 @@ export const COPY = {
     openRoutine: "Open today's routine",
     defaulted: ' · Defaulted',
     rulePrefix: 'Rule: if',
+    ruleCondition,
     ruleArrow: '→'
   },
   routineCard: {
@@ -242,6 +248,8 @@ export const COPY = {
     progressionEyebrow: 'Next step',
     progressionTitle: 'Progression',
     progressionHolding: 'Holding until the progression rule threshold is met.',
+    progressionHoldingRule: (condition: string, action: string) =>
+      `Holding until the rule is met: if ${ruleCondition(condition)}, ${action.toLowerCase()}.`,
     progressionReady: (condition: string, action: string) => `${condition}. ${action}.`
   },
   evidence: {
@@ -597,7 +605,15 @@ export const COPY = {
     declinedAnimalReason:
       'Declined: Non-human animal or in-vitro study. ViskotuN1 specializes strictly in interventional studies with human participants (clinical rehab, pharmacology, nutrition, sleep, cognitive habits).',
     declinedTheoreticalReason:
-      'Declined: Theoretical physics, mathematics, or non-interventional topic. ViskotuN1 only builds executable routines from interventional studies conducted on human participants.'
+      'Declined: Theoretical physics, mathematics, or non-interventional topic. ViskotuN1 only builds executable routines from interventional studies conducted on human participants.',
+    declinedAnimalModel:
+      'Declined: Non-human / rodent model. This is a preclinical animal study, so its protocol was never tested on people. ViskotuN1 only builds routines from interventional studies with human participants.',
+    declinedInVitro:
+      'Declined: In vitro / cell culture study. Results from cells in a dish do not tell you what dose, schedule or safety limits apply to a person. ViskotuN1 only builds routines from interventional studies with human participants.',
+    declinedTheoreticalScience:
+      'Declined: Theoretical / non-human science. This paper studies physics, mathematics or another non-clinical field and contains no routine that a person can follow.',
+    declinedObservational:
+      'Declined: Observational study lacking an executable routine. Cohort, case-control and cross-sectional studies measure associations; researchers did not assign participants a routine, so there is no protocol to copy.'
   },
   landing: {
     topBanner: 'Strictly interventional human research · Zero-hallucination daily routines',
@@ -852,7 +868,9 @@ export const COPY = {
         referenceRange: (min?: number, max?: number, unit?: string) =>
           `Target range: ${min ?? 0}–${max ?? 100} ${unit || ''}`,
         decrease: (name: string) => `Decrease ${name}`,
-        increase: (name: string) => `Increase ${name}`
+        increase: (name: string) => `Increase ${name}`,
+        outOfRange: (min: number, max: number, unit?: string) =>
+          `Value must be between ${min} and ${max}${unit ? ` ${unit}` : ''}. It was adjusted to the nearest limit.`
       },
       timer: {
         start: 'Start test timer',
@@ -862,7 +880,10 @@ export const COPY = {
         targetDuration: (seconds: number) => `Target duration: ${seconds}s`,
         secondsElapsed: (seconds: number) => `${seconds} seconds elapsed`,
         elapsedSummary: (seconds: number, max?: number) =>
-          `${seconds} seconds elapsed${max ? ` · Target duration: ${max}s` : ''}`
+          `${seconds} seconds elapsed${max ? ` · Target duration: ${max}s` : ''}`,
+        startCountdown: 'Start countdown',
+        remainingSummary: (remaining: number, total: number) =>
+          remaining > 0 ? `${remaining} seconds remaining of ${total}s` : 'Session complete'
       },
       multichoice: {
         selectOne: 'Select clinical classification:',
