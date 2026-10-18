@@ -662,6 +662,13 @@ export const COPY = {
     protocolReady: (title: string) => `Routine ready: ${title}`,
     routineReady: (title: string) => `Routine ready: ${title}`,
     failedWithStatus: (status: number) => `Extraction failed with HTTP ${status}`,
+    linkNotRecognized:
+      'No DOI, PubMed or PMC ID found in that link. Paste the paper DOI (for example 10.1177/1941738116631498) or upload the PDF.',
+    paperNotFound: 'No paper with that DOI or ID was found in Europe PMC. Check the identifier or upload the PDF.',
+    fullTextUnavailable:
+      'This paper is not open access, so its methods cannot be read from the link. Upload the PDF to extract the routine.',
+    paperLookupFailed: 'Could not reach Europe PMC to fetch this paper. Try again or upload the PDF.',
+    modelUnavailable: 'The paper was found, but the extraction model is busy right now. Try again in a minute.',
     matchedBannedKeyword: (keyword: string, version: string) =>
       `Paper declined: Matched restricted non-human / theoretical policy criterion ("${keyword}"). ViskotuN1 enforces interventional human science only per clinical policy v${version}.`,
     declinedAnimalReason:
