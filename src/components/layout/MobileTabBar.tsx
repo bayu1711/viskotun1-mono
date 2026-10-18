@@ -3,12 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { COPY } from '../../data/copy';
 import { navItems } from '../../data/navigation';
 import { cn } from '../../utils/cn';
 import { Icon } from '../ui/Icon';
+import { AIIcon } from '../ui/AIIcon';
 
 export function MobileTabBar() {
   const { openAssistant, isOpen } = useAssistant();
@@ -44,9 +44,9 @@ export function MobileTabBar() {
           aria-label={COPY.shell.openAssistant}
           aria-haspopup="dialog"
           aria-expanded={isOpen}
-          className="flex h-fab w-fab shrink-0 items-center justify-center rounded-full bg-orange text-white shadow-float transition-transform active:scale-95"
+          className="flex h-fab w-fab shrink-0 items-center justify-center rounded-full bg-ink text-white shadow-float transition-transform active:scale-95"
         >
-          <Icon icon={AutoAwesomeOutlinedIcon} size="xl" />
+          <AIIcon size="xl" />
         </button>
       </div>
     </nav>

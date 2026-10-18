@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { RoutineSwitcher } from '../routine/RoutineSwitcher';
 import { SectionHeading } from '../ui/SectionHeading';
 import { Icon } from '../ui/Icon';
@@ -32,7 +32,7 @@ export function PageHeader({ eyebrow, title, children, switcherExtra }: PageHead
             href={`${ROUTES.community}?tab=explore`}
             className="inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
           >
-            <Icon icon={AutoAwesomeOutlinedIcon} size="xs" />
+            <Icon icon={TrendingUpIcon} size="xs" />
             <span>{COPY.howTo.buttonExploreSamples}</span>
           </Link>
         ) : null}

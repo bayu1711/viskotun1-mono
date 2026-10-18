@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { DropOffPanel } from '../components/community/DropOffPanel';
 import { EfficacyCard } from '../components/community/EfficacyCard';
 import { ReviewsPanel } from '../components/community/ReviewsPanel';
@@ -95,13 +95,13 @@ export function CommunityPage() {
         onClick={() => setActiveTab('explore')}
         className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
       >
-        <Icon icon={AutoAwesomeOutlinedIcon} size="xs" />
+        <Icon icon={TrendingUpIcon} size="xs" />
         <span>{COPY.howTo.buttonExploreSamples}</span>
       </button>
     )
   ) : (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-mint/40 px-3 py-1.5 text-xs font-semibold text-ink">
-      <Icon icon={AutoAwesomeOutlinedIcon} size="xs" />
+      <Icon icon={TrendingUpIcon} size="xs" />
       <span>{COPY.howTo.buttonExploreSamples}</span>
     </span>
   );

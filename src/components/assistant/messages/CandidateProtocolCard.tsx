@@ -3,7 +3,6 @@
 import React from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import { COPY } from '../../../data/copy';
 import type { Protocol, ProtocolStep } from '../../../types/routine';
@@ -13,6 +12,7 @@ import { Callout } from '../../feedback/Callout';
 import { MissingDataBanner } from '../../protocol/MissingDataBanner';
 import { EvidenceBadgeChip } from '../../ui/EvidenceBadgeChip';
 import { Icon } from '../../ui/Icon';
+import { AIIcon } from '../../ui/AIIcon';
 import { MetaItem } from './MetaItem';
 
 interface CandidateProtocolCardProps {
@@ -48,7 +48,7 @@ export function CandidateProtocolCard({
     <article className="rounded-card border border-ink/10 bg-white p-5 space-y-4">
       <div className="flex items-center justify-between gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-mint px-2.5 py-0.5 text-xs font-medium text-ink">
-          <Icon icon={AutoAwesomeIcon} size="xs" />
+          <AIIcon size="xs" />
           {COPY.assistant.stagingEyebrow}
         </span>
         <span className="text-2xs text-ink/60 font-mono">
