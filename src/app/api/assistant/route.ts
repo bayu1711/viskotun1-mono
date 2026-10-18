@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { answerFor } from '../../../utils/assistant';
+import {
+  answerForRejection,
+  classifyRejectionQuestion,
+  isRejectionQuestionInScope
+} from '../../../utils/rejectionAssistant';
 import { stripClinicalDisclaimer } from '../../../utils/disclaimer';
 import { COPY } from '../../../data/copy';
-import type { Routine, Protocol } from '../../../types/routine';
+import type { Routine } from '../../../types/routine';
 import { getEffectiveGuardrails } from '@/server/guardrailLedger';
 
 export async function POST(request: Request) {
@@ -23,13 +28,65 @@ export async function POST(request: Request) {
       progressionRules,
       feedbackMetric,
       paper,
-      missingDataFlags
+      missingDataFlags,
+      rejectionReason,
+      rejectedFileName
     } = body;
 
     const resolvedTitle = routineTitle || protocolTitle || 'Study';
 
     if (!question) {
       return NextResponse.json({ error: COPY.api.assistant.questionRequired }, { status: 400 });
+    }
+
+    if (typeof rejectionReason === 'string' && rejectionReason.trim().length > 0) {
+      const trimmedReason = rejectionReason.trim();
+      const scope = classifyRejectionQuestion(question);
+      if (!isRejectionQuestionInScope(scope) || scope.asksAboutContent) {
+        return NextResponse.json({
+          answer: answerForRejection(trimmedReason, question),
+          source: COPY.assistant.rejection.source,
+          engine: 'local-rules'
+        });
+      }
+
+      const rejectionInstruction = `You are the ViskotuN1 Gatekeeper Policy Assistant.
+A user uploaded "${rejectedFileName || 'a research paper'}" and it was declined before extraction with the following gatekeeper decision:
+"${trimmedReason}"
+
+ViskotuN1 Eligibility Policy:
+- Only interventional human research (randomized controlled trials, clinical cohorts, structured physical therapy, nutrition, sleep, or cognitive protocols tested on human participants) is eligible.
+- Animal models (mice, rats, primates), in-vitro studies, theoretical papers, and purely observational epidemiology without an actionable human intervention are strictly ineligible because dosing, loading, and tissue tolerance cannot be safely extrapolated to human self-experimentation.
+
+Strict Scope Rules:
+1. Answer ONLY why the paper was rejected, why animal/non-human or non-interventional studies are unsuitable for human routines, or what types of human interventional studies qualify instead.
+2. NEVER discuss, summarize, or answer questions about the declined paper's own content, methods, experimental setup, results, findings, dosages, sets, reps, or conclusions.
+3. Keep your response concise (2-4 sentences) and do NOT include Clinical Advisory prefixes or Medical Disclaimer statements.`;
+
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (apiKey) {
+        try {
+          const genAI = new GoogleGenerativeAI(apiKey);
+          const model = genAI.getGenerativeModel({
+            model: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
+            systemInstruction: rejectionInstruction
+          });
+          const res = await model.generateContent(question);
+          return NextResponse.json({
+            answer: stripClinicalDisclaimer(res.response.text().trim()),
+            source: COPY.assistant.rejection.source,
+            engine: 'cloud-gemini'
+          });
+        } catch (err) {
+          console.error('[AssistantRoute] Gemini API error on rejection Q&A, falling back to local policy answer:', err);
+        }
+      }
+
+      return NextResponse.json({
+        answer: answerForRejection(trimmedReason, question),
+        source: COPY.assistant.rejection.source,
+        engine: 'local-rules'
+      });
     }
 
     const activePolicy = await getEffectiveGuardrails();
