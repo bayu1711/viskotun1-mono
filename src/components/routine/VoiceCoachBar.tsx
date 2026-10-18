@@ -142,7 +142,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete, isDayComplete
             <CircleButton
               label={COPY.voiceCoach.nextStep}
               size={36}
-              disabled={currentStepIndex >= stepCount - 1}
+              disabled={!isPlaying && currentStepIndex >= stepCount - 1}
               onClick={nextStep}
             >
               <Icon icon={SkipNextRoundedIcon} size="md" />

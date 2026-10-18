@@ -357,6 +357,8 @@ export const COPY = {
     holdFinished: 'Hold complete. Relax.',
     finishedAllSteps: 'Great work! You have completed all prescribed plan steps for today.',
     guidedStepsEnded: 'That was the last guided step. Log any remaining sets on your step cards.',
+    awaitNextPrompt: 'When you finish your sets, log them on the step card and tap next step.',
+    awaitingNext: 'Log your sets, then tap Next',
     unsupported: 'Voice synthesis is not supported on this browser.',
     voiceNameDisplay: (name: string) => `Voice: ${name}`,
     switchVoice: 'Switch coach voice',

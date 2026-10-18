@@ -331,8 +331,11 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
         } else if (holdSeconds > 0) {
           // Repeated holds or a session timer: the coach only times it, the user logs sets on the card
           startHoldCountdown(holdSeconds, () => restThen(() => guideStep(index + 1)));
+        } else {
+          // Rep-based steps are logged by the user on the step card, then the user moves on
+          setStatusText(COPY.voiceCoach.awaitingNext);
+          speak(COPY.voiceCoach.awaitNextPrompt);
         }
-        // Rep-based steps are logged by the user on the step card
       });
     },
     [buildStepScript, isSoundEnabled, onStepComplete, speak, startHoldCountdown, steps]
@@ -381,6 +384,11 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
     cancelSpeech();
     clearTimer();
     setCountdownRemaining(null);
+    // On the last step, Next ends the session instead of staying put
+    if (isPlaying && currentStepIndex >= steps.length - 1) {
+      guideStep(steps.length);
+      return;
+    }
     const nextIdx = Math.min(steps.length - 1, currentStepIndex + 1);
     setCurrentStepIndex(nextIdx);
     if (isPlaying) {
