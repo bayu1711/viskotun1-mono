@@ -35,7 +35,7 @@ export function TopBar() {
   return (
     <header className="mx-auto w-full max-w-6xl px-5 pt-5 lg:px-10 lg:pt-8">
       <div className="flex items-center gap-3 border-b border-ink pb-4">
-        <Link href={ROUTES.routine} className="flex min-h-11 min-w-11 items-center justify-center hover:opacity-85 transition-opacity lg:hidden" aria-label={COPY.brand.name}>
+        <Link href={ROUTES.landing} className="flex min-h-11 min-w-11 items-center justify-center hover:opacity-85 transition-opacity lg:hidden" aria-label={COPY.brand.name}>
           <Image
             src={COPY.brand.iconUrl}
             alt={COPY.brand.name}
