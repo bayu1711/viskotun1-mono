@@ -78,8 +78,11 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
 
   const speed = SPEED_OPTIONS[speedIndex];
   const timerRef = useRef<number | null>(null);
+  const restTimerRef = useRef<number | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Bumped on every cancel so in-flight TTS fetches and stale end events are ignored
+  const speechIdRef = useRef(0);
 
   const isSupported = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
@@ -113,6 +116,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
   }, []);
 
   const cancelSpeech = useCallback(() => {
+    speechIdRef.current += 1;
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -127,6 +131,10 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
     if (timerRef.current !== null) {
       window.clearInterval(timerRef.current);
       timerRef.current = null;
+    }
+    if (restTimerRef.current !== null) {
+      window.clearTimeout(restTimerRef.current);
+      restTimerRef.current = null;
     }
   }, []);
 
@@ -146,8 +154,11 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
     (text: string, onEnd?: () => void) => {
       if (!isSupported) return;
       cancelSpeech();
+      const speechId = speechIdRef.current;
+      const isCurrent = () => speechId === speechIdRef.current;
 
       const speakWithBrowser = () => {
+        if (!isCurrent()) return;
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.rate = speed;
         utterance.pitch = 1.0;
@@ -160,7 +171,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
 
         utterance.onend = () => {
           utteranceRef.current = null;
-          if (onEnd) onEnd();
+          if (onEnd && isCurrent()) onEnd();
         };
 
         utterance.onerror = () => {
@@ -183,12 +194,13 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
       })
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
+          if (!isCurrent()) return;
           if (data?.audioContent) {
             const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
             audio.playbackRate = speed;
             audio.onended = () => {
               audioRef.current = null;
-              if (onEnd) onEnd();
+              if (onEnd && isCurrent()) onEnd();
             };
             audio.onerror = () => {
               audioRef.current = null;
@@ -290,7 +302,8 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule }: UseVoiceCoa
           startHoldCountdown(step.durationSeconds, () => {
             if (onStepComplete) onStepComplete(index);
             // Wait 2 seconds rest, then advance to next step
-            window.setTimeout(() => {
+            restTimerRef.current = window.setTimeout(() => {
+              restTimerRef.current = null;
               guideStep(index + 1);
             }, 2000);
           });
