@@ -10,11 +10,13 @@ import {
 } from '../data/config';
 import type {
   DataCollectionField,
+  DoseMode,
   FeedbackLog,
   FeedbackMetric,
   MorphingDataLog,
   PaperMeta,
   Routine,
+  RoutineStep,
   RoutineSummary
 } from '../types/routine';
 import { clamp, toPercent } from './math';
@@ -150,19 +152,70 @@ export function getScheduledFieldsForDay(routine?: Routine, day?: number): DataC
   return spec.filter((field) => isFieldScheduledForDay(field, targetDay));
 }
 
-/** Fraction (0–1) of today's sets completed across all active (non-excluded) steps. */
+/** Target number of sets for a step under the given dose mode. */
+export function targetSetsForStep(step: RoutineStep, doseMode: DoseMode = 'standard'): number {
+  if (doseMode === 'micro') {
+    return 1;
+  }
+  if (doseMode === 'rest') {
+    return 0;
+  }
+  return step.sets;
+}
+
+/** Fraction (0–1) of today's sets completed across all active (non-excluded) steps, scaled by dose mode. */
 export function completionOf(
   routine: Routine,
   setsDone: Record<string, number>,
-  excludedStepIds: string[] = []
-) {
+  excludedStepIds: string[] = [],
+  doseMode: DoseMode = 'standard'
+): number {
   const activeSteps = routine.steps.filter((step) => !excludedStepIds.includes(step.id));
+  if (activeSteps.length === 0) return 0;
+
+  if (doseMode === 'micro') {
+    // In micro-dose mode: target is 1 set per active step to preserve neural & behavioral habit loops
+    const targetSets = activeSteps.map((step) => ({
+      id: step.id,
+      target: 1
+    }));
+    const total = targetSets.reduce((sum, item) => sum + item.target, 0);
+    const done = targetSets.reduce(
+      (sum, item) => sum + Math.min(setsDone[item.id] ?? 0, item.target),
+      0
+    );
+    return total === 0 ? 0 : done / total;
+  }
+
+  if (doseMode === 'rest') {
+    // In active rest mode, any logged action or check-in completes the day
+    const anySets = Object.values(setsDone).some((v) => v > 0);
+    return anySets ? 1 : 0;
+  }
+
   const total = activeSteps.reduce((sum, step) => sum + step.sets, 0);
   const done = activeSteps.reduce(
     (sum, step) => sum + Math.min(setsDone[step.id] ?? 0, step.sets),
     0
   );
   return total === 0 ? 0 : done / total;
+}
+
+/**
+ * Calculates a non-punitive consistency / momentum score (0-100%).
+ * Unlike a rigid streak that zeroes out on a single missed day,
+ * the Momentum Index rewards active days and successful recovery days,
+ * applying a gentle decay rather than an immediate wipeout.
+ */
+export function momentumOf(
+  routine: Routine,
+  todayFraction: number,
+  streak: number
+): number {
+  if (routine.currentDay <= 0) return 0;
+  const adherence = adherenceOf(routine, todayFraction);
+  const streakBonus = Math.min(20, streak * 2);
+  return clamp(Math.round(adherence * 0.8 + streakBonus), 0, 100);
 }
 
 /** Average completion across every day so far, including today. */
