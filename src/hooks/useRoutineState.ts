@@ -6,8 +6,11 @@ import { COPY } from '../data/copy';
 import { initialQueuedPapers, protocols as initialProtocols, sampleProtocols } from '../data/protocols';
 import { PRECALIBRATED_SAMPLE_PROTOCOLS, SAMPLE_PAPERS, type SamplePaper } from '../data/samplePapers';
 import type {
+  BarrierLog,
+  BarrierType,
   ChatMessage,
   DataCollectionField,
+  DoseMode,
   FeedbackLog,
   MorphingDataLog,
   NewChatMessage,
@@ -39,9 +42,11 @@ import {
   isMilestoneDay,
   isProgressionReady,
   isRoutineCompleted,
+  momentumOf,
   resolveDataCollectionSpec,
   resolveFeedbackMetric,
-  resolveMilestoneDays
+  resolveMilestoneDays,
+  targetSetsForStep
 } from '../utils/routineMetrics';
 import { getDaysDifference, getLocalTodayDateString, getMsUntilNextLocalMidnight, nowLabel } from '../utils/time';
 
@@ -51,6 +56,7 @@ function createInitialRuntime(items: Routine[]): Record<string, RoutineRuntime> 
     items.map((item) => {
       const logs = item.initialFeedbackLogs ?? [];
       const morphLogs = item.initialMorphingLogs ?? [];
+      const barrierLogs = item.initialBarrierLogs ?? [];
       return [
         item.id,
         {
@@ -58,6 +64,9 @@ function createInitialRuntime(items: Routine[]): Record<string, RoutineRuntime> 
           excludedStepIds: item.initialExcludedStepIds ?? [],
           feedbackLogs: logs,
           morphingLogs: morphLogs,
+          barrierLogs,
+          doseMode: item.initialDoseMode ?? 'standard',
+          pendingReEntryCheckin: false,
           messages: item.initialMessages,
           escalationPaused: false,
           assistantTyping: false,
@@ -109,6 +118,7 @@ export function useRoutineState() {
   const [isFeedbackDrawerOpen, setIsFeedbackDrawerOpen] = useState(false);
   const [isReviewDrawerOpen, setIsReviewDrawerOpen] = useState(false);
   const [isHowToOpen, setIsHowToOpen] = useState(false);
+  const [isReEntryOpen, setIsReEntryOpen] = useState(false);
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
   const [runtime, setRuntime] = useState<Record<string, ProtocolRuntime>>({});
   const [hasHydrated, setHasHydrated] = useState(false);
@@ -762,8 +772,9 @@ export function useRoutineState() {
   );
 
   // Derived values
+  const currentDoseMode: DoseMode = state.doseMode ?? protocol?.initialDoseMode ?? 'standard';
   const todayFraction = protocol
-    ? completionOf(protocol, state.setsDone, state.excludedStepIds ?? [])
+    ? completionOf(protocol, state.setsDone, state.excludedStepIds ?? [], currentDoseMode)
     : 0;
   const todayPercent = toPercent(todayFraction);
   const activeSteps = useMemo(
@@ -775,6 +786,7 @@ export function useRoutineState() {
     ? isRoutineCompleted(protocol, dayIsComplete || todayFraction >= 1)
     : false;
   const adherenceRate = protocol ? adherenceOf(protocol, todayFraction) : 0;
+  const momentum = protocol ? momentumOf(protocol, todayFraction, protocol.streak || 0) : 0;
   const progressionReady = protocol
     ? isProgressionReady(
         state.feedbackLogs,
@@ -788,7 +800,8 @@ export function useRoutineState() {
       protocolList.map((item) => {
         const itemState = runtime[item.id]?.setsDone ?? {};
         const itemExcluded = runtime[item.id]?.excludedStepIds ?? [];
-        const fraction = completionOf(item, itemState, itemExcluded);
+        const itemDose = runtime[item.id]?.doseMode ?? item.initialDoseMode ?? 'standard';
+        const fraction = completionOf(item, itemState, itemExcluded, itemDose);
         return {
           id: item.id,
           title: item.title,
@@ -799,6 +812,7 @@ export function useRoutineState() {
           dayHistory: item.dayHistory,
           doi: item.paper?.doi,
           streak: item.streak,
+          doseMode: itemDose,
           todayFraction: fraction,
           todayPercent: toPercent(fraction)
         };
@@ -816,9 +830,11 @@ export function useRoutineState() {
       if (!protocol) return false;
       if ((state.excludedStepIds ?? []).includes(stepId)) return false;
       const step = protocol.steps.find((s) => s.id === stepId);
-      return step ? (state.setsDone[stepId] ?? 0) >= step.sets : false;
+      if (!step) return false;
+      const target = targetSetsForStep(step, currentDoseMode);
+      return (state.setsDone[stepId] ?? 0) >= target;
     },
-    [protocol, state.setsDone, state.excludedStepIds]
+    [protocol, state.setsDone, state.excludedStepIds, currentDoseMode]
   );
 
   const updateSetCount = useCallback(
@@ -826,18 +842,19 @@ export function useRoutineState() {
       if (!protocol) return;
       const step = protocol.steps.find((s) => s.id === stepId);
       if (!step) return;
+      const target = targetSetsForStep(step, currentDoseMode);
       updateRuntime(protocol.id, (prev) => ({
         ...prev,
         setsDone: {
           ...prev.setsDone,
-          [stepId]: clamp(next(prev.setsDone[stepId] ?? 0, step.sets), 0, step.sets)
+          [stepId]: clamp(next(prev.setsDone[stepId] ?? 0, target), 0, target)
         }
       }));
     },
-    [protocol, updateRuntime]
+    [protocol, updateRuntime, currentDoseMode]
   );
 
-  const incrementSet = useCallback((stepId: string) => updateSetCount(stepId, (current) => current + 1), [updateSetCount]);
+  const incrementSet = useCallback((stepId: string) => updateSetCount(stepId, (current, max) => current + 1), [updateSetCount]);
   const decrementSet = useCallback((stepId: string) => updateSetCount(stepId, (current) => current - 1), [updateSetCount]);
   const toggleStep = useCallback(
     (stepId: string) => updateSetCount(stepId, (current, max) => (current >= max ? 0 : max)),
@@ -849,18 +866,18 @@ export function useRoutineState() {
     const nonExcludedSteps = protocol.steps.filter(
       (step) => !(state.excludedStepIds ?? []).includes(step.id)
     );
-    const allSetsDone = Object.fromEntries(nonExcludedSteps.map((step) => [step.id, step.sets]));
+    const allSetsDone = Object.fromEntries(
+      nonExcludedSteps.map((step) => [step.id, targetSetsForStep(step, currentDoseMode)])
+    );
     updateRuntime(protocol.id, (prev) => ({
       ...prev,
       setsDone: { ...prev.setsDone, ...allSetsDone }
     }));
-    const latestScore = state.feedbackLogs[state.feedbackLogs.length - 1]?.score ?? DEFAULT_CONFIRMATION_SCORE;
-    pushMessages(protocol.id, {
-      role: 'ai',
-      kind: 'confirmation',
-      content: COPY.assistant.confirmLogged(protocol.currentDay, latestScore)
-    });
-  }, [protocol, state.excludedStepIds, state.feedbackLogs, updateRuntime, pushMessages]);
+
+    if (currentDoseMode === 'micro') {
+      toast.success(COPY.reEntry.microDoseCompletedToast);
+    }
+  }, [protocol, state.excludedStepIds, currentDoseMode, updateRuntime]);
 
   const advanceToNextDay = useCallback(() => {
     if (!protocol) return;
@@ -871,7 +888,7 @@ export function useRoutineState() {
 
     const prevDay = protocol.currentDay;
     const nextDay = prevDay + 1;
-    const fraction = completionOf(protocol, state.setsDone, state.excludedStepIds);
+    const fraction = completionOf(protocol, state.setsDone, state.excludedStepIds, currentDoseMode);
     const nextHistory = [...(protocol.dayHistory || [])];
     // Record current day's progress (at least 1.0 when manually advancing)
     nextHistory[prevDay - 1] = Math.max(fraction, 1);
@@ -895,6 +912,8 @@ export function useRoutineState() {
     updateRuntime(protocol.id, (prev) => ({
       ...prev,
       setsDone: {},
+      doseMode: 'standard',
+      pendingReEntryCheckin: false,
       lastActiveDate: todayStr
     }));
 
@@ -905,7 +924,115 @@ export function useRoutineState() {
     });
 
     toast.success(COPY.dayActions.advancedToast(nextDay));
-  }, [protocol, state.setsDone, state.excludedStepIds, updateRuntime, pushMessages]);
+  }, [protocol, state.setsDone, state.excludedStepIds, currentDoseMode, updateRuntime, pushMessages]);
+
+  const setDoseMode = useCallback(
+    (mode: DoseMode) => {
+      if (!protocol) return;
+      updateRuntime(protocol.id, (prev) => ({
+        ...prev,
+        doseMode: mode
+      }));
+    },
+    [protocol, updateRuntime]
+  );
+
+  const logBarrier = useCallback(
+    (barrier: BarrierType, selectedDose: DoseMode, note?: string) => {
+      if (!protocol) return;
+      const barrierLabel = COPY.reEntry.barriers[barrier]?.label || barrier;
+      const newLog: BarrierLog = {
+        id: createId('barr'),
+        day: protocol.currentDay,
+        barrier,
+        barrierLabel,
+        selectedDoseMode: selectedDose,
+        note,
+        loggedAt: nowLabel()
+      };
+
+      updateRuntime(protocol.id, (prev) => ({
+        ...prev,
+        doseMode: selectedDose,
+        barrierLogs: [...(prev.barrierLogs ?? []), newLog],
+        pendingReEntryCheckin: false
+      }));
+
+      setIsReEntryOpen(false);
+
+      const doseLabel = COPY.reEntry.doseModes[selectedDose]?.title || selectedDose;
+      pushMessages(protocol.id, {
+        role: 'ai',
+        kind: 'confirmation',
+        content: COPY.assistant.barrierLoggedConfirmation(barrierLabel, doseLabel)
+      });
+
+      toast.success(COPY.reEntry.barrierLoggedToast(doseLabel));
+    },
+    [protocol, updateRuntime, pushMessages]
+  );
+
+  const dismissReEntryCheckin = useCallback(() => {
+    if (!protocol) return;
+    updateRuntime(protocol.id, (prev) => ({
+      ...prev,
+      pendingReEntryCheckin: false
+    }));
+    setIsReEntryOpen(false);
+  }, [protocol, updateRuntime]);
+
+  const openReEntryModal = useCallback(() => {
+    setIsReEntryOpen(true);
+  }, []);
+
+  const closeReEntryModal = useCallback(() => {
+    setIsReEntryOpen(false);
+  }, []);
+
+  const simulateLapse = useCallback(
+    (days = 3) => {
+      if (!protocol) return;
+      const missedCount = Math.min(days, protocol.totalDays - protocol.currentDay);
+      const nextDay = Math.min(protocol.totalDays, protocol.currentDay + missedCount);
+      const nextHistory = [...(protocol.dayHistory || [])];
+      for (let d = protocol.currentDay; d < nextDay; d++) {
+        nextHistory[d - 1] = 0;
+      }
+      const todayStr = getLocalTodayDateString();
+
+      setProtocolList((prev) =>
+        prev.map((p) =>
+          p.id === protocol.id
+            ? {
+                ...p,
+                currentDay: nextDay,
+                dayHistory: nextHistory,
+                lastActiveDate: todayStr
+              }
+            : p
+        )
+      );
+
+      updateRuntime(protocol.id, (prev) => ({
+        ...prev,
+        setsDone: {},
+        pendingReEntryCheckin: true,
+        lapseDays: missedCount,
+        lastActiveDate: todayStr
+      }));
+
+      setIsReEntryOpen(true);
+
+      pushMessages(protocol.id, {
+        role: 'ai',
+        kind: 'confirmation',
+        content: COPY.assistant.reEntryWelcome(missedCount, nextDay)
+      });
+
+      toast.info(`Simulated ${missedCount}-day lapse. Compassionate re-entry activated.`);
+    },
+    [protocol, updateRuntime, pushMessages]
+  );
 
   const simulatePastDays = useCallback(
     (daysCount = 4) => {
@@ -1238,7 +1365,8 @@ export function useRoutineState() {
         const currentRt = runtimeRef.current[p.id];
         const currentSets = currentRt?.setsDone ?? {};
         const excluded = currentRt?.excludedStepIds ?? p.initialExcludedStepIds ?? [];
-        const todayFraction = completionOf(p, currentSets, excluded);
+        const currentDose = currentRt?.doseMode ?? p.initialDoseMode ?? 'standard';
+        const todayFraction = completionOf(p, currentSets, excluded, currentDose);
 
         const nextHistory = [...(p.dayHistory || [])];
         if (p.currentDay > 0) {
@@ -1251,20 +1379,36 @@ export function useRoutineState() {
         }
 
         const nextDay = Math.min(p.totalDays, p.currentDay + daysPassed);
+        const isMultiDayLapse = daysPassed >= 2;
         const streakContinues = todayFraction >= 0.8 && daysPassed === 1;
-        const nextStreak = streakContinues ? (p.streak || 0) + 1 : 0;
+        // Non-punitive consistency: multi-day lapse preserves streak baseline rather than resetting to 0
+        const nextStreak = streakContinues ? (p.streak || 0) + 1 : (isMultiDayLapse ? p.streak || 0 : 0);
 
         updateRuntime(p.id, (prev) => ({
           ...prev,
           setsDone: {},
+          doseMode: 'standard',
+          pendingReEntryCheckin: isMultiDayLapse,
+          lapseDays: isMultiDayLapse ? daysPassed : undefined,
           lastActiveDate: todayStr
         }));
 
-        pushMessages(p.id, {
-          role: 'ai',
-          kind: 'confirmation',
-          content: COPY.assistant.dayRolloverNotification(nextDay)
-        });
+        if (isMultiDayLapse) {
+          pushMessages(p.id, {
+            role: 'ai',
+            kind: 'confirmation',
+            content: COPY.assistant.reEntryWelcome(daysPassed, nextDay)
+          });
+          if (p.id === activeProtocolIdRef.current) {
+            setIsReEntryOpen(true);
+          }
+        } else {
+          pushMessages(p.id, {
+            role: 'ai',
+            kind: 'confirmation',
+            content: COPY.assistant.dayRolloverNotification(nextDay)
+          });
+        }
 
         return {
           ...p,
@@ -2054,9 +2198,21 @@ export function useRoutineState() {
       todayFraction,
       todayPercent,
       adherenceRate,
+      momentum,
       dayIsComplete,
       isCompleted,
       progressionReady,
+      doseMode: currentDoseMode,
+      setDoseMode,
+      barrierLogs: state.barrierLogs ?? [],
+      logBarrier,
+      isReEntryOpen,
+      openReEntryModal,
+      closeReEntryModal,
+      dismissReEntryCheckin,
+      pendingReEntryCheckin: Boolean(state.pendingReEntryCheckin),
+      lapseDays: state.lapseDays ?? 0,
+      simulateLapse,
       assistantTyping: state.assistantTyping ?? false,
       isFeedbackDrawerOpen,
       openFeedbackDrawer,
@@ -2119,6 +2275,10 @@ export function useRoutineState() {
       state.messages,
       state.setsDone,
       state.feedbackLogs,
+      state.barrierLogs,
+      state.pendingReEntryCheckin,
+      state.lapseDays,
+      currentDoseMode,
       morphingLogs,
       dataCollectionSpec,
       activeFieldId,
@@ -2130,6 +2290,7 @@ export function useRoutineState() {
       todayFraction,
       todayPercent,
       adherenceRate,
+      momentum,
       dayIsComplete,
       isCompleted,
       progressionReady,
@@ -2143,6 +2304,13 @@ export function useRoutineState() {
       isHowToOpen,
       openHowTo,
       closeHowTo,
+      isReEntryOpen,
+      openReEntryModal,
+      closeReEntryModal,
+      dismissReEntryCheckin,
+      setDoseMode,
+      logBarrier,
+      simulateLapse,
       loadSampleProtocol,
       redoRoutine,
       samplePapers,
