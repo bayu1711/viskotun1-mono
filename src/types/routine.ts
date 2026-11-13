@@ -183,6 +183,26 @@ export interface FeedbackLog {
   loggedAt: string;
 }
 
+export type BarrierType =
+  | 'time_crunch'
+  | 'fatigue_energy'
+  | 'discomfort_pain'
+  | 'routine_travel'
+  | 'fasting_deficit'
+  | 'other';
+
+export type DoseMode = 'standard' | 'micro' | 'rest';
+
+export interface BarrierLog {
+  id: string;
+  day: number;
+  barrier: BarrierType;
+  barrierLabel: string;
+  selectedDoseMode: DoseMode;
+  note?: string;
+  loggedAt: string;
+}
+
 export type ChatRole = 'user' | 'ai';
 export type ChatKind =
   | 'text'
@@ -279,6 +299,8 @@ export interface Routine {
   initialSetsDone: Record<string, number>;
   initialExcludedStepIds?: string[];
   initialFeedbackLogs?: FeedbackLog[];
+  initialBarrierLogs?: BarrierLog[];
+  initialDoseMode?: DoseMode;
   feedbackMetric?: FeedbackMetric;
   dataCollectionSpec?: DataCollectionField[];
   initialMorphingLogs?: MorphingDataLog[];
@@ -306,6 +328,10 @@ export interface RoutineRuntime {
   excludedStepIds?: string[];
   feedbackLogs: FeedbackLog[];
   morphingLogs?: MorphingDataLog[];
+  barrierLogs?: BarrierLog[];
+  doseMode?: DoseMode;
+  pendingReEntryCheckin?: boolean;
+  lapseDays?: number;
   messages: ChatMessage[];
   escalationPaused: boolean;
   assistantTyping?: boolean;
@@ -325,6 +351,7 @@ export interface RoutineSummary {
   todayPercent: number;
   todayFraction: number;
   streak: number;
+  doseMode?: DoseMode;
   dayHistory?: number[];
   doi?: string;
 }
