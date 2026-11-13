@@ -92,6 +92,72 @@ export const COPY = {
     emptyStepsTitle: 'No steps extracted',
     emptyStepsBody: 'This paper did not report an executable routine.'
   },
+  reEntry: {
+    badge: 'Adaptive Re-Entry',
+    title: 'Welcome back! Life happens.',
+    subtitle: (days: number) =>
+      days > 1
+        ? `You were away for ${days} days. Breaks and disruptions are a completely natural part of building long-term habits. Let's adapt today so you keep your momentum.`
+        : "Let's adapt today's routine to match your current circumstances and energy.",
+    question: 'What got in the way recently?',
+    barrierHint: 'Logging barriers helps Viskotu learn your patterns and personalize recovery recommendations.',
+    barriers: {
+      time_crunch: {
+        label: 'Time Crunch / Busy Day',
+        description: 'Packed schedule, work deadlines, or limited available time'
+      },
+      fatigue_energy: {
+        label: 'High Fatigue / Low Energy',
+        description: 'Feeling drained, exhausted, or poor sleep recovery'
+      },
+      discomfort_pain: {
+        label: 'Discomfort / Soreness',
+        description: 'Physical aches, soreness, or mild symptom flare-up'
+      },
+      routine_travel: {
+        label: 'Routine / Travel Disruption',
+        description: 'Away from home, shift work, or disrupted rhythm'
+      },
+      fasting_deficit: {
+        label: 'Fasting / Sleep Deficit',
+        description: 'Ramadan fasting hours, acute sleep deficit, or summer heat'
+      },
+      other: {
+        label: 'Other Life Priority',
+        description: 'Family commitments, unexpected events, or personal matters'
+      }
+    },
+    doseModeHeading: "Choose Today's Action",
+    doseModes: {
+      standard: {
+        title: 'Full Protocol (100%)',
+        badge: 'Standard',
+        desc: 'Complete all prescribed sets and exercises as planned in the study.'
+      },
+      micro: {
+        title: 'Maintenance Micro-Dose (~2 min)',
+        badge: 'Recommended',
+        desc: '1 single set of essential actions. Preserves your neural and behavioral habit loop with zero burnout.'
+      },
+      rest: {
+        title: 'Active Recovery & Mobility',
+        badge: 'Gentle',
+        desc: 'Gentle mobility check-in, hydration, and mindful recovery.'
+      }
+    },
+    confirmBarrier: 'Resume Plan with Selected Action',
+    dismiss: 'Continue with standard routine',
+    barrierLoggedToast: (mode: string) => `Adaptive plan updated · ${mode} mode active`,
+    microDoseCompletedToast: 'Micro-dose complete! Habit loop preserved and consistency protected.'
+  },
+  doseMode: {
+    label: "Today's Dose Mode",
+    standard: 'Full (100%)',
+    micro: 'Micro-Dose (~2m)',
+    rest: 'Active Recovery',
+    activeTooltip: (mode: string) => `Currently in ${mode} mode`,
+    microNotice: 'Micro-Dose active: Complete 1 set to achieve 100% daily completion.'
+  },
   dayActions: {
     markComplete: 'Mark today complete',
     dayLogged: (day: number) => `✓ Day ${day} logged`,
@@ -573,6 +639,10 @@ export const COPY = {
       `Logged Day ${day}. Biofeedback score ${score}/10. Within the study's safe range — progression stays on track.`,
     dayRolloverNotification: (day: number) =>
       `A new calendar day has begun in your local timezone. Welcome to Day ${day}. Today's prescribed routine is ready.`,
+    reEntryWelcome: (days: number, nextDay: number) =>
+      `Welcome back! After ${days} days away, your progress is preserved without penalty. We've enabled adaptive micro-dose choices so you can smoothly maintain momentum on Day ${nextDay}.`,
+    barrierLoggedConfirmation: (barrier: string, mode: string) =>
+      `Noted barrier: "${barrier}". Switched today's session to ${mode} mode to keep your behavioral habit loop active without burnout.`,
     dayAdvancedConfirmation: (prevDay: number, nextDay: number) =>
       `Day ${prevDay} marked complete. Advanced to Day ${nextDay}.`,
     simulatedHistoryConfirmation: (days: number, currentDay: number) =>
