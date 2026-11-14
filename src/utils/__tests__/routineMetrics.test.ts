@@ -15,12 +15,14 @@ import {
   exceedsFeedbackThreshold,
   isProgressionReady,
   isRoutineCompleted,
+  momentumOf,
   progressionStatus,
   resolveBiomarkerPoints,
   resolveFeedbackMetric,
   resolveFieldTargetBounds,
   resolveMilestoneDays,
-  resolvePaperRoutineStatus
+  resolvePaperRoutineStatus,
+  targetSetsForStep
 } from '../routineMetrics';
 
 const mockRoutine: Routine = {
@@ -477,6 +479,48 @@ describe('routineMetrics', () => {
       };
       expect(resolveMilestoneDays(photoField, 30)).toEqual([1, 14, 30]);
       expect(resolveMilestoneDays({ ...photoField, milestoneDays: undefined }, 14)).toEqual([1, 7, 14]);
+    });
+  });
+
+  describe('Adaptive Micro-Dose & Momentum (Sprint 1)', () => {
+    it('scales target sets appropriately across dose modes', () => {
+      const step = mockRoutine.steps[0]; // sets: 3
+      expect(targetSetsForStep(step, 'standard')).toBe(3);
+      expect(targetSetsForStep(step, 'micro')).toBe(1);
+      expect(targetSetsForStep(step, 'rest')).toBe(0);
+    });
+
+    it('calculates 100% completion in micro-dose mode with 1 set per action', () => {
+      // mockRoutine has 2 steps (sets: 3 and 2)
+      // in micro-dose mode: target is 1 each (total 2)
+      const partialStandard = { 'step-1': 1, 'step-2': 1 };
+      // in standard mode: 2 done out of 5 total = 0.4
+      expect(completionOf(mockRoutine, partialStandard, [], 'standard')).toBe(0.4);
+      // in micro mode: 1 done for step-1 and 1 for step-2 = 2/2 = 1.0 (100%)
+      expect(completionOf(mockRoutine, partialStandard, [], 'micro')).toBe(1.0);
+
+      // completing only 1 of 2 micro steps = 0.5
+      expect(completionOf(mockRoutine, { 'step-1': 1 }, [], 'micro')).toBe(0.5);
+    });
+
+    it('calculates active rest completion when an activity is checked', () => {
+      expect(completionOf(mockRoutine, {}, [], 'rest')).toBe(0);
+      expect(completionOf(mockRoutine, { 'step-1': 1 }, [], 'rest')).toBe(1.0);
+    });
+
+    it('calculates non-punitive momentum incorporating adherence and consistency bonuses', () => {
+      const routine: Routine = {
+        ...mockRoutine,
+        currentDay: 5,
+        dayHistory: [1, 1, 0, 1] // missed day 3
+      };
+      // Today 1.0 completed, streak of 2
+      const momentum = momentumOf(routine, 1.0, 2);
+      expect(momentum).toBeGreaterThan(0);
+      expect(momentum).toBeLessThanOrEqual(100);
+      // Adherence rate is (1+1+0+1 + 1)/5 = 80%.
+      // 80 * 0.8 + 2*2 = 64 + 4 = 68%
+      expect(momentum).toBe(68);
     });
   });
 });
