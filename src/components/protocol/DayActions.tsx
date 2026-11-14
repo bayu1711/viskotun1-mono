@@ -19,6 +19,7 @@ export function DayActions({ onLogFeedback, size = 'lg', className }: DayActions
     advanceToNextDay,
     simulatePastDays,
     simulateFullCompletion,
+    simulateLapse,
     dayIsComplete,
     currentDay,
     totalDays,
@@ -50,7 +51,7 @@ export function DayActions({ onLogFeedback, size = 'lg', className }: DayActions
             <span>{COPY.dayActions.adminControlEyebrow}</span>
             <span className="rounded bg-ink/5 px-1.5 py-0.5">Admin Only</span>
           </div>
-          <div className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
             <PillButton
               size="sm"
               variant="outline"
@@ -65,6 +66,14 @@ export function DayActions({ onLogFeedback, size = 'lg', className }: DayActions
               onClick={() => simulatePastDays(4)}
             >
               {COPY.dayActions.simulatePastDays(4)}
+            </PillButton>
+            <PillButton
+              size="sm"
+              variant="outline"
+              onClick={() => simulateLapse(3)}
+              title="Simulates 3-day inactivity to trigger compassionate re-entry"
+            >
+              Simulate 3-Day Lapse
             </PillButton>
             <PillButton
               size="sm"

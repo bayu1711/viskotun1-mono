@@ -14,6 +14,7 @@ import { FeedbackDrawer } from '../routine/FeedbackDrawer';
 import { CommunityReviewDrawer } from '../community/CommunityReviewDrawer';
 import { PolicyLedgerDrawer } from '../admin/PolicyLedgerDrawer';
 import { HowToModal } from '../howto/HowToModal';
+import { ReEntryModal } from '../routine/ReEntryModal';
 import { AssistantFab } from './AssistantFab';
 import { FileDropOverlay } from './FileDropOverlay';
 import { MobileTabBar } from './MobileTabBar';
@@ -51,6 +52,7 @@ export function AppShell({ children }: AppShellProps) {
         <CommunityReviewDrawer />
         <PolicyLedgerDrawer />
         <HowToModal />
+        <ReEntryModal />
         <FileDropOverlay visible={isDragging} />
       </div>
     );
@@ -74,6 +76,7 @@ export function AppShell({ children }: AppShellProps) {
       <CommunityReviewDrawer />
       <PolicyLedgerDrawer />
       <HowToModal />
+      <ReEntryModal />
       <FileDropOverlay visible={isDragging} />
     </div>
   );

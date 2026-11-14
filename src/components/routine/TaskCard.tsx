@@ -5,6 +5,7 @@ import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import type { RoutineStep, ProtocolStep } from '../../types/routine';
 import { cn } from '../../utils/cn';
+import { targetSetsForStep } from '../../utils/routineMetrics';
 import { getStepDisplay } from '../../utils/steps';
 import { toneStyles } from '../../utils/tones';
 import { CheckToggle } from '../ui/CheckToggle';
@@ -20,6 +21,7 @@ interface TaskCardProps {
 
 export function TaskCard({ step, wide = false }: TaskCardProps) {
   const {
+    doseMode,
     setsDone,
     incrementSet,
     decrementSet,
@@ -30,7 +32,8 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
   } = useRoutine();
   const { askAboutTask } = useAssistant();
   const excluded = isStepExcluded(step.id);
-  const done = Math.min(setsDone[step.id] ?? 0, step.sets);
+  const targetSets = targetSetsForStep(step, doseMode);
+  const done = Math.min(setsDone[step.id] ?? 0, targetSets);
   const complete = isStepComplete(step.id);
   const styles = toneStyles[step.tone];
   const display = getStepDisplay(step);
@@ -140,13 +143,18 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
       <div className="mt-auto pt-5">
         <p className="text-metric font-light leading-none tabular-nums">
           {done}
-          <span className={styles.muted}> / {step.sets}</span>
+          <span className={styles.muted}> / {targetSets}</span>
           <span className={cn('ml-1.5 text-sm', styles.muted)}>{display.setLabel}</span>
+          {doseMode === 'micro' && (
+            <span className="ml-2 inline-flex items-center rounded bg-mint px-1.5 py-0.5 text-3xs font-semibold text-ink">
+              Micro
+            </span>
+          )}
         </p>
         <SetCounter
           action={step.action}
           done={done}
-          max={step.sets}
+          max={targetSets}
           perSetLabel={display.perSet}
           tone={step.tone}
           onIncrement={() => incrementSet(step.id)}

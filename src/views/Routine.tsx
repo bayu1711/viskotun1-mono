@@ -10,6 +10,7 @@ import { DailyProgressBar } from '../components/routine/DailyProgressBar';
 import { FeedbackLogList } from '../components/routine/FeedbackLogList';
 import { HistoryCalendar } from '../components/routine/HistoryCalendar';
 import { MilestoneBanner } from '../components/routine/MilestoneBanner';
+import { DoseModeSelector } from '../components/routine/DoseModeSelector';
 import { TaskGrid } from '../components/routine/TaskGrid';
 import { VoiceCoachBar } from '../components/routine/VoiceCoachBar';
 import { CircleButton } from '../components/ui/CircleButton';
@@ -88,6 +89,7 @@ export function RoutinePage() {
             />
           </div>
 
+          <DoseModeSelector className="mt-4 mb-3" />
           <TaskGrid steps={routine.steps} />
           <DayActions className="mt-2.5" />
 

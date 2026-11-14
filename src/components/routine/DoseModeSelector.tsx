@@ -1,0 +1,112 @@
+'use client';
+
+import React from 'react';
+import BoltOutlinedIcon from '@mui/icons-material/BoltOutlined';
+import FitnessCenterOutlinedIcon from '@mui/icons-material/FitnessCenterOutlined';
+import SpaOutlinedIcon from '@mui/icons-material/SpaOutlined';
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
+import { motion } from 'framer-motion';
+import { useRoutine } from '../../contexts/RoutineContext';
+import { COPY } from '../../data/copy';
+import type { DoseMode } from '../../types/routine';
+import { cn } from '../../utils/cn';
+import { Icon } from '../ui/Icon';
+
+interface DoseOption {
+  id: DoseMode;
+  label: string;
+  icon: typeof BoltOutlinedIcon;
+  badge?: string;
+}
+
+const DOSE_OPTIONS: DoseOption[] = [
+  { id: 'standard', label: COPY.doseMode.standard, icon: FitnessCenterOutlinedIcon },
+  { id: 'micro', label: COPY.doseMode.micro, icon: BoltOutlinedIcon, badge: 'Adaptive' },
+  { id: 'rest', label: COPY.doseMode.rest, icon: SpaOutlinedIcon }
+];
+
+export function DoseModeSelector({ className }: { className?: string }) {
+  const { doseMode, setDoseMode, openReEntryModal, pendingReEntryCheckin } = useRoutine();
+
+  return (
+    <div className={cn('rounded-card border border-ink/10 bg-white/70 p-3 sm:p-4 backdrop-blur-sm', className)}>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+        <div className="flex items-center gap-1.5">
+          <span className="text-2xs font-semibold uppercase tracking-wider text-ink/60">
+            {COPY.doseMode.label}
+          </span>
+          {pendingReEntryCheckin && (
+            <span className="flex h-2 w-2 rounded-full bg-orange-500 animate-pulse" title="Lapse check-in waiting" />
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={openReEntryModal}
+          className="inline-flex items-center gap-1 text-3xs font-medium text-ink/70 hover:text-ink transition-colors underline decoration-dotted"
+        >
+          <Icon icon={HelpOutlineOutlinedIcon} size="xs" />
+          <span>Life disrupted? Adapt routine</span>
+        </button>
+      </div>
+
+      {/* Segmented Dose Options */}
+      <div className="grid grid-cols-3 gap-1.5 rounded-xl bg-ink/5 p-1">
+        {DOSE_OPTIONS.map((opt) => {
+          const isActive = doseMode === opt.id;
+          const IconComp = opt.icon;
+
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => setDoseMode(opt.id)}
+              className={cn(
+                'relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 rounded-lg py-2 px-2 text-center text-xs font-medium transition-all focus:outline-none',
+                isActive
+                  ? 'bg-white text-ink shadow-sm ring-1 ring-ink/10'
+                  : 'text-ink/65 hover:text-ink hover:bg-white/40'
+              )}
+            >
+              <Icon icon={IconComp} size="xs" className={cn(isActive && opt.id === 'micro' ? 'text-amber-600' : '')} />
+              <span className="truncate">{opt.label}</span>
+              {opt.badge && !isActive && (
+                <span className="hidden sm:inline-block rounded bg-mint/50 px-1 py-0.2 text-3xs font-semibold text-ink">
+                  {opt.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Contextual Notice */}
+      {doseMode === 'micro' && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="mt-2.5 rounded-lg bg-mint/30 border border-mint/60 px-3 py-2 text-3xs text-ink/90 flex items-center justify-between"
+        >
+          <span className="font-medium">
+            ⚡ {COPY.doseMode.microNotice}
+          </span>
+          <span className="shrink-0 text-3xs text-ink/60 hidden sm:inline">
+            Preserves habit loop
+          </span>
+        </motion.div>
+      )}
+
+      {doseMode === 'rest' && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="mt-2.5 rounded-lg bg-sky/30 border border-sky/50 px-3 py-2 text-3xs text-ink/90 flex items-center justify-between"
+        >
+          <span className="font-medium">
+            🌿 Active Recovery: Log mobility, hydration, or gentle breathing today.
+          </span>
+        </motion.div>
+      )}
+    </div>
+  );
+}
