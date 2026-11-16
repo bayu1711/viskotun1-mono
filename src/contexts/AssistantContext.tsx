@@ -2,7 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { COPY } from '../data/copy';
-import type { RoutineStep, ProtocolStep } from '../types/routine';
+import type { RoutineStep } from '../types/routine';
 import { RoutineContext } from './RoutineContext';
 
 export type AssistantMode = 'ask' | 'upload' | 'lifestyle';
@@ -13,7 +13,7 @@ export interface AssistantContextValue {
   openAssistant: (mode?: AssistantMode) => void;
   closeAssistant: () => void;
   setMode: (mode: AssistantMode) => void;
-  askAboutTask: (step: RoutineStep | ProtocolStep) => void;
+  askAboutTask: (step: RoutineStep) => void;
   openLifestyleTuning: () => void;
 }
 
@@ -33,7 +33,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
   const closeAssistant = useCallback(() => setIsOpen(false), []);
 
   const askAboutTask = useCallback(
-    (step: RoutineStep | ProtocolStep) => {
+    (step: RoutineStep) => {
       setMode('ask');
       setIsOpen(true);
       if (askQuestion) {

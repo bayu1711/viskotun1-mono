@@ -20,7 +20,7 @@ const INTENT_PATTERNS: Record<RejectionIntent, RegExp> = {
 
 /** Reaches for the declined paper's own substance, which the assistant must not discuss. */
 const CONTENT_PATTERN =
-  /summar\w*|abstract|methods?\b|results?\b|findings?\b|conclusions?\b|dos(e|age)\b|\bsets\b|\breps\b|\bsteps?\b|protocol|sample size|authors?\b|journal|how (do|to|many|much)|(tell me|what) .*\b(paper|study)\b.*\b(about|say|show|found)/;
+  /summar\w*|abstract|methods?\b|results?\b|findings?\b|conclusions?\b|dos(e|age)\b|\bsets\b|\breps\b|\bsteps?\b|protocol|routine|sample size|authors?\b|journal|how (do|to|many|much)|(tell me|what) .*\b(paper|study)\b.*\b(about|say|show|found)/;
 
 export function classifyRejectionQuestion(question: string): RejectionQuestionScope {
   const text = question.toLowerCase();

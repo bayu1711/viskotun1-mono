@@ -68,7 +68,7 @@ export function answerFor(protocol: Routine | Protocol, question: string): strin
     const paperTitle = protocol.paper?.title || protocol.title;
     const currentV = protocol.version || '1.0';
     const nextV = (parseFloat(currentV) + 0.1).toFixed(1);
-    return `### Clinical Cross-Check Analysis\n\nI cross-referenced your proposed improvement against the published Methods & Interventions section for **${paperTitle}**.\n\n• **Clinical Verification:** Your proposed refinement has been evaluated against the peer-reviewed trial methodology.\n• **Version Bump:** This protocol advances to **v${nextV}** with your refinement recorded in the public changelog.\n• **Oversight:** Any bespoke UI widgets required by this fix are routed to the Clinical Policy Ledger for confirmation.`;
+    return `### Clinical Cross-Check Analysis\n\nI cross-referenced your proposed improvement against the published Methods & Interventions section for **${paperTitle}**.\n\n• **Clinical Verification:** Your proposed refinement has been evaluated against the peer-reviewed trial methodology.\n• **Version Bump:** This routine advances to **v${nextV}** with your refinement recorded in the public changelog.\n• **Oversight:** Any bespoke UI widgets required by this fix are routed to the Clinical Policy Ledger for confirmation.`;
   }
 
   // 5. Specific task / step execution guidance ("what is <task> and what is needed to be done?")

@@ -3,7 +3,7 @@ import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
-import type { RoutineStep, ProtocolStep } from '../../types/routine';
+import type { RoutineStep } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { targetSetsForStep } from '../../utils/routineMetrics';
 import { getStepDisplay } from '../../utils/steps';
@@ -15,7 +15,7 @@ import { SetCounter } from './SetCounter';
 import { TaskStatList } from './TaskStatList';
 
 interface TaskCardProps {
-  step: RoutineStep | ProtocolStep;
+  step: RoutineStep;
   wide?: boolean;
 }
 

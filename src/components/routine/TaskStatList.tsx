@@ -1,12 +1,12 @@
 import React from 'react';
 import { COPY } from '../../data/copy';
-import type { RoutineStep, ProtocolStep } from '../../types/routine';
+import type { RoutineStep } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import type { StepDisplay } from '../../utils/steps';
 import { toneStyles } from '../../utils/tones';
 
 interface TaskStatListProps {
-  step: RoutineStep | ProtocolStep;
+  step: RoutineStep;
   display: StepDisplay;
 }
 

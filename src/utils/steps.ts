@@ -1,5 +1,5 @@
 import { COPY } from '../data/copy';
-import type { RoutineStep, ProtocolStep } from '../types/routine';
+import type { RoutineStep } from '../types/routine';
 
 export interface StepDisplay {
   setLabel: string;
@@ -11,7 +11,7 @@ export interface StepDisplay {
 }
 
 /** Resolves display strings for a step, falling back to reps or hold time when the paper omits labels. */
-export function getStepDisplay(step: ProtocolStep): StepDisplay {
+export function getStepDisplay(step: RoutineStep): StepDisplay {
   const seconds = step.durationSeconds ?? 0;
   const isTimed = seconds > 0;
   const setLabel = step.setLabel ?? COPY.task.defaultSetLabel;

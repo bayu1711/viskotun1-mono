@@ -27,7 +27,8 @@ const MODE_OPTIONS: { id: AssistantMode; label: string }[] = [
 
 interface AssistantHeaderProps {
   mode: AssistantMode;
-  protocolTitle: string;
+  routineTitle?: string;
+  protocolTitle?: string;
   titleId: string;
   onModeChange: (mode: AssistantMode) => void;
   onClose: () => void;
@@ -39,6 +40,7 @@ interface AssistantHeaderProps {
 
 export function AssistantHeader({
   mode,
+  routineTitle,
   protocolTitle,
   titleId,
   onModeChange,
@@ -48,6 +50,7 @@ export function AssistantHeader({
   lastEngine
 }: AssistantHeaderProps) {
   const isAsk = mode === 'ask';
+  const displayTitle = routineTitle || protocolTitle || '';
   const [isEdgeAvailable, setIsEdgeAvailable] = useState<boolean>(false);
   const [isDisclaimerOpen, setIsDisclaimerOpen] = useState<boolean>(false);
   const disclaimerRef = useRef<HTMLDivElement>(null);
@@ -98,7 +101,7 @@ export function AssistantHeader({
       <div className="pt-4">
         <div className="flex items-center justify-between gap-2">
           <p className="truncate text-sm leading-none text-ink/60">
-            {customEyebrow || (mode === 'lifestyle' ? COPY.lifestyleTuning.badge : isAsk ? protocolTitle : COPY.assistant.eyebrowUpload)}
+            {customEyebrow || (mode === 'lifestyle' ? COPY.lifestyleTuning.badge : isAsk ? displayTitle : COPY.assistant.eyebrowUpload)}
           </p>
           <div ref={disclaimerRef} className="relative flex items-center gap-1.5 shrink-0">
             <button

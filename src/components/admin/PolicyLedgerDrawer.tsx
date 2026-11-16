@@ -24,7 +24,7 @@ import { PillButton } from '../ui/PillButton';
 
 export function PolicyLedgerDrawer() {
   const { isAdmin } = useAuth();
-  const { dataCollectionSpec, stagingProtocol, approveProposedWidget } = useRoutine();
+  const { dataCollectionSpec, stagingRoutine, approveProposedWidget } = useRoutine();
   const {
     policy,
     isLiveFirestore,
@@ -76,13 +76,13 @@ export function PolicyLedgerDrawer() {
         map.set(field.proposedWidget.id, field.proposedWidget);
       }
     }
-    for (const field of stagingProtocol?.dataCollectionSpec ?? []) {
+    for (const field of stagingRoutine?.dataCollectionSpec ?? []) {
       if (field.proposedWidget) {
         map.set(field.proposedWidget.id, field.proposedWidget);
       }
     }
     return Array.from(map.values());
-  }, [remoteProposals, dataCollectionSpec, stagingProtocol]);
+  }, [remoteProposals, dataCollectionSpec, stagingRoutine]);
 
   const panelRef = useRef<HTMLDivElement>(null);
   useDialogA11y(panelRef, { open: isDrawerOpen, onClose: closePolicyDrawer });

@@ -42,11 +42,11 @@ export function hasQuestionBeenAsked(candidate: string, askedQuestions: string[]
  *    provide rich follow-ups so chips adapt continuously across the conversation.
  */
 export function getDynamicSuggestions(
-  protocol?: Routine | Protocol | null,
+  routine?: Routine | Protocol | null,
   messages: ChatMessage[] = [],
   maxSuggestions = 4
 ): string[] {
-  if (!protocol) return [];
+  if (!routine) return [];
 
   // 1. Collect all user-asked messages
   const userQuestions = messages
@@ -54,7 +54,7 @@ export function getDynamicSuggestions(
     .map((m) => m.content);
 
   // 2. Unasked FAQs from the study
-  const unaskedFaqs = (protocol.faqs || [])
+  const unaskedFaqs = (routine.faqs || [])
     .map((f) => f.question)
     .filter((q) => !hasQuestionBeenAsked(q, userQuestions));
 
@@ -65,17 +65,17 @@ export function getDynamicSuggestions(
   // 4. Topic candidate questions
   const safetyQuestion = COPY.assistant.suggestions.safetyRules;
   const progressionQuestion = COPY.assistant.suggestions.progressionCriteria;
-  const biofeedbackQuestion = COPY.assistant.suggestions.biofeedbackLog(protocol.feedbackMetric?.name);
+  const biofeedbackQuestion = COPY.assistant.suggestions.biofeedbackLog(routine.feedbackMetric?.name);
   const biofeedbackEscalation = COPY.assistant.suggestions.biofeedbackEscalation;
   const scheduleQuestion = COPY.assistant.suggestions.routineSchedule;
   const missingDataQuestion =
-    protocol.missingDataFlags?.length || protocol.steps?.some((s) => s.inferred)
+    routine.missingDataFlags?.length || routine.steps?.some((s) => s.inferred)
       ? COPY.assistant.suggestions.missingData
       : null;
-  const citationQuestion = protocol.paper ? COPY.assistant.suggestions.trialCitation : null;
+  const citationQuestion = routine.paper ? COPY.assistant.suggestions.trialCitation : null;
 
   // Step-specific candidate questions
-  const stepQuestions: string[] = (protocol.steps || [])
+  const stepQuestions: string[] = (routine.steps || [])
     .slice(0, 2)
     .map((s) => COPY.assistant.suggestions.stepDetails(s.action));
 

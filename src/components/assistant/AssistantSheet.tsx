@@ -29,18 +29,17 @@ export function AssistantSheet() {
   const {
     messages,
     routine,
-    protocol = routine,
     assistantTyping,
     askQuestion,
     uploadPaper,
-    stagingProtocol,
+    stagingRoutine,
     isExtractingPaper,
     extractingSourceName,
     stagingMessages,
     stagingError,
     isStagingAssistantTyping,
-    confirmStagingProtocol,
-    discardStagingProtocol,
+    confirmStagingRoutine,
+    discardStagingRoutine,
     askStagingQuestion,
     toggleStagingExcludeStep,
     lifestyleProfile,
@@ -82,7 +81,7 @@ export function AssistantSheet() {
   };
 
   const handleConfirmCandidate = () => {
-    confirmStagingProtocol();
+    confirmStagingRoutine();
     setMode('ask');
   };
 
@@ -96,13 +95,13 @@ export function AssistantSheet() {
   );
 
   const askSuggestions = useMemo(
-    () => getDynamicSuggestions(protocol, messages),
-    [protocol, messages]
+    () => getDynamicSuggestions(routine, messages),
+    [routine, messages]
   );
 
   const stagingSuggestions = useMemo(
-    () => getDynamicSuggestions(stagingProtocol, stagingMessages),
-    [stagingProtocol, stagingMessages]
+    () => getDynamicSuggestions(stagingRoutine, stagingMessages),
+    [stagingRoutine, stagingMessages]
   );
 
   const rejectionSuggestions = useMemo(() => {
@@ -148,14 +147,14 @@ export function AssistantSheet() {
           >
             <AssistantHeader
               mode={mode}
-              protocolTitle={protocol ? protocol.shortTitle : COPY.assistant.noActiveProtocolForAskTitle}
+              routineTitle={routine ? routine.shortTitle : COPY.assistant.noActiveProtocolForAskTitle}
               customTitle={
-                !isAsk && stagingProtocol
+                !isAsk && stagingRoutine
                   ? COPY.assistant.stagingTitle
                   : undefined
               }
               customEyebrow={
-                !isAsk && stagingProtocol
+                !isAsk && stagingRoutine
                   ? COPY.assistant.stagingEyebrow
                   : undefined
               }
@@ -178,9 +177,9 @@ export function AssistantSheet() {
                 />
               ) : isAsk ? (
                 /* Ask Mode: Contextual to Active Routine */
-                protocol || messages.length > 0 ? (
+                routine || messages.length > 0 ? (
                   <>
-                    {protocol && <MissingDataBanner />}
+                    {routine && <MissingDataBanner />}
                     {hasAskConversation ? (
                       messages.map((message) => (
                         <AssistantMessage key={message.id} message={message} />
@@ -217,13 +216,12 @@ export function AssistantSheet() {
                     <div className="py-4">
                       <ProcessingCard source={extractingSourceName} createdAt={Date.now()} />
                     </div>
-                  ) : stagingProtocol ? (
+                  ) : stagingRoutine ? (
                     <div className="space-y-4">
                       <CandidateRoutineCard
-                        routine={stagingProtocol}
-                        protocol={stagingProtocol}
+                        routine={stagingRoutine}
                         onConfirm={handleConfirmCandidate}
-                        onDiscard={discardStagingProtocol}
+                        onDiscard={discardStagingRoutine}
                         onToggleExcludeStep={toggleStagingExcludeStep}
                         onAskAboutStep={(step) => {
                           if (step.id === 'improvement') {
@@ -297,7 +295,7 @@ export function AssistantSheet() {
                     onFile={handleFile}
                   />
                 </>
-              ) : stagingProtocol ? (
+              ) : stagingRoutine ? (
                 <>
                   <FaqSuggestions
                     suggestions={stagingSuggestions}

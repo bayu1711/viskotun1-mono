@@ -11,12 +11,12 @@ import VolumeOffRoundedIcon from '@mui/icons-material/VolumeOffRounded';
 import VolumeUpRoundedIcon from '@mui/icons-material/VolumeUpRounded';
 import { COPY } from '../../data/copy';
 import { useVoiceCoach } from '../../hooks/useVoiceCoach';
-import type { RoutineStep, ProtocolStep } from '../../types/routine';
+import type { RoutineStep } from '../../types/routine';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 
 interface VoiceCoachBarProps {
-  steps: (RoutineStep | ProtocolStep)[];
+  steps: RoutineStep[];
   safetyRule?: string;
   onStepComplete?: (stepIndex: number) => void;
   isDayComplete?: boolean;

@@ -23,11 +23,10 @@ interface AssistantMessageProps {
 /** Routes a chat message to the presentational component for its role + kind. */
 export function AssistantMessage({ message }: AssistantMessageProps) {
   const {
-    stagingProtocol,
+    stagingRoutine,
     routine,
-    protocol = routine,
-    confirmStagingProtocol,
-    discardStagingProtocol,
+    confirmStagingRoutine,
+    discardStagingRoutine,
     toggleStagingExcludeStep
   } = useRoutine();
 
@@ -40,14 +39,13 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
       case 'text':
         return <PaperSummaryCard intro={message.content} />;
       case 'candidate': {
-        const target = stagingProtocol || protocol;
+        const target = stagingRoutine || routine;
         if (!target) return null;
         return (
           <CandidateRoutineCard
             routine={target}
-            protocol={target}
-            onConfirm={confirmStagingProtocol}
-            onDiscard={discardStagingProtocol}
+            onConfirm={confirmStagingRoutine}
+            onDiscard={discardStagingRoutine}
             onToggleExcludeStep={toggleStagingExcludeStep}
           />
         );

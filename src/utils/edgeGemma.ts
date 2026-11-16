@@ -4,7 +4,7 @@
  * for 100% private, zero-latency, offline daily protocol safety Q&A.
  */
 
-import type { Routine, Protocol } from '../types/routine';
+import type { Routine } from '../types/routine';
 import { stripClinicalDisclaimer } from './disclaimer';
 
 interface AICapabilities {
@@ -55,20 +55,20 @@ export async function isEdgeGemmaAvailable(): Promise<boolean> {
 }
 
 /** Query the on-device language model using the active study's clinical context. */
-export async function queryEdgeGemma(protocol: Protocol, question: string): Promise<string> {
+export async function queryEdgeGemma(routine: Routine, question: string): Promise<string> {
   if (typeof window === 'undefined' || !window.ai) {
     throw new Error('On-device AI is not supported on this browser/platform.');
   }
 
-  const systemInstruction = `You are a clinical study safety assistant for the research paper protocol "${protocol.title}".
+  const systemInstruction = `You are a clinical study safety assistant for the research paper routine "${routine.title}".
 Context from the paper:
-Protocol: ${protocol.title}
-Steps: ${JSON.stringify(protocol.steps)}
-Contraindications: ${JSON.stringify(protocol.contraindications)}
-Progression Rules: ${JSON.stringify(protocol.progressionRules)}
-Biofeedback Metric: ${JSON.stringify(protocol.feedbackMetric || {})}
-Paper Citation: ${JSON.stringify(protocol.paper)}
-Known FAQs: ${JSON.stringify(protocol.faqs)}
+Routine: ${routine.title}
+Steps: ${JSON.stringify(routine.steps)}
+Contraindications: ${JSON.stringify(routine.contraindications)}
+Progression Rules: ${JSON.stringify(routine.progressionRules)}
+Biofeedback Metric: ${JSON.stringify(routine.feedbackMetric || {})}
+Paper Citation: ${JSON.stringify(routine.paper)}
+Known FAQs: ${JSON.stringify(routine.faqs)}
 
 Instructions:
 1. For general inquiries, answer concisely in 1-3 sentences strictly grounded in the study's Methods & Interventions section.
