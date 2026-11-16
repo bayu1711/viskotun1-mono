@@ -13,10 +13,28 @@ import { useRouter } from 'next/navigation';
 import { COPY } from '../data/copy';
 import { ROUTES } from '../data/navigation';
 import { getFirebaseAuth } from '../lib/firebase';
-import type { AuthState, User } from '../types/auth';
+import type { AuthState, RegionContext, User, UserLifestyleProfile } from '../types/auth';
 
 const STORAGE_KEY = 'viskotun1_auth_user';
 const LEGACY_STORAGE_KEY = 'protocol_engine_auth_user';
+const LIFESTYLE_STORAGE_KEY = 'viskotun1_lifestyle_profile';
+
+export const DEFAULT_LIFESTYLE_PROFILE: UserLifestyleProfile = {
+  region: {
+    countryCode: 'AE',
+    countryName: 'United Arab Emirates',
+    city: 'Abu Dhabi',
+    detectedBy: 'default_uae',
+    confirmed: false
+  },
+  workPattern: 'standard',
+  smokingStatus: 'non_smoker',
+  activityBaseline: 'moderate',
+  isRamadanFastingObserver: false,
+  climateSensitivity: 'moderate',
+  activeTags: [],
+  intakeCompleted: false
+};
 
 function deriveInitials(name: string, fallback: string = COPY.auth.initials.fallback): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -80,6 +98,7 @@ export const AuthContext = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [lifestyleProfile, setLifestyleProfile] = useState<UserLifestyleProfile>(DEFAULT_LIFESTYLE_PROFILE);
   const [isLoading, setIsLoading] = useState(true);
 
   // Safe client hydration from localStorage
@@ -87,8 +106,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY) || window.localStorage.getItem(LEGACY_STORAGE_KEY);
       if (saved) {
-        setUser(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        setUser(parsed);
+        if (parsed.lifestyleProfile) {
+          setLifestyleProfile(parsed.lifestyleProfile);
+        }
         window.localStorage.setItem(STORAGE_KEY, saved);
+      }
+      const savedProfile = window.localStorage.getItem(LIFESTYLE_STORAGE_KEY);
+      if (savedProfile) {
+        setLifestyleProfile(JSON.parse(savedProfile));
       }
     } catch {
       // Fallback silently if localStorage is restricted
@@ -96,6 +123,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
     }
   }, []);
+
+  const updateLifestyleProfile = useCallback((updates: Partial<UserLifestyleProfile>) => {
+    setLifestyleProfile((prev) => {
+      const next = { ...prev, ...updates, lastTunedAt: new Date().toISOString() };
+      try {
+        window.localStorage.setItem(LIFESTYLE_STORAGE_KEY, JSON.stringify(next));
+      } catch {}
+      setUser((current) => {
+        if (!current) return current;
+        const updated = { ...current, lifestyleProfile: next };
+        try {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+      return next;
+    });
+  }, []);
+
+  const confirmRegion = useCallback((countryName: string, city?: string) => {
+    const isUae =
+      countryName.toLowerCase().includes('emirates') ||
+      countryName.toLowerCase().includes('uae') ||
+      countryName.toLowerCase().includes('abu dhabi') ||
+      countryName.toLowerCase().includes('dubai');
+    const countryCode = isUae ? 'AE' : countryName.slice(0, 2).toUpperCase();
+    updateLifestyleProfile({
+      region: {
+        countryCode,
+        countryName,
+        city: city || (isUae ? 'Abu Dhabi' : undefined),
+        detectedBy: 'user_selected',
+        confirmed: true
+      }
+    });
+  }, [updateLifestyleProfile]);
 
   const persistUser = useCallback((nextUser: User | null) => {
     setUser((prev) => {
@@ -289,6 +352,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated: Boolean(user && !user.isGuest),
       isGuest: Boolean(user?.isGuest),
       isAdmin,
+      lifestyleProfile,
+      updateLifestyleProfile,
+      confirmRegion,
       loginAsGuest,
       loginAsAdmin,
       loginWithEmail,
@@ -296,7 +362,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signupWithEmail,
       logout
     }),
-    [user, isLoading, isAdmin, loginAsGuest, loginAsAdmin, loginWithEmail, loginWithGoogle, signupWithEmail, logout]
+    [
+      user,
+      isLoading,
+      isAdmin,
+      lifestyleProfile,
+      updateLifestyleProfile,
+      confirmRegion,
+      loginAsGuest,
+      loginAsAdmin,
+      loginWithEmail,
+      loginWithGoogle,
+      signupWithEmail,
+      logout
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

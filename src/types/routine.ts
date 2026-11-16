@@ -214,6 +214,7 @@ export type ChatKind =
   | 'confirmation'
   | 'question'
   | 'answer'
+  | 'lifestyle_tuning'
   | 'processing';
 
 export type AIEngineType = 'on-device-gemma' | 'cloud-gemini' | 'server-gemma' | 'local-rules';
@@ -332,6 +333,7 @@ export interface RoutineRuntime {
   doseMode?: DoseMode;
   pendingReEntryCheckin?: boolean;
   lapseDays?: number;
+  lifestyleProfile?: import('./auth').UserLifestyleProfile;
   messages: ChatMessage[];
   escalationPaused: boolean;
   assistantTyping?: boolean;
