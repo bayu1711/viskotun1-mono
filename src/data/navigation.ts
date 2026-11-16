@@ -7,6 +7,7 @@ import type { LocaleCopy } from './locales/types';
 
 export const ROUTES = {
   landing: '/',
+  uae: '/uae',
   routine: '/routine',
   dashboard: '/dashboard',
   community: '/community',

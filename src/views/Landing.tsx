@@ -179,17 +179,20 @@ export function LandingPage() {
     <div className="min-h-screen bg-white font-sans text-ink selection:bg-orange/20 selection:text-ink">
       {/* Top Notice Banner */}
       <div className="bg-yellow text-ink">
-        <a
-          href="#gatekeeper"
-          className="group mx-auto block min-h-11 max-w-6xl text-pretty px-5 py-3 text-center text-sm font-medium"
+        <Link
+          href={ROUTES.uae}
+          className="group mx-auto flex min-h-11 max-w-6xl items-center justify-center gap-2 text-pretty px-5 py-2 text-center text-sm font-medium"
         >
-          <span className="underline-offset-4 group-hover:underline">{COPY.landing.topBanner}</span>
+          <span className="rounded-full bg-ink px-2 py-0.5 text-2xs font-bold text-white">Abu Dhabi 2026</span>
+          <span className="underline-offset-4 group-hover:underline">
+            Future Health Challenge: Sustaining Healthy Behaviors in the UAE
+          </span>
           <Icon
             icon={ArrowForwardIcon}
             size="xs"
-            className="ml-1.5 inline-block align-[-0.2em] transition-transform duration-200 ease-out-strong group-hover:translate-x-0.5"
+            className="inline-block transition-transform duration-200 ease-out-strong group-hover:translate-x-0.5"
           />
-        </a>
+        </Link>
       </div>
 
       {/* Public Top Navigation */}
@@ -225,6 +228,13 @@ export function LandingPage() {
               <a href="#features" className="rounded-full px-3 py-2.5 transition-colors hover:bg-ink/5 hover:text-ink">
                 {COPY.landing.nav.features}
               </a>
+              <Link
+                href={ROUTES.uae}
+                className="ml-2 inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-cream/80 px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-cream"
+              >
+                <span>🇦🇪</span>
+                <span>{COPY.landing.uaeEditionLink}</span>
+              </Link>
             </nav>
           </div>
 
@@ -544,6 +554,9 @@ export function LandingPage() {
                 </Link>
               </>
             )}
+            <Link href={ROUTES.uae} className="inline-flex min-h-11 items-center font-medium text-ink transition-colors hover:underline">
+              {COPY.landing.uaeEditionLink}
+            </Link>
             <a
               href="https://github.com/bayu1711/viskotun1-mono"
               target="_blank"
