@@ -2137,6 +2137,45 @@ export function useRoutineState() {
     [protocol, adherenceRate, userId, closeReviewDrawer]
   );
 
+  const tuneLifestyle = useCallback(
+    async (message: string) => {
+      const currentProf = auth?.lifestyleProfile;
+      const country = currentProf?.region?.countryCode || 'AE';
+
+      try {
+        const res = await fetch('/api/lifestyle/tune', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message,
+            country,
+            currentProfile: currentProf
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.profileUpdates && auth?.updateLifestyleProfile) {
+            auth.updateLifestyleProfile(data.profileUpdates);
+          }
+          if (protocol) {
+            pushMessages(protocol.id, {
+              role: 'ai',
+              kind: 'confirmation',
+              content: data.reply
+            });
+          }
+          toast.success(COPY.lifestyleTuning.tagAddedToast(data.extractedTags?.[0] || 'Lifestyle'));
+          return data;
+        }
+      } catch (err) {
+        console.warn('[useRoutineState] Lifestyle tune failed:', err);
+      }
+      return null;
+    },
+    [auth, protocol, pushMessages]
+  );
+
   const updateGuardrailThreshold = useCallback(
     (threshold: number, message?: string) => {
       if (!protocol || applyGuardrailThreshold(protocol, threshold, message) === protocol) return;
@@ -2262,6 +2301,10 @@ export function useRoutineState() {
       toggleStagingExcludeStep,
       addRoutine: addProtocol,
       addProtocol,
+      lifestyleProfile: auth?.lifestyleProfile,
+      updateLifestyleProfile: auth?.updateLifestyleProfile,
+      confirmRegion: auth?.confirmRegion,
+      tuneLifestyle,
       resetToDefaults,
       updateGuardrailThreshold,
       approveProposedWidget,
@@ -2344,6 +2387,10 @@ export function useRoutineState() {
       askStagingQuestion,
       toggleStagingExcludeStep,
       addProtocol,
+      auth?.lifestyleProfile,
+      auth?.updateLifestyleProfile,
+      auth?.confirmRegion,
+      tuneLifestyle,
       resetToDefaults,
       updateGuardrailThreshold,
       approveProposedWidget,

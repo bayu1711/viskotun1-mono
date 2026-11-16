@@ -5,7 +5,7 @@ import { COPY } from '../data/copy';
 import type { RoutineStep, ProtocolStep } from '../types/routine';
 import { RoutineContext } from './RoutineContext';
 
-export type AssistantMode = 'ask' | 'upload';
+export type AssistantMode = 'ask' | 'upload' | 'lifestyle';
 
 export interface AssistantContextValue {
   isOpen: boolean;
@@ -14,6 +14,7 @@ export interface AssistantContextValue {
   closeAssistant: () => void;
   setMode: (mode: AssistantMode) => void;
   askAboutTask: (step: RoutineStep | ProtocolStep) => void;
+  openLifestyleTuning: () => void;
 }
 
 const AssistantContext = createContext<AssistantContextValue | null>(null);
@@ -42,9 +43,14 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
     [askQuestion]
   );
 
+  const openLifestyleTuning = useCallback(() => {
+    setMode('lifestyle');
+    setIsOpen(true);
+  }, []);
+
   const value = useMemo(
-    () => ({ isOpen, mode, openAssistant, closeAssistant, setMode, askAboutTask }),
-    [isOpen, mode, openAssistant, closeAssistant, askAboutTask]
+    () => ({ isOpen, mode, openAssistant, closeAssistant, setMode, askAboutTask, openLifestyleTuning }),
+    [isOpen, mode, openAssistant, closeAssistant, askAboutTask, openLifestyleTuning]
   );
 
   return <AssistantContext.Provider value={value}>{children}</AssistantContext.Provider>;
