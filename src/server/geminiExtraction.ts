@@ -5,8 +5,8 @@ import { applyGuardrailThreshold } from '../utils/routineMetrics';
 import { generateFallbackRoutine } from './fallbackRoutines';
 import { classifyPaperSource, containsTerm } from './gatekeeper';
 import { getEffectiveGuardrails } from './guardrailLedger';
-import { findCanonicalProtocol } from './routineRegistry';
-import { validateAndRegisterProtocolWidgets } from './widgetRegistry';
+import { findCanonicalRoutine, findCanonicalProtocol } from './routineRegistry';
+import { validateAndRegisterRoutineWidgets, validateAndRegisterProtocolWidgets } from './widgetRegistry';
 import { executeWithGeminiFailover, getGeminiApiKeys } from './geminiKeys';
 import { resolvePaperSource, type PaperResolution } from './paperSource';
 
@@ -62,7 +62,7 @@ Return a JSON object conforming strictly to:
 {
   "eligible": boolean,
   "rejectionReason": string, // only if eligible is false
-  "protocol": {
+  "routine": {
     "id": string, // lowercase kebab-case slug
     "title": string,
     "shortTitle": string, // 2-3 words
@@ -150,7 +150,7 @@ Return a JSON object conforming strictly to:
     "initialMessages": [
       { "id": string, "role": "user", "kind": "file", "content": string, "timestamp": string },
       { "id": string, "role": "ai", "kind": "text", "content": string, "timestamp": string },
-      { "id": string, "role": "ai", "kind": "protocol", "content": string, "timestamp": string }
+      { "id": string, "role": "ai", "kind": "routine", "content": string, "timestamp": string }
     ],
     "community": {
       "studyEfficacy": number,
@@ -177,7 +177,7 @@ type GuardrailPolicy = Awaited<ReturnType<typeof getEffectiveGuardrails>>;
 
 /**
  * Checks that settle a paper without an LLM call. `screenText` is matched against the gatekeeper and
- * banned keywords; `lookup` (DOI and title) against the canonical protocol registry.
+ * banned keywords; `lookup` (DOI and title) against the canonical routine registry.
  */
 async function screenPaper(
   screenText: string,
@@ -207,8 +207,8 @@ async function screenPaper(
     };
   }
 
-  // Check if paper is already cataloged in the Canonical Protocol Registry
-  const existing = await findCanonicalProtocol({
+  // Check if paper is already cataloged in the Canonical Routine Registry
+  const existing = await findCanonicalRoutine({
     doi: lookup.doi,
     title: lookup.title,
     id: lookup.title
@@ -239,7 +239,7 @@ const UNRESOLVED_LINK_REASONS: Record<Exclude<PaperResolution, { ok: true }>['re
   'no-full-text': COPY.extraction.fullTextUnavailable
 };
 
-export async function extractPaperProtocol(input: ExtractInput): Promise<ExtractResult> {
+export async function extractPaperRoutine(input: ExtractInput): Promise<ExtractResult> {
   const sourceName = input.file ? input.file.name : input.url || input.text || 'uploaded-document.pdf';
 
   // 1. Resolve live policy from Cloud Firestore Guardrail Ledger
@@ -321,20 +321,20 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
             },
             SYSTEM_PROMPT,
             dynamicPolicyInstruction,
-            `Analyze this attached PDF (${input.file.name}). First check the strict gatekeeper criteria. If interventional human science, extract the full protocol.`
+            `Analyze this attached PDF (${input.file.name}). First check the strict gatekeeper criteria. If interventional human science, extract the full routine.`
           ];
         } else if (paperFromLink) {
           promptParts = [
             SYSTEM_PROMPT,
             dynamicPolicyInstruction,
-            `Analyze this paper: ${paperFromLink.citation}. Its full text, retrieved from Europe PMC, is between the markers below. Take every title, author, sample size and parameter from this text only. First check gatekeeper criteria, then extract the protocol if eligible.`,
+            `Analyze this paper: ${paperFromLink.citation}. Its full text, retrieved from Europe PMC, is between the markers below. Take every title, author, sample size and parameter from this text only. First check gatekeeper criteria, then extract the routine if eligible.`,
             `<<<PAPER FULL TEXT>>>\n${paperFromLink.fullText}\n<<<END PAPER FULL TEXT>>>`
           ];
         } else {
           promptParts = [
             SYSTEM_PROMPT,
             dynamicPolicyInstruction,
-            `Analyze this paper text: ${input.text}. First check gatekeeper criteria, then extract the protocol if eligible.`
+            `Analyze this paper text: ${input.text}. First check gatekeeper criteria, then extract the routine if eligible.`
           ];
         }
 
@@ -356,67 +356,68 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
           };
         }
 
-        if (parsed.protocol) {
-          const protocol: Protocol = {
-            ...parsed.protocol,
-            version: parsed.protocol.version || '1.0',
-            changelog: parsed.protocol.changelog && parsed.protocol.changelog.length > 0
-              ? parsed.protocol.changelog
+        const rawRoutine = parsed.routine || parsed.protocol;
+        if (rawRoutine) {
+          const routine: Routine = {
+            ...rawRoutine,
+            version: rawRoutine.version || '1.0',
+            changelog: rawRoutine.changelog && rawRoutine.changelog.length > 0
+              ? rawRoutine.changelog
               : [
                   {
                     version: '1.0',
                     date: new Date().toISOString(),
-                    summary: 'Initial clinical protocol extraction',
+                    summary: 'Initial clinical routine extraction',
                     author: 'Gemini Multimodal Extraction'
                   }
                 ],
-            dayHistory: parsed.protocol.dayHistory ?? [],
-            initialSetsDone: parsed.protocol.initialSetsDone ?? {},
-            initialFeedbackLogs: parsed.protocol.initialFeedbackLogs ?? [],
-            feedbackMetric: parsed.protocol.feedbackMetric
+            dayHistory: rawRoutine.dayHistory ?? [],
+            initialSetsDone: rawRoutine.initialSetsDone ?? {},
+            initialFeedbackLogs: rawRoutine.initialFeedbackLogs ?? [],
+            feedbackMetric: rawRoutine.feedbackMetric
               ? {
-                  ...parsed.protocol.feedbackMetric,
+                  ...rawRoutine.feedbackMetric,
                   escalationThreshold: activePolicy.painEscalationThreshold,
                   escalationMessage: activePolicy.escalationAlertMessage
                 }
               : undefined,
-            initialMessages: parsed.protocol.initialMessages ?? [
+            initialMessages: rawRoutine.initialMessages ?? [
               {
-                id: `${parsed.protocol.id}-msg-1`,
+                id: `${rawRoutine.id}-msg-1`,
                 role: 'user',
                 kind: 'file',
                 content: sourceName,
                 timestamp: COPY.assistant.timestampJustNow
               },
               {
-                id: `${parsed.protocol.id}-msg-2`,
+                id: `${rawRoutine.id}-msg-2`,
                 role: 'ai',
                 kind: 'text',
-                content: COPY.assistant.parsedSummary(parsed.protocol.paper?.pages ?? 'the'),
+                content: COPY.assistant.parsedSummary(rawRoutine.paper?.pages ?? 'the'),
                 timestamp: COPY.assistant.timestampJustNow
               },
               {
-                id: `${parsed.protocol.id}-msg-3`,
+                id: `${rawRoutine.id}-msg-3`,
                 role: 'ai',
-                kind: 'protocol',
-                content: parsed.protocol.id,
+                kind: 'routine',
+                content: rawRoutine.id,
                 timestamp: COPY.assistant.timestampJustNow
               }
             ]
           };
 
-          const validatedProtocol = await validateAndRegisterProtocolWidgets(protocol);
+          const validatedRoutine = await validateAndRegisterRoutineWidgets(routine);
 
           return {
             success: true,
             eligible: true,
-            routine: validatedProtocol,
-            protocol: validatedProtocol,
+            routine: validatedRoutine,
+            protocol: validatedRoutine,
             source: sourceName
           };
         }
 
-        throw new Error('Gemini output missing protocol or eligible field');
+        throw new Error('Gemini output missing routine or eligible field');
       });
 
       if (extracted) {
@@ -438,7 +439,7 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
   }
 
   // Development / fallback mode: provides instant, calibrated routine extraction
-  const fallbackRoutine = await validateAndRegisterProtocolWidgets(
+  const fallbackRoutine = await validateAndRegisterRoutineWidgets(
     generateFallbackRoutine(sourceName)
   );
   if (fallbackRoutine.feedbackMetric) {
@@ -458,5 +459,5 @@ export async function extractPaperProtocol(input: ExtractInput): Promise<Extract
   };
 }
 
-export const extractPaperRoutine = extractPaperProtocol;
+export const extractPaperProtocol = extractPaperRoutine;
 

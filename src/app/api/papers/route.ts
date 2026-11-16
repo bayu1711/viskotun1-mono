@@ -36,11 +36,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, seeded, message: COPY.api.papers.seedSuccess });
     }
 
-    const { paper, protocol } = body;
+    const { paper, protocol, routine } = body;
     if (!paper) {
       return NextResponse.json({ error: COPY.api.papers.paperRequired }, { status: 400 });
     }
 
+    const targetRoutine = routine || protocol || paper.routine || paper.protocol;
     const paperDocument: StoredPaper = {
       id: paper.id,
       title: paper.title,
@@ -64,8 +65,8 @@ export async function POST(request: Request) {
       activeTrackersCount: paper.activeTrackersCount ?? 0,
       totalLogsCount: paper.totalLogsCount ?? 0,
       trendingRank: paper.trendingRank,
-      routine: (protocol || paper.routine) || undefined,
-      protocol: (protocol || paper.protocol) || undefined,
+      routine: targetRoutine || undefined,
+      protocol: targetRoutine || undefined,
       userId: paper.userId || null,
       createdAt: paper.createdAt || Date.now(),
       updatedAt: Date.now()

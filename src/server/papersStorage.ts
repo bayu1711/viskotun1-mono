@@ -97,6 +97,7 @@ async function enrichPaperWithLiveTelemetry(paper: SamplePaper): Promise<SampleP
 export async function getSamplePapers(): Promise<{
   trendingPapers: SamplePaper[];
   samplePapers: SamplePaper[];
+  routines: Record<string, Routine>;
   protocols: Record<string, Protocol>;
   source: 'firestore-live' | 'memory-cache';
 }> {
@@ -166,6 +167,7 @@ export async function getSamplePapers(): Promise<{
         return {
           trendingPapers: sorted,
           samplePapers: sorted,
+          routines: protocols,
           protocols,
           source: 'firestore-live'
         };
@@ -222,6 +224,7 @@ export async function getSamplePapers(): Promise<{
   return {
     trendingPapers: sorted,
     samplePapers: sorted,
+    routines: protocols,
     protocols,
     source: 'memory-cache'
   };
