@@ -118,6 +118,7 @@ export function useRoutineState() {
   const [isFeedbackDrawerOpen, setIsFeedbackDrawerOpen] = useState(false);
   const [isReviewDrawerOpen, setIsReviewDrawerOpen] = useState(false);
   const [isHowToOpen, setIsHowToOpen] = useState(false);
+  const [isBctLedgerOpen, setIsBctLedgerOpen] = useState(false);
   const [isReEntryOpen, setIsReEntryOpen] = useState(false);
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
   const [runtime, setRuntime] = useState<Record<string, ProtocolRuntime>>({});
@@ -554,6 +555,9 @@ export function useRoutineState() {
 
   const openHowTo = useCallback(() => setIsHowToOpen(true), []);
   const closeHowTo = useCallback(() => setIsHowToOpen(false), []);
+
+  const openBctLedger = useCallback(() => setIsBctLedgerOpen(true), []);
+  const closeBctLedger = useCallback(() => setIsBctLedgerOpen(false), []);
 
   const loadSampleProtocol = useCallback(
     (sampleId: string, options?: { forceRestart?: boolean }) => {
@@ -2279,6 +2283,9 @@ export function useRoutineState() {
       isHowToOpen,
       openHowTo,
       closeHowTo,
+      isBctLedgerOpen,
+      openBctLedger,
+      closeBctLedger,
       loadTrendingRoutine: loadSampleProtocol,
       loadSampleRoutine: loadSampleProtocol,
       loadSampleProtocol,
@@ -2363,6 +2370,9 @@ export function useRoutineState() {
       isHowToOpen,
       openHowTo,
       closeHowTo,
+      isBctLedgerOpen,
+      openBctLedger,
+      closeBctLedger,
       isReEntryOpen,
       openReEntryModal,
       closeReEntryModal,

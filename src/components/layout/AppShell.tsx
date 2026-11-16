@@ -15,6 +15,7 @@ import { CommunityReviewDrawer } from '../community/CommunityReviewDrawer';
 import { PolicyLedgerDrawer } from '../admin/PolicyLedgerDrawer';
 import { HowToModal } from '../howto/HowToModal';
 import { ReEntryModal } from '../routine/ReEntryModal';
+import { BctLedgerDrawer } from '../bct/BctLedgerDrawer';
 import { AssistantFab } from './AssistantFab';
 import { FileDropOverlay } from './FileDropOverlay';
 import { MobileTabBar } from './MobileTabBar';
@@ -39,7 +40,11 @@ export function AppShell({ children }: AppShellProps) {
     uploadPaper(file);
   });
 
-  const isPublicPage = pathname === '/' || pathname === '/login' || pathname === '/signup';
+  const isPublicPage =
+    pathname === '/' ||
+    pathname === '/uae' ||
+    pathname === '/login' ||
+    pathname === '/signup';
 
   if (isPublicPage) {
     return (
@@ -53,6 +58,7 @@ export function AppShell({ children }: AppShellProps) {
         <PolicyLedgerDrawer />
         <HowToModal />
         <ReEntryModal />
+        <BctLedgerDrawer />
         <FileDropOverlay visible={isDragging} />
       </div>
     );
@@ -77,6 +83,7 @@ export function AppShell({ children }: AppShellProps) {
       <PolicyLedgerDrawer />
       <HowToModal />
       <ReEntryModal />
+      <BctLedgerDrawer />
       <FileDropOverlay visible={isDragging} />
     </div>
   );

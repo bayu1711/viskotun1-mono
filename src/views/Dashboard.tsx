@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { BiomarkerTrendChart } from '../components/dashboard/BiomarkerTrendChart';
+import { HealthAgeCard } from '../components/dashboard/HealthAgeCard';
 import { KeyMetrics } from '../components/dashboard/KeyMetrics';
 import { MilestonePhotoComparison } from '../components/dashboard/MilestonePhotoComparison';
 import { PapersPanel } from '../components/dashboard/PapersPanel';
@@ -41,6 +42,7 @@ export function DashboardPage() {
       <KeyMetrics />
       <div className="mt-2.5 grid grid-cols-1 gap-2.5 lg:grid-cols-main-aside">
         <div className="space-y-2.5">
+          <HealthAgeCard />
           {hasBiomarkerField && <BiomarkerTrendChart />}
           {hasPhotoField && <MilestonePhotoComparison />}
           {!hasBiomarkerField && !hasPhotoField && <BiomarkerTrendChart />}
