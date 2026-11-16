@@ -11,7 +11,7 @@ Built with **Next.js 14 (App Router)**, **TypeScript**, and **Tailwind CSS**, de
 Peer-reviewed clinical literature is notoriously dense and difficult for patients and athletes to follow safely. **ViskotuN1** bridges this gap by:
 - **Multimodal Paper Ingestion & Gatekeeping**: Ingesting scientific PDFs and full-text links, isolating actionable methods, dosing, tempo, and contraindications while strictly rejecting non-human (animal/in-vitro) or non-interventional studies—complete with an interactive **Suitability Q&A** flow explaining why a declined paper is ineligible.
 - **The "Morphing" Pipeline (Schema-Driven Adaptive UI & AI Widget Oversight)**: Dynamically generating bespoke data collection widgets and dashboard analytics tailored to the study's endpoints—spanning 6 core clinical primitives (`scale`, `photo`, `numeric`, `timer`, `multichoice`, `boolean`) plus **AI-Proposed Custom Widgets (`ProposedWidgetSpec`)** governed by a human-in-the-loop administrator approval queue.
-- **Canonical Paper Registry & Semantic Protocol Versioning (`v1.0` → `v1.1`)**: Deduplicating papers by normalized DOI and title fingerprint so all participants tracking the same study share a single canonical protocol, pooling real-world efficacy telemetry, drop-off curves, and a public version changelog updated via AI-verified community corrections.
+- **Canonical Paper Registry & Semantic Routine Versioning (`v1.0` → `v1.1`)**: Deduplicating papers by normalized DOI and title fingerprint so all participants tracking the same study share a single canonical routine, pooling real-world efficacy telemetry, drop-off curves, and a public version changelog updated via AI-verified community corrections.
 - **Live Routine Execution & Interactive Voice Coach**: Translating trial parameters into personalized daily routines with live set counters, tempo/hold pacing, guided audio coaching (`VoiceCoachBar` + Google Cloud TTS), and smart biofeedback scoring.
 - **Adaptive Safety Lockouts**: Automatically pausing escalation and recommending load/dosage reductions when adverse symptom or tolerability thresholds are exceeded, governed by a live **Firestore Guardrail Policy Ledger**.
 - **Grounded AI Paper Assistant**: Providing clinical Q&A grounded strictly in the study's *Methods and Interventions* section via a 3-tier hybrid AI cascade (On-Device Edge Gemma → Private Server Gemma → Cloud Gemini with multi-key 429 auto-failover).
@@ -36,7 +36,7 @@ Research Paper (PDF / Full-Text Link)
   • Novel / Bespoke Endpoint? ➔ Registers `ProposedWidgetSpec` in Firestore
     (`collection: 'widget_proposals'`, status: 'pending_review')
     - While Pending: Renders safe fallback primitive + AI Oversight Banner
-    - Admin Approved (`/api/admin/widgets`): Injects into canonical protocol
+    - Admin Approved (`/api/admin/widgets`): Injects into canonical routine
       and unlocks <CustomGeneratedWidget /> with custom presets & steppers
       │
       ▼
@@ -56,7 +56,7 @@ Research Paper (PDF / Full-Text Link)
   • Daily, Weekly, & Milestone Scheduling (e.g., photo check-ins on Day 1, 14, 30)
   • Morphing Dashboard Visualizers wired to live user `morphingLogs`:
     - Photos  ➔ Interactive Before / After split slider (<MilestonePhotoComparison />)
-    - Numbers ➔ Biomarker trend curves with protocol-driven `targetMin` / `targetMax`
+    - Numbers ➔ Biomarker trend curves with routine-driven `targetMin` / `targetMax`
                 healthy zone bands (<BiomarkerTrendChart />)
     - Scales  ➔ Tolerability and load escalation pause timelines (<ProgressionPanel />)
 ```
@@ -65,7 +65,7 @@ Research Paper (PDF / Full-Text Link)
 
 ## Canonical Paper Registry, Semantic Versioning & Community Corrections
 
-When multiple users upload or study the same peer-reviewed paper, ViskotuN1 prevents fragmented duplicate routines through a **Canonical Paper Registry** (`src/server/routineRegistry.ts`) paired with **Semantic Protocol Versioning**:
+When multiple users upload or study the same peer-reviewed paper, ViskotuN1 prevents fragmented duplicate routines through a **Canonical Paper Registry** (`src/server/routineRegistry.ts`) paired with **Semantic Routine Versioning**:
 
 ```text
 User Uploads PDF or Pastes Paper URL
@@ -81,7 +81,7 @@ User Uploads PDF or Pastes Paper URL
                                        │
                                        ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ 2. Pooled Community Telemetry (`protocols/{canonicalId}`)                   │
+│ 2. Pooled Community Telemetry (`routines/{canonicalId}`)                    │
 │  • Aggregates real-world efficacy vs. published trial efficacy              │
 │  • Tracks live active trackers, total logged sessions, and drop-off curves  │
 │  • Pools verified participant reviews (`/api/community/reviews`)            │
@@ -93,8 +93,8 @@ User Uploads PDF or Pastes Paper URL
 │  • Users or clinicians report a parameter discrepancy or propose an         │
 │    improvement in the AI Paper Assistant chat                               │
 │  • Assistant cross-checks the request against the study's Methods section   │
-│  • If verified: Bumps protocol minor version (`updateCanonicalProtocolVersion`)│
-│    and appends a `ProtocolChangelogEntry` (`addedFields`, `updatedFields`)  │
+│  • If verified: Bumps routine minor version (`updateCanonicalRoutineVersion`)│
+│    and appends a `RoutineChangelogEntry` (`addedFields`, `updatedFields`)   │
 │  • Inspectable anytime via version pills (`v1.0`) & <VersionHistoryModal /> │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -122,7 +122,7 @@ ViskotuN1 employs a **Hybrid AI Tiering** model designed to optimize cost, resil
                                                           • Ollama / Vertex Model Garden
                                                         3. Cloud Gemini Flash (Multi-Key)
                                                           • High-reasoning fallback &
-                                                            protocol discrepancy verification
+                                                            routine discrepancy verification
                                                         4. Deterministic Rule & Rejection Matcher
                                                           • Offline citation & Gatekeeper
                                                             rejection suitability Q&A
@@ -165,15 +165,15 @@ In safety-critical clinical and health applications, hardcoded thresholds in cod
 ```
 
 - **Zero-Downtime Policy Tuning**: Clinical administrators can update adverse escalation thresholds, load reduction percentages, and gatekeeper banned keywords on the fly without rebuilding or redeploying containers.
-- **Human-in-the-Loop AI Widget Approval**: Administrators review pending `ProposedWidgetSpec` items in the **Policy Ledger Drawer** and approve them with one click, immediately upgrading the protocol's UI across sessions.
-- **Admin Simulation & Testing Controls**: Built-in testing controls allow simulating multi-day adherence (`simulatePastDays`), full protocol completion (`simulateFullCompletion`), and local midnight day rollovers.
+- **Human-in-the-Loop AI Widget Approval**: Administrators review pending `ProposedWidgetSpec` items in the **Policy Ledger Drawer** and approve them with one click, immediately upgrading the routine's UI across sessions.
+- **Admin Simulation & Testing Controls**: Built-in testing controls allow simulating multi-day adherence (`simulatePastDays`), full routine completion (`simulateFullCompletion`), and local midnight day rollovers.
 - **Interactive UI Inspector**: Tap the **Shield** icon in the TopBar to inspect live policy provenance, view Firestore connectivity status, approve pending AI widgets, and test dynamic policy updates in real time.
 
 ---
 
 ## Zero-Hallucination Parameter Resolution (3-Tier Clinical Pipeline)
 
-When academic papers describe interventions in their Methods section, authors frequently omit minor execution parameters (e.g., stating *"participants performed static stretching"* without publishing hold duration or sets). Rather than silently hallucinating numbers or breaking protocol execution, ViskotuN1 executes a deterministic **3-Tier Resolution Pipeline**:
+When academic papers describe interventions in their Methods section, authors frequently omit minor execution parameters (e.g., stating *"participants performed static stretching"* without publishing hold duration or sets). Rather than silently hallucinating numbers or breaking routine execution, ViskotuN1 executes a deterministic **3-Tier Resolution Pipeline**:
 
 ```text
 Paper Omission Detected (e.g., Calf Stretch hold duration missing)
@@ -287,7 +287,7 @@ ViskotuN1 offers multiple authentication and testing pathways designed for evalu
      - **1-Click Quick Access**: On `/login` or `/signup`, click the **"Continue as Admin"** button (`Dr. Evelyn Reed`).
      - **Email Keyword**: Sign up or log in using any email containing `admin` (e.g. `admin@viskotun1.internal`, `admin@example.com`).
    - **Badge**: Shows the green active dot with the `admin` badge in the top navigation bar.
-   - **Unlocked Features**: Activates the Guardrail Policy Ledger drawer, AI-proposed widget approval queue, fast-forward protocol day simulations, and one-click demo reset.
+   - **Unlocked Features**: Activates the Guardrail Policy Ledger drawer, AI-proposed widget approval queue, fast-forward routine day simulations, and one-click demo reset.
    - **Post-Competition Security**: *Following the completion of the Google AI Builder Cup evaluation, public admin entry points and one-click tester buttons will be sealed off and restricted strictly behind internal clinical staff credentials and enterprise IAM governance.*
 
 ---
@@ -302,18 +302,18 @@ ViskotuN1 offers multiple authentication and testing pathways designed for evalu
 | **Multimodal Paper Ingestion** | ✅ | ✅ | ✅ | ✅ | Tap `+` button in top bar or drop PDF into `/routine`; tests Gemini extraction & gatekeeping |
 | **Suitability Q&A Flow** | ✅ | ✅ | ✅ | ✅ | Upload an ineligible paper (e.g. animal/in-vitro) to trigger interactive rejection explanation |
 | **Grounded AI Clinical Assistant** | ✅ | ✅ | ✅ | ✅ | Open Assistant sheet; ask questions grounded strictly in paper's Methods section |
-| **Protocol Switcher** | ✅ | ✅ | ✅ | ✅ | Switch between pre-loaded studies (Achilles Rehab, Hair Density, Calibrated Protocols) |
+| **Routine Switcher** | ✅ | ✅ | ✅ | ✅ | Switch between pre-loaded studies (Achilles Rehab, Hair Density, Calibrated Routines) |
 | **Morphing Visualizer Dashboard** | ✅ | ✅ | ✅ | ✅ | Navigate to `/dashboard`; view Before/After photo comparison slider & biomarker trend curves |
 | **Community Evidence & Reviews** | ✅ | ✅ | ✅ | ✅ | Navigate to `/community`; view pooled drop-off curves, efficacy scores, and public version history |
 | **Cross-Device Cloud Sync** | ❌ (Local only) | ✅ | ✅ | ✅ | State synced to Firebase & `/api/user/sync`; preserves streak across devices |
 | **Cloud Storage Photo Uploads** | Fallback (Data URL) | ✅ (GCS Bucket) | ✅ (GCS Bucket) | ✅ (GCS Bucket) | Complete a photo check-in step; tests `/api/upload` and `/api/media/...` streaming |
-| **Fast-Forward Protocol Simulation** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Under *"Today's Progress"*: test *"Advance to Next Day"*, *"Simulate +4 Days"*, & *"Simulate Full Completion"* |
+| **Fast-Forward Routine Simulation** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Under *"Today's Progress"*: test *"Advance to Next Day"*, *"Simulate +4 Days"*, & *"Simulate Full Completion"* |
 | **Dynamic Guardrail Policy Ledger** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Click Shield icon in TopBar; adjust pain lockout threshold slider & load reduction % |
 | **AI Widget Approval Queue** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Open Policy Ledger drawer; review & approve pending Gemini-extracted `ProposedWidgetSpec` |
-| **One-Click Demo Reset** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Click Restart icon in TopBar; resets routine, telemetry, and protocols to default state |
+| **One-Click Demo Reset** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Click Restart icon in TopBar; resets routine, telemetry, and routines to default state |
 
 > [!NOTE]
-> **Admin Panel Lifecycle & Post-Competition Sealing**: The 1-click admin sign-in, Policy Ledger drawer, AI-proposed widget approval queue, and fast-forward protocol simulation controls are temporarily surfaced in the public UI exclusively to facilitate evaluation and technical grading for the **Google AI Builder Cup**. Once the competition concludes, the entire admin panel will be sealed off and placed behind private multi-factor authentication (MFA) and Google Cloud IAM role restrictions.
+> **Admin Panel Lifecycle & Post-Competition Sealing**: The 1-click admin sign-in, Policy Ledger drawer, AI-proposed widget approval queue, and fast-forward routine simulation controls are temporarily surfaced in the public UI exclusively to facilitate evaluation and technical grading for the **Google AI Builder Cup**. Once the competition concludes, the entire admin panel will be sealed off and placed behind private multi-factor authentication (MFA) and Google Cloud IAM role restrictions.
 
 ---
 

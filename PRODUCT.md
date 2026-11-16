@@ -6,7 +6,7 @@ product
 
 ## Users
 
-Adults who follow a study-based health routine on their own, most often Achilles or other tendon rehab, sleep, nutrition or focus protocols. They open the app daily, usually on a phone, often in the middle of an exercise set or right after it. They want to know what to do today, log how it felt, and trust that the routine is safe and comes from real research.
+Adults who follow a study-based health routine on their own, most often Achilles or other tendon rehab, sleep, nutrition or focus routines. They open the app daily, usually on a phone, often in the middle of an exercise set or right after it. They want to know what to do today, log how it felt, and trust that the routine is safe and comes from real research.
 
 ## Product Purpose
 
