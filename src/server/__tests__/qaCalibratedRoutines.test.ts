@@ -26,7 +26,10 @@ describe('canonical paper lookup & versioning', () => {
     ['10.1016/j.smrv.2019.04.008', 'warm-bath-sleep'],
     ['10.1179/106698105790824888', 'cervical-posture'],
     ['10.4103/0253-7176.106022', 'ashwagandha-stress'],
-    ['10.1073/pnas.0801268105', 'dual-n-back']
+    ['10.1073/pnas.0801268105', 'dual-n-back'],
+    ['10.1016/j.lanepe.2024.100912', 'uae-heat-circadian'],
+    ['10.3389/fnut.2023.1142981', 'uae-ramadan-metabolic'],
+    ['10.1016/j.addbeh.2024.108042', 'uae-midwakh-tapering']
   ])('resolves DOI %s to canonical protocol %s', async (doi, id) => {
     const routine = await findCanonicalRoutine({ doi });
     expect(routine?.id).toBe(id);
@@ -216,5 +219,44 @@ describe('QA TC-06 · Dual n-back (Jaeggi 2008)', () => {
     const routine = await extract('10.1073/pnas.0801268105');
     expect(routine.feedbackMetric?.label).toBe('mental fatigue / cognitive strain');
     expect(field(routine, 'nb-fatigue')).toMatchObject({ type: 'scale', min: 0, max: 10 });
+  });
+});
+
+describe('QA Abu Dhabi Seed Protocols (Al-Shehhi, Al-Dhaheri, Zaabi)', () => {
+  it('resolves and verifies Circadian Light & Heat Hydration Protocol', async () => {
+    const routine = await findCanonicalRoutine({ doi: '10.1016/j.lanepe.2024.100912' });
+    expect(routine).toBeDefined();
+    expect(routine?.id).toBe('uae-heat-circadian');
+    expect(routine?.steps.length).toBe(3);
+    for (const step of routine!.steps) {
+      expect(step.microDoseStep).toBeDefined();
+      expect(step.microDoseStep?.action.length).toBeGreaterThan(5);
+    }
+    expect(routine?.contraindications.some((c) => c.severity === 'stop')).toBe(true);
+    expect(routine?.missingDataFlags.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('resolves and verifies Ramadan Metabolic Stability Protocol', async () => {
+    const routine = await findCanonicalRoutine({ doi: '10.3389/fnut.2023.1142981' });
+    expect(routine).toBeDefined();
+    expect(routine?.id).toBe('uae-ramadan-metabolic');
+    expect(routine?.steps.length).toBe(3);
+    for (const step of routine!.steps) {
+      expect(step.microDoseStep).toBeDefined();
+    }
+    expect(routine?.progressionRules.length).toBeGreaterThanOrEqual(2);
+    expect(routine?.feedbackMetric?.name).toBe('afternoon energy');
+  });
+
+  it('resolves and verifies Midwakh Cessation & Tapering Protocol', async () => {
+    const routine = await findCanonicalRoutine({ doi: '10.1016/j.addbeh.2024.108042' });
+    expect(routine).toBeDefined();
+    expect(routine?.id).toBe('uae-midwakh-tapering');
+    expect(routine?.steps.length).toBe(3);
+    for (const step of routine!.steps) {
+      expect(step.microDoseStep).toBeDefined();
+    }
+    expect(routine?.feedbackMetric?.name).toBe('craving intensity');
+    expect(routine?.progressionRules.some((r) => r.condition.includes('Week 3'))).toBe(true);
   });
 });
