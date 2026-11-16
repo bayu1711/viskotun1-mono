@@ -130,7 +130,7 @@ export const COPY = {
     doseModeHeading: "Choose Today's Action",
     doseModes: {
       standard: {
-        title: 'Full Protocol (100%)',
+        title: 'Full Routine (100%)',
         badge: 'Standard',
         desc: 'Complete all prescribed sets and exercises as planned in the study.'
       },
@@ -508,11 +508,11 @@ export const COPY = {
     exploreTab: 'Explore trending papers',
     goToRoutine: 'Go to daily routine',
     trackButton: 'Track',
-    defaultProtocolTitle: 'Research Protocol',
+    defaultProtocolTitle: 'Research Routine',
     versionPill: (v: string) => `v${v}`,
     versionUpdatedPill: (v: string) => `v${v} · Updated`,
-    versionHistoryTitle: 'Protocol Version History & Changelog',
-    versionHistoryEmpty: 'No previous revisions recorded for this protocol.',
+    versionHistoryTitle: 'Routine Version History & Changelog',
+    versionHistoryEmpty: 'No previous revisions recorded for this routine.',
     versionCurrentBadge: 'Current Active Version',
     versionApprovedBadge: 'Clinically Cross-Checked',
     versionChangesLabel: 'Refinements & Added Fields:',
@@ -599,7 +599,7 @@ export const COPY = {
     titleAsk: 'Ask Viskotu',
     titleUpload: 'Add a paper',
     stagingTitle: 'Review candidate routine',
-    stagingEyebrow: 'Extracted protocol',
+    stagingEyebrow: 'Extracted routine',
     stagingDescription: 'Inspect the extracted clinical routine and discuss with Viskotu before confirming.',
     confirmAddPaper: 'Confirm & start routine',
     discardCandidate: 'Discard',
@@ -609,7 +609,7 @@ export const COPY = {
     proposeImprovementPrompt: 'I noticed a discrepancy with the published paper: ',
     adoptExistingRoutine: 'Start this routine',
     proposeImprovementButton: 'Discuss or Propose Fix',
-    protocolUpdatedNotice: (v: string) => `Protocol updated to v${v}`,
+    protocolUpdatedNotice: (v: string) => `Routine updated to v${v}`,
     uploadAnother: 'Upload another paper',
     candidateStepsTitle: 'Extracted intervention steps',
     candidateSafetyTitle: 'Safety guardrail & stop rule',
@@ -620,7 +620,7 @@ export const COPY = {
     noActiveProtocolForAskBody: 'Add a research paper or load a trending routine to start asking questions.',
     switchToUpload: 'Add a paper',
     intakeInstructionTitle: 'Add an interventional study',
-    intakeInstructionBody: 'Upload a clinical trial PDF or enter a DOI/PubMed link. Gemini will extract the protocol, steps, and safety rules so you can review and discuss it before adding it to your schedule.',
+    intakeInstructionBody: 'Upload a clinical trial PDF or enter a DOI/PubMed link. Gemini will extract the routine, steps, and safety rules so you can review and discuss it before adding it to your schedule.',
     typing: 'Viskotu is typing…',
     attach: 'Attach a PDF',
     send: 'Send',
@@ -811,13 +811,13 @@ export const COPY = {
     declinedTheoreticalReason:
       'Declined: Theoretical physics, mathematics, or non-interventional topic. ViskotuN1 only builds executable routines from interventional studies conducted on human participants.',
     declinedAnimalModel:
-      'Declined: Non-human / rodent model. This is a preclinical animal study, so its protocol was never tested on people. ViskotuN1 only builds routines from interventional studies with human participants.',
+      'Declined: Non-human / rodent model. This is a preclinical animal study, so its methodology was never tested on people. ViskotuN1 only builds routines from interventional studies with human participants.',
     declinedInVitro:
       'Declined: In vitro / cell culture study. Results from cells in a dish do not tell you what dose, schedule or safety limits apply to a person. ViskotuN1 only builds routines from interventional studies with human participants.',
     declinedTheoreticalScience:
       'Declined: Theoretical / non-human science. This paper studies physics, mathematics or another non-clinical field and contains no routine that a person can follow.',
     declinedObservational:
-      'Declined: Observational study lacking an executable routine. Cohort, case-control and cross-sectional studies measure associations; researchers did not assign participants a routine, so there is no protocol to copy.'
+      'Declined: Observational study lacking an executable routine. Cohort, case-control and cross-sectional studies measure associations; researchers did not assign participants a routine, so there is no routine to copy.'
   },
   landing: {
     topBanner: 'Strictly interventional human research · Zero-hallucination daily routines',
@@ -973,7 +973,7 @@ export const COPY = {
     heroSubtitle:
       'Extreme summer heat, rotating shift work, and regional lifestyle patterns break rigid fitness apps. ViskotuN1 adapts your clinical routines with micro-dosing and non-punitive re-entry so your momentum never resets to zero.',
     ctaStartTrial: 'Start UAE Adapted Routine',
-    ctaExploreProtocols: 'Explore Clinical Protocols',
+    ctaExploreProtocols: 'Explore Clinical Routines',
     backToGlobal: 'Global Edition',
     trustMetrics: {
       noStreakBreakTitle: 'Zero Streak Shame',
@@ -1020,35 +1020,35 @@ export const COPY = {
     pillar3: {
       tag: 'Regional Tobacco Cessation',
       title: 'Midwakh, Dokha & Shisha Harm Reduction',
-      body: 'Clinical behavioral substitution protocols specifically targeting high-nicotine Midwakh pipe habits and social shisha triggers.'
+      body: 'Clinical behavioral substitution routines specifically targeting high-nicotine Midwakh pipe habits and social shisha triggers.'
     },
-    protocolsTitle: 'Curated Abu Dhabi Research Protocols',
+    protocolsTitle: 'Curated Abu Dhabi Research Routines',
     protocolsSubtitle:
       'Pre-configured interventional routines ready to run immediately in your browser.',
     protocolCards: {
       heat: {
-        title: 'Circadian Light & Heat Hydration Protocol',
+        title: 'Circadian Light & Heat Hydration Routine',
         institution: 'Cleveland Clinic / ACSM Thermal Guidelines',
         duration: '28 Days · Daily',
         action: 'Morning light exposure before 8 AM + indoor isometric pacing',
         tag: 'Heat Resilience'
       },
       ramadan: {
-        title: 'Ramadan Circadian & Metabolic Stability',
+        title: 'Ramadan Circadian & Metabolic Stability Routine',
         institution: 'Gulf Endocrine Society / Lancet Diabetes',
         duration: '30 Days · Ramadan Window',
         action: 'Post-Iftar mobility + Suhoor low-glycemic hydration timing',
         tag: 'Chronobiology'
       },
       midwakh: {
-        title: 'Midwakh & Dokha Behavioral Tapering',
+        title: 'Midwakh & Dokha Behavioral Tapering Routine',
         institution: 'UAE Public Health / Cochrane Tobacco Addiction',
         duration: '42 Days · 6 Phases',
         action: 'Urge surfing + tactile replacement + gradual frequency step-down',
         tag: 'Harm Reduction'
       }
     },
-    launchProtocolCta: 'Start Protocol in App',
+    launchProtocolCta: 'Start Routine in App',
     clinicalBriefTitle: 'Physician-Ready Clinical Summary',
     clinicalBriefSubtitle:
       'Export structured adherence reports directly formatted for consultation with your physician at SEHA, Cleveland Clinic Abu Dhabi, or Sheikh Shakhbout Medical City (SSMC).',
@@ -1251,7 +1251,7 @@ export const COPY = {
       notScheduledPhotoNote: (currentDay: number, nextMilestone?: number, daysUntil?: number | null) =>
         nextMilestone && daysUntil
           ? `Photo assessment is not scheduled for Day ${currentDay}. Next milestone photo is scheduled for Day ${nextMilestone} (in ${daysUntil} ${daysUntil === 1 ? 'day' : 'days'}).`
-          : `Photo assessment is not scheduled for Day ${currentDay}. All protocol milestone assessments have been completed.`,
+          : `Photo assessment is not scheduled for Day ${currentDay}. All routine milestone assessments have been completed.`,
       notScheduledPhotoTooltip: (nextDay?: number) =>
         nextDay
           ? `Not scheduled for today · Next photo due Day ${nextDay}`

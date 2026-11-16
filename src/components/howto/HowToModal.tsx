@@ -139,7 +139,7 @@ export function HowToModal() {
                     <div>
                       <h4 className="text-xs font-medium text-ink">Ready to explore?</h4>
                       <p className="text-2xs text-ink/60">
-                        Choose a pre-calibrated sample paper or explore trending community protocols.
+                        Choose a pre-calibrated sample paper or explore trending community routines.
                       </p>
                     </div>
                     <Link

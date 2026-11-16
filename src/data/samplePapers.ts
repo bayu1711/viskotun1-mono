@@ -222,7 +222,7 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
   {
     id: 'uae-heat-circadian',
     title: 'Efficacy of morning retinal photic stimulation and indoor thermal micro-conditioning during extreme heat ambient exposure: A randomized interventional trial',
-    shortTitle: 'Circadian Light & Heat Hydration Protocol',
+    shortTitle: 'Circadian Light & Heat Hydration Routine',
     domain: 'Circadian Photobiology & Environmental Thermal Adaptation',
     category: 'circadian',
     authors: 'Al-Shehhi K., Henderson T., Mansoor M., et al.',

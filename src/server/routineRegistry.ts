@@ -168,15 +168,18 @@ const TITLE_ALIASES: Record<string, string[]> = {
   'dual-n-back': ['improving fluid intelligence with training on working memory'],
   'uae-heat-circadian': [
     'efficacy of morning retinal photic stimulation and indoor thermal micro-conditioning',
-    'circadian light heat resilient hydration protocol'
+    'circadian light heat resilient hydration protocol',
+    'circadian light heat resilient hydration routine'
   ],
   'uae-ramadan-metabolic': [
     'chronobiological synchronization and postprandial glycemic stabilization during intermittent fasting',
-    'ramadan circadian metabolic rhythm protocol'
+    'ramadan circadian metabolic rhythm protocol',
+    'ramadan circadian metabolic rhythm routine'
   ],
   'uae-midwakh-tapering': [
     'clinical efficacy of behavioral substitution and urge surfing for high nicotine midwakh pipe cessation',
-    'midwakh dokha behavioral harm reduction tapering protocol'
+    'midwakh dokha behavioral harm reduction tapering protocol',
+    'midwakh dokha behavioral harm reduction tapering routine'
   ]
 };
 

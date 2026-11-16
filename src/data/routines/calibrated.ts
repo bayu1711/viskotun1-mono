@@ -358,7 +358,7 @@ export const imstBloodPressureRoutine: Routine = {
 /** TC-03 · Haghayegh et al. 2019 · before-bedtime passive body heating */
 export const warmBathSleepRoutine: Routine = {
   id: 'warm-bath-sleep',
-  title: 'Before-Bedtime Warm Bath Sleep Protocol',
+  title: 'Before-Bedtime Warm Bath Sleep Routine',
   shortTitle: 'warm bath sleep',
   icon: 'sleep',
   phase: 'Phase 1: Week 1–2',
@@ -708,7 +708,7 @@ export const cervicalPostureRoutine: Routine = {
 /** TC-05 · Chandrasekhar et al. 2012 · KSM-66 ashwagandha root extract */
 export const ashwagandhaStressRoutine: Routine = {
   id: 'ashwagandha-stress',
-  title: 'KSM-66 Ashwagandha Stress Reduction Protocol',
+  title: 'KSM-66 Ashwagandha Stress Reduction Routine',
   shortTitle: 'ashwagandha',
   icon: 'pill',
   phase: 'Phase 1: Day 1–60',
@@ -1030,7 +1030,7 @@ export const dualNBackRoutine: Routine = {
 /** TC-UAE-01 · Al-Shehhi et al. 2024 · Circadian Light & Heat-Resilient Hydration Protocol */
 export const uaeHeatCircadianRoutine: Routine = {
   id: 'uae-heat-circadian',
-  title: 'Circadian Light & Heat-Resilient Hydration Protocol',
+  title: 'Circadian Light & Heat-Resilient Hydration Routine',
   shortTitle: 'Heat Resilience',
   icon: 'fitness',
   phase: 'Phase 1: Ambient Heat Baseline (Weeks 1–4)',
@@ -1106,7 +1106,7 @@ export const uaeHeatCircadianRoutine: Routine = {
       id: 'heat-3',
       tone: 'sky',
       icon: 'diet',
-      action: 'Hypotonic Pre-Transit Hydration Protocol',
+      action: 'Hypotonic Pre-Transit Hydration Routine',
       detail:
         'Consume 400 mL cold water with 250mg sodium citrate 30 minutes before stepping into outdoor transit or midday sun to preserve cardiac stroke volume.',
       sets: 2,
@@ -1234,7 +1234,7 @@ export const uaeHeatCircadianRoutine: Routine = {
 /** TC-UAE-02 · Al-Dhaheri et al. 2023 · Ramadan Circadian & Metabolic Stability Protocol */
 export const uaeRamadanMetabolicRoutine: Routine = {
   id: 'uae-ramadan-metabolic',
-  title: 'Ramadan Circadian & Metabolic Stability Protocol',
+  title: 'Ramadan Circadian & Metabolic Stability Routine',
   shortTitle: 'Ramadan Rhythm',
   icon: 'diet',
   phase: 'Phase 1: Fasting Synchronization (Days 1–10)',
@@ -1437,7 +1437,7 @@ export const uaeRamadanMetabolicRoutine: Routine = {
 /** TC-UAE-03 · Zaabi et al. 2024 · Midwakh & Dokha Behavioral Harm Reduction & Tapering Protocol */
 export const uaeMidwakhTaperingRoutine: Routine = {
   id: 'uae-midwakh-tapering',
-  title: 'Midwakh & Dokha Behavioral Harm Reduction & Tapering Protocol',
+  title: 'Midwakh & Dokha Behavioral Harm Reduction & Tapering Routine',
   shortTitle: 'Midwakh Tapering',
   icon: 'check',
   phase: 'Phase 1: Frequency Cap & Urge Surfing (Weeks 1–2)',

@@ -4,7 +4,7 @@ import { classifyPaperSource } from './gatekeeper';
 
 export const FALLBACK_CREATINE_SLEEP: Routine = {
   id: 'creatine-sleep',
-  title: 'Creatine & Sleep Deprivation Cognitive Protocol',
+  title: 'Creatine & Sleep Deprivation Cognitive Routine',
   shortTitle: 'creatine sleep',
   icon: 'sleep',
   phase: 'Phase 1: Acute Loading',
