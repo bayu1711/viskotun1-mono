@@ -358,6 +358,31 @@ export const COPY = {
       `Holding until the rule is met: if ${ruleCondition(condition)}, ${action.toLowerCase()}.`,
     progressionReady: (condition: string, action: string) => `${condition}. ${action}.`
   },
+  bctLedger: {
+    eyebrow: 'Behavioral Medicine',
+    title: 'BCT Taxonomy v1 Ledger',
+    subtitle:
+      'Formal Behavioral Change Techniques (Michie et al. 2013) accredited across ViskotuN1 interventions.',
+    dialogLabel: 'Behavior Change Techniques Ledger',
+    closeButton: 'Close Ledger',
+    clusterLabel: 'Taxonomy Cluster',
+    mechanismLabel: 'Mechanism of Action',
+    implementationLabel: 'Viskotu Execution',
+    targetBarriersLabel: 'Target Gulf Barriers',
+    openLedgerButton: 'Inspect BCT Taxonomy'
+  },
+  healthAge: {
+    eyebrow: 'Clinical Impact',
+    title: 'Biological Health Age Projection',
+    projectedAgeLabel: 'Projected Health Age',
+    deltaLabel: (delta: number) => `${Math.abs(delta)} years younger`,
+    baselineAgeLabel: (age: number) => `Chronological Baseline: ${age} yrs`,
+    cvdRiskLabel: 'Cardiovascular Risk Reduction',
+    metabolicRiskLabel: 'Metabolic Syndrome Risk Reduction',
+    resilienceLabel: 'Habit Resilience Score',
+    resilienceCaption: 'Micro-dose barrier conversion & habit retention rate',
+    bctLinkText: 'View Accredited BCT Coding'
+  },
   evidence: {
     rctShort: 'RCT',
     pilotShort: 'Pilot',

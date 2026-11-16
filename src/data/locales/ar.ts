@@ -98,6 +98,31 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     emptyStepsTitle: 'لم تُستخرج خطوات',
     emptyStepsBody: 'لم يوثق هذا البحث خطوات سريرية قابلة للتنفيذ.'
   },
+  bctLedger: {
+    eyebrow: 'الطب السلوكي الإكلينيكي',
+    title: 'سجل تقنيات تغيير السلوك (BCT Taxonomy v1)',
+    subtitle:
+      'تقنيات معتمدة أكاديمياً لتعديل السلوك الصحي (Michie et al. 2013) مدمجة في بروتوكولات ڤيسكوتو N1.',
+    dialogLabel: 'سجل تقنيات تغيير السلوك',
+    closeButton: 'إغلاق السجل',
+    clusterLabel: 'تصنيف التقنية السلوكية',
+    mechanismLabel: 'الآلية النفسية والعصبية',
+    implementationLabel: 'التطبيق العملي في ڤيسكوتو',
+    targetBarriersLabel: 'عوائق بيئة الخليج المستهدفة',
+    openLedgerButton: 'استعراض تصنيف BCT السلوكي'
+  },
+  healthAge: {
+    eyebrow: 'الأثر السريري',
+    title: 'توقع العمر الصحي الحيوي',
+    projectedAgeLabel: 'العمر الصحي المتوقع',
+    deltaLabel: (delta: number) => `أصغر بـ ${Math.abs(delta)} سنوات بيولوجياً`,
+    baselineAgeLabel: (age: number) => `العمر الزمني المرجعي: ${age} سنة`,
+    cvdRiskLabel: 'انخفاض مخاطر القلب والأوعية الدموية',
+    metabolicRiskLabel: 'انخفاض مخاطر المتلازمة الأيضية',
+    resilienceLabel: 'مؤشر مرونة العادة السلوكية',
+    resilienceCaption: 'معدل تحويل المعوقات لخطوات ميسّرة واستدامة الالتزام',
+    bctLinkText: 'الاطلاع على تقنيات BCT المعتمدة'
+  },
   reEntry: {
     badge: 'مرحباً بعودتك',
     title: 'استئناف الخطة بسلاسة',
