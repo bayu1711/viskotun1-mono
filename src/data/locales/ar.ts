@@ -404,7 +404,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       noStreakBreakDesc: 'انقطاع الأيام لا يصفر إنجازك بل يفعّل استعادة النشاط المرنة تلقائياً.',
       clinicalRigourTitle: 'أبحاث سريرية محكمة 100%',
       clinicalRigourDesc: 'مستندة إلى تجارب بشرية سريرية مدققة ومطابقة للمعايير الصحية.',
-      microDoseTitle: 'خطوات ميسّرة في 3 دقائق',
+      microDoseTitle: 'الخطوات الميسّرة في 3 دقائق',
       microDoseDesc: 'بدائل حركية مكيّفة داخل الأماكن المغلقة عند اشتداد درجات الحرارة إلى 48° مئوية أو ضغط العمل.'
     },
     simulator: {
