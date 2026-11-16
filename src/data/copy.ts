@@ -158,6 +158,36 @@ export const COPY = {
     activeTooltip: (mode: string) => `Currently in ${mode} mode`,
     microNotice: 'Micro-Dose active: Complete 1 set to achieve 100% daily completion.'
   },
+  lifestyleTuning: {
+    badge: 'Context Tuning',
+    title: 'Adaptive Lifestyle Profile',
+    tuneButton: 'Tune Lifestyle',
+    topBarPill: (region: string, tagCount: number) =>
+      tagCount > 0 ? `${region} · ${tagCount} lifestyle active` : `${region} · Tune profile`,
+    detectedLocationGreeting: (country: string, city?: string) =>
+      `Marhaban! I detect you're tracking from ${city ? `${city}, ` : ''}${country}. Is that right?`,
+    unknownLocationGreeting:
+      'Marhaban! Which city or region are you tracking from? Selecting your region allows Viskotu to tailor your daily plan around local climate, fasting hours, and work patterns.',
+    confirmLocationBtn: (cityOrCountry: string) => `✓ Yes, ${cityOrCountry}`,
+    changeLocationBtn: 'Change Region',
+    customPromptPlaceholder: 'Type or speak: e.g. "I work rotating 12h night shifts and smoke shisha occasionally"...',
+    suggestionsEyebrow: (region: string) => `Popular lifestyle factors in ${region}`,
+    tagAddedToast: (tag: string) => `Added "${tag}" to lifestyle profile`,
+    tagRemovedToast: (tag: string) => `Removed "${tag}" from lifestyle profile`,
+    lifestyleIntro: (region: string) =>
+      `Here are the most common lifestyle patterns in ${region}. Tap any that apply to your day, or describe your schedule and habits in your own words:`,
+    tagAddedConfirmation: (tag: string) =>
+      `Added "${tag}" to your lifestyle profile. I've adjusted your daily routine parameters and will monitor corresponding outcome indicators.`,
+    crowdsourcedTagNotice: (tag: string, country: string) =>
+      `Registered "${tag}" for ${country}. Future participants in your region will see this suggestion!`,
+    lifestyleTunedConfirmation: (summary: string) =>
+      `Lifestyle updated! ${summary}. Your routine schedule and biofeedback goals are aligned with your daily reality.`,
+    filterAll: 'All Participants',
+    filterSmokers: 'Smokers / Shisha Cohort',
+    filterNonSmokers: 'Non-Smokers',
+    filterRamadan: 'Ramadan Fasting Cohort',
+    filterShiftWork: 'Shift Workers'
+  },
   dayActions: {
     markComplete: 'Mark today complete',
     dayLogged: (day: number) => `✓ Day ${day} logged`,
