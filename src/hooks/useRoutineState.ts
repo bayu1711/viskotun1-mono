@@ -2082,6 +2082,8 @@ export function useRoutineState() {
       handle?: string;
       day?: number;
       adherence?: number;
+      lifestyleCohort?: 'smoker' | 'non_smoker' | 'ramadan' | 'shift_work' | 'general';
+      tags?: string[];
     }) => {
       if (!protocol) return;
 
@@ -2092,7 +2094,9 @@ export function useRoutineState() {
         handle: reviewData.handle,
         day: reviewData.day ?? protocol.currentDay,
         adherence: reviewData.adherence ?? adherenceRate,
-        userId: userId || undefined
+        userId: userId || undefined,
+        lifestyleCohort: reviewData.lifestyleCohort,
+        tags: reviewData.tags
       };
 
       try {
@@ -2141,6 +2145,16 @@ export function useRoutineState() {
     async (message: string) => {
       const currentProf = auth?.lifestyleProfile;
       const country = currentProf?.region?.countryCode || 'AE';
+      const targetId = protocol?.id || '';
+
+      pushMessages(targetId, {
+        role: 'user',
+        kind: 'question',
+        content: message
+      });
+      if (targetId) {
+        updateRuntime(targetId, (prev) => ({ ...prev, assistantTyping: true }));
+      }
 
       try {
         const res = await fetch('/api/lifestyle/tune', {
@@ -2158,22 +2172,24 @@ export function useRoutineState() {
           if (data.profileUpdates && auth?.updateLifestyleProfile) {
             auth.updateLifestyleProfile(data.profileUpdates);
           }
-          if (protocol) {
-            pushMessages(protocol.id, {
-              role: 'ai',
-              kind: 'confirmation',
-              content: data.reply
-            });
-          }
+          pushMessages(targetId, {
+            role: 'ai',
+            kind: 'confirmation',
+            content: data.reply
+          });
           toast.success(COPY.lifestyleTuning.tagAddedToast(data.extractedTags?.[0] || 'Lifestyle'));
           return data;
         }
       } catch (err) {
         console.warn('[useRoutineState] Lifestyle tune failed:', err);
+      } finally {
+        if (targetId) {
+          updateRuntime(targetId, (prev) => ({ ...prev, assistantTyping: false }));
+        }
       }
       return null;
     },
-    [auth, protocol, pushMessages]
+    [auth, protocol, pushMessages, updateRuntime]
   );
 
   const updateGuardrailThreshold = useCallback(

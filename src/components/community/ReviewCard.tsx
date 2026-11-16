@@ -19,9 +19,24 @@ export function ReviewCard({ review }: ReviewCardProps) {
   return (
     <li>
       <article className={cn('rounded-tile border p-4 transition-colors', config.card)}>
-        <div className="flex items-center gap-2 text-xs text-ink/65">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-ink/65">
           <span aria-hidden="true" className={cn('h-2.5 w-2.5 rounded-full ring-1 ring-ink/20', config.dot)} />
           <span className="font-medium text-ink">{COPY.community.reviewMeta(review.outcome, review.day)}</span>
+          {review.lifestyleCohort === 'smoker' && (
+            <span className="rounded-full bg-peach/30 px-2 py-0.5 text-3xs font-medium text-ink">
+              💨 Smoker / Shisha
+            </span>
+          )}
+          {review.lifestyleCohort === 'ramadan' && (
+            <span className="rounded-full bg-mint/40 px-2 py-0.5 text-3xs font-medium text-ink">
+              🌙 Ramadan Fasting
+            </span>
+          )}
+          {review.lifestyleCohort === 'shift_work' && (
+            <span className="rounded-full bg-cream px-2 py-0.5 text-3xs font-medium text-ink">
+              🏥 Shift Work
+            </span>
+          )}
           <span className="ml-auto rounded-full bg-white/80 px-2 py-0.5 text-3xs font-semibold text-ink/70">
             {COPY.community.reviewAdherence(review.adherence)}
           </span>

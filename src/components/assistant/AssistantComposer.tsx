@@ -31,7 +31,9 @@ inputRef)
     event.preventDefault();
     const value = draft.trim();
     if (!value) return;
-    if (!isAsk || isPaperLink(value)) {
+    if (mode === 'lifestyle') {
+      onAsk(value);
+    } else if (!isAsk || isPaperLink(value)) {
       onAddPaper(value);
     } else {
       onAsk(value);
@@ -39,8 +41,18 @@ inputRef)
     setDraft('');
   };
 
-  const defaultPlaceholder = isAsk ? COPY.assistant.placeholderAsk : COPY.assistant.placeholderUpload;
-  const defaultAriaLabel = isAsk ? COPY.assistant.inputAsk : COPY.assistant.inputUpload;
+  const defaultPlaceholder =
+    mode === 'lifestyle'
+      ? COPY.lifestyleTuning.customPromptPlaceholder
+      : isAsk
+      ? COPY.assistant.placeholderAsk
+      : COPY.assistant.placeholderUpload;
+  const defaultAriaLabel =
+    mode === 'lifestyle'
+      ? COPY.lifestyleTuning.title
+      : isAsk
+      ? COPY.assistant.inputAsk
+      : COPY.assistant.inputUpload;
 
   return (
     <form onSubmit={handleSubmit} className="flex items-center gap-2 rounded-full border border-ink/10 bg-white p-1.5">

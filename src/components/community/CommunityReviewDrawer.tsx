@@ -23,7 +23,8 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
     adherenceRate,
     isReviewDrawerOpen,
     closeReviewDrawer,
-    submitCommunityReview
+    submitCommunityReview,
+    lifestyleProfile
   } = useRoutine();
 
   const isOpen = open ?? isReviewDrawerOpen;
@@ -45,12 +46,23 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
 
     setIsSubmitting(true);
     try {
+      const lifestyleCohort =
+        lifestyleProfile?.smokingStatus && lifestyleProfile.smokingStatus !== 'non_smoker'
+          ? 'smoker'
+          : lifestyleProfile?.isRamadanFastingObserver
+          ? 'ramadan'
+          : lifestyleProfile?.workPattern === 'shift_work'
+          ? 'shift_work'
+          : 'general';
+
       await submitCommunityReview({
         outcome,
         day,
         adherence,
         handle: handle.trim() || undefined,
-        text: text.trim()
+        text: text.trim(),
+        lifestyleCohort,
+        tags: lifestyleProfile?.activeTags || []
       });
       // Reset form
       setText('');

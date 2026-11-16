@@ -21,7 +21,8 @@ const ENGINE_LABELS: Record<AIEngineType, string> = {
 
 const MODE_OPTIONS: { id: AssistantMode; label: string }[] = [
   { id: 'ask', label: COPY.assistant.modes.ask },
-  { id: 'upload', label: COPY.assistant.modes.upload }
+  { id: 'upload', label: COPY.assistant.modes.upload },
+  { id: 'lifestyle', label: COPY.assistant.modes.lifestyle }
 ];
 
 interface AssistantHeaderProps {
@@ -97,7 +98,7 @@ export function AssistantHeader({
       <div className="pt-4">
         <div className="flex items-center justify-between gap-2">
           <p className="truncate text-sm leading-none text-ink/60">
-            {customEyebrow || (isAsk ? protocolTitle : COPY.assistant.eyebrowUpload)}
+            {customEyebrow || (mode === 'lifestyle' ? COPY.lifestyleTuning.badge : isAsk ? protocolTitle : COPY.assistant.eyebrowUpload)}
           </p>
           <div ref={disclaimerRef} className="relative flex items-center gap-1.5 shrink-0">
             <button
@@ -168,7 +169,7 @@ export function AssistantHeader({
           </div>
         </div>
         <h2 id={titleId} className="mt-1 text-display-sm leading-tight tracking-tight">
-          {customTitle || (isAsk ? COPY.assistant.titleAsk : COPY.assistant.titleUpload)}
+          {customTitle || (mode === 'lifestyle' ? COPY.lifestyleTuning.title : isAsk ? COPY.assistant.titleAsk : COPY.assistant.titleUpload)}
         </h2>
       </div>
     </header>

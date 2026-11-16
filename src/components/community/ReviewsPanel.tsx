@@ -12,9 +12,20 @@ import { PillButton } from '../ui/PillButton';
 import { SectionHeading } from '../ui/SectionHeading';
 import { ReviewCard } from './ReviewCard';
 
+type CohortFilter = 'all' | 'smoker' | 'non_smoker' | 'ramadan' | 'shift_work';
+
+const COHORT_FILTER_OPTIONS: { id: CohortFilter; label: string }[] = [
+  { id: 'all', label: COPY.lifestyleTuning.filterAll },
+  { id: 'smoker', label: COPY.lifestyleTuning.filterSmokers },
+  { id: 'non_smoker', label: COPY.lifestyleTuning.filterNonSmokers },
+  { id: 'ramadan', label: COPY.lifestyleTuning.filterRamadan },
+  { id: 'shift_work', label: COPY.lifestyleTuning.filterShiftWork }
+];
+
 export function ReviewsPanel() {
   const { routine, protocol = routine, openReviewDrawer } = useRoutine();
   const [filter, setFilter] = useState<ReviewFilter>('all');
+  const [cohortFilter, setCohortFilter] = useState<CohortFilter>('all');
   const [liveReviews, setLiveReviews] = useState<CommunityReview[]>(
     routine?.community?.reviews || []
   );
@@ -54,10 +65,52 @@ export function ReviewsPanel() {
     };
   }, [protocol?.id, protocol?.community?.reviews]);
 
-  const reviews =
-    filter === 'all'
-      ? liveReviews
-      : liveReviews.filter((review) => review.outcome === filter);
+  const reviews = liveReviews.filter((review) => {
+    const outcomeMatch = filter === 'all' || review.outcome === filter;
+    if (!outcomeMatch) return false;
+
+    if (cohortFilter === 'all') return true;
+    if (review.lifestyleCohort === cohortFilter) return true;
+
+    const lowerText = review.text.toLowerCase();
+    const lowerHandle = (review.handle || '').toLowerCase();
+    const tags = review.tags || [];
+
+    if (cohortFilter === 'smoker') {
+      return (
+        tags.includes('smoker') ||
+        lowerText.includes('smok') ||
+        lowerText.includes('shisha') ||
+        lowerText.includes('dokha') ||
+        lowerText.includes('midwakh') ||
+        lowerHandle.includes('smok')
+      );
+    }
+    if (cohortFilter === 'ramadan') {
+      return (
+        tags.includes('ramadan') ||
+        lowerText.includes('ramadan') ||
+        lowerText.includes('fasting') ||
+        lowerHandle.includes('fasting')
+      );
+    }
+    if (cohortFilter === 'shift_work') {
+      return (
+        tags.includes('shift_work') ||
+        lowerText.includes('shift') ||
+        lowerText.includes('night') ||
+        lowerHandle.includes('shift')
+      );
+    }
+    if (cohortFilter === 'non_smoker') {
+      return (
+        review.lifestyleCohort === 'non_smoker' ||
+        (!lowerText.includes('smok') && !lowerText.includes('shisha') && !lowerText.includes('midwakh'))
+      );
+    }
+
+    return true;
+  });
 
   return (
     <Panel aria-label={COPY.community.reviewsLabel}>
@@ -70,13 +123,20 @@ export function ReviewsPanel() {
           </PillButton>
         }
       />
-      <FilterChips
-        className="mt-4"
-        options={reviewFilters}
-        value={filter}
-        onChange={setFilter}
-        ariaLabel={COPY.community.filterLabel}
-      />
+      <div className="mt-4 space-y-2">
+        <FilterChips
+          options={reviewFilters}
+          value={filter}
+          onChange={setFilter}
+          ariaLabel={COPY.community.filterLabel}
+        />
+        <FilterChips
+          options={COHORT_FILTER_OPTIONS}
+          value={cohortFilter}
+          onChange={setCohortFilter}
+          ariaLabel="Filter reviews by participant lifestyle cohort"
+        />
+      </div>
 
       {isLoading && liveReviews.length === 0 ? (
         <div className="mt-4 space-y-2">

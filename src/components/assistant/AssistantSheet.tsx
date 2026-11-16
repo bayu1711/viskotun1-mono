@@ -18,6 +18,7 @@ import { AssistantComposer } from './AssistantComposer';
 import { AssistantHeader } from './AssistantHeader';
 import { AssistantMessage } from './AssistantMessage';
 import { FaqSuggestions } from './FaqSuggestions';
+import { LifestyleTuningView } from './LifestyleTuningView';
 import { CandidateProtocolCard } from './messages/CandidateProtocolCard';
 import { ProcessingCard } from './ProcessingCard';
 import { TypingIndicator } from './TypingIndicator';
@@ -41,7 +42,11 @@ export function AssistantSheet() {
     confirmStagingProtocol,
     discardStagingProtocol,
     askStagingQuestion,
-    toggleStagingExcludeStep
+    toggleStagingExcludeStep,
+    lifestyleProfile,
+    confirmRegion,
+    updateLifestyleProfile,
+    tuneLifestyle
   } = useRoutine();
 
   const panelRef = useRef<HTMLElement>(null);
@@ -51,7 +56,7 @@ export function AssistantSheet() {
   useDialogA11y(panelRef, { open: isOpen, onClose: closeAssistant, initialFocusRef: inputRef });
 
   const currentMessageCount =
-    mode === 'ask'
+    mode === 'ask' || mode === 'lifestyle'
       ? messages.length + (assistantTyping ? 1 : 0)
       : stagingMessages.length +
         (isStagingAssistantTyping ? 1 : 0) +
@@ -83,7 +88,8 @@ export function AssistantSheet() {
 
   const hasAskConversation = messages.length > 0 || assistantTyping;
   const isAsk = mode === 'ask';
-  const activeMessages = isAsk ? messages : stagingMessages;
+  const isLifestyle = mode === 'lifestyle';
+  const activeMessages = isAsk || isLifestyle ? messages : stagingMessages;
   const lastEngine = useMemo(
     () => [...activeMessages].reverse().find((m) => m.engine)?.engine,
     [activeMessages]
@@ -160,7 +166,17 @@ export function AssistantSheet() {
             />
 
             <div role="log" aria-live="polite" className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
-              {isAsk ? (
+              {isLifestyle ? (
+                /* Lifestyle Tuning Mode */
+                <LifestyleTuningView
+                  lifestyleProfile={lifestyleProfile}
+                  messages={messages}
+                  isTyping={assistantTyping}
+                  onTune={tuneLifestyle}
+                  onConfirmRegion={confirmRegion}
+                  onUpdateProfile={updateLifestyleProfile}
+                />
+              ) : isAsk ? (
                 /* Ask Mode: Contextual to Active Routine */
                 protocol || messages.length > 0 ? (
                   <>
@@ -255,7 +271,17 @@ export function AssistantSheet() {
             </div>
 
             <footer className="shrink-0 space-y-3 border-t border-ink/10 bg-canvas px-5 pb-5 pt-3">
-              {isAsk ? (
+              {isLifestyle ? (
+                <AssistantComposer
+                  ref={inputRef}
+                  mode="lifestyle"
+                  onAsk={tuneLifestyle}
+                  onAddPaper={addPaper}
+                  onFile={handleFile}
+                  placeholder={COPY.lifestyleTuning.customPromptPlaceholder}
+                  ariaLabel={COPY.lifestyleTuning.title}
+                />
+              ) : isAsk ? (
                 <>
                   <FaqSuggestions
                     suggestions={askSuggestions}

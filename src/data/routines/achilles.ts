@@ -176,6 +176,7 @@ export const achillesRoutine: Routine = {
       handle: 'Anonymous · 41M · Runner',
       day: 5,
       outcome: 'adjusted',
+      lifestyleCohort: 'non_smoker',
       text: 'Scaled load down by 10% on Day 5 due to soreness, recovered fully by Week 3.',
       adherence: 88
     },
@@ -185,7 +186,8 @@ export const achillesRoutine: Routine = {
       handle: 'Anonymous · 33F · Desk worker',
       day: 11,
       outcome: 'paused',
-      text: 'Day 11 escalation was too aggressive. Paused two days, then repeated Week 1 loading before progressing.',
+      lifestyleCohort: 'shift_work',
+      text: 'Day 11 escalation was too aggressive during rotating hospital shifts. Paused two days, then repeated Week 1 loading before progressing.',
       adherence: 61
     },
     {
@@ -194,17 +196,19 @@ export const achillesRoutine: Routine = {
       handle: 'Anonymous · 29M · Basketball',
       day: 14,
       outcome: 'improved',
-      text: 'Finished Phase 1 at 0/10 discomfort. Morning stiffness dropped from 25 min to under 5 min.',
+      lifestyleCohort: 'smoker',
+      text: 'Midwakh smoker · finished Phase 1 at 0/10 discomfort. Morning stiffness dropped from 25 min to under 5 min.',
       adherence: 96
     },
     {
       id: 'ach-rev-4',
       userId: 'user-ach-hiker-52f',
-      handle: 'Anonymous · 52F · Hiker',
+      handle: 'Anonymous · 52F · Fasting Observer',
       day: 8,
       outcome: 'adjusted',
-      text: 'Bent-knee drops aggravated the tendon, so I kept the straight-knee variant only until Day 8.',
-      adherence: 74
+      lifestyleCohort: 'ramadan',
+      text: 'During Ramadan fasting hours, shifted eccentric calf drops to 1 hour post-Iftar. Recovered smoothly with zero tendon cramp.',
+      adherence: 84
     }]
 
   },

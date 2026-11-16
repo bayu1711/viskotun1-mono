@@ -19,13 +19,28 @@ import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 
 export function TopBar() {
-  const { streak, resetToDefaults, openHowTo } = useRoutine();
-  const { openAssistant } = useAssistant();
+  const { streak, resetToDefaults, openHowTo, lifestyleProfile } = useRoutine();
+  const { openAssistant, openLifestyleTuning } = useAssistant();
   const { user, isGuest, isAdmin, logout } = useAuth();
   const { openPolicyDrawer, isLiveFirestore } = usePolicyLedger();
 
   const displayName = user?.name || COPY.auth.defaultGuestName;
   const displayInitials = user?.initials || COPY.brand.initials;
+
+  const flagEmoji =
+    lifestyleProfile?.region?.countryCode === 'AE'
+      ? '🇦🇪'
+      : lifestyleProfile?.region?.countryCode === 'SA'
+      ? '🇸🇦'
+      : lifestyleProfile?.region?.countryCode === 'GB'
+      ? '🇬🇧'
+      : lifestyleProfile?.region?.countryCode === 'US'
+      ? '🇺🇸'
+      : '🌐';
+
+  const regionLabel =
+    lifestyleProfile?.region?.city || lifestyleProfile?.region?.countryName || 'Abu Dhabi';
+  const tagCount = lifestyleProfile?.activeTags?.length ?? 0;
 
   // The server clock is not in the viewer's timezone, so the greeting is only computed in the browser
   const [greetingText, setGreetingText] = useState<string | null>(null);
@@ -68,7 +83,25 @@ export function TopBar() {
           </div>
         </div>
 
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            type="button"
+            onClick={openLifestyleTuning}
+            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-ink/20 bg-cream/70 hover:bg-cream px-2.5 py-1 text-xs font-medium text-ink transition-colors cursor-pointer"
+            title={COPY.lifestyleTuning.tuneButton}
+            aria-label={COPY.lifestyleTuning.tuneButton}
+          >
+            <span className="text-xs leading-none" aria-hidden="true">
+              {flagEmoji}
+            </span>
+            <span className="hidden sm:inline font-semibold">
+              {regionLabel}
+            </span>
+            <span className="text-2xs text-ink/65">
+              · {tagCount > 0 ? `${tagCount} active` : 'Tune'}
+            </span>
+          </button>
+
           {streak > 0 && (
             <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-orange/15 px-3 py-1 text-xs font-semibold text-ink">
               <Icon icon={LocalFireDepartmentOutlinedIcon} size="xs" />
