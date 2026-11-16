@@ -1,1 +1,0 @@
-export { RoutineStepRow as ProtocolStepRow } from '../routine/RoutineStepRow';

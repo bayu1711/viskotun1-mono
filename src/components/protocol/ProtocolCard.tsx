@@ -1,1 +1,0 @@
-export { RoutineCard as ProtocolCard } from '../routine/RoutineCard';

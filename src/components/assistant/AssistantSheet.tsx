@@ -13,13 +13,13 @@ import { useScrollToLatest } from '../../hooks/useScrollToLatest';
 import { isPdfFile } from '../../utils/files';
 import { getDynamicSuggestions } from '../../utils/suggestions';
 import { EmptyState } from '../feedback/EmptyState';
-import { MissingDataBanner } from '../protocol/MissingDataBanner';
+import { MissingDataBanner } from '../routine/MissingDataBanner';
 import { AssistantComposer } from './AssistantComposer';
 import { AssistantHeader } from './AssistantHeader';
 import { AssistantMessage } from './AssistantMessage';
 import { FaqSuggestions } from './FaqSuggestions';
 import { LifestyleTuningView } from './LifestyleTuningView';
-import { CandidateProtocolCard } from './messages/CandidateProtocolCard';
+import { CandidateRoutineCard } from './messages/CandidateRoutineCard';
 import { ProcessingCard } from './ProcessingCard';
 import { TypingIndicator } from './TypingIndicator';
 import { UploadDropzone } from './UploadDropzone';
@@ -219,7 +219,8 @@ export function AssistantSheet() {
                     </div>
                   ) : stagingProtocol ? (
                     <div className="space-y-4">
-                      <CandidateProtocolCard
+                      <CandidateRoutineCard
+                        routine={stagingProtocol}
                         protocol={stagingProtocol}
                         onConfirm={handleConfirmCandidate}
                         onDiscard={discardStagingProtocol}

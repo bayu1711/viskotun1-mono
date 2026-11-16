@@ -107,7 +107,7 @@ export type WidgetType = (typeof SUPPORTED_WIDGET_TYPES)[number];
 
 export type ProposedWidgetStatus = 'pending_review' | 'approved';
 
-export interface ProtocolChangelogEntry {
+export interface RoutineChangelogEntry {
   version: string;
   date: string;
   summary: string;
@@ -116,12 +116,16 @@ export interface ProtocolChangelogEntry {
   updatedFields?: string[];
 }
 
+/** Backward-compatibility alias */
+export type ProtocolChangelogEntry = RoutineChangelogEntry;
+
 export interface ProposedWidgetSpec {
   id: string;
   requestedType: string;
   title: string;
   description: string;
   status: ProposedWidgetStatus;
+  routineId?: string;
   protocolId?: string;
   paperTitle?: string;
   fieldId?: string;
@@ -414,5 +418,6 @@ export interface PaperUploadResult {
   success: boolean;
   eligible: boolean;
   reason?: string;
+  routine?: Routine;
   protocol?: Routine;
 }

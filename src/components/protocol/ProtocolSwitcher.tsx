@@ -1,1 +1,0 @@
-export { RoutineSwitcher as ProtocolSwitcher } from '../routine/RoutineSwitcher';

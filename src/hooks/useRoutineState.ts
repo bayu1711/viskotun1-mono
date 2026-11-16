@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { AuthContext } from '../contexts/AuthContext';
 import { DEFAULT_CONFIRMATION_SCORE, FEEDBACK_ESCALATION_THRESHOLD } from '../data/config';
 import { COPY } from '../data/copy';
-import { initialQueuedPapers, protocols as initialProtocols, sampleProtocols } from '../data/protocols';
+import { initialQueuedPapers, protocols as initialProtocols, sampleProtocols } from '../data/routines';
 import { PRECALIBRATED_SAMPLE_PROTOCOLS, SAMPLE_PAPERS, type SamplePaper } from '../data/samplePapers';
 import type {
   BarrierLog,

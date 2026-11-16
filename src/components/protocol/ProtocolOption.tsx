@@ -1,1 +1,0 @@
-export { RoutineOption as ProtocolOption } from '../routine/RoutineOption';

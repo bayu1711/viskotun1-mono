@@ -10,13 +10,14 @@ import { Icon } from '../ui/Icon';
 import { IconTile } from '../ui/IconTile';
 
 interface MissingDataBannerProps {
+  routine?: Routine | Protocol | null;
   protocol?: Routine | Protocol | null;
   className?: string;
 }
 
-export function MissingDataBanner({ protocol: propProtocol, className }: MissingDataBannerProps = {}) {
+export function MissingDataBanner({ routine: propRoutine, protocol: propProtocol, className }: MissingDataBannerProps = {}) {
   const { routine, protocol = routine, missingDataFlagEnabled } = useRoutine();
-  const current = propProtocol !== undefined ? propProtocol : (routine || protocol);
+  const current = propRoutine !== undefined ? propRoutine : (propProtocol !== undefined ? propProtocol : (routine || protocol));
 
   if (!missingDataFlagEnabled || !current) return null;
 

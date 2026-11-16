@@ -5,35 +5,41 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import { COPY } from '../../../data/copy';
-import type { Protocol, ProtocolStep } from '../../../types/routine';
+import type { Routine, Protocol, RoutineStep, ProtocolStep } from '../../../types/routine';
 import { cn } from '../../../utils/cn';
 import { isRandomizedTrial, stopRuleOf } from '../../../utils/routineMetrics';
 import { Callout } from '../../feedback/Callout';
-import { MissingDataBanner } from '../../protocol/MissingDataBanner';
+import { MissingDataBanner } from '../../routine/MissingDataBanner';
 import { EvidenceBadgeChip } from '../../ui/EvidenceBadgeChip';
 import { Icon } from '../../ui/Icon';
 import { AIIcon } from '../../ui/AIIcon';
 import { MetaItem } from './MetaItem';
 
-interface CandidateProtocolCardProps {
-  protocol: Protocol;
+interface CandidateRoutineCardProps {
+  routine?: Routine | Protocol;
+  protocol?: Routine | Protocol;
   onConfirm: () => void;
   onDiscard: () => void;
   onToggleExcludeStep?: (stepId: string) => void;
-  onAskAboutStep?: (step: ProtocolStep) => void;
+  onAskAboutStep?: (step: RoutineStep | ProtocolStep) => void;
 }
 
-export function CandidateProtocolCard({
-  protocol,
+export type CandidateProtocolCardProps = CandidateRoutineCardProps;
+
+export function CandidateRoutineCard({
+  routine,
+  protocol: propProtocol,
   onConfirm,
   onDiscard,
   onToggleExcludeStep,
   onAskAboutStep
-}: CandidateProtocolCardProps) {
-  const paper = protocol.paper;
-  const stopRule = stopRuleOf(protocol);
-  const progressionRule = protocol.progressionRules?.[0];
-  const excludedIds = protocol.initialExcludedStepIds ?? [];
+}: CandidateRoutineCardProps) {
+  const protocol = (routine || propProtocol)!;
+  const targetRoutine = protocol;
+  const paper = targetRoutine.paper;
+  const stopRule = stopRuleOf(targetRoutine);
+  const progressionRule = targetRoutine.progressionRules?.[0];
+  const excludedIds = targetRoutine.initialExcludedStepIds ?? [];
 
   const meta = [
     { label: COPY.assistant.meta.sample, value: COPY.assistant.meta.sampleValue(paper.sampleSize) },
@@ -95,7 +101,7 @@ export function CandidateProtocolCard({
       )}
 
       {/* Missing Parameters / Lineage Banner */}
-      <MissingDataBanner protocol={protocol} className="rounded-tile text-xs" />
+      <MissingDataBanner routine={targetRoutine} protocol={targetRoutine} className="rounded-tile text-xs" />
 
       {protocol.dataCollectionSpec?.some(
         (field) => field.proposedWidget?.status === 'pending_review'
@@ -246,3 +252,5 @@ export function CandidateProtocolCard({
     </article>
   );
 }
+
+export const CandidateProtocolCard = CandidateRoutineCard;

@@ -12,7 +12,7 @@ import { Icon } from '../ui/Icon';
 import { IconTile } from '../ui/IconTile';
 import { StepIcon } from '../ui/StepIcon';
 import { RoutineOption } from './RoutineOption';
-import { QueuedPaperItem } from '../protocol/QueuedPaperItem';
+import { QueuedPaperItem } from './QueuedPaperItem';
 
 export function RoutineSwitcher() {
   const { routines, queuedPapers, activeRoutineId, setActiveRoutine, routine } = useRoutine();

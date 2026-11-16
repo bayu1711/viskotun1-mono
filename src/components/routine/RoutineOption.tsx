@@ -6,7 +6,7 @@ import { cn } from '../../utils/cn';
 import { Icon } from '../ui/Icon';
 import { ProgressRing } from '../ui/ProgressRing';
 import { StepIcon } from '../ui/StepIcon';
-import { PaperRowText } from '../protocol/PaperRowText';
+import { PaperRowText } from './PaperRowText';
 
 interface RoutineOptionProps {
   routine?: RoutineSummary;

@@ -13,7 +13,7 @@ import { UserFileBubble } from './messages/UserFileBubble';
 import { UserTextBubble } from './messages/UserTextBubble';
 import { ProcessingCard } from './ProcessingCard';
 
-import { CandidateProtocolCard } from './messages/CandidateProtocolCard';
+import { CandidateRoutineCard } from './messages/CandidateRoutineCard';
 import { useRoutine } from '../../contexts/RoutineContext';
 
 interface AssistantMessageProps {
@@ -43,7 +43,8 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
         const target = stagingProtocol || protocol;
         if (!target) return null;
         return (
-          <CandidateProtocolCard
+          <CandidateRoutineCard
+            routine={target}
             protocol={target}
             onConfirm={confirmStagingProtocol}
             onDiscard={discardStagingProtocol}

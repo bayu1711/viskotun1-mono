@@ -5,7 +5,7 @@ import NorthEastIcon from '@mui/icons-material/NorthEast';
 import { Callout } from '../components/feedback/Callout';
 import { PageContainer } from '../components/layout/PageContainer';
 import { PageHeader } from '../components/layout/PageHeader';
-import { DayActions } from '../components/protocol/DayActions';
+import { DayActions } from '../components/routine/DayActions';
 import { DailyProgressBar } from '../components/routine/DailyProgressBar';
 import { FeedbackLogList } from '../components/routine/FeedbackLogList';
 import { HistoryCalendar } from '../components/routine/HistoryCalendar';

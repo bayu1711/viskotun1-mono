@@ -9,8 +9,8 @@
  */
 
 import { getFirestore } from './guardrailLedger';
-import { achillesProtocol } from '../data/protocols/achilles';
-import { hairLossProtocol } from '../data/protocols/hairLoss';
+import { achillesRoutine } from '../data/routines/achilles';
+import { hairLossRoutine } from '../data/routines/hairLoss';
 import { calibratedRoutines } from '../data/routines/calibrated';
 import {
   FALLBACK_CREATINE_SLEEP,
@@ -41,7 +41,7 @@ const METRICS_SUBCOLLECTION = 'community_metrics';
 // Built-in verified seed protocols
 const BUILTIN_PROTOCOLS: Record<string, Protocol> = {
   achilles: {
-    ...achillesProtocol,
+    ...achillesRoutine,
     canonicalId: 'achilles',
     isCanonical: true,
     version: '1.0',
@@ -55,7 +55,7 @@ const BUILTIN_PROTOCOLS: Record<string, Protocol> = {
     ]
   },
   'hair-loss': {
-    ...hairLossProtocol,
+    ...hairLossRoutine,
     canonicalId: 'hair-loss',
     isCanonical: true,
     version: '1.0',

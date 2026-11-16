@@ -13,8 +13,8 @@ import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 import { Panel } from '../ui/Panel';
 import { SectionHeading } from '../ui/SectionHeading';
-import { DayActions } from '../protocol/DayActions';
-import { MissingDataBanner } from '../protocol/MissingDataBanner';
+import { DayActions } from './DayActions';
+import { MissingDataBanner } from './MissingDataBanner';
 import { RoutineStepRow } from './RoutineStepRow';
 
 export function RoutineCard() {
