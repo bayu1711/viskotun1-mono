@@ -68,7 +68,7 @@ ViskotuN1 introduces a **Schema-Driven Adaptive UI** (Generative UI):
 
 ### A. Data Collection Specification
 ```typescript
-// src/types/protocol.ts
+// src/types/routine.ts
 
 export type WidgetType = 
   | 'scale'        // 0–10 or custom min/max visual slider
@@ -105,9 +105,9 @@ export interface MorphingDataLog {
 }
 ```
 
-### B. Updated Protocol Interface
+### B. Updated Routine Interface
 ```typescript
-export interface Protocol {
+export interface Routine {
   id: string;
   title: string;
   // ... existing fields ...
@@ -194,9 +194,9 @@ When the data collection morphs, the **Dashboard** dynamically selects the appro
 ## 7. Phased Implementation Roadmap
 
 ### Phase 1: Data Contracts & Gemini Extraction
-- [x] Update `src/types/protocol.ts` with `DataCollectionField` and `MorphingDataLog`.
+- [x] Update `src/types/routine.ts` with `DataCollectionField` and `MorphingDataLog`.
 - [x] Extend Gemini extraction prompt in `src/server/geminiExtraction.ts` to extract `dataCollectionSpec` from paper Methods.
-- [x] Add fallback specs in `src/server/fallbackProtocols.ts`:
+- [x] Add fallback specs in `src/server/fallbackRoutines.ts`:
   - Achilles Tendinopathy $\rightarrow$ `scale` (Pain VAS 0–10) & `numeric` (Lunge dorsiflexion angle)
   - Creatine Sleep Deprivation $\rightarrow$ `timer` (Psychomotor Vigilance Task), `multichoice` (Stanford Sleepiness Scale), & `scale` (GI distress)
   - Hair Loss Trial $\rightarrow$ `photo` (Milestone Baseline/Day 14/28/56/84 vertex photo) & `scale` (Scalp irritation)
@@ -211,14 +211,14 @@ When the data collection morphs, the **Dashboard** dynamically selects the appro
 - [x] Create polymorphic `DynamicFieldRenderer.tsx` and integrate into `FeedbackLogForm.tsx`.
 
 ### Phase 3: Milestone Awareness & Routine Integration
-- [x] Update `useProtocolState.ts` to store polymorphic `morphingLogs` in `localStorage`.
-- [x] Detect current day milestone status (`isMilestoneDay(protocol, currentDay)`).
+- [x] Update `useRoutineState.ts` to store polymorphic `morphingLogs` in `localStorage`.
+- [x] Detect current day milestone status (`isMilestoneDay(routine, currentDay)`).
 - [x] Render milestone callout banner on scheduled evaluation days (`MilestoneBanner.tsx`).
 
 ### Phase 4: Morphing Dashboard Analytics
 - [x] Create `src/components/dashboard/MilestonePhotoComparison.tsx`.
 - [x] Create `src/components/dashboard/BiomarkerChartContent.tsx` and `BiomarkerTrendChart.tsx`.
-- [x] Conditionally render visualizers in `src/views/Dashboard.tsx` based on `protocol.dataCollectionSpec`.
+- [x] Conditionally render visualizers in `src/views/Dashboard.tsx` based on `routine.dataCollectionSpec`.
 
 ---
 

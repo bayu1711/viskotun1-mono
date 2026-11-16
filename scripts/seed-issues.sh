@@ -50,7 +50,7 @@ ISSUE_2=$(gh issue create --repo "$REPO" \
   --title "refactor(core): eliminate DRY violations, prop drilling, and timer memory leaks" \
   --label "completed,phase-1" \
   --body "### Summary
-- Lifted \`PainLogDrawer\` to shared \`ProtocolContext\` and mounted once in \`AppShell.tsx\`.
+- Lifted \`PainLogDrawer\` to shared \`RoutineContext\` and mounted once in \`AppShell.tsx\`.
 - Cleaned up \`useRef\` timer intervals to eliminate memory leaks on unmount.
 - Replaced lossy integer round-trip math with raw \`todayFraction\` metrics.
 - Added dynamic imports with \`ssr: false\` for Recharts components.
@@ -61,12 +61,12 @@ gh issue close "$ISSUE_2" --reason "completed" --comment "Verified and pushed to
 
 # 3. Scientific Gatekeeper (Closed)
 ISSUE_3=$(gh issue create --repo "$REPO" \
-  --title "feat(gatekeeper): scientific scope validation and high-fidelity fallback protocols" \
+  --title "feat(gatekeeper): scientific scope validation and high-fidelity fallback routines" \
   --label "completed,phase-2" \
   --body "### Summary
 - Built strict scientific gatekeeper (\`isTheoreticalOrNonHuman\`) enforcing human interventional studies only.
 - Gracefully declines theoretical physics, pure math, animal/rodent models, and observational papers.
-- Created fallback protocols (*Creatine & Sleep Deprivation*, *Patellar HSR Rehab*) for zero-API-key local testing.
+- Created fallback routines (*Creatine & Sleep Deprivation*, *Patellar HSR Rehab*) for zero-API-key local testing.
 
 **Completed in**: Commit \`184a1c5\`")
 echo "Created $ISSUE_3"
@@ -105,7 +105,7 @@ ISSUE_6=$(gh issue create --repo "$REPO" \
   --body "### Summary
 - Connected window drag-and-drop, \`UploadDropzone\`, and DOI input to live \`uploadPaper\` handler.
 - Real-time extraction progress stages rendered in the chat stream.
-- Switches active protocol immediately upon successful extraction or displays an educational alert card if declined.
+- Switches active routine immediately upon successful extraction or displays an educational alert card if declined.
 
 **Completed in**: Commit \`f7c130e\`")
 echo "Created $ISSUE_6"
@@ -121,35 +121,35 @@ gh issue create --repo "$REPO" \
 Keep user check-ins and pain logs saved across browser refreshes.
 
 ### Target Files
-- \`src/hooks/useProtocolState.ts\`
+- \`src/hooks/useRoutineState.ts\`
 
 ### Tasks
-- [ ] Save \`runtime[protocolId].setsDone\` to \`localStorage\` on update.
-- [ ] Save \`runtime[protocolId].painLogs\` to \`localStorage\` on update.
+- [ ] Save \`runtime[routineId].setsDone\` to \`localStorage\` on update.
+- [ ] Save \`runtime[routineId].painLogs\` to \`localStorage\` on update.
 - [ ] Hydrate saved counts and logs safely after initial mount.
 
 ### Acceptance Criteria
 - Check off 2 sets on Day 4, log pain score of 2, refresh the browser $\rightarrow$ counts and log remain intact." >/dev/null
 echo "Created Task: persist completed sets and pain logs"
 
-# Task 2: Uploaded Protocols Storage
+# Task 2: Uploaded Routines Storage
 gh issue create --repo "$REPO" \
-  --title "feat(storage): persist custom uploaded protocols across browser sessions" \
+  --title "feat(storage): persist custom uploaded routines across browser sessions" \
   --label "phase-3" \
   --body "### Objective
 Ensure papers uploaded and extracted by the user do not disappear on page reload.
 
 ### Target Files
-- \`src/hooks/useProtocolState.ts\`
+- \`src/hooks/useRoutineState.ts\`
 
 ### Tasks
-- [ ] Save newly added protocols in \`protocolList\` to \`localStorage\`.
-- [ ] Save current \`activeProtocolId\` so the user stays on their active paper.
-- [ ] Merge saved protocols with defaults during client hydration.
+- [ ] Save newly added routines in \`routineList\` to \`localStorage\`.
+- [ ] Save current \`activeRoutineId\` so the user stays on their active paper.
+- [ ] Merge saved routines with defaults during client hydration.
 
 ### Acceptance Criteria
-- Upload a new PDF, wait for extraction to complete, refresh the browser $\rightarrow$ custom protocol remains in sidebar and active." >/dev/null
-echo "Created Task: persist custom uploaded protocols"
+- Upload a new PDF, wait for extraction to complete, refresh the browser $\rightarrow$ custom routine remains in sidebar and active." >/dev/null
+echo "Created Task: persist custom uploaded routines"
 
 # Task 3: Reset to Demo Defaults
 gh issue create --repo "$REPO" \
@@ -160,16 +160,16 @@ Allow judges and testers to wipe local storage and restore clean baseline mock d
 
 ### Target Files
 - \`src/components/layout/TopBar.tsx\`
-- \`src/hooks/useProtocolState.ts\`
+- \`src/hooks/useRoutineState.ts\`
 - \`src/data/copy.ts\`
 
 ### Tasks
-- [ ] Add \`resetToDefaults()\` function in protocol state.
+- [ ] Add \`resetToDefaults()\` function in routine state.
 - [ ] Add subtle reset button or menu item in \`TopBar.tsx\`.
 - [ ] Show toast notification on reset.
 
 ### Acceptance Criteria
-- Clicking reset clears \`localStorage\` and resets active protocol back to Achilles Day 4." >/dev/null
+- Clicking reset clears \`localStorage\` and resets active routine back to Achilles Day 4." >/dev/null
 echo "Created Task: add Reset to Demo Defaults action"
 
 # Task 4: Multi-Stage Dockerfile
@@ -187,10 +187,10 @@ Containerize the Next.js standalone application for Google Cloud Run deployment.
 - [ ] Create 3-stage build: \`deps\`, \`builder\`, \`runner\`.
 - [ ] Run container with unprivileged user \`nextjs:nodejs\`.
 - [ ] Configure \`EXPOSE 3000\` and \`CMD [\"node\", \"server.js\"]\`.
-- [ ] Verify \`docker build -t protocol-engine .\` completes with image size < 150MB.
+- [ ] Verify \`docker build -t viskotun1 .\` completes with image size < 150MB.
 
 ### Acceptance Criteria
-- Container starts locally with \`docker run -p 3000:3000 protocol-engine\` and serves the app." >/dev/null
+- Container starts locally with \`docker run -p 3000:3000 viskotun1\` and serves the app." >/dev/null
 echo "Created Task: create multi-stage Dockerfile"
 
 # Task 5: Cloud Run Guide & .env.example
@@ -224,7 +224,7 @@ Create a clean, 1-page clinical brief layout suitable for specialists or persona
 - \`src/data/copy.ts\`
 
 ### Tasks
-- [ ] Build modal view displaying protocol title, trial DOI, adherence %, symptom score timeline, and contraindications.
+- [ ] Build modal view displaying routine title, trial DOI, adherence %, symptom score timeline, and contraindications.
 - [ ] Add \`@media print\` CSS so printing isolates the 1-page summary card and hides sidebar/nav.
 
 ### Acceptance Criteria
