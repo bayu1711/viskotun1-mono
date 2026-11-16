@@ -41,7 +41,7 @@ describe('paperFingerprint', () => {
   });
 
   describe('getCanonicalPaperId', () => {
-    it('preserves known preset aliases for built-in sample protocols', () => {
+    it('preserves known preset aliases for built-in sample routines', () => {
       expect(getCanonicalPaperId({ id: 'achilles' })).toBe('achilles');
       expect(getCanonicalPaperId({ doi: '10.1177/03635465980260030301' })).toBe('achilles');
       expect(getCanonicalPaperId({ doi: '10.4103/0974-7753.114700' })).toBe('hair-loss');

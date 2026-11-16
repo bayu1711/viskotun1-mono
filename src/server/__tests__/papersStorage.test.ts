@@ -4,13 +4,13 @@ import { NextRequest } from 'next/server';
 import { GET, POST } from '../../app/api/papers/route';
 
 describe('papersStorage and /api/papers endpoint', () => {
-  it('retrieves sample and trending papers with pre-calibrated protocols sorted by popularity', async () => {
-    const { samplePapers, trendingPapers, protocols, source } = await getSamplePapers();
+  it('retrieves sample and trending papers with pre-calibrated routines sorted by popularity', async () => {
+    const { samplePapers, trendingPapers, routines, protocols, source } = await getSamplePapers();
     expect(samplePapers.length).toBeGreaterThanOrEqual(6);
     expect(trendingPapers.length).toBeGreaterThanOrEqual(6);
-    expect(protocols['achilles']).toBeDefined();
-    expect(protocols['hair-loss']).toBeDefined();
-    expect(protocols['creatine-sleep']).toBeDefined();
+    expect((routines || protocols)['achilles']).toBeDefined();
+    expect((routines || protocols)['hair-loss']).toBeDefined();
+    expect((routines || protocols)['creatine-sleep']).toBeDefined();
     expect(['firestore-live', 'memory-cache']).toContain(source);
 
     // Verify trending papers are sorted descending by popularityScore
@@ -33,12 +33,13 @@ describe('papersStorage and /api/papers endpoint', () => {
     expect(fastingPaper?.activeTrackersCount).toBe(0);
     expect(fastingPaper?.totalLogsCount).toBe(0);
 
-    // Verify protocols start on Day 1 with empty history and no initial logs
-    expect(protocols['achilles'].currentDay).toBe(1);
-    expect(protocols['achilles'].dayHistory).toEqual([]);
-    expect(protocols['achilles'].initialSetsDone).toEqual({});
-    expect(protocols['hair-loss'].currentDay).toBe(1);
-    expect(protocols['hair-loss'].dayHistory).toEqual([]);
+    // Verify routines start on Day 1 with empty history and no initial logs
+    const routineMap = routines || protocols;
+    expect(routineMap['achilles'].currentDay).toBe(1);
+    expect(routineMap['achilles'].dayHistory).toEqual([]);
+    expect(routineMap['achilles'].initialSetsDone).toEqual({});
+    expect(routineMap['hair-loss'].currentDay).toBe(1);
+    expect(routineMap['hair-loss'].dayHistory).toEqual([]);
   });
 
   it('persists a new paper to the papers collection and retrieves it', async () => {
@@ -78,8 +79,8 @@ describe('papersStorage and /api/papers endpoint', () => {
     expect(data.trendingPapers).toBeDefined();
     expect(Array.isArray(data.trendingPapers)).toBe(true);
     expect(data.trendingPapers[0].trendingRank).toBe(1);
-    expect(data.protocols).toBeDefined();
-    expect(data.protocols['achilles'].currentDay).toBe(1);
+    expect(data.routines || data.protocols).toBeDefined();
+    expect((data.routines || data.protocols)['achilles'].currentDay).toBe(1);
   });
 
   it('POST /api/papers validates paper presence', async () => {

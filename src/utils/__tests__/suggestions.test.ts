@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { getDynamicSuggestions, hasQuestionBeenAsked } from '../suggestions';
 import type { Routine, ChatMessage } from '../../types/routine';
 
-const mockProtocol: Routine = {
+const mockRoutine: Routine = {
   id: 'mock-1',
   title: 'Achilles Tendinopathy Routine',
   shortTitle: 'Achilles Loading',
@@ -105,8 +105,8 @@ describe('hasQuestionBeenAsked', () => {
 });
 
 describe('getDynamicSuggestions', () => {
-  it('returns initial protocol FAQs when no questions have been asked yet', () => {
-    const suggestions = getDynamicSuggestions(mockProtocol, []);
+  it('returns initial routine FAQs when no questions have been asked yet', () => {
+    const suggestions = getDynamicSuggestions(mockRoutine, []);
     expect(suggestions).toContain('why 3 × 15 reps?');
     expect(suggestions).toContain('is some discomfort okay?');
     expect(suggestions).toContain('when do I add load?');
@@ -130,7 +130,7 @@ describe('getDynamicSuggestions', () => {
       }
     ];
 
-    const suggestions = getDynamicSuggestions(mockProtocol, messages);
+    const suggestions = getDynamicSuggestions(mockRoutine, messages);
     // Asked question MUST NOT be in suggestions
     expect(suggestions).not.toContain('why 3 × 15 reps?');
     // Remaining unasked FAQs must still be present
@@ -156,7 +156,7 @@ describe('getDynamicSuggestions', () => {
       }
     ];
 
-    const suggestions = getDynamicSuggestions(mockProtocol, messages);
+    const suggestions = getDynamicSuggestions(mockRoutine, messages);
     // When sets/reps were discussed, progression criteria is suggested as a follow-up
     expect(suggestions.some((s) => s.includes('progress'))).toBe(true);
   });
@@ -171,7 +171,7 @@ describe('getDynamicSuggestions', () => {
       { id: '6', role: 'ai', kind: 'answer', content: 'Add load when pain is below 2/10.', timestamp: '10:02' }
     ];
 
-    const suggestions = getDynamicSuggestions(mockProtocol, messages);
+    const suggestions = getDynamicSuggestions(mockRoutine, messages);
     // All 3 FAQs have been asked, so none of them should appear
     expect(suggestions).not.toContain('why 3 × 15 reps?');
     expect(suggestions).not.toContain('is some discomfort okay?');
@@ -180,7 +180,7 @@ describe('getDynamicSuggestions', () => {
     expect(suggestions.length).toBeGreaterThan(0);
   });
 
-  it('returns empty array when protocol is undefined', () => {
+  it('returns empty array when routine is undefined', () => {
     expect(getDynamicSuggestions(undefined, [])).toEqual([]);
   });
 });

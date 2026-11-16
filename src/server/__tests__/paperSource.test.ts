@@ -15,7 +15,7 @@ vi.mock('@google/generative-ai', () => ({
 }));
 
 import { COPY } from '../../data/copy';
-import { extractPaperProtocol } from '../geminiExtraction';
+import { extractPaperRoutine } from '../geminiExtraction';
 import { jatsToText, parsePaperIdentifier, resolvePaperSource } from '../paperSource';
 
 const ASTYM_RECORD = {
@@ -109,12 +109,12 @@ describe('resolvePaperSource', () => {
   });
 });
 
-describe('extractPaperProtocol with a link', () => {
+describe('extractPaperRoutine with a link', () => {
   it('asks for the PDF instead of calling Gemini when the full text is not available', async () => {
     vi.stubEnv('GEMINI_API_KEY', 'test-key');
     mockEuropePmc({ ...ASTYM_RECORD, pmcid: undefined }, null);
 
-    const result = await extractPaperProtocol({ url: 'https://doi.org/10.1177/1941738116631498' });
+    const result = await extractPaperRoutine({ url: 'https://doi.org/10.1177/1941738116631498' });
 
     expect(result).toMatchObject({ success: false, eligible: false, rejectionReason: COPY.extraction.fullTextUnavailable });
     expect(generateContent).not.toHaveBeenCalled();
@@ -125,7 +125,7 @@ describe('extractPaperProtocol with a link', () => {
     mockEuropePmc(ASTYM_RECORD, ASTYM_XML);
     generateContent.mockResolvedValue({ response: { text: () => JSON.stringify({ eligible: false, rejectionReason: 'stub' }) } });
 
-    await extractPaperProtocol({ url: 'https://doi.org/10.1177/1941738116631498' });
+    await extractPaperRoutine({ url: 'https://doi.org/10.1177/1941738116631498' });
 
     const prompt = (generateContent.mock.calls[0][0] as string[]).join('\n');
     expect(prompt).toContain('3 sets of 15 heel drops');
@@ -137,7 +137,7 @@ describe('extractPaperProtocol with a link', () => {
     mockEuropePmc(ASTYM_RECORD, ASTYM_XML);
     generateContent.mockRejectedValue(new Error('503 high demand'));
 
-    const result = await extractPaperProtocol({ url: 'https://doi.org/10.1177/1941738116631498' });
+    const result = await extractPaperRoutine({ url: 'https://doi.org/10.1177/1941738116631498' });
 
     expect(result).toMatchObject({ success: false, eligible: false, rejectionReason: COPY.extraction.modelUnavailable });
     expect(result.routine).toBeUndefined();
@@ -150,7 +150,7 @@ describe('extractPaperProtocol with a link', () => {
       ASTYM_XML
     );
 
-    const result = await extractPaperProtocol({ url: '10.3389/fphys.2021.734879' });
+    const result = await extractPaperRoutine({ url: '10.3389/fphys.2021.734879' });
 
     expect(result.eligible).toBe(false);
     expect(result.rejectionReason).toBe(COPY.extraction.declinedAnimalModel);

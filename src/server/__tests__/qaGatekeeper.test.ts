@@ -5,7 +5,7 @@ vi.mock('../guardrailLedger', async (importOriginal) => {
   return { ...actual, getEffectiveGuardrails: async () => actual.BASELINE_GUARDRAIL_POLICY };
 });
 
-import { extractPaperProtocol } from '../geminiExtraction';
+import { extractPaperRoutine } from '../geminiExtraction';
 import { classifyPaperSource, containsTerm } from '../gatekeeper';
 
 /** QA issue #31 · TC-07 to TC-10 AI Safety Gatekeeper Rejection Suite */
@@ -56,7 +56,7 @@ describe('QA TC-07…TC-10 · gatekeeper rejection suite', () => {
   });
 
   it.each(REJECTION_CASES)('$tc returns no routine from the extraction pipeline', async ({ input, label }) => {
-    const result = await extractPaperProtocol({ text: input });
+    const result = await extractPaperRoutine({ text: input });
     expect(result.eligible).toBe(false);
     expect(result.rejectionReason).toContain(label);
     expect(result.routine).toBeUndefined();

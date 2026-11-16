@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Routine } from '../../types/routine';
 import { answerFor, isPaperLink } from '../assistant';
 
-const sampleProtocol: Routine = {
+const sampleRoutine: Routine = {
   id: 'creatine-test',
   title: 'Creatine Supplementation in Sleep Deprivation',
   shortTitle: 'creatine sleep',
@@ -95,28 +95,28 @@ const sampleProtocol: Routine = {
 
 describe('Assistant answerFor generalization', () => {
   it('matches predefined FAQs based on keywords', () => {
-    const answer = answerFor(sampleProtocol, 'can I drink coffee with this?');
+    const answer = answerFor(sampleRoutine, 'can I drink coffee with this?');
     expect(answer).toContain('The trial controlled caffeine intake');
   });
 
   it('dynamically answers safety and stop rule inquiries', () => {
-    const answer = answerFor(sampleProtocol, 'what are the safety rules and when should I stop?');
+    const answer = answerFor(sampleRoutine, 'what are the safety rules and when should I stop?');
     expect(answer).toContain('Safety stop rule: Stop immediately if severe renal impairment');
     expect(answer).toContain('Additional study precaution: Avoid taking alongside high-dose caffeine');
   });
 
   it('dynamically answers progression criteria inquiries', () => {
-    const answer = answerFor(sampleProtocol, 'how do I progress to the next phase?');
+    const answer = answerFor(sampleRoutine, 'how do I progress to the next phase?');
     expect(answer).toContain('Progression criteria: GI tolerance sustained for 5 consecutive days → Transition from acute loading (5g) to maintenance (3g)');
   });
 
   it('dynamically answers prescribed routine and dosage inquiries', () => {
-    const answer = answerFor(sampleProtocol, 'what is my daily routine and dosage?');
+    const answer = answerFor(sampleRoutine, 'what is my daily routine and dosage?');
     expect(answer).toContain('Prescribed daily routine: Morning Creatine Dose (1 dose, 1x Daily 5g with food)');
   });
 
   it('dynamically answers specific task step inquiry with detailed steps on what it is and what is needed to be done', () => {
-    const answer = answerFor(sampleProtocol, 'What is "Morning Creatine Dose" and what is needed to be done?');
+    const answer = answerFor(sampleRoutine, 'What is "Morning Creatine Dose" and what is needed to be done?');
     expect(answer).toContain('Morning Creatine Dose');
     expect(answer).toContain('What it is: 5g creatine monohydrate dissolved in water with breakfast');
     expect(answer).toContain('What is needed to be done: Complete 1 dose (1x Daily) · 5g with food');
@@ -124,8 +124,8 @@ describe('Assistant answerFor generalization', () => {
   });
 
   it('includes clinical guideline note for inferred task steps in step guidance', () => {
-    const protocolWithInferred: Routine = {
-      ...sampleProtocol,
+    const routineWithInferred: Routine = {
+      ...sampleRoutine,
       steps: [
         {
           id: 'step-inferred',
@@ -146,7 +146,7 @@ describe('Assistant answerFor generalization', () => {
         }
       ]
     };
-    const answer = answerFor(protocolWithInferred, 'How to perform Static Hamstring Stretch and what is needed to be done?');
+    const answer = answerFor(routineWithInferred, 'How to perform Static Hamstring Stretch and what is needed to be done?');
     expect(answer).toContain('Static Hamstring Stretch');
     expect(answer).toContain('What it is: Hold the stretch without bouncing');
     expect(answer).toContain('hold: 30s');
@@ -154,21 +154,21 @@ describe('Assistant answerFor generalization', () => {
   });
 
   it('dynamically answers biofeedback tracking inquiries', () => {
-    const answer = answerFor(sampleProtocol, 'how do I log my feedback score?');
+    const answer = answerFor(sampleRoutine, 'how do I log my feedback score?');
     expect(answer).toContain('Daily biofeedback metric: GI distress (scale 0–10). Escalation threshold is ≥ 3/10.');
     expect(answer).toContain('consult a specialist');
   });
 
   it('dynamically provides paper evidence and citation information', () => {
-    const answer = answerFor(sampleProtocol, 'tell me about the paper and authors');
+    const answer = answerFor(sampleRoutine, 'tell me about the paper and authors');
     expect(answer).toContain('Study: "Acute Cognitive Satiation via Creatine Monohydrate"');
     expect(answer).toContain('Journal of Neuroscience (2024) by Gordji-Nejad et al.');
     expect(answer).toContain('Sample size: N = 15 (Double-Blind RCT)');
   });
 
   it('answers missing parameters inquiry when trial omitted parameters', () => {
-    const protocolWithMissingData: Routine = {
-      ...sampleProtocol,
+    const routineWithMissingData: Routine = {
+      ...sampleRoutine,
       missingDataFlags: [
         {
           stepId: 'cr-1',
@@ -179,7 +179,7 @@ describe('Assistant answerFor generalization', () => {
       ],
       steps: [
         {
-          ...sampleProtocol.steps[0],
+          ...sampleRoutine.steps[0],
           inferred: true,
           inferredProvenance: {
             tier: 'lineage',
@@ -189,7 +189,7 @@ describe('Assistant answerFor generalization', () => {
       ]
     };
 
-    const answer = answerFor(protocolWithMissingData, 'what parameters are missing or inferred?');
+    const answer = answerFor(routineWithMissingData, 'what parameters are missing or inferred?');
     expect(answer).toContain('The trial authors did not report all execution parameters');
     expect(answer).toContain('Hold duration');
     expect(answer).toContain('Conservative default 30s');
@@ -197,12 +197,12 @@ describe('Assistant answerFor generalization', () => {
   });
 
   it('answers missing parameters inquiry when all parameters were reported', () => {
-    const answer = answerFor(sampleProtocol, 'are there any missing parameters or omitted steps?');
+    const answer = answerFor(sampleRoutine, 'are there any missing parameters or omitted steps?');
     expect(answer).toContain('All execution parameters, dosages, and cadences were explicitly reported');
   });
 
   it('falls back gracefully when the question is out of scope', () => {
-    const answer = answerFor(sampleProtocol, 'can this predict quantum gravity?');
+    const answer = answerFor(sampleRoutine, 'can this predict quantum gravity?');
     expect(answer).toContain("I couldn't find that in the Methods section");
     expect(answer).toContain('creatine sleep');
   });
@@ -211,7 +211,7 @@ describe('Assistant answerFor generalization', () => {
     expect(isPaperLink('https://doi.org/10.1016/j.clinbiomech.2014.11.005')).toBe(true);
     expect(isPaperLink('10.1016/j.clinbiomech.2014.11.005')).toBe(true);
     expect(isPaperLink('https://pubmed.ncbi.nlm.nih.gov/25498305/')).toBe(true);
-    expect(isPaperLink('What is the protocol sets count?')).toBe(false);
+    expect(isPaperLink('What is the routine sets count?')).toBe(false);
   });
 });
 

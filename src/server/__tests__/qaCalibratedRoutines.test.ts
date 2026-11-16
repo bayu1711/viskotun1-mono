@@ -7,11 +7,11 @@ vi.mock('../guardrailLedger', async (importOriginal) => {
 
 import { COPY } from '../../data/copy';
 import type { Routine } from '../../types/routine';
-import { extractPaperProtocol } from '../geminiExtraction';
+import { extractPaperRoutine } from '../geminiExtraction';
 import { findCanonicalRoutine, updateCanonicalRoutineVersion } from '../routineRegistry';
 
 async function extract(text: string): Promise<Routine> {
-  const result = await extractPaperProtocol({ text });
+  const result = await extractPaperRoutine({ text });
   expect(result.eligible).toBe(true);
   expect(result.routine).toBeDefined();
   return result.routine!;
@@ -30,7 +30,7 @@ describe('canonical paper lookup & versioning', () => {
     ['10.1016/j.lanepe.2024.100912', 'uae-heat-circadian'],
     ['10.3389/fnut.2023.1142981', 'uae-ramadan-metabolic'],
     ['10.1016/j.addbeh.2024.108042', 'uae-midwakh-tapering']
-  ])('resolves DOI %s to canonical protocol %s', async (doi, id) => {
+  ])('resolves DOI %s to canonical routine %s', async (doi, id) => {
     const routine = await findCanonicalRoutine({ doi });
     expect(routine?.id).toBe(id);
     expect(routine?.version).toBe('1.0');
@@ -47,7 +47,7 @@ describe('canonical paper lookup & versioning', () => {
     expect(byDoi?.version).toBe('1.0');
   });
 
-  it('updates protocol version and records changelog on improvement', async () => {
+  it('updates routine version and records changelog on improvement', async () => {
     const updated = await updateCanonicalRoutineVersion(
       'plantar-fasciitis',
       { phase: 'Updated Clinical Phase' },
@@ -222,8 +222,8 @@ describe('QA TC-06 · Dual n-back (Jaeggi 2008)', () => {
   });
 });
 
-describe('QA Abu Dhabi Seed Protocols (Al-Shehhi, Al-Dhaheri, Zaabi)', () => {
-  it('resolves and verifies Circadian Light & Heat Hydration Protocol', async () => {
+describe('QA Abu Dhabi Seed Routines (Al-Shehhi, Al-Dhaheri, Zaabi)', () => {
+  it('resolves and verifies Circadian Light & Heat Hydration Routine', async () => {
     const routine = await findCanonicalRoutine({ doi: '10.1016/j.lanepe.2024.100912' });
     expect(routine).toBeDefined();
     expect(routine?.id).toBe('uae-heat-circadian');
@@ -236,7 +236,7 @@ describe('QA Abu Dhabi Seed Protocols (Al-Shehhi, Al-Dhaheri, Zaabi)', () => {
     expect(routine?.missingDataFlags.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('resolves and verifies Ramadan Metabolic Stability Protocol', async () => {
+  it('resolves and verifies Ramadan Metabolic Stability Routine', async () => {
     const routine = await findCanonicalRoutine({ doi: '10.3389/fnut.2023.1142981' });
     expect(routine).toBeDefined();
     expect(routine?.id).toBe('uae-ramadan-metabolic');
@@ -248,7 +248,7 @@ describe('QA Abu Dhabi Seed Protocols (Al-Shehhi, Al-Dhaheri, Zaabi)', () => {
     expect(routine?.feedbackMetric?.name).toBe('afternoon energy');
   });
 
-  it('resolves and verifies Midwakh Cessation & Tapering Protocol', async () => {
+  it('resolves and verifies Midwakh Cessation & Tapering Routine', async () => {
     const routine = await findCanonicalRoutine({ doi: '10.1016/j.addbeh.2024.108042' });
     expect(routine).toBeDefined();
     expect(routine?.id).toBe('uae-midwakh-tapering');

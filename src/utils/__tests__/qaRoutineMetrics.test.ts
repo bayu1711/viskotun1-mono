@@ -62,7 +62,7 @@ describe('field escalation thresholds', () => {
 });
 
 describe('policy sync keeps paper-specific advice', () => {
-  it('keeps protocol-owned messages but applies the policy threshold', () => {
+  it('keeps paper-owned messages but applies the policy threshold', () => {
     const updated = applyGuardrailThreshold(ashwagandhaStressRoutine, 5, 'Generic policy message');
     expect(updated.feedbackMetric?.escalationThreshold).toBe(5);
     expect(updated.feedbackMetric?.escalationMessage).toContain('Split-dose rule');
@@ -76,7 +76,7 @@ describe('policy sync keeps paper-specific advice', () => {
     expect(updated.feedbackMetric?.escalationMessage).toBe('Updated policy message');
   });
 
-  it('is stable once applied to protocol-owned messages', () => {
+  it('is stable once applied to paper-owned messages', () => {
     const once = applyGuardrailThreshold(ashwagandhaStressRoutine, 4, 'Generic policy message');
     expect(applyGuardrailThreshold(once, 4, 'Generic policy message')).toBe(once);
   });

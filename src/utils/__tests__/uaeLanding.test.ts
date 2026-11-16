@@ -20,9 +20,10 @@ describe('UAE & Abu Dhabi Edition Contracts and Routing', () => {
     expect(uae.simulator.barrierHeat).toContain('48°C');
     expect(uae.simulator.barrierShift).toContain('Shift');
     expect(uae.simulator.barrierRamadan).toContain('Ramadan');
-    expect(uae.protocolCards.heat.title).toContain('Heat');
-    expect(uae.protocolCards.ramadan.title).toContain('Ramadan');
-    expect(uae.protocolCards.midwakh.title).toContain('Midwakh');
+    const cards = uae.routineCards || uae.protocolCards;
+    expect(cards.heat.title).toContain('Heat');
+    expect(cards.ramadan.title).toContain('Ramadan');
+    expect(cards.midwakh.title).toContain('Midwakh');
     expect(uae.clinicalBriefPoints.length).toBeGreaterThanOrEqual(3);
   });
 
@@ -37,7 +38,8 @@ describe('UAE & Abu Dhabi Edition Contracts and Routing', () => {
     expect(uaeAr.simulator.barrierHeat).toContain('48° مئوية');
     expect(uaeAr.simulator.barrierShift).toContain('نوبة عمل');
     expect(uaeAr.simulator.barrierRamadan).toContain('صيام شهر رمضان');
-    expect(uaeAr.protocolCards.midwakh.title).toContain('المدواخ والدخة');
+    const cardsAr = uaeAr.routineCards || uaeAr.protocolCards;
+    expect(cardsAr.midwakh.title).toContain('المدواخ والدخة');
   });
 
   it('guarantees Landing.tsx provides discoverable access to /uae', () => {

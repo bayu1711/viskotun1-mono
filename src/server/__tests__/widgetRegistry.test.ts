@@ -4,6 +4,7 @@ import {
   inferFallbackWidgetType,
   isSupportedWidgetType,
   listWidgetProposals,
+  validateAndRegisterRoutineWidgets,
   validateAndRegisterProtocolWidgets
 } from '../widgetRegistry';
 import { generateFallbackRoutine } from '../fallbackRoutines';
@@ -29,7 +30,7 @@ describe('AI Widget Validation & Human Oversight Registry', () => {
 
   it('registers pending widget proposals when a custom paper has a novel endpoint and allows admin confirmation', async () => {
     const rawRoutine = generateFallbackRoutine('Respiratory_Cadence_Biofeedback_Trial.pdf');
-    const validated = await validateAndRegisterProtocolWidgets(rawRoutine);
+    const validated = await validateAndRegisterRoutineWidgets(rawRoutine);
 
     const customField = validated.dataCollectionSpec?.find((f) => Boolean(f.proposedWidget));
     expect(customField).toBeDefined();
@@ -44,7 +45,7 @@ describe('AI Widget Validation & Human Oversight Registry', () => {
     expect(approved?.approvedAt).toBeDefined();
 
     // Subsequent validations for the same paper automatically resolve the approved widget
-    const revalidated = await validateAndRegisterProtocolWidgets(rawRoutine);
+    const revalidated = await validateAndRegisterRoutineWidgets(rawRoutine);
     const revalidatedField = revalidated.dataCollectionSpec?.find(
       (f) => f.proposedWidget?.id === proposalId
     );

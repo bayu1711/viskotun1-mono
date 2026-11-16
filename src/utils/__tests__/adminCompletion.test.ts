@@ -22,7 +22,7 @@ describe('Admin Testing Controls - Simulate Full Completion', () => {
 
   it('validates routine is fully completed when simulated with totalDays', () => {
     const mockRoutine: Partial<Routine> = {
-      id: 'test-protocol',
+      id: 'test-routine',
       currentDay: 84,
       totalDays: 84,
       dayHistory: new Array(84).fill(1.0)
