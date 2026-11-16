@@ -208,7 +208,7 @@ export const hairLossRoutine: Routine = {
     question: 'is shedding normal?',
     keywords: ['shed', 'losing', 'falling', 'more hair'],
     answer:
-    'Yes. The authors report increased shedding in weeks 2–6 for 40% of participants as resting follicles re-enter the growth phase. It resolved without changes to the protocol.'
+    'Yes. The authors report increased shedding in weeks 2–6 for 40% of participants as resting follicles re-enter the growth phase. It resolved without changes to the routine.'
   },
   {
     question: 'why 1.5 mm needles?',

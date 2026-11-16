@@ -85,7 +85,7 @@ export const BCT_TAXONOMY_ENTRIES: BctTaxonomyEntry[] = [
     name: 'Behavioral substitution',
     description: 'Prompt substitution of an unwanted behavior with a wanted behavior.',
     viskotuImplementation:
-      'Midwakh & Dokha urge surfing and tactile substitution protocols; swapping outdoor exertion for indoor air-conditioned mobility during summer peaks.',
+      'Midwakh & Dokha urge surfing and tactile substitution routines; swapping outdoor exertion for indoor air-conditioned mobility during summer peaks.',
     mechanismOfAction:
       'Channels neurobehavioral cravings and habitual motor reflexes into harmless alternative routines.',
     targetBarriers: ['midwakh_dokha', 'shisha_waterpipe', 'extreme_heat_summer']
@@ -97,7 +97,7 @@ export const BCT_TAXONOMY_ENTRIES: BctTaxonomyEntry[] = [
     description:
       'Set easy-to-perform tasks, making them progressively more difficult until the target behavior is achieved.',
     viskotuImplementation:
-      'Dynamic micro-dose contraction: automatically scales down 45m protocols into a 3–5 min indoor micro-dose when severe barriers occur.',
+      'Dynamic micro-dose contraction: automatically scales down 45m routines into a 3–5 min indoor micro-dose when severe barriers occur.',
     mechanismOfAction:
       'Preserves neural synaptic habit gating by minimizing activation threshold during high cognitive or environmental load.',
     targetBarriers: ['extreme_heat_summer', 'healthcare_shift_worker', 'fatigue_energy']
@@ -109,7 +109,7 @@ export const BCT_TAXONOMY_ENTRIES: BctTaxonomyEntry[] = [
     description:
       'Advise on ways of reducing negative emotions to facilitate performance of the behavior.',
     viskotuImplementation:
-      'Strict non-punitive re-entry protocol: never resets streaks to zero upon lapse; frames breaks as natural data points rather than failure.',
+      'Strict non-punitive re-entry system: never resets streaks to zero upon lapse; frames breaks as natural data points rather than failure.',
     mechanismOfAction:
       'Extinguishes the clinical Abstinence Violation Effect (AVE), preventing shame-induced program abandonment.',
     targetBarriers: ['streak_shame', 'lapse_guilt', 'time_crunch']

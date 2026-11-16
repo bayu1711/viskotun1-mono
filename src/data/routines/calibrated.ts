@@ -18,7 +18,7 @@ function intakeMessages(id: string, fileName: string, pages: number, scope: stri
       content: `Parsed ${pages} pages and isolated ${scope}.`,
       timestamp: '9:01 AM'
     },
-    { id: `${id}-msg-3`, role: 'ai', kind: 'protocol', content: id, timestamp: '9:01 AM' }
+    { id: `${id}-msg-3`, role: 'ai', kind: 'routine', content: id, timestamp: '9:01 AM' }
   ];
 }
 
@@ -143,7 +143,7 @@ export const plantarFasciitisRoutine: Routine = {
     'plantar-fasciitis',
     'Rathleff_2015_Plantar_Fasciitis_HighLoad.pdf',
     9,
-    'the high-load strength training protocol. Insole and stretching-only arms were excluded'
+    'the high-load strength training routine. Insole and stretching-only arms were excluded'
   ),
   community: {
     studyEfficacy: 78,
@@ -1027,7 +1027,7 @@ export const dualNBackRoutine: Routine = {
   ]
 };
 
-/** TC-UAE-01 · Al-Shehhi et al. 2024 · Circadian Light & Heat-Resilient Hydration Protocol */
+/** TC-UAE-01 · Al-Shehhi et al. 2024 · Circadian Light & Heat-Resilient Hydration Routine */
 export const uaeHeatCircadianRoutine: Routine = {
   id: 'uae-heat-circadian',
   title: 'Circadian Light & Heat-Resilient Hydration Routine',
@@ -1193,7 +1193,7 @@ export const uaeHeatCircadianRoutine: Routine = {
     'uae-heat-circadian',
     'AlShehhi_2024_Heat_Circadian_AbuDhabi.pdf',
     12,
-    'the morning circadian photoperiod and indoor AC isometric protocol. Outdoor endurance arms were filtered out'
+    'the morning circadian photoperiod and indoor AC isometric routine. Outdoor endurance arms were filtered out'
   ),
   community: {
     studyEfficacy: 84,
@@ -1231,7 +1231,7 @@ export const uaeHeatCircadianRoutine: Routine = {
   ]
 };
 
-/** TC-UAE-02 · Al-Dhaheri et al. 2023 · Ramadan Circadian & Metabolic Stability Protocol */
+/** TC-UAE-02 · Al-Dhaheri et al. 2023 · Ramadan Circadian & Metabolic Stability Routine */
 export const uaeRamadanMetabolicRoutine: Routine = {
   id: 'uae-ramadan-metabolic',
   title: 'Ramadan Circadian & Metabolic Stability Routine',
@@ -1396,7 +1396,7 @@ export const uaeRamadanMetabolicRoutine: Routine = {
     'uae-ramadan-metabolic',
     'AlDhaheri_2023_Ramadan_Metabolic_AbuDhabi.pdf',
     14,
-    'the Suhoor hydration, post-Iftar corridor walk, and biphasic sleep protocol'
+    'the Suhoor hydration, post-Iftar corridor walk, and biphasic sleep routine'
   ),
   community: {
     studyEfficacy: 87,
@@ -1434,7 +1434,7 @@ export const uaeRamadanMetabolicRoutine: Routine = {
   ]
 };
 
-/** TC-UAE-03 · Zaabi et al. 2024 · Midwakh & Dokha Behavioral Harm Reduction & Tapering Protocol */
+/** TC-UAE-03 · Zaabi et al. 2024 · Midwakh & Dokha Behavioral Harm Reduction & Tapering Routine */
 export const uaeMidwakhTaperingRoutine: Routine = {
   id: 'uae-midwakh-tapering',
   title: 'Midwakh & Dokha Behavioral Harm Reduction & Tapering Routine',
@@ -1476,7 +1476,7 @@ export const uaeMidwakhTaperingRoutine: Routine = {
       inferred: true,
       inferredProvenance: {
         tier: 'guideline',
-        source: 'Stanford Autonomic Neurobiology Protocol (Balban et al.)',
+        source: 'Stanford Autonomic Neurobiology Method (Balban et al.)',
         rationale: 'Breathing ratio defaulted to 2s inhale, 1s top-up inhale, 5s slow exhalation.'
       },
       microDoseStep: {
@@ -1565,7 +1565,7 @@ export const uaeMidwakhTaperingRoutine: Routine = {
       stepId: 'midwakh-1',
       parameter: 'Breathing cadence for urge surfing',
       fallback: 'Cyclic physiological sigh (2s inhale, 1s top-up inhale, 5s exhale)',
-      sourceGuideline: 'Stanford Autonomic Neurobiology Protocol (Balban et al.)'
+      sourceGuideline: 'Stanford Autonomic Neurobiology Method (Balban et al.)'
     }
   ],
   dayHistory: [],
@@ -1604,7 +1604,7 @@ export const uaeMidwakhTaperingRoutine: Routine = {
     'uae-midwakh-tapering',
     'Zaabi_2024_Midwakh_Cessation_AbuDhabi.pdf',
     11,
-    'the 3-minute urge surfing, bowl frequency cap, and post-dinner Pavlovian substitution protocol'
+    'the 3-minute urge surfing, bowl frequency cap, and post-dinner Pavlovian substitution routine'
   ),
   community: {
     studyEfficacy: 74,

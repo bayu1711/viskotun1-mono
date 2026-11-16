@@ -314,6 +314,7 @@ export const COPY = {
     openRoutine: "Open today's routine",
     defaulted: ' · Defaulted',
     rulePrefix: 'Rule: if',
+    ruleCondition,
     ruleArrow: '→'
   },
   missingData: {
@@ -509,6 +510,7 @@ export const COPY = {
     goToRoutine: 'Go to daily routine',
     trackButton: 'Track',
     defaultProtocolTitle: 'Research Routine',
+    defaultRoutineTitle: 'Research Routine',
     versionPill: (v: string) => `v${v}`,
     versionUpdatedPill: (v: string) => `v${v} · Updated`,
     versionHistoryTitle: 'Routine Version History & Changelog',
@@ -974,6 +976,7 @@ export const COPY = {
       'Extreme summer heat, rotating shift work, and regional lifestyle patterns break rigid fitness apps. ViskotuN1 adapts your clinical routines with micro-dosing and non-punitive re-entry so your momentum never resets to zero.',
     ctaStartTrial: 'Start UAE Adapted Routine',
     ctaExploreProtocols: 'Explore Clinical Routines',
+    ctaExploreRoutines: 'Explore Clinical Routines',
     backToGlobal: 'Global Edition',
     trustMetrics: {
       noStreakBreakTitle: 'Zero Streak Shame',
@@ -1023,7 +1026,10 @@ export const COPY = {
       body: 'Clinical behavioral substitution routines specifically targeting high-nicotine Midwakh pipe habits and social shisha triggers.'
     },
     protocolsTitle: 'Curated Abu Dhabi Research Routines',
+    routinesTitle: 'Curated Abu Dhabi Research Routines',
     protocolsSubtitle:
+      'Pre-configured interventional routines ready to run immediately in your browser.',
+    routinesSubtitle:
       'Pre-configured interventional routines ready to run immediately in your browser.',
     protocolCards: {
       heat: {
@@ -1048,7 +1054,31 @@ export const COPY = {
         tag: 'Harm Reduction'
       }
     },
+    routineCards: {
+      heat: {
+        title: 'Circadian Light & Heat Hydration Routine',
+        institution: 'Cleveland Clinic / ACSM Thermal Guidelines',
+        duration: '28 Days · Daily',
+        action: 'Morning light exposure before 8 AM + indoor isometric pacing',
+        tag: 'Heat Resilience'
+      },
+      ramadan: {
+        title: 'Ramadan Circadian & Metabolic Stability Routine',
+        institution: 'Gulf Endocrine Society / Lancet Diabetes',
+        duration: '30 Days · Ramadan Window',
+        action: 'Post-Iftar mobility + Suhoor low-glycemic hydration timing',
+        tag: 'Chronobiology'
+      },
+      midwakh: {
+        title: 'Midwakh & Dokha Behavioral Tapering Routine',
+        institution: 'UAE Public Health / Cochrane Tobacco Addiction',
+        duration: '42 Days · 6 Phases',
+        action: 'Urge surfing + tactile replacement + gradual frequency step-down',
+        tag: 'Harm Reduction'
+      }
+    },
     launchProtocolCta: 'Start Routine in App',
+    launchRoutineCta: 'Start Routine in App',
     clinicalBriefTitle: 'Physician-Ready Clinical Summary',
     clinicalBriefSubtitle:
       'Export structured adherence reports directly formatted for consultation with your physician at SEHA, Cleveland Clinic Abu Dhabi, or Sheikh Shakhbout Medical City (SSMC).',
