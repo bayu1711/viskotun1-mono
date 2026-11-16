@@ -518,21 +518,22 @@ export async function getCommunityMetrics(
 }
 
 /**
- * Updates a canonical protocol's dataCollectionSpec when an admin confirms an AI-proposed widget.
+ * Updates a canonical routine's dataCollectionSpec when an admin confirms an AI-proposed widget.
  */
-export async function injectApprovedWidgetIntoCanonicalProtocol(
+export async function injectApprovedWidgetIntoCanonicalRoutine(
   approvedProposal: ProposedWidgetSpec
-): Promise<Protocol | null> {
-  if (!approvedProposal.protocolId) return null;
+): Promise<Routine | null> {
+  const targetId = approvedProposal.routineId || approvedProposal.protocolId;
+  if (!targetId) return null;
 
   const canonicalId = getCanonicalPaperId(
-    { id: approvedProposal.protocolId },
-    approvedProposal.protocolId
+    { id: targetId },
+    targetId
   );
   const existing =
     memoryProtocols.get(canonicalId) ||
-    memoryProtocols.get(approvedProposal.protocolId) ||
-    (await findCanonicalProtocol({ id: approvedProposal.protocolId }, approvedProposal.protocolId));
+    memoryProtocols.get(targetId) ||
+    (await findCanonicalProtocol({ id: targetId }, targetId));
 
   if (!existing || !existing.dataCollectionSpec) {
     return null;
@@ -557,8 +558,8 @@ export async function injectApprovedWidgetIntoCanonicalProtocol(
   };
 
   memoryProtocols.set(canonicalId, updatedProtocol);
-  if (approvedProposal.protocolId !== canonicalId) {
-    memoryProtocols.set(approvedProposal.protocolId, updatedProtocol);
+  if (targetId !== canonicalId) {
+    memoryProtocols.set(targetId, updatedProtocol);
   }
 
   const db = getFirestore();
@@ -656,3 +657,4 @@ export const findCanonicalRoutine = findCanonicalProtocol;
 export const saveCanonicalRoutine = saveCanonicalProtocol;
 export const updateCanonicalRoutineVersion = updateCanonicalProtocolVersion;
 export const toCanonicalRoutine = toCanonicalProtocol;
+export const injectApprovedWidgetIntoCanonicalProtocol = injectApprovedWidgetIntoCanonicalRoutine;

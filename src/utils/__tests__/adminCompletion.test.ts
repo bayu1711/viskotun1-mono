@@ -36,7 +36,7 @@ describe('Admin Testing Controls - Simulate Full Completion', () => {
     const totalDays = 84;
     const routine = {
       id: 'achilles-simulated',
-      title: 'Achilles Tendinopathy Protocol',
+      title: 'Achilles Tendinopathy Routine',
       shortTitle: 'achilles',
       phase: 'Phase 1',
       phaseLabel: 'Eccentric Loading',

@@ -4,7 +4,7 @@ import type { Routine, ChatMessage } from '../../types/routine';
 
 const mockProtocol: Routine = {
   id: 'mock-1',
-  title: 'Achilles Tendinopathy Protocol',
+  title: 'Achilles Tendinopathy Routine',
   shortTitle: 'Achilles Loading',
   icon: 'walk',
   phase: 'Phase 1',

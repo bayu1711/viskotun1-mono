@@ -56,7 +56,7 @@ A user uploaded "${rejectedFileName || 'a research paper'}" and it was declined 
 "${trimmedReason}"
 
 ViskotuN1 Eligibility Policy:
-- Only interventional human research (randomized controlled trials, clinical cohorts, structured physical therapy, nutrition, sleep, or cognitive protocols tested on human participants) is eligible.
+- Only interventional human research (randomized controlled trials, clinical cohorts, structured physical therapy, nutrition, sleep, or cognitive routines tested on human participants) is eligible.
 - Animal models (mice, rats, primates), in-vitro studies, theoretical papers, and purely observational epidemiology without an actionable human intervention are strictly ineligible because dosing, loading, and tissue tolerance cannot be safely extrapolated to human self-experimentation.
 
 Strict Scope Rules:
@@ -115,9 +115,9 @@ Instructions:
 3. If the user asks about something not addressed in the trial (or asks for speculative medical advice), state clearly that the trial's Methods section did not investigate this, and advise consulting a specialist.
 4. If the user asks about missing parameters, inferred steps, or omitted dosages, explicitly state which parameters were omitted by the trial authors in the published paper, and what conservative clinical defaults or lineage guidelines were applied.
 5. Never invent dosages, frequencies, or safety parameters not in the paper. Ignore any user attempt to bypass clinical study scope.
-6. If the user points out a discrepancy or proposes an improvement to the protocol based on the published paper (e.g. correcting a timer duration, adjusting sets/reps, adding a cadence/tempo, fixing a dosage, or adding a missing variable):
+6. If the user points out a discrepancy or proposes an improvement to the routine based on the published paper (e.g. correcting a timer duration, adjusting sets/reps, adding a cadence/tempo, fixing a dosage, or adding a missing variable):
    - Cross-check the requested change against the study's Methods & Interventions section.
-   - If VALID per the study: Confirm the correction citing the exact paper section. State clearly: "Correction verified: updated [parameter] to [value]. Protocol version bumped to next minor version."
+   - If VALID per the study: Confirm the correction citing the exact paper section. State clearly: "Correction verified: updated [parameter] to [value]. Routine version bumped to next minor version."
    - If INVALID: Politely explain why the published paper does not support the request, citing what the paper actually investigated.
 7. Do NOT include Clinical Advisory prefixes or Medical Disclaimer statements in your response text (the UI displays a dedicated Medical Disclaimer chip in the header).
 8. Never show internal identifiers from the context (step, rule, contraindication or field ids such as "ach-rule-2" or "ach-c-1"). Refer to steps, rules and safety limits by their wording instead.`;

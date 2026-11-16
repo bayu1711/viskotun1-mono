@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { COPY } from '../../../../data/copy';
-import { injectApprovedWidgetIntoCanonicalProtocol } from '../../../../server/routineRegistry';
+import { injectApprovedWidgetIntoCanonicalRoutine } from '../../../../server/routineRegistry';
 import { approveWidgetProposal, listWidgetProposals } from '../../../../server/widgetRegistry';
 
 export const dynamic = 'force-dynamic';
@@ -38,12 +38,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const updatedProtocol = await injectApprovedWidgetIntoCanonicalProtocol(approved);
+    const updatedRoutine = await injectApprovedWidgetIntoCanonicalRoutine(approved);
 
     return NextResponse.json({
       message: COPY.api.widgets.approveSuccess,
       proposal: approved,
-      protocol: updatedProtocol
+      routine: updatedRoutine,
+      protocol: updatedRoutine
     });
   } catch (error) {
     console.error('[AdminWidgetsAPI] Failed to approve widget proposal:', error);
