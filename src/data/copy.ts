@@ -933,7 +933,109 @@ export const COPY = {
     footerTagline: 'ViskotuN1 · Interventional human research intelligence',
     footerSignIn: 'Sign in',
     footerCreateAccount: 'Create account',
-    footerGithub: 'GitHub'
+    footerGithub: 'GitHub',
+    uaeEditionLink: '🇦🇪 Abu Dhabi Edition · Challenge 09'
+  },
+  uaeLanding: {
+    meta: {
+      title: 'ViskotuN1 UAE // Sustaining Healthy Behaviors in Abu Dhabi',
+      description:
+        'Future Health Digital Innovation Challenge: Adaptive behavioral health platform tailored for Abu Dhabi & the UAE. Eliminating streak collapse through clinical micro-dosing, extreme heat resilience, and Ramadan synchronization.'
+    },
+    challengeBadge: 'Future Health Digital Innovation Challenge · Abu Dhabi 2026',
+    challengeSubbadge: 'Focus Area 03: Wellbeing · Challenge 09: Sustaining Healthy Behaviors',
+    heroTitle: 'Sustaining Healthy Behaviors in Abu Dhabi & the UAE — Without Punitive Streaks.',
+    heroSubtitle:
+      'Extreme summer heat, rotating shift work, and regional lifestyle patterns break rigid fitness apps. ViskotuN1 adapts your clinical routines with micro-dosing and non-punitive re-entry so your momentum never resets to zero.',
+    ctaStartTrial: 'Start UAE Adapted Routine',
+    ctaExploreProtocols: 'Explore Clinical Protocols',
+    backToGlobal: 'Global Edition',
+    trustMetrics: {
+      noStreakBreakTitle: 'Zero Streak Shame',
+      noStreakBreakDesc: 'Lapses trigger adaptive re-entry instead of resetting your days to 0.',
+      clinicalRigourTitle: '100% Interventional Science',
+      clinicalRigourDesc: 'Grounded in peer-reviewed RCTs audited for missing clinical parameters.',
+      microDoseTitle: '3-Minute Micro-Doses',
+      microDoseDesc: 'Indoor, climate-safe fallback steps when 48°C heat or 12h shifts strike.'
+    },
+    simulator: {
+      tag: 'Interactive Behavioral Simulator',
+      title: 'Why Traditional Streak Apps Fail in the Gulf',
+      subtitle:
+        'See how conventional all-or-nothing apps cause sudden user drop-off versus how Viskotu preserves your health momentum.',
+      barrierLabel: 'Select an Abu Dhabi Barrier:',
+      barrierHeat: '48°C Midday Summer Heat',
+      barrierShift: '14-Hour Hospital / Energy Shift',
+      barrierRamadan: 'Ramadan Fasting & Late Night Prayers',
+      traditionalAppTitle: 'Conventional Streak App',
+      traditionalResultTitle: 'Streak Broken: Day 0',
+      traditionalResultBody:
+        'Missed the prescribed 45-min gym session. Streak drops to zero. 82% of users abandon the habit within 14 days due to the abstinence violation effect.',
+      traditionalBadge: 'Binary Punishment',
+      viskotuAppTitle: 'ViskotuN1 Adaptive Engine',
+      viskotuResultTitle: 'Streak Maintained: Day 19',
+      viskotuResultBody:
+        'Barrier detected. The routine automatically scales down to a 4-minute indoor mobility micro-dose. Zero shame, 100% habit momentum conserved.',
+      viskotuBadge: 'Adaptive Micro-Dose',
+      tryActionText: 'Simulate Another Barrier'
+    },
+    pillarsTitle: 'Three Architectural Pillars for Gulf Wellbeing',
+    pillarsSubtitle:
+      'Engineered to address the distinctive environmental and cultural dynamics of Abu Dhabi and the wider UAE.',
+    pillar1: {
+      tag: 'Climate Resilience',
+      title: 'Thermal & Heat Adaptation',
+      body: 'Outdoor temperatures exceeding 45°C for 5 months make outdoor cardio risky. Viskotu swaps outdoor steps for indoor air-conditioned micro-routines with zero friction.'
+    },
+    pillar2: {
+      tag: 'Cultural Chronobiology',
+      title: 'Ramadan Circadian Synchronization',
+      body: 'Synchronizes hydration, nutrient timing, and light exposure around Suhoor and Iftar windows, supporting metabolic health without dehydration.'
+    },
+    pillar3: {
+      tag: 'Regional Tobacco Cessation',
+      title: 'Midwakh, Dokha & Shisha Harm Reduction',
+      body: 'Clinical behavioral substitution protocols specifically targeting high-nicotine Midwakh pipe habits and social shisha triggers.'
+    },
+    protocolsTitle: 'Curated Abu Dhabi Research Protocols',
+    protocolsSubtitle:
+      'Pre-configured interventional routines ready to run immediately in your browser.',
+    protocolCards: {
+      heat: {
+        title: 'Circadian Light & Heat Hydration Protocol',
+        institution: 'Cleveland Clinic / ACSM Thermal Guidelines',
+        duration: '28 Days · Daily',
+        action: 'Morning light exposure before 8 AM + indoor isometric pacing',
+        tag: 'Heat Resilience'
+      },
+      ramadan: {
+        title: 'Ramadan Circadian & Metabolic Stability',
+        institution: 'Gulf Endocrine Society / Lancet Diabetes',
+        duration: '30 Days · Ramadan Window',
+        action: 'Post-Iftar mobility + Suhoor low-glycemic hydration timing',
+        tag: 'Chronobiology'
+      },
+      midwakh: {
+        title: 'Midwakh & Dokha Behavioral Tapering',
+        institution: 'UAE Public Health / Cochrane Tobacco Addiction',
+        duration: '42 Days · 6 Phases',
+        action: 'Urge surfing + tactile replacement + gradual frequency step-down',
+        tag: 'Harm Reduction'
+      }
+    },
+    launchProtocolCta: 'Start Protocol in App',
+    clinicalBriefTitle: 'Physician-Ready Clinical Summary',
+    clinicalBriefSubtitle:
+      'Export structured adherence reports directly formatted for consultation with your physician at SEHA, Cleveland Clinic Abu Dhabi, or Sheikh Shakhbout Medical City (SSMC).',
+    clinicalBriefPoints: [
+      'Visual timeline of adherence, micro-dose conversions, and recovery rates',
+      'Biofeedback logs (pain, energy, sleep score) correlated with intervention dose',
+      'Audited safety parameters and stop rules mapped directly to clinical trial DOIs'
+    ],
+    ctaBannerTitle: 'Ready to sustain healthy behaviors in Abu Dhabi?',
+    ctaBannerSubtitle:
+      'Join residents and clinicians using evidence-based adaptive micro-dosing. No credit card or setup required.',
+    ctaBannerButton: 'Launch Abu Dhabi Experience — Free'
   },
   auth: {
     loginTitle: 'Welcome back',
