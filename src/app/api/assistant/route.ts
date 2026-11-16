@@ -174,7 +174,7 @@ Instructions:
 
         return NextResponse.json(responseJson);
       } catch (err) {
-        console.error('[AssistantRoute] Gemini API error, falling back to local protocol matcher:', err);
+        console.error('[AssistantRoute] Gemini API error, falling back to local routine matcher:', err);
       }
     }
 

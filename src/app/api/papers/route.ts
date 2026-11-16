@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ papers });
     }
 
-    // Default: return sample research papers and pre-calibrated protocols
+    // Default: return sample research papers and pre-calibrated routines
     const result = await getSamplePapers();
     return NextResponse.json(result);
   } catch (error) {

@@ -3,6 +3,7 @@ import {
   SUPPORTED_WIDGET_TYPES,
   type DataCollectionField,
   type ProposedWidgetSpec,
+  type Routine,
   type Protocol,
   type WidgetType
 } from '../types/routine';
@@ -92,18 +93,18 @@ export async function registerWidgetProposal(proposal: ProposedWidgetSpec): Prom
 }
 
 /**
- * Validates all fields in a protocol's dataCollectionSpec.
+ * Validates all fields in a routine's dataCollectionSpec.
  * If a field requests an unsupported widget type or specifies a custom proposedWidget,
  * registers the proposal for human oversight while assigning a safe fallback WidgetType.
  */
-export async function validateAndRegisterProtocolWidgets(protocol: Protocol): Promise<Protocol> {
-  if (!protocol.dataCollectionSpec || protocol.dataCollectionSpec.length === 0) {
-    return protocol;
+export async function validateAndRegisterRoutineWidgets(routine: Routine | Protocol): Promise<Routine> {
+  if (!routine.dataCollectionSpec || routine.dataCollectionSpec.length === 0) {
+    return routine as Routine;
   }
 
   const validatedFields: DataCollectionField[] = [];
 
-  for (const rawField of protocol.dataCollectionSpec) {
+  for (const rawField of routine.dataCollectionSpec) {
     const rawType = String(rawField.type || 'scale');
     const isStandard = isSupportedWidgetType(rawType);
     const hasCustomProposal = !isStandard || Boolean(rawField.proposedWidget);
@@ -119,7 +120,7 @@ export async function validateAndRegisterProtocolWidgets(protocol: Protocol): Pr
       : inferFallbackWidgetType(requestedType, rawField);
 
     const proposalId =
-      rawField.proposedWidget?.id || `widget_${protocol.id}_${rawField.id}`;
+      rawField.proposedWidget?.id || `widget_${routine.id}_${rawField.id}`;
 
     const initialProposal: ProposedWidgetSpec = {
       id: proposalId,
@@ -130,8 +131,8 @@ export async function validateAndRegisterProtocolWidgets(protocol: Protocol): Pr
         rawField.instructions ||
         `Custom clinical endpoint widget for ${rawField.name}`,
       status: rawField.proposedWidget?.status === 'approved' ? 'approved' : 'pending_review',
-      protocolId: protocol.id,
-      paperTitle: protocol.paper?.title || protocol.title,
+      protocolId: routine.id,
+      paperTitle: routine.paper?.title || routine.title,
       fieldId: rawField.id,
       unit: rawField.proposedWidget?.unit ?? rawField.unit,
       min: rawField.proposedWidget?.min ?? rawField.min,
@@ -152,10 +153,12 @@ export async function validateAndRegisterProtocolWidgets(protocol: Protocol): Pr
   }
 
   return {
-    ...protocol,
+    ...routine,
     dataCollectionSpec: validatedFields
-  };
+  } as Routine;
 }
+
+export const validateAndRegisterProtocolWidgets = validateAndRegisterRoutineWidgets;
 
 export async function listWidgetProposals(): Promise<ProposedWidgetSpec[]> {
   const merged = new Map<string, ProposedWidgetSpec>(memoryWidgetProposals);
