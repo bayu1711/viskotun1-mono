@@ -397,7 +397,9 @@ export async function addCommunityReview(
     text: newReview.text.trim(),
     adherence: Math.max(0, Math.min(100, Math.round(newReview.adherence))),
     createdAt: nowIso,
-    userId
+    userId,
+    lifestyleCohort: newReview.lifestyleCohort,
+    tags: newReview.tags
   };
 
   // 1. Update in-memory cache

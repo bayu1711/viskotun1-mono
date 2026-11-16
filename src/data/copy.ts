@@ -567,7 +567,8 @@ export const COPY = {
     modeLabel: 'Viskotu mode',
     modes: {
       ask: 'Ask',
-      upload: 'Add paper'
+      upload: 'Add paper',
+      lifestyle: 'Lifestyle'
     },
     eyebrowUpload: 'New research',
     titleAsk: 'Ask Viskotu',

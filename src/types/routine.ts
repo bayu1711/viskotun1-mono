@@ -239,6 +239,8 @@ export interface CommunityReview {
   adherence: number;
   createdAt?: string;
   userId?: string;
+  lifestyleCohort?: 'smoker' | 'non_smoker' | 'ramadan' | 'shift_work' | 'general';
+  tags?: string[];
 }
 
 export interface NewCommunityReview {
@@ -248,6 +250,8 @@ export interface NewCommunityReview {
   text: string;
   adherence: number;
   userId?: string;
+  lifestyleCohort?: 'smoker' | 'non_smoker' | 'ramadan' | 'shift_work' | 'general';
+  tags?: string[];
 }
 
 export interface DropOffPoint {

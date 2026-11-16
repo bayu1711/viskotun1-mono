@@ -46,7 +46,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const routineId = body.routineId || body.protocolId;
-    const { handle, outcome, day, adherence, text, userId } = body;
+    const { handle, outcome, day, adherence, text, userId, lifestyleCohort, tags } = body;
 
     if (!routineId) {
       return NextResponse.json(
@@ -76,7 +76,9 @@ export async function POST(request: Request) {
         outcome: outcome as ReviewOutcome,
         day: Number(day) || 1,
         adherence: Number(adherence) || 100,
-        text
+        text,
+        lifestyleCohort,
+        tags
       },
       userId
     );

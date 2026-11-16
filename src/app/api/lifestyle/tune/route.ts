@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { executeWithGeminiFailover, getGeminiApiKeys } from '@/server/geminiKeys';
 import {
   getRegionalSuggestions,
@@ -50,8 +51,9 @@ Respond in 2-3 warm, professional sentences (like an expert physiotherapist or c
 2. Plainly explain how their routine pacing, timing windows, or recovery tracking are adapted without any judgment or guilt.
 3. Keep it concise, friendly, and empowering.`;
 
-        const geminiReply = await executeWithGeminiFailover(async (ai) => {
-          const model = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const geminiReply = await executeWithGeminiFailover(async (apiKey) => {
+          const genAI = new GoogleGenerativeAI(apiKey);
+          const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-1.5-flash' });
           const res = await model.generateContent(prompt);
           return res.response.text().trim();
         });
