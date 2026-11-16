@@ -3,6 +3,7 @@ import BarChartRoundedIcon from '@mui/icons-material/BarChartRounded';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import { COPY } from './copy';
+import type { LocaleCopy } from './locales/types';
 
 export const ROUTES = {
   landing: '/',
@@ -20,8 +21,12 @@ export interface NavItem {
   end?: boolean;
 }
 
-export const navItems: NavItem[] = [
-  { href: ROUTES.routine, label: COPY.nav.today, icon: TaskAltIcon, end: true },
-  { href: ROUTES.dashboard, label: COPY.nav.stats, icon: BarChartRoundedIcon },
-  { href: ROUTES.community, label: COPY.nav.community, icon: PeopleAltOutlinedIcon }
-];
+export function getNavItems(copy: LocaleCopy = COPY as unknown as LocaleCopy): NavItem[] {
+  return [
+    { href: ROUTES.routine, label: copy.nav.today, icon: TaskAltIcon, end: true },
+    { href: ROUTES.dashboard, label: copy.nav.stats, icon: BarChartRoundedIcon },
+    { href: ROUTES.community, label: copy.nav.community, icon: PeopleAltOutlinedIcon }
+  ];
+}
+
+export const navItems: NavItem[] = getNavItems();

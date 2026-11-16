@@ -9,6 +9,7 @@ import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useLocale } from '../../contexts/LocaleContext';
 import { usePolicyLedger } from '../../contexts/PolicyLedgerContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
@@ -23,9 +24,10 @@ export function TopBar() {
   const { openAssistant, openLifestyleTuning } = useAssistant();
   const { user, isGuest, isAdmin, logout } = useAuth();
   const { openPolicyDrawer, isLiveFirestore } = usePolicyLedger();
+  const { locale, toggleLocale, copy } = useLocale();
 
-  const displayName = user?.name || COPY.auth.defaultGuestName;
-  const displayInitials = user?.initials || COPY.brand.initials;
+  const displayName = user?.name || copy.auth.defaultGuestName;
+  const displayInitials = user?.initials || copy.brand.initials;
 
   const flagEmoji =
     lifestyleProfile?.region?.countryCode === 'AE'
@@ -45,16 +47,16 @@ export function TopBar() {
   // The server clock is not in the viewer's timezone, so the greeting is only computed in the browser
   const [greetingText, setGreetingText] = useState<string | null>(null);
   useEffect(() => {
-    setGreetingText(greeting());
-  }, []);
+    setGreetingText(locale === 'ar' ? 'مرحباً بك،' : greeting());
+  }, [locale]);
 
   return (
     <header className="mx-auto w-full max-w-6xl px-5 pt-5 lg:px-10 lg:pt-8">
       <div className="flex items-center gap-3 border-b border-ink pb-4">
-        <Link href={ROUTES.landing} className="flex min-h-11 min-w-11 items-center justify-center hover:opacity-85 transition-opacity lg:hidden" aria-label={COPY.brand.name}>
+        <Link href={ROUTES.landing} className="flex min-h-11 min-w-11 items-center justify-center hover:opacity-85 transition-opacity lg:hidden" aria-label={copy.brand.name}>
           <Image
             src={COPY.brand.iconUrl}
-            alt={COPY.brand.name}
+            alt={copy.brand.name}
             width={28}
             height={28}
             priority
@@ -72,24 +74,37 @@ export function TopBar() {
                 href={ROUTES.login}
                 className="inline-flex min-h-11 items-center whitespace-nowrap text-2xs font-semibold text-ink underline underline-offset-2 transition-colors hover:text-ink/80"
               >
-                {COPY.auth.signInToSyncBadge}
+                {copy.auth.signInToSyncBadge}
               </Link>
             ) : isAdmin ? (
               <span className="flex items-center gap-1 rounded-full border border-ink/20 bg-cream px-2 py-0.5 text-2xs font-semibold lowercase text-ink">
                 <span className="h-1.5 w-1.5 rounded-full bg-ink" />
-                {COPY.auth.adminBadge}
+                {copy.auth.adminBadge}
               </span>
             ) : null}
           </div>
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          {/* Language Switcher */}
+          <button
+            type="button"
+            onClick={toggleLocale}
+            className="inline-flex items-center gap-1 rounded-full border border-ink/20 bg-cream/70 hover:bg-cream px-2.5 py-1 text-xs font-semibold text-ink transition-colors cursor-pointer"
+            title={locale === 'en' ? 'التحويل إلى اللغة العربية' : 'Switch to English'}
+            aria-label={locale === 'en' ? 'التحويل إلى اللغة العربية' : 'Switch to English'}
+          >
+            <span className={locale === 'en' ? 'font-bold text-ink' : 'text-ink/60 font-normal'}>EN</span>
+            <span className="text-ink/30" aria-hidden="true">|</span>
+            <span className={locale === 'ar' ? 'font-bold text-ink' : 'text-ink/60 font-normal'}>العربية</span>
+          </button>
+
           <button
             type="button"
             onClick={openLifestyleTuning}
             className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-ink/20 bg-cream/70 hover:bg-cream px-2.5 py-1 text-xs font-medium text-ink transition-colors cursor-pointer"
-            title={COPY.lifestyleTuning.tuneButton}
-            aria-label={COPY.lifestyleTuning.tuneButton}
+            title={copy.lifestyleTuning.tuneButton}
+            aria-label={copy.lifestyleTuning.tuneButton}
           >
             <span className="text-xs leading-none" aria-hidden="true">
               {flagEmoji}
@@ -105,23 +120,23 @@ export function TopBar() {
           {streak > 0 && (
             <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-orange/15 px-3 py-1 text-xs font-semibold text-ink">
               <Icon icon={LocalFireDepartmentOutlinedIcon} size="xs" />
-              {COPY.shell.streak(streak)}
+              {copy.shell.streak(streak)}
             </span>
           )}
         </div>
 
         {user && !isGuest && (
-          <CircleButton label={COPY.auth.signOut} onClick={logout} size={38}>
+          <CircleButton label={copy.auth.signOut} onClick={logout} size={38}>
             <Icon icon={LogoutOutlinedIcon} size="md" />
           </CircleButton>
         )}
 
-        <CircleButton label={COPY.howTo.dialogLabel} onClick={openHowTo} size={38}>
+        <CircleButton label={copy.howTo.dialogLabel} onClick={openHowTo} size={38}>
           <Icon icon={HelpOutlineOutlinedIcon} size="md" />
         </CircleButton>
 
         {isAdmin && (
-          <CircleButton label={COPY.policyLedger.dialogLabel} onClick={openPolicyDrawer} size={38} className="relative">
+          <CircleButton label={copy.policyLedger.dialogLabel} onClick={openPolicyDrawer} size={38} className="relative">
             <Icon icon={ShieldOutlinedIcon} size="md" />
             {isLiveFirestore && (
               <span
@@ -133,12 +148,12 @@ export function TopBar() {
         )}
 
         {isAdmin && (
-          <CircleButton label={COPY.shell.resetDemo} onClick={resetToDefaults} size={38}>
+          <CircleButton label={copy.shell.resetDemo} onClick={resetToDefaults} size={38}>
             <Icon icon={RestartAltOutlinedIcon} size="md" />
           </CircleButton>
         )}
 
-        <CircleButton label={COPY.shell.addPaper} onClick={() => openAssistant('upload')}>
+        <CircleButton label={copy.shell.addPaper} onClick={() => openAssistant('upload')}>
           <Icon icon={AddIcon} size="lg" />
         </CircleButton>
       </div>

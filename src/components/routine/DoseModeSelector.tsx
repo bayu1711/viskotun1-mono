@@ -1,13 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import BoltOutlinedIcon from '@mui/icons-material/BoltOutlined';
 import FitnessCenterOutlinedIcon from '@mui/icons-material/FitnessCenterOutlined';
 import SpaOutlinedIcon from '@mui/icons-material/SpaOutlined';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import { motion } from 'framer-motion';
+import { useLocale } from '../../contexts/LocaleContext';
 import { useRoutine } from '../../contexts/RoutineContext';
-import { COPY } from '../../data/copy';
 import type { DoseMode } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { Icon } from '../ui/Icon';
@@ -19,21 +19,25 @@ interface DoseOption {
   badge?: string;
 }
 
-const DOSE_OPTIONS: DoseOption[] = [
-  { id: 'standard', label: COPY.doseMode.standard, icon: FitnessCenterOutlinedIcon },
-  { id: 'micro', label: COPY.doseMode.micro, icon: BoltOutlinedIcon, badge: 'Adaptive' },
-  { id: 'rest', label: COPY.doseMode.rest, icon: SpaOutlinedIcon }
-];
-
 export function DoseModeSelector({ className }: { className?: string }) {
   const { doseMode, setDoseMode, openReEntryModal, pendingReEntryCheckin } = useRoutine();
+  const { copy, locale } = useLocale();
+
+  const options: DoseOption[] = useMemo(
+    () => [
+      { id: 'standard', label: copy.doseMode.standard, icon: FitnessCenterOutlinedIcon },
+      { id: 'micro', label: copy.doseMode.micro, icon: BoltOutlinedIcon, badge: locale === 'ar' ? 'متكيف' : 'Adaptive' },
+      { id: 'rest', label: copy.doseMode.rest, icon: SpaOutlinedIcon }
+    ],
+    [copy, locale]
+  );
 
   return (
     <div className={cn('rounded-card border border-ink/10 bg-white/70 p-3 sm:p-4 backdrop-blur-sm', className)}>
       <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
         <div className="flex items-center gap-1.5">
           <span className="text-2xs font-semibold uppercase tracking-wider text-ink/60">
-            {COPY.doseMode.label}
+            {copy.doseMode.label}
           </span>
           {pendingReEntryCheckin && (
             <span className="flex h-2 w-2 rounded-full bg-orange-500 animate-pulse" title="Lapse check-in waiting" />
@@ -46,13 +50,13 @@ export function DoseModeSelector({ className }: { className?: string }) {
           className="inline-flex items-center gap-1 text-3xs font-medium text-ink/70 hover:text-ink transition-colors underline decoration-dotted"
         >
           <Icon icon={HelpOutlineOutlinedIcon} size="xs" />
-          <span>Life disrupted? Adapt routine</span>
+          <span>{locale === 'ar' ? 'تعطل جدولك؟ تكييف الخطة' : 'Life disrupted? Adapt routine'}</span>
         </button>
       </div>
 
       {/* Segmented Dose Options */}
       <div className="grid grid-cols-3 gap-1.5 rounded-xl bg-ink/5 p-1">
-        {DOSE_OPTIONS.map((opt) => {
+        {options.map((opt) => {
           const isActive = doseMode === opt.id;
           const IconComp = opt.icon;
 
@@ -88,10 +92,10 @@ export function DoseModeSelector({ className }: { className?: string }) {
           className="mt-2.5 rounded-lg bg-mint/30 border border-mint/60 px-3 py-2 text-3xs text-ink/90 flex items-center justify-between"
         >
           <span className="font-medium">
-            ⚡ {COPY.doseMode.microNotice}
+            ⚡ {copy.doseMode.microNotice}
           </span>
           <span className="shrink-0 text-3xs text-ink/60 hidden sm:inline">
-            Preserves habit loop
+            {locale === 'ar' ? 'حماية وتيرة الالتزام' : 'Preserves habit loop'}
           </span>
         </motion.div>
       )}
@@ -103,7 +107,7 @@ export function DoseModeSelector({ className }: { className?: string }) {
           className="mt-2.5 rounded-lg bg-sky/30 border border-sky/50 px-3 py-2 text-3xs text-ink/90 flex items-center justify-between"
         >
           <span className="font-medium">
-            🌿 Active Recovery: Log mobility, hydration, or gentle breathing today.
+            🌿 {copy.reEntry.doseModes.rest.desc}
           </span>
         </motion.div>
       )}

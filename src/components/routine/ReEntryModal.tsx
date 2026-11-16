@@ -11,6 +11,7 @@ import BedtimeOutlinedIcon from '@mui/icons-material/BedtimeOutlined';
 import MoreHorizOutlinedIcon from '@mui/icons-material/MoreHorizOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useLocale } from '../../contexts/LocaleContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
 import { COPY } from '../../data/copy';
@@ -38,6 +39,7 @@ export function ReEntryModal() {
     logBarrier,
     lapseDays
   } = useRoutine();
+  const { copy, locale, isRtl } = useLocale();
 
   const [selectedBarrier, setSelectedBarrier] = useState<BarrierType>('time_crunch');
   const [selectedDose, setSelectedDose] = useState<DoseMode>('micro');
@@ -80,7 +82,7 @@ export function ReEntryModal() {
             ref={panelRef}
             role="dialog"
             aria-modal="true"
-            aria-label={COPY.reEntry.title}
+            aria-label={copy.reEntry.title}
             tabIndex={-1}
             initial={{ scale: 0.96, opacity: 0, y: MOTION.dialogOffsetY }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -97,21 +99,21 @@ export function ReEntryModal() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="rounded bg-mint/40 px-1.5 py-0.5 text-3xs font-semibold uppercase tracking-wider text-ink/75">
-                      {COPY.reEntry.badge}
+                      {copy.reEntry.badge}
                     </span>
                     {lapseDays > 0 && (
                       <span className="text-3xs font-medium text-ink/50">
-                        {lapseDays} days elapsed
+                        {locale === 'ar' ? `مضى ${lapseDays} يوم` : `${lapseDays} days elapsed`}
                       </span>
                     )}
                   </div>
                   <h2 className="text-base font-semibold text-ink leading-tight">
-                    {COPY.reEntry.title}
+                    {copy.reEntry.title}
                   </h2>
                 </div>
               </div>
 
-              <CircleButton label="Close" onClick={closeReEntryModal} size={36}>
+              <CircleButton label={locale === 'ar' ? 'إغلاق' : 'Close'} onClick={closeReEntryModal} size={36}>
                 <Icon icon={CloseIcon} size="sm" />
               </CircleButton>
             </div>
@@ -121,22 +123,22 @@ export function ReEntryModal() {
               {/* Empathy Introduction */}
               <div className="rounded-xl border border-ink/10 bg-white/60 p-4">
                 <p className="text-xs text-ink/80 leading-relaxed">
-                  {COPY.reEntry.subtitle(lapseDays)}
+                  {copy.reEntry.subtitle(lapseDays)}
                 </p>
               </div>
 
               {/* Step 1: Barrier Detection */}
               <div>
                 <label className="block text-xs font-semibold text-ink mb-1">
-                  {COPY.reEntry.question}
+                  {copy.reEntry.question}
                 </label>
                 <p className="text-3xs text-ink/60 mb-3">
-                  {COPY.reEntry.barrierHint}
+                  {copy.reEntry.barrierHint}
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {barrierKeys.map((key) => {
-                    const barrier = COPY.reEntry.barriers[key];
+                    const barrier = copy.reEntry.barriers[key];
                     const isSelected = selectedBarrier === key;
                     const IconComp = BARRIER_ICONS[key];
 
@@ -146,7 +148,8 @@ export function ReEntryModal() {
                         type="button"
                         onClick={() => setSelectedBarrier(key)}
                         className={cn(
-                          'flex items-start gap-3 rounded-xl border p-3 text-left transition-all',
+                          'flex items-start gap-3 rounded-xl border p-3 transition-all cursor-pointer',
+                          isRtl ? 'text-right' : 'text-left',
                           isSelected
                             ? 'border-ink bg-white shadow-sm ring-1 ring-ink'
                             : 'border-ink/10 bg-white/40 hover:bg-white/80'
@@ -177,12 +180,12 @@ export function ReEntryModal() {
               {/* Step 2: Adaptive Action / Dose Selection */}
               <div>
                 <label className="block text-xs font-semibold text-ink mb-2">
-                  {COPY.reEntry.doseModeHeading}
+                  {copy.reEntry.doseModeHeading}
                 </label>
 
                 <div className="space-y-2.5">
                   {(['micro', 'standard', 'rest'] as const).map((mode) => {
-                    const info = COPY.reEntry.doseModes[mode];
+                    const info = copy.reEntry.doseModes[mode];
                     const isSelected = selectedDose === mode;
 
                     return (
@@ -191,7 +194,8 @@ export function ReEntryModal() {
                         type="button"
                         onClick={() => setSelectedDose(mode)}
                         className={cn(
-                          'flex w-full items-start gap-3.5 rounded-xl border p-3.5 text-left transition-all',
+                          'flex w-full items-start gap-3.5 rounded-xl border p-3.5 transition-all cursor-pointer',
+                          isRtl ? 'text-right' : 'text-left',
                           isSelected
                             ? 'border-ink bg-white shadow-sm ring-2 ring-ink/80'
                             : 'border-ink/10 bg-white/40 hover:bg-white/80'
@@ -230,14 +234,14 @@ export function ReEntryModal() {
               {/* Optional Note */}
               <div>
                 <label htmlFor="reentry-note" className="block text-3xs font-medium text-ink/60 mb-1">
-                  Optional personal reflection / journal
+                  {locale === 'ar' ? 'ملاحظة شخصية اختيارية' : 'Optional personal reflection / journal'}
                 </label>
                 <input
                   id="reentry-note"
                   type="text"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="e.g. Flight delay, felt fatigued after long workday..."
+                  placeholder={locale === 'ar' ? 'مثال: تأخر في موعد السفر، إرهاق بعد نوبة عمل طويلة...' : 'e.g. Flight delay, felt fatigued after long workday...'}
                   className="w-full rounded-lg border border-ink/15 bg-white px-3 py-2 text-xs text-ink placeholder:text-ink/30 focus:border-ink focus:outline-none"
                 />
               </div>
@@ -248,9 +252,9 @@ export function ReEntryModal() {
               <button
                 type="button"
                 onClick={dismissReEntryCheckin}
-                className="text-xs font-medium text-ink/60 hover:text-ink transition-colors py-2"
+                className="text-xs font-medium text-ink/60 hover:text-ink transition-colors py-2 cursor-pointer"
               >
-                {COPY.reEntry.dismiss}
+                {copy.reEntry.dismiss}
               </button>
 
               <PillButton
@@ -258,7 +262,7 @@ export function ReEntryModal() {
                 onClick={handleConfirm}
                 className="w-full sm:w-auto"
               >
-                {COPY.reEntry.confirmBarrier}
+                {copy.reEntry.confirmBarrier}
               </PillButton>
             </div>
           </motion.div>

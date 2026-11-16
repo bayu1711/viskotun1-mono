@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { COPY } from '../../data/copy';
-import { navItems } from '../../data/navigation';
+import { useLocale } from '../../contexts/LocaleContext';
+import { getNavItems } from '../../data/navigation';
 import { cn } from '../../utils/cn';
 
 interface SidebarNavProps {
@@ -12,13 +12,15 @@ interface SidebarNavProps {
 }
 
 export function SidebarNav({ className }: SidebarNavProps) {
+  const { copy } = useLocale();
   const pathname = usePathname();
   const currentPath = pathname ?? '';
+  const items = useMemo(() => getNavItems(copy), [copy]);
 
   return (
-    <nav aria-label={COPY.nav.primaryLabel} className={className}>
+    <nav aria-label={copy.nav.primaryLabel} className={className}>
       <ul className="space-y-1">
-        {navItems.map((item) => {
+        {items.map((item) => {
           const isActive = item.end ? currentPath === item.href : currentPath.startsWith(item.href);
           return (
             <li key={item.href}>

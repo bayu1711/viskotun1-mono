@@ -139,3 +139,20 @@ input[type='range'].feedback-slider:focus-visible::-webkit-slider-thumb {
     display: none !important;
   }
 }
+
+/* RTL Layout & Arabic Typography */
+[dir='rtl'] {
+  text-align: right;
+  font-family: system-ui, -apple-system, 'Segoe UI', Tahoma, 'Noto Sans Arabic', 'Cairo', sans-serif;
+}
+
+[dir='rtl'] h1,
+[dir='rtl'] h2,
+[dir='rtl'] h3 {
+  letter-spacing: normal !important;
+}
+
+/* Mirror icons that indicate directional navigation in RTL */
+[dir='rtl'] .rtl-mirror {
+  transform: scaleX(-1);
+}

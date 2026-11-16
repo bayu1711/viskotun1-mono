@@ -3,9 +3,9 @@ import AddIcon from '@mui/icons-material/Add';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAssistant } from '../../contexts/AssistantContext';
+import { useLocale } from '../../contexts/LocaleContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
-import { COPY } from '../../data/copy';
 import { useDismissable } from '../../hooks/useDismissable';
 import { cn } from '../../utils/cn';
 import { Icon } from '../ui/Icon';
@@ -17,6 +17,7 @@ import { QueuedPaperItem } from '../protocol/QueuedPaperItem';
 export function RoutineSwitcher() {
   const { routines, queuedPapers, activeRoutineId, setActiveRoutine, routine } = useRoutine();
   const { openAssistant } = useAssistant();
+  const { copy } = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const listId = useId();
@@ -40,10 +41,10 @@ export function RoutineSwitcher() {
       <button
         type="button"
         onClick={handleAddPaper}
-        className="flex min-h-11 items-center gap-2 rounded-full border border-dashed border-ink/40 py-1.5 px-3 text-sm text-ink/70 hover:border-ink hover:text-ink transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+        className="flex min-h-11 items-center gap-2 rounded-full border border-dashed border-ink/40 py-1.5 px-3 text-sm text-ink/70 hover:border-ink hover:text-ink transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 cursor-pointer"
       >
         <Icon icon={AddIcon} size="sm" />
-        <span>{COPY.switcher.addPaper}</span>
+        <span>{copy.switcher.addPaper}</span>
       </button>
     );
   }
@@ -56,7 +57,7 @@ export function RoutineSwitcher() {
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-controls={isOpen ? listId : undefined}
-        className="flex min-h-11 items-center gap-2 rounded-full border border-ink py-1.5 pl-1.5 pr-3 text-sm transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+        className="flex min-h-11 items-center gap-2 rounded-full border border-ink py-1.5 pl-1.5 pr-3 text-sm transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 cursor-pointer"
       >
         <IconTile variant="orange" shape="circle" size={28}>
           <StepIcon icon={routine.icon} size="xs" />
@@ -75,7 +76,7 @@ export function RoutineSwitcher() {
             className="absolute left-0 top-full z-popover mt-2 w-popover max-w-inset rounded-card bg-white p-2 shadow-popover"
           >
             <p id={headingId} className="px-2 py-1 text-2xs uppercase tracking-wider text-ink/60">
-              {COPY.switcher.heading}
+              {copy.switcher.heading}
             </p>
             <ul id={listId} role="listbox" aria-labelledby={headingId} className="space-y-1">
               {routines.map((item) => (
@@ -99,10 +100,10 @@ export function RoutineSwitcher() {
             <button
               type="button"
               onClick={handleAddPaper}
-              className="mt-2 flex w-full items-center gap-2 rounded-tile border border-dashed border-ink/40 p-2 text-sm text-ink/70 hover:border-ink hover:text-ink transition-colors"
+              className="mt-2 flex w-full items-center gap-2 rounded-tile border border-dashed border-ink/40 p-2 text-sm text-ink/70 hover:border-ink hover:text-ink transition-colors cursor-pointer"
             >
               <Icon icon={AddIcon} size="sm" />
-              <span>{COPY.switcher.addPaper}</span>
+              <span>{copy.switcher.addPaper}</span>
             </button>
           </motion.div>
         )}
