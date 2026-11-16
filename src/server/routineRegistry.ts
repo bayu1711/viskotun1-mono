@@ -165,7 +165,19 @@ const TITLE_ALIASES: Record<string, string[]> = {
   'ashwagandha-stress': [
     'study of safety and efficacy of a high concentration full spectrum extract of ashwagandha root in reducing stress and anxiety'
   ],
-  'dual-n-back': ['improving fluid intelligence with training on working memory']
+  'dual-n-back': ['improving fluid intelligence with training on working memory'],
+  'uae-heat-circadian': [
+    'efficacy of morning retinal photic stimulation and indoor thermal micro-conditioning',
+    'circadian light heat resilient hydration protocol'
+  ],
+  'uae-ramadan-metabolic': [
+    'chronobiological synchronization and postprandial glycemic stabilization during intermittent fasting',
+    'ramadan circadian metabolic rhythm protocol'
+  ],
+  'uae-midwakh-tapering': [
+    'clinical efficacy of behavioral substitution and urge surfing for high nicotine midwakh pipe cessation',
+    'midwakh dokha behavioral harm reduction tapering protocol'
+  ]
 };
 
   // Check Title and Filename match across in-memory catalog

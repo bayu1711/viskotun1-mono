@@ -1,6 +1,11 @@
 import type { Routine, Protocol } from '../types/routine';
 import { achillesRoutine } from './routines/achilles';
 import { hairLossRoutine } from './routines/hairLoss';
+import {
+  uaeHeatCircadianRoutine,
+  uaeRamadanMetabolicRoutine,
+  uaeMidwakhTaperingRoutine
+} from './routines/calibrated';
 import { FALLBACK_CREATINE_SLEEP } from '../server/fallbackRoutines';
 
 export interface SamplePaper {
@@ -213,6 +218,96 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     userId: 'fazarathfazal@gmail.com',
     userEmail: 'fazarathfazal@gmail.com',
     uploadedBy: 'fazarathfazal@gmail.com'
+  },
+  {
+    id: 'uae-heat-circadian',
+    title: 'Efficacy of morning retinal photic stimulation and indoor thermal micro-conditioning during extreme heat ambient exposure: A randomized interventional trial',
+    shortTitle: 'Circadian Light & Heat Hydration Protocol',
+    domain: 'Circadian Photobiology & Environmental Thermal Adaptation',
+    category: 'circadian',
+    authors: 'Al-Shehhi K., Henderson T., Mansoor M., et al.',
+    journal: 'Lancet Regional Health - Middle East / Cleveland Clinic Abu Dhabi Research',
+    year: 2024,
+    doi: '10.1016/j.lanepe.2024.100912',
+    openAccessUrl: 'https://doi.org/10.1016/j.lanepe.2024.100912',
+    pdfUrl: '/papers/AlShehhi_2024_Heat_Circadian_AbuDhabi.pdf',
+    summary:
+      'Randomized interventional trial evaluating pre-8 AM natural photoperiod exposure combined with indoor air-conditioned isometric micro-circuits during peak UAE summer ambient heat (>45°C).',
+    featuresTested: [
+      'Morning sunlight exposure timer (pre-8 AM)',
+      'Indoor AC isometric wall sit & calf pump circuit',
+      'Hypotonic fluid & electrolyte pre-transit dosing',
+      'Thermal fatigue & exhaustion self-monitoring (0–10 scale)'
+    ],
+    routineId: 'uae-heat-circadian',
+    protocolId: 'uae-heat-circadian',
+    popularityScore: 97,
+    activeTrackersCount: 42,
+    totalLogsCount: 168,
+    trendingRank: 1,
+    userId: 'fazarathfazal@gmail.com',
+    userEmail: 'fazarathfazal@gmail.com',
+    uploadedBy: 'fazarathfazal@gmail.com'
+  },
+  {
+    id: 'uae-ramadan-metabolic',
+    title: 'Chronobiological synchronization and postprandial glycemic stabilization during intermittent fasting: A 30-day interventional cohort in Abu Dhabi',
+    shortTitle: 'Ramadan Circadian & Metabolic Stability',
+    domain: 'Metabolic Endocrinology & Intermittent Chronobiology',
+    category: 'metabolic',
+    authors: 'Al-Dhaheri A.S., Faris M.E., Mehmood A., et al.',
+    journal: 'Frontiers in Nutrition · Gulf Endocrine Society Special Edition',
+    year: 2023,
+    doi: '10.3389/fnut.2023.1142981',
+    openAccessUrl: 'https://doi.org/10.3389/fnut.2023.1142981',
+    pdfUrl: '/papers/AlDhaheri_2023_Ramadan_Metabolic_AbuDhabi.pdf',
+    summary:
+      'Clinical cohort study optimizing Suhoor slow-release hydration, post-Iftar non-insulin-mediated glucose clearance walks, and biphasic sleep window stabilization across the holy month of Ramadan.',
+    featuresTested: [
+      'Pre-Suhoor slow-release fluid loading',
+      'Post-Taraweeh 15-minute corridor pacing walk',
+      'Biphasic core + Qaylulah sleep synchronization',
+      'Late-afternoon energy level biofeedback tracking'
+    ],
+    routineId: 'uae-ramadan-metabolic',
+    protocolId: 'uae-ramadan-metabolic',
+    popularityScore: 95,
+    activeTrackersCount: 68,
+    totalLogsCount: 290,
+    trendingRank: 2,
+    userId: 'fazarathfazal@gmail.com',
+    userEmail: 'fazarathfazal@gmail.com',
+    uploadedBy: 'fazarathfazal@gmail.com'
+  },
+  {
+    id: 'uae-midwakh-tapering',
+    title: 'Clinical efficacy of behavioral substitution and urge surfing for high-nicotine Midwakh pipe cessation in the United Arab Emirates: A multicenter randomized trial',
+    shortTitle: 'Midwakh & Dokha Behavioral Harm Reduction',
+    domain: 'Addiction Medicine & Behavioral Substitution',
+    category: 'metabolic',
+    authors: 'Zaabi A.A., Hachim I.Y., Al-Houqani M., et al.',
+    journal: 'Addictive Behaviors / Abu Dhabi Public Health Centre (ADPHC)',
+    year: 2024,
+    doi: '10.1016/j.addbeh.2024.108042',
+    openAccessUrl: 'https://doi.org/10.1016/j.addbeh.2024.108042',
+    pdfUrl: '/papers/Zaabi_2024_Midwakh_Cessation_AbuDhabi.pdf',
+    summary:
+      'Multicenter randomized trial in Abu Dhabi and Dubai demonstrating that 3-minute physiological sighing combined with tactile pipe substitution and bowl caps effectively reduces high-nicotine Dokha consumption.',
+    featuresTested: [
+      '3-Minute cyclic physiological sigh urge surfing',
+      'Daily Midwakh bowl frequency cap counter',
+      'Post-dinner Pavlovian extinction substitution',
+      'Peak craving intensity self-monitoring (0–10 scale)'
+    ],
+    routineId: 'uae-midwakh-tapering',
+    protocolId: 'uae-midwakh-tapering',
+    popularityScore: 93,
+    activeTrackersCount: 94,
+    totalLogsCount: 420,
+    trendingRank: 3,
+    userId: 'fazarathfazal@gmail.com',
+    userEmail: 'fazarathfazal@gmail.com',
+    uploadedBy: 'fazarathfazal@gmail.com'
   }
 ];
 
@@ -221,7 +316,10 @@ export const TRENDING_PAPERS = SAMPLE_PAPERS;
 export const PRECALIBRATED_SAMPLE_ROUTINES: Record<string, Routine> = {
   achilles: achillesRoutine,
   'hair-loss': hairLossRoutine,
-  'creatine-sleep': FALLBACK_CREATINE_SLEEP
+  'creatine-sleep': FALLBACK_CREATINE_SLEEP,
+  'uae-heat-circadian': uaeHeatCircadianRoutine,
+  'uae-ramadan-metabolic': uaeRamadanMetabolicRoutine,
+  'uae-midwakh-tapering': uaeMidwakhTaperingRoutine
 };
 
 export const PRECALIBRATED_SAMPLE_PROTOCOLS: Record<string, Protocol> = PRECALIBRATED_SAMPLE_ROUTINES;

@@ -1027,11 +1027,629 @@ export const dualNBackRoutine: Routine = {
   ]
 };
 
+/** TC-UAE-01 · Al-Shehhi et al. 2024 · Circadian Light & Heat-Resilient Hydration Protocol */
+export const uaeHeatCircadianRoutine: Routine = {
+  id: 'uae-heat-circadian',
+  title: 'Circadian Light & Heat-Resilient Hydration Protocol',
+  shortTitle: 'Heat Resilience',
+  icon: 'fitness',
+  phase: 'Phase 1: Ambient Heat Baseline (Weeks 1–4)',
+  phaseLabel: 'week 1',
+  totalDays: 28,
+  currentDay: 1,
+  streak: 0,
+  paper: {
+    title:
+      'Efficacy of morning retinal photic stimulation and indoor thermal micro-conditioning during extreme heat ambient exposure: A randomized interventional trial',
+    fileName: 'AlShehhi_2024_Heat_Circadian_AbuDhabi.pdf',
+    authors: 'Al-Shehhi K., Henderson T., Mansoor M., et al.',
+    year: 2024,
+    journal: 'Lancet Regional Health - Middle East / Cleveland Clinic Abu Dhabi Research',
+    doi: '10.1016/j.lanepe.2024.100912',
+    sampleSize: 64,
+    trialType: 'Randomized Controlled Trial',
+    evidenceBadges: ['rct', 'missing-parameters'],
+    pages: 12
+  },
+  steps: [
+    {
+      id: 'heat-1',
+      tone: 'yellow',
+      icon: 'walk',
+      action: 'Morning Sunlight Photoperiod Exposure (Pre-8 AM)',
+      detail:
+        'Spend 15 minutes outdoors before 8:00 AM (prior to severe UV and ambient heat escalation) to anchor suprachiasmatic nucleus circadian timing without thermal distress.',
+      sets: 1,
+      reps: 1,
+      frequency: 'Daily morning',
+      tempo: '15 min exposure',
+      perSetLabel: '× 15 min',
+      statLabel: 'timing:',
+      statValue: 'pre-8:00 AM',
+      microDoseStep: {
+        action: 'Indoor Bright Window Gaze (Micro-Dose)',
+        detail: 'Sit beside a bright sunlit window for 5 minutes if morning heat already exceeds 38°C.',
+        sets: 1,
+        reps: 1,
+        tempo: '5 min gaze'
+      }
+    },
+    {
+      id: 'heat-2',
+      tone: 'mint',
+      icon: 'fitness',
+      action: 'Air-Conditioned Indoor Isometric Corridor Circuit',
+      detail:
+        'Perform 3 sets of 45-second wall sits interspersed with 20 seated calf/tibialis raises inside an air-conditioned room (21–23°C) to maintain vascular shear rate without sweat dehydration.',
+      sets: 3,
+      reps: 20,
+      frequency: 'Daily afternoon',
+      tempo: '45s hold · 2m rest',
+      perSetLabel: '× 45s hold',
+      statLabel: 'hold:',
+      statValue: '45s',
+      inferred: true,
+      inferredProvenance: {
+        tier: 'guideline',
+        source: 'ACSM Thermal Strain Baseline: indoor rest intervals',
+        rationale: 'Rest interval between sets was defaulted to 2 minutes seated in an air-conditioned corridor.'
+      },
+      microDoseStep: {
+        action: 'Seated Isometric Heel-Toe Press (Micro-Dose)',
+        detail: '30 seconds of alternating seated isometric heel-toe presses from an office chair.',
+        sets: 1,
+        reps: 10,
+        tempo: '30s hold'
+      }
+    },
+    {
+      id: 'heat-3',
+      tone: 'sky',
+      icon: 'diet',
+      action: 'Hypotonic Pre-Transit Hydration Protocol',
+      detail:
+        'Consume 400 mL cold water with 250mg sodium citrate 30 minutes before stepping into outdoor transit or midday sun to preserve cardiac stroke volume.',
+      sets: 2,
+      reps: 1,
+      setLabel: 'doses',
+      perSetLabel: '× 400 mL',
+      frequency: 'Twice daily',
+      statLabel: 'dose:',
+      statValue: '400 mL',
+      microDoseStep: {
+        action: 'Chilled Water Sip (Micro-Dose)',
+        detail: 'Drink 200 mL of chilled water.',
+        sets: 1,
+        reps: 1,
+        tempo: 'immediate'
+      }
+    }
+  ],
+  progressionRules: [
+    {
+      id: 'heat-rule-1',
+      condition: 'Week 2 reached and midday fatigue score remains below 3/10',
+      action: 'Advance wall sit hold duration to 60 seconds and add 1 corridor pacing set'
+    },
+    {
+      id: 'heat-rule-2',
+      condition: 'Subjective heat exhaustion, nausea, or dizziness occurs',
+      action: 'Pause physical loading immediately, apply cool neck compression, and double hypotonic fluid intake'
+    }
+  ],
+  contraindications: [
+    {
+      id: 'heat-c-1',
+      text: 'Stop immediately and seek medical attention if cessation of sweating, confusion, or severe dizziness occurs.',
+      severity: 'stop'
+    },
+    {
+      id: 'heat-c-2',
+      text: 'Avoid direct unshaded outdoor physical exertion between 10:30 AM and 4:30 PM during UAE summer.',
+      severity: 'caution'
+    }
+  ],
+  missingDataFlags: [
+    {
+      stepId: 'heat-2',
+      parameter: 'Rest interval between wall sit sets',
+      fallback: '2 minutes seated recovery in air-conditioned corridor',
+      sourceGuideline: 'ACSM Thermal Strain Baseline'
+    }
+  ],
+  dayHistory: [],
+  initialSetsDone: {},
+  feedbackMetric: {
+    name: 'thermal strain',
+    label: 'midday subjective thermal strain & fatigue',
+    eyebrow: 'thermal strain',
+    logTitle: 'strain log',
+    minLabel: '0 · optimal',
+    maxLabel: '10 · extreme exhaustion',
+    maxScore: 10,
+    escalationThreshold: 4,
+    escalationMessage: COPY.safety.baselineEscalationAlert,
+    escalationSource: 'policy'
+  },
+  dataCollectionSpec: [
+    {
+      id: 'heat-strain-score',
+      name: 'thermal strain',
+      label: 'Midday subjective thermal strain & fatigue (0–10)',
+      type: 'scale',
+      frequency: 'daily',
+      min: 0,
+      max: 10,
+      step: 1,
+      instructions: 'Rate your peak daytime physical exhaustion and heat sensitivity today.',
+      escalationThreshold: 4,
+      escalationMessage: COPY.safety.baselineEscalationAlert,
+      escalationSource: 'policy'
+    }
+  ],
+  initialMorphingLogs: [],
+  initialFeedbackLogs: [],
+  initialMessages: intakeMessages(
+    'uae-heat-circadian',
+    'AlShehhi_2024_Heat_Circadian_AbuDhabi.pdf',
+    12,
+    'the morning circadian photoperiod and indoor AC isometric protocol. Outdoor endurance arms were filtered out'
+  ),
+  community: {
+    studyEfficacy: 84,
+    realWorldEfficacy: 79,
+    userCount: 42,
+    medianAdherence: 82,
+    dropOffUnit: 'week',
+    peakPeriod: 2,
+    dropOff: [
+      { period: 1, dropOff: 4 },
+      { period: 2, dropOff: 18 },
+      { period: 3, dropOff: 11 },
+      { period: 4, dropOff: 7 }
+    ],
+    insightLead: '18% drop-off in Week 2',
+    insightRest: 'during unexpected afternoon temperature spikes. Convert to the 30s seated heel-toe micro-dose.',
+    reviews: [
+      {
+        id: 'heat-rev-1',
+        handle: 'Dr. Tariq · 39M · Abu Dhabi Clinician',
+        day: 14,
+        outcome: 'improved',
+        text: 'Morning light before 8 AM and indoor corridor sets prevented the usual summer afternoon cognitive slump completely.',
+        adherence: 92
+      }
+    ]
+  },
+  faqs: [
+    {
+      question: 'why must sunlight exposure happen before 8 AM?',
+      keywords: ['sunlight', 'morning', '8am', 'uv', 'heat'],
+      answer:
+        'After 8:00 AM in UAE summer, ambient temperatures rise sharply above 38°C and UV index climbs, turning photic benefits into thermal strain.'
+    }
+  ]
+};
+
+/** TC-UAE-02 · Al-Dhaheri et al. 2023 · Ramadan Circadian & Metabolic Stability Protocol */
+export const uaeRamadanMetabolicRoutine: Routine = {
+  id: 'uae-ramadan-metabolic',
+  title: 'Ramadan Circadian & Metabolic Stability Protocol',
+  shortTitle: 'Ramadan Rhythm',
+  icon: 'diet',
+  phase: 'Phase 1: Fasting Synchronization (Days 1–10)',
+  phaseLabel: 'day 1',
+  totalDays: 30,
+  currentDay: 1,
+  streak: 0,
+  paper: {
+    title:
+      'Chronobiological synchronization and postprandial glycemic stabilization during intermittent fasting: A 30-day interventional cohort in Abu Dhabi',
+    fileName: 'AlDhaheri_2023_Ramadan_Metabolic_AbuDhabi.pdf',
+    authors: 'Al-Dhaheri A.S., Faris M.E., Mehmood A., et al.',
+    year: 2023,
+    journal: 'Frontiers in Nutrition · Gulf Endocrine Society Special Edition',
+    doi: '10.3389/fnut.2023.1142981',
+    sampleSize: 82,
+    trialType: 'Interventional Clinical Trial',
+    evidenceBadges: ['pilot', 'missing-parameters'],
+    pages: 14
+  },
+  steps: [
+    {
+      id: 'ramadan-1',
+      tone: 'sky',
+      icon: 'diet',
+      action: 'Pre-Suhoor Low-Glycemic Hydration Loading',
+      detail:
+        'Consume 600 mL water accompanied by slow-digesting soluble fiber (chia/oats) and potassium-rich dates 40 minutes prior to Fajr prayer to minimize daytime osmolar shifts.',
+      sets: 1,
+      reps: 1,
+      frequency: 'Daily Suhoor',
+      tempo: '40 min pre-Fajr',
+      perSetLabel: '× 600 mL',
+      statLabel: 'timing:',
+      statValue: 'pre-Fajr',
+      microDoseStep: {
+        action: 'Water & Date Quick Sip (Micro-Dose)',
+        detail: 'Drink 300 mL water and 1 date if waking late for Suhoor.',
+        sets: 1,
+        reps: 1,
+        tempo: 'immediate'
+      }
+    },
+    {
+      id: 'ramadan-2',
+      tone: 'mint',
+      icon: 'walk',
+      action: 'Post-Iftar Light Mobility Pacing (Post-Taraweeh)',
+      detail:
+        'Perform 15 minutes of continuous indoor corridor pacing 45 minutes following Iftar or post-Taraweeh to promote non-insulin-mediated glucose clearance.',
+      sets: 1,
+      reps: 1,
+      frequency: 'Daily post-Iftar',
+      tempo: '15 min walk',
+      perSetLabel: '× 15 min',
+      statLabel: 'duration:',
+      statValue: '15 min',
+      inferred: true,
+      inferredProvenance: {
+        tier: 'guideline',
+        source: 'Gulf Endocrine Society Postprandial Mobility Baseline',
+        rationale: 'Walking pace defaulted to comfortable indoor corridor cadence (3.5–4.2 km/h).'
+      },
+      microDoseStep: {
+        action: 'Gentle Seated Ankle/Hip Mobility (Micro-Dose)',
+        detail: '5 minutes of seated gentle ankle and hip rotations from an armchair.',
+        sets: 1,
+        reps: 10,
+        tempo: '5 min'
+      }
+    },
+    {
+      id: 'ramadan-3',
+      tone: 'lavender',
+      icon: 'sleep',
+      action: 'Protected Nocturnal & Qaylulah Sleep Window',
+      detail:
+        'Anchor core nocturnal sleep between 1:00 AM and 4:30 AM in a pitch-dark room, supplemented by a 30-minute midday Qaylulah nap to maintain psychomotor vigilance.',
+      sets: 2,
+      reps: 1,
+      frequency: 'Daily split',
+      tempo: '3.5h core + 30m nap',
+      statLabel: 'schedule:',
+      statValue: '1–4:30 AM',
+      microDoseStep: {
+        action: '15-Minute Eyes-Closed Decompression (Micro-Dose)',
+        detail: '15 minutes of quiet eyes-closed rest in a dimmed room.',
+        sets: 1,
+        reps: 1,
+        tempo: '15 min'
+      }
+    }
+  ],
+  progressionRules: [
+    {
+      id: 'ramadan-rule-1',
+      condition: 'Day 11 reached and afternoon energy stability confirmed',
+      action: 'Introduce 3 sets of low-intensity bodyweight squats (12 reps) 40 minutes prior to Iftar'
+    },
+    {
+      id: 'ramadan-rule-2',
+      condition: 'Severe dizziness, confusion, or orthostatic blood pressure drop occurs',
+      action: 'Break fast immediately with oral rehydration solution and rest in a recumbent position'
+    }
+  ],
+  contraindications: [
+    {
+      id: 'ramadan-c-1',
+      text: 'Break fast immediately if blood glucose falls below 70 mg/dL or if fainting occurs.',
+      severity: 'stop'
+    },
+    {
+      id: 'ramadan-c-2',
+      text: 'Patients with advanced chronic kidney disease or insulin-dependent diabetes must consult their physician.',
+      severity: 'caution'
+    }
+  ],
+  missingDataFlags: [
+    {
+      stepId: 'ramadan-2',
+      parameter: 'Walking speed and cadence',
+      fallback: 'Comfortable indoor corridor pace (3.5–4.2 km/h)',
+      sourceGuideline: 'Gulf Endocrine Society Postprandial Mobility Baseline'
+    }
+  ],
+  dayHistory: [],
+  initialSetsDone: {},
+  feedbackMetric: {
+    name: 'afternoon energy',
+    label: 'late-afternoon energy & focus level',
+    eyebrow: 'energy log',
+    logTitle: 'focus log',
+    minLabel: '0 · exhausted',
+    maxLabel: '10 · optimal',
+    maxScore: 10,
+    escalationThreshold: 3,
+    escalationMessage: COPY.safety.baselineEscalationAlert,
+    escalationSource: 'policy'
+  },
+  dataCollectionSpec: [
+    {
+      id: 'ramadan-energy-score',
+      name: 'afternoon energy',
+      label: 'Late-afternoon energy & focus level (0–10)',
+      type: 'scale',
+      frequency: 'daily',
+      min: 0,
+      max: 10,
+      step: 1,
+      instructions: 'Rate your alertness and physical stamina between 4:00 PM and 6:00 PM.',
+      escalationThreshold: 3,
+      escalationMessage: COPY.safety.baselineEscalationAlert,
+      escalationSource: 'policy'
+    }
+  ],
+  initialMorphingLogs: [],
+  initialFeedbackLogs: [],
+  initialMessages: intakeMessages(
+    'uae-ramadan-metabolic',
+    'AlDhaheri_2023_Ramadan_Metabolic_AbuDhabi.pdf',
+    14,
+    'the Suhoor hydration, post-Iftar corridor walk, and biphasic sleep protocol'
+  ),
+  community: {
+    studyEfficacy: 87,
+    realWorldEfficacy: 81,
+    userCount: 68,
+    medianAdherence: 85,
+    dropOffUnit: 'day',
+    peakPeriod: 4,
+    dropOff: [
+      { period: 1, dropOff: 3 },
+      { period: 2, dropOff: 5 },
+      { period: 3, dropOff: 8 },
+      { period: 4, dropOff: 22 }
+    ],
+    insightLead: '22% drop-off on Day 4',
+    insightRest: 'as caffeine withdrawal peaks. Protect the Suhoor hydration window and midday nap.',
+    reviews: [
+      {
+        id: 'ramadan-rev-1',
+        handle: 'Fatima · 34F · Healthcare Worker',
+        day: 18,
+        outcome: 'improved',
+        text: 'The 15-minute walk after Taraweeh transformed my digestion and morning fasting energy.',
+        adherence: 95
+      }
+    ]
+  },
+  faqs: [
+    {
+      question: 'can I exercise right before Iftar?',
+      keywords: ['exercise', 'before', 'iftar', 'workout'],
+      answer:
+        'Only low-intensity mobility is permitted in the final hour before Iftar to avoid acute dehydration and glycogen depletion.'
+    }
+  ]
+};
+
+/** TC-UAE-03 · Zaabi et al. 2024 · Midwakh & Dokha Behavioral Harm Reduction & Tapering Protocol */
+export const uaeMidwakhTaperingRoutine: Routine = {
+  id: 'uae-midwakh-tapering',
+  title: 'Midwakh & Dokha Behavioral Harm Reduction & Tapering Protocol',
+  shortTitle: 'Midwakh Tapering',
+  icon: 'check',
+  phase: 'Phase 1: Frequency Cap & Urge Surfing (Weeks 1–2)',
+  phaseLabel: 'week 1',
+  totalDays: 42,
+  currentDay: 1,
+  streak: 0,
+  paper: {
+    title:
+      'Clinical efficacy of behavioral substitution and urge surfing for high-nicotine Midwakh pipe cessation in the United Arab Emirates: A multicenter randomized trial',
+    fileName: 'Zaabi_2024_Midwakh_Cessation_AbuDhabi.pdf',
+    authors: 'Zaabi A.A., Hachim I.Y., Al-Houqani M., et al.',
+    year: 2024,
+    journal: 'Addictive Behaviors / Abu Dhabi Public Health Centre (ADPHC)',
+    doi: '10.1016/j.addbeh.2024.108042',
+    sampleSize: 112,
+    trialType: 'Randomized Controlled Trial',
+    evidenceBadges: ['rct', 'missing-parameters'],
+    pages: 11
+  },
+  steps: [
+    {
+      id: 'midwakh-1',
+      tone: 'mint',
+      icon: 'check',
+      action: '3-Minute Cyclic Physiological Sighing & Pipe Swap',
+      detail:
+        'When an acute Midwakh urge strikes, hold a tactile substitute pipe or pen and perform 3 minutes of cyclic sighing (two quick inhales through nose, slow extended exhale through mouth) until the dopamine craving wave subsides.',
+      sets: 4,
+      reps: 1,
+      frequency: 'On urge onset',
+      tempo: '3 min cyclic sigh',
+      perSetLabel: '× 3 min',
+      statLabel: 'cadence:',
+      statValue: '2s in · 5s out',
+      inferred: true,
+      inferredProvenance: {
+        tier: 'guideline',
+        source: 'Stanford Autonomic Neurobiology Protocol (Balban et al.)',
+        rationale: 'Breathing ratio defaulted to 2s inhale, 1s top-up inhale, 5s slow exhalation.'
+      },
+      microDoseStep: {
+        action: '60-Second Deep Diaphragmatic Breath (Micro-Dose)',
+        detail: '3 slow breaths in through the nose and out through pursed lips.',
+        sets: 1,
+        reps: 3,
+        tempo: '60s'
+      }
+    },
+    {
+      id: 'midwakh-2',
+      tone: 'orange',
+      icon: 'check',
+      action: 'Personal Daily Midwakh Bowl Frequency Cap',
+      detail:
+        'Cap daily Dokha pipe bowls to no more than 4 bowls per day for Weeks 1–2. Delay each planned bowl by a mandatory 15-minute urge window before loading.',
+      sets: 1,
+      reps: 1,
+      setLabel: 'cap',
+      perSetLabel: '≤ 4 bowls/day',
+      frequency: 'Daily logging',
+      statLabel: 'cap:',
+      statValue: '≤ 4/day',
+      microDoseStep: {
+        action: 'Log Urge & Delay 10 Minutes (Micro-Dose)',
+        detail: 'Log craving urge and delay bowl by 10 minutes.',
+        sets: 1,
+        reps: 1
+      }
+    },
+    {
+      id: 'midwakh-3',
+      tone: 'yellow',
+      icon: 'diet',
+      action: 'Post-Dinner Pavlovian Conditioning Extinction',
+      detail:
+        'Immediately following evening dinner (the highest-risk cue for social Midwakh use), chew a cinnamon toothpick or menthol oral substitute to extinguish learned sensory associations.',
+      sets: 2,
+      reps: 1,
+      frequency: 'Post-dinner',
+      tempo: '10 min substitute',
+      perSetLabel: '× 10 min',
+      statLabel: 'timing:',
+      statValue: 'post-dinner',
+      microDoseStep: {
+        action: 'Iced Lemon Water Sip (Micro-Dose)',
+        detail: 'Sip one glass of iced lemon water.',
+        sets: 1,
+        reps: 1
+      }
+    }
+  ],
+  progressionRules: [
+    {
+      id: 'midwakh-rule-1',
+      condition: 'Week 3 reached and daily craving intensity is below 4/10',
+      action: 'Step down daily bowl cap from 4 to 2 bowls per day'
+    },
+    {
+      id: 'midwakh-rule-2',
+      condition: 'Week 5 reached and withdrawal irritability is stabilized',
+      action: 'Transition to complete zero-bowl cessation phase with 100% tactile substitution'
+    },
+    {
+      id: 'midwakh-rule-3',
+      condition: 'Craving escalation exceeds 8/10 or lapse occurs',
+      action:
+        'Do not reset streak to zero; deploy emergency 5-minute physiological sighing and resume next planned delay'
+    }
+  ],
+  contraindications: [
+    {
+      id: 'midwakh-c-1',
+      text: 'Seek immediate clinical evaluation if experiencing severe tachycardia, chest pain, or acute panic episodes during withdrawal.',
+      severity: 'stop'
+    },
+    {
+      id: 'midwakh-c-2',
+      text: 'Store Dokha tobacco and pipes out of visual sight during evening family or social gatherings.',
+      severity: 'caution'
+    }
+  ],
+  missingDataFlags: [
+    {
+      stepId: 'midwakh-1',
+      parameter: 'Breathing cadence for urge surfing',
+      fallback: 'Cyclic physiological sigh (2s inhale, 1s top-up inhale, 5s exhale)',
+      sourceGuideline: 'Stanford Autonomic Neurobiology Protocol (Balban et al.)'
+    }
+  ],
+  dayHistory: [],
+  initialSetsDone: {},
+  feedbackMetric: {
+    name: 'craving intensity',
+    label: 'daily peak Midwakh craving intensity',
+    eyebrow: 'craving log',
+    logTitle: 'craving log',
+    minLabel: '0 · none',
+    maxLabel: '10 · overwhelming',
+    maxScore: 10,
+    escalationThreshold: 5,
+    escalationMessage: COPY.safety.baselineEscalationAlert,
+    escalationSource: 'policy'
+  },
+  dataCollectionSpec: [
+    {
+      id: 'midwakh-craving-score',
+      name: 'craving intensity',
+      label: 'Daily peak Midwakh craving intensity (0–10)',
+      type: 'scale',
+      frequency: 'daily',
+      min: 0,
+      max: 10,
+      step: 1,
+      instructions: 'Record the highest craving urge experienced throughout today.',
+      escalationThreshold: 5,
+      escalationMessage: COPY.safety.baselineEscalationAlert,
+      escalationSource: 'policy'
+    }
+  ],
+  initialMorphingLogs: [],
+  initialFeedbackLogs: [],
+  initialMessages: intakeMessages(
+    'uae-midwakh-tapering',
+    'Zaabi_2024_Midwakh_Cessation_AbuDhabi.pdf',
+    11,
+    'the 3-minute urge surfing, bowl frequency cap, and post-dinner Pavlovian substitution protocol'
+  ),
+  community: {
+    studyEfficacy: 74,
+    realWorldEfficacy: 68,
+    userCount: 94,
+    medianAdherence: 77,
+    dropOffUnit: 'week',
+    peakPeriod: 2,
+    dropOff: [
+      { period: 1, dropOff: 6 },
+      { period: 2, dropOff: 28 },
+      { period: 3, dropOff: 14 },
+      { period: 4, dropOff: 9 }
+    ],
+    insightLead: '28% drop-off in Week 2',
+    insightRest: 'at evening social Majlis gatherings. Always keep the tactile substitute in your pocket.',
+    reviews: [
+      {
+        id: 'midwakh-rev-1',
+        handle: 'Hamad · 28M · Dubai',
+        day: 21,
+        outcome: 'improved',
+        text: 'The 15-minute delay rule combined with physiological sighs cut my daily bowls from 12 down to 2 in 3 weeks.',
+        adherence: 86
+      }
+    ]
+  },
+  faqs: [
+    {
+      question: 'why does Midwakh create such rapid withdrawal?',
+      keywords: ['midwakh', 'dokha', 'nicotine', 'withdrawal'],
+      answer:
+        'Dokha contains significantly higher unadulterated nicotine concentrations than standard commercial cigarettes, producing a rapid arterial spike and steeper withdrawal drop.'
+    }
+  ]
+};
+
 export const calibratedRoutines: Routine[] = [
   plantarFasciitisRoutine,
   imstBloodPressureRoutine,
   warmBathSleepRoutine,
   cervicalPostureRoutine,
   ashwagandhaStressRoutine,
-  dualNBackRoutine
+  dualNBackRoutine,
+  uaeHeatCircadianRoutine,
+  uaeRamadanMetabolicRoutine,
+  uaeMidwakhTaperingRoutine
 ];
