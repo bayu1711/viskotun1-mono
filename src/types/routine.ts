@@ -40,6 +40,14 @@ export interface InferredProvenance {
   rationale?: string;
 }
 
+export interface MicroDoseStep {
+  action: string;
+  detail: string;
+  sets?: number;
+  reps?: number;
+  tempo?: string;
+}
+
 export interface RoutineStep {
   id: string;
   tone: Tone;
@@ -60,6 +68,8 @@ export interface RoutineStep {
   /** Primary parameter shown on wide cards (e.g. "dose:" / "1 mL"). */
   statLabel?: string;
   statValue?: string;
+  /** Scaled low-friction fallback step for micro-dose mode. */
+  microDoseStep?: MicroDoseStep;
 }
 
 /** Backward-compatibility alias */

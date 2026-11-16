@@ -45,7 +45,10 @@ const KNOWN_PRESET_MAP: Record<string, string> = {
   'warm-bath-sleep': 'warm-bath-sleep',
   'cervical-posture': 'cervical-posture',
   'ashwagandha-stress': 'ashwagandha-stress',
-  'dual-n-back': 'dual-n-back'
+  'dual-n-back': 'dual-n-back',
+  'uae-heat-circadian': 'uae-heat-circadian',
+  'uae-ramadan-metabolic': 'uae-ramadan-metabolic',
+  'uae-midwakh-tapering': 'uae-midwakh-tapering'
 };
 
 const KNOWN_DOI_MAP: Record<string, string> = {
@@ -60,7 +63,10 @@ const KNOWN_DOI_MAP: Record<string, string> = {
   '10.1016/j.smrv.2019.04.008': 'warm-bath-sleep',
   '10.1179/106698105790824888': 'cervical-posture',
   '10.4103/0253-7176.106022': 'ashwagandha-stress',
-  '10.1073/pnas.0801268105': 'dual-n-back'
+  '10.1073/pnas.0801268105': 'dual-n-back',
+  '10.1016/j.lanepe.2024.100912': 'uae-heat-circadian',
+  '10.3389/fnut.2023.1142981': 'uae-ramadan-metabolic',
+  '10.1016/j.addbeh.2024.108042': 'uae-midwakh-tapering'
 };
 
 export interface PaperIdentifierInput {
