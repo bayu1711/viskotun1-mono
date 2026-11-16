@@ -97,7 +97,7 @@ export function BiomarkerTrendChart() {
         </div>
       )}
 
-      {/* Field switcher if protocol tracks multiple parameters */}
+      {/* Field switcher if routine tracks multiple parameters */}
       {trackableFields.length > 1 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {trackableFields.map((field) => {

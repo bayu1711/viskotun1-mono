@@ -1,7 +1,7 @@
 /**
  * Edge Gemma & On-Device AI Driver
  * Leverages Chrome Built-in AI (Prompt API powered by Gemini Nano / Gemma architecture)
- * for 100% private, zero-latency, offline daily protocol safety Q&A.
+ * for 100% private, zero-latency, offline daily routine safety Q&A.
  */
 
 import type { Routine } from '../types/routine';

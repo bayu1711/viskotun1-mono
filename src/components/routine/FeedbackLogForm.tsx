@@ -116,7 +116,7 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
 
   return (
     <form onSubmit={handleSubmit}>
-      {/* Field Switcher Tabs (if protocol has multiple measures) */}
+      {/* Field Switcher Tabs (if routine has multiple measures) */}
       {availableFields.length > 1 && (
         <div className="flex border-b border-ink/15 bg-canvas px-6 pt-4 pb-2 gap-2 overflow-x-auto">
           {availableFields.map((field) => {

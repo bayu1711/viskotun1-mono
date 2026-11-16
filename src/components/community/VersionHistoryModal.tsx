@@ -5,7 +5,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import HistoryIcon from '@mui/icons-material/History';
 import VerifiedUserOutlinedIcon from '@mui/icons-material/VerifiedUserOutlined';
 import { COPY } from '../../data/copy';
-import type { ProtocolChangelogEntry } from '../../types/routine';
+import type { RoutineChangelogEntry, ProtocolChangelogEntry } from '../../types/routine';
 import { AIIcon } from '../ui/AIIcon';
 import { Icon } from '../ui/Icon';
 
@@ -14,7 +14,7 @@ interface VersionHistoryModalProps {
   onClose: () => void;
   paperTitle: string;
   currentVersion?: string;
-  changelog?: ProtocolChangelogEntry[];
+  changelog?: RoutineChangelogEntry[] | ProtocolChangelogEntry[];
 }
 
 export function VersionHistoryModal({

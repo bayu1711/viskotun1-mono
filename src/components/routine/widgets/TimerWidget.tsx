@@ -122,7 +122,7 @@ export function TimerWidget({ field, value, onChange }: TimerWidgetProps) {
 
       {field.instructions && (
         <p className="mt-5 rounded-tile bg-ink/5 p-3 text-2xs text-ink/75 leading-relaxed text-left">
-          <strong className="text-ink font-medium">{COPY.morphing.widgets.protocolGuidelines}</strong>
+          <strong className="text-ink font-medium">{COPY.morphing.widgets.routineGuidelines}</strong>
           {field.instructions}
         </p>
       )}

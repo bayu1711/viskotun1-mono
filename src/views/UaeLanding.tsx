@@ -564,38 +564,38 @@ export function UaeLandingView() {
         </div>
       </section>
 
-      {/* Curated Abu Dhabi Research Protocols */}
-      <section id="protocols" className="py-20 lg:py-28">
+      {/* Curated Abu Dhabi Research Routines */}
+      <section id="routines" className="py-20 lg:py-28">
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
           <div className="max-w-2xl">
             <h2 className="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-              {t.protocolsTitle}
+              {t.routinesTitle || t.protocolsTitle}
             </h2>
             <p className="mt-3 text-pretty text-base leading-relaxed text-ink/80">
-              {t.protocolsSubtitle}
+              {t.routinesSubtitle || t.protocolsSubtitle}
             </p>
           </div>
 
           <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
-            {/* Heat Protocol */}
+            {/* Heat Routine */}
             <div className="flex flex-col justify-between rounded-callout border border-ink/10 bg-white p-6 shadow-sm hover:border-ink/30 transition-colors">
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="rounded-full bg-yellow/80 px-2.5 py-0.5 text-2xs font-bold text-ink">
-                    {t.protocolCards.heat.tag}
+                    {(t.routineCards || t.protocolCards).heat.tag}
                   </span>
                   <span className="text-2xs font-medium text-ink/60">
-                    {t.protocolCards.heat.duration}
+                    {(t.routineCards || t.protocolCards).heat.duration}
                   </span>
                 </div>
                 <h3 className="mt-4 font-display text-lg font-bold text-ink">
-                  {t.protocolCards.heat.title}
+                  {(t.routineCards || t.protocolCards).heat.title}
                 </h3>
                 <p className="mt-1 text-xs font-semibold text-ink/65">
-                  {t.protocolCards.heat.institution}
+                  {(t.routineCards || t.protocolCards).heat.institution}
                 </p>
                 <p className="mt-3 text-xs leading-relaxed text-ink/80">
-                  {t.protocolCards.heat.action}
+                  {(t.routineCards || t.protocolCards).heat.action}
                 </p>
               </div>
 
@@ -605,7 +605,7 @@ export function UaeLandingView() {
                   onClick={() => handleStartUae(['extreme_heat_summer'])}
                   className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-ink bg-ink text-white px-4 text-xs font-bold hover:bg-ink/85 transition-colors cursor-pointer"
                 >
-                  <span>{t.launchProtocolCta}</span>
+                  <span>{t.launchRoutineCta || t.launchProtocolCta}</span>
                   <Icon
                     icon={ArrowForwardIcon}
                     size="xs"
@@ -615,25 +615,25 @@ export function UaeLandingView() {
               </div>
             </div>
 
-            {/* Ramadan Protocol */}
+            {/* Ramadan Routine */}
             <div className="flex flex-col justify-between rounded-callout border border-ink/10 bg-white p-6 shadow-sm hover:border-ink/30 transition-colors">
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="rounded-full bg-sky/80 px-2.5 py-0.5 text-2xs font-bold text-ink">
-                    {t.protocolCards.ramadan.tag}
+                    {(t.routineCards || t.protocolCards).ramadan.tag}
                   </span>
                   <span className="text-2xs font-medium text-ink/60">
-                    {t.protocolCards.ramadan.duration}
+                    {(t.routineCards || t.protocolCards).ramadan.duration}
                   </span>
                 </div>
                 <h3 className="mt-4 font-display text-lg font-bold text-ink">
-                  {t.protocolCards.ramadan.title}
+                  {(t.routineCards || t.protocolCards).ramadan.title}
                 </h3>
                 <p className="mt-1 text-xs font-semibold text-ink/65">
-                  {t.protocolCards.ramadan.institution}
+                  {(t.routineCards || t.protocolCards).ramadan.institution}
                 </p>
                 <p className="mt-3 text-xs leading-relaxed text-ink/80">
-                  {t.protocolCards.ramadan.action}
+                  {(t.routineCards || t.protocolCards).ramadan.action}
                 </p>
               </div>
 
@@ -643,7 +643,7 @@ export function UaeLandingView() {
                   onClick={() => handleStartUae(['ramadan_fasting'])}
                   className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-ink bg-ink text-white px-4 text-xs font-bold hover:bg-ink/85 transition-colors cursor-pointer"
                 >
-                  <span>{t.launchProtocolCta}</span>
+                  <span>{t.launchRoutineCta || t.launchProtocolCta}</span>
                   <Icon
                     icon={ArrowForwardIcon}
                     size="xs"
@@ -653,25 +653,25 @@ export function UaeLandingView() {
               </div>
             </div>
 
-            {/* Midwakh Protocol */}
+            {/* Midwakh Routine */}
             <div className="flex flex-col justify-between rounded-callout border border-ink/10 bg-white p-6 shadow-sm hover:border-ink/30 transition-colors">
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="rounded-full bg-mint/80 px-2.5 py-0.5 text-2xs font-bold text-ink">
-                    {t.protocolCards.midwakh.tag}
+                    {(t.routineCards || t.protocolCards).midwakh.tag}
                   </span>
                   <span className="text-2xs font-medium text-ink/60">
-                    {t.protocolCards.midwakh.duration}
+                    {(t.routineCards || t.protocolCards).midwakh.duration}
                   </span>
                 </div>
                 <h3 className="mt-4 font-display text-lg font-bold text-ink">
-                  {t.protocolCards.midwakh.title}
+                  {(t.routineCards || t.protocolCards).midwakh.title}
                 </h3>
                 <p className="mt-1 text-xs font-semibold text-ink/65">
-                  {t.protocolCards.midwakh.institution}
+                  {(t.routineCards || t.protocolCards).midwakh.institution}
                 </p>
                 <p className="mt-3 text-xs leading-relaxed text-ink/80">
-                  {t.protocolCards.midwakh.action}
+                  {(t.routineCards || t.protocolCards).midwakh.action}
                 </p>
               </div>
 
@@ -681,7 +681,7 @@ export function UaeLandingView() {
                   onClick={() => handleStartUae(['midwakh_dokha', 'shisha_waterpipe'])}
                   className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-ink bg-ink text-white px-4 text-xs font-bold hover:bg-ink/85 transition-colors cursor-pointer"
                 >
-                  <span>{t.launchProtocolCta}</span>
+                  <span>{t.launchRoutineCta || t.launchProtocolCta}</span>
                   <Icon
                     icon={ArrowForwardIcon}
                     size="xs"

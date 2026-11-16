@@ -24,25 +24,26 @@ const COHORT_FILTER_OPTIONS: { id: CohortFilter; label: string }[] = [
 
 export function ReviewsPanel() {
   const { routine, protocol = routine, openReviewDrawer } = useRoutine();
+  const targetRoutine = routine || protocol;
   const [filter, setFilter] = useState<ReviewFilter>('all');
   const [cohortFilter, setCohortFilter] = useState<CohortFilter>('all');
   const [liveReviews, setLiveReviews] = useState<CommunityReview[]>(
-    routine?.community?.reviews || []
+    targetRoutine?.community?.reviews || []
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  // Sync when active protocol changes or live reviews are fetched from Firestore
+  // Sync when active routine changes or live reviews are fetched from Firestore
   useEffect(() => {
     let isMounted = true;
-    if (!protocol?.id) return;
+    if (!targetRoutine?.id) return;
 
-    // Fast sync from local protocol state first
-    setLiveReviews(protocol.community?.reviews || []);
+    // Fast sync from local routine state first
+    setLiveReviews(targetRoutine.community?.reviews || []);
 
     async function fetchLiveReviews() {
       setIsLoading(true);
       try {
-        const res = await fetch(`/api/community/reviews?routineId=${encodeURIComponent(protocol.id)}`);
+        const res = await fetch(`/api/community/reviews?routineId=${encodeURIComponent(targetRoutine.id)}`);
         if (res.ok) {
           const data = await res.json();
           if (isMounted && Array.isArray(data.reviews) && data.reviews.length > 0) {
@@ -63,7 +64,7 @@ export function ReviewsPanel() {
     return () => {
       isMounted = false;
     };
-  }, [protocol?.id, protocol?.community?.reviews]);
+  }, [targetRoutine?.id, targetRoutine?.community?.reviews]);
 
   const reviews = liveReviews.filter((review) => {
     const outcomeMatch = filter === 'all' || review.outcome === filter;

@@ -26,6 +26,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
     submitCommunityReview,
     lifestyleProfile
   } = useRoutine();
+  const currentRoutine = routine || protocol;
 
   const isOpen = open ?? isReviewDrawerOpen;
   const handleClose = onClose ?? closeReviewDrawer;
@@ -34,7 +35,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
   useDialogA11y(panelRef, { open: isOpen, onClose: handleClose });
 
   const [outcome, setOutcome] = useState<ReviewOutcome>('improved');
-  const [day, setDay] = useState<number>(protocol?.currentDay || 1);
+  const [day, setDay] = useState<number>(currentRoutine?.currentDay || 1);
   const [adherence, setAdherence] = useState<number>(adherenceRate || 100);
   const [handle, setHandle] = useState('');
   const [text, setText] = useState('');
@@ -129,12 +130,12 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
                 </button>
               </div>
 
-              {protocol && (
+              {currentRoutine && (
                 <div className="mt-3 rounded-tile bg-canvas p-3 text-xs border border-ink/10">
-                  <span className="font-semibold text-ink">{protocol.title}</span>
-                  {protocol.paper?.doi && (
+                  <span className="font-semibold text-ink">{currentRoutine.title}</span>
+                  {currentRoutine.paper?.doi && (
                     <span className="ml-2 text-ink/60 font-mono">
-                      · {protocol.paper.doi}
+                      · {currentRoutine.paper.doi}
                     </span>
                   )}
                 </div>
@@ -174,7 +175,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
                     <input
                       type="number"
                       min={1}
-                      max={protocol?.totalDays || 180}
+                      max={currentRoutine?.totalDays || 180}
                       value={day}
                       onChange={(e) => setDay(Number(e.target.value))}
                       className="w-full rounded-tile border border-ink/20 bg-white px-3 py-1.5 text-xs text-ink focus:border-ink focus:outline-none"

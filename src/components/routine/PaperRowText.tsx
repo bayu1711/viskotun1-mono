@@ -8,7 +8,7 @@ interface PaperRowTextProps {
   metaClassName?: string;
 }
 
-/** Two-line title + meta block shared by every paper/protocol row. */
+/** Two-line title + meta block shared by every paper/routine row. */
 export function PaperRowText({ title, meta, titleClassName, metaClassName }: PaperRowTextProps) {
   return (
     <span className="min-w-0 flex-1">

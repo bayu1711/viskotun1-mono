@@ -64,7 +64,7 @@ export function PapersPanel() {
           {routines.map((item) => (
             <PaperListItem
               key={item.id}
-              protocol={item}
+              routine={item}
               active={item.id === activeRoutineId}
               onOpen={handleOpenRoutine}
             />

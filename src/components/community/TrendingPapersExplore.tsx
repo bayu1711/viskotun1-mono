@@ -70,7 +70,7 @@ export function TrendingPapersExplore() {
         paperTitle={
           viewingVersionPaper?.title ||
           viewingVersionPaper?.shortTitle ||
-          COPY.community.defaultProtocolTitle
+          COPY.community.defaultRoutineTitle
         }
         currentVersion={viewingVersionPaper?.version || '1.0'}
         changelog={viewingVersionPaper?.changelog || []}

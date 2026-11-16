@@ -116,7 +116,7 @@ export function NumericWidget({ field, value, onChange }: NumericWidgetProps) {
 
       {field.instructions && (
         <p className="mt-3 rounded-tile bg-ink/5 p-3 text-2xs text-ink/70 leading-relaxed text-left">
-          <strong className="text-ink font-medium">{COPY.morphing.widgets.protocolNote}</strong>
+          <strong className="text-ink font-medium">{COPY.morphing.widgets.routineNote}</strong>
           {field.instructions}
         </p>
       )}

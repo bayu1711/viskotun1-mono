@@ -34,8 +34,7 @@ export function CandidateRoutineCard({
   onToggleExcludeStep,
   onAskAboutStep
 }: CandidateRoutineCardProps) {
-  const protocol = (routine || propProtocol)!;
-  const targetRoutine = protocol;
+  const targetRoutine = (routine || propProtocol)!;
   const paper = targetRoutine.paper;
   const stopRule = stopRuleOf(targetRoutine);
   const progressionRule = targetRoutine.progressionRules?.[0];
@@ -59,28 +58,28 @@ export function CandidateRoutineCard({
             {COPY.assistant.stagingEyebrow}
           </span>
           <span className="inline-flex items-center rounded-full bg-cream border border-ink/15 px-2 py-0.5 text-3xs font-semibold text-ink">
-            v{protocol.version || '1.0'}
+            v{targetRoutine.version || '1.0'}
           </span>
         </div>
         <span className="text-2xs text-ink/60 font-mono">
-          {protocol.phase || 'Clinical Research'} · {protocol.totalDays} days
+          {targetRoutine.phase || 'Clinical Research'} · {targetRoutine.totalDays} days
         </span>
       </div>
 
-      {protocol.isCanonical && (
+      {targetRoutine.isCanonical && (
         <div className="rounded-tile border border-ink/15 bg-cream/70 p-3 text-xs text-ink space-y-1">
           <div className="flex items-center gap-1.5 font-semibold text-ink">
             <AIIcon size="xs" />
-            <span>{COPY.assistant.existingCanonicalPill(protocol.version || '1.0')}</span>
+            <span>{COPY.assistant.existingCanonicalPill(targetRoutine.version || '1.0')}</span>
           </div>
           <p className="text-2xs text-ink/75 leading-relaxed">
-            {COPY.assistant.existingCanonicalNotice(protocol.version || '1.0')}
+            {COPY.assistant.existingCanonicalNotice(targetRoutine.version || '1.0')}
           </p>
         </div>
       )}
 
       <div>
-        <h3 className="text-base font-semibold leading-snug text-ink">{paper.title || protocol.title}</h3>
+        <h3 className="text-base font-semibold leading-snug text-ink">{paper.title || targetRoutine.title}</h3>
         <p className="mt-1 text-xs text-ink/60">
           {paper.authors} · {paper.journal}
         </p>
@@ -103,7 +102,7 @@ export function CandidateRoutineCard({
       {/* Missing Parameters / Lineage Banner */}
       <MissingDataBanner routine={targetRoutine} protocol={targetRoutine} className="rounded-tile text-xs" />
 
-      {protocol.dataCollectionSpec?.some(
+      {targetRoutine.dataCollectionSpec?.some(
         (field) => field.proposedWidget?.status === 'pending_review'
       ) && (
         <div
@@ -120,13 +119,13 @@ export function CandidateRoutineCard({
         </div>
       )}
 
-      {protocol.steps && protocol.steps.length > 0 && (
+      {targetRoutine.steps && targetRoutine.steps.length > 0 && (
         <div className="space-y-2 pt-1 border-t border-ink/10">
           <p className="text-2xs font-semibold uppercase tracking-wider text-ink/60">
             {COPY.assistant.candidateStepsTitle}
           </p>
           <ul className="space-y-2.5">
-            {protocol.steps.map((step, idx) => {
+            {targetRoutine.steps.map((step, idx) => {
               const isExcluded = excludedIds.includes(step.id);
               return (
                 <li
@@ -205,7 +204,7 @@ export function CandidateRoutineCard({
 
       {progressionRule && (
         <p className="text-2xs text-ink/60 px-1">
-          {COPY.protocolCard.rulePrefix} {COPY.protocolCard.ruleCondition(progressionRule.condition)} {COPY.protocolCard.ruleArrow}{' '}
+          {COPY.routineCard.rulePrefix} {COPY.routineCard.ruleCondition(progressionRule.condition)} {COPY.routineCard.ruleArrow}{' '}
           <span className="font-medium text-ink">{progressionRule.action.toLowerCase()}</span>
         </p>
       )}
@@ -218,7 +217,7 @@ export function CandidateRoutineCard({
             className="flex flex-1 items-center justify-center gap-2 rounded-full bg-ink px-4 py-2.5 text-xs font-medium text-white transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
           >
             <Icon icon={CheckIcon} size="xs" />
-            <span>{protocol.isCanonical ? COPY.assistant.adoptExistingRoutine : COPY.assistant.confirmAddPaper}</span>
+            <span>{targetRoutine.isCanonical ? COPY.assistant.adoptExistingRoutine : COPY.assistant.confirmAddPaper}</span>
           </button>
           <button
             type="button"
@@ -237,7 +236,7 @@ export function CandidateRoutineCard({
               onAskAboutStep({
                 id: 'improvement',
                 action: COPY.assistant.proposeImprovementPrompt
-              } as unknown as ProtocolStep);
+              } as unknown as RoutineStep);
             }}
             className="w-full text-center text-2xs font-medium text-ink/65 hover:text-ink underline decoration-dotted transition-colors py-1"
           >

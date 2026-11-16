@@ -28,7 +28,6 @@ interface ShareableSummaryModalProps {
 export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModalProps) {
   const {
     routine,
-    protocol = routine,
     currentDay,
     totalDays,
     streak,
@@ -41,11 +40,13 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
   const panelRef = useRef<HTMLDivElement>(null);
   useDialogA11y(panelRef, { open: isOpen, onClose });
 
+  if (!routine) return null;
+
   const status = progressionStatus(escalationPaused, progressionReady);
   const compliance = complianceLevel(adherenceRate);
-  const isRct = isRandomizedTrial(protocol.paper);
-  const stopRule = stopRuleOf(protocol);
-  const progressionRule = protocol.progressionRules[0];
+  const isRct = isRandomizedTrial(routine.paper);
+  const stopRule = stopRuleOf(routine);
+  const progressionRule = routine.progressionRules[0];
   const recentLogs = (feedbackLogs || []).slice(-5).reverse();
   const todayFormatted = new Date().toLocaleDateString(undefined, {
     year: 'numeric',
@@ -95,7 +96,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                   {COPY.shareableSummary.cardTitle}
                 </p>
                 <h2 className="text-lg font-medium tracking-tight">
-                  {protocol.title}
+                  {routine.title}
                 </h2>
               </div>
               <div className="flex items-center gap-3">
@@ -136,15 +137,15 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                     </span>
                   </div>
                   <h1 className="mt-2 text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-                    {protocol.title}
+                    {routine.title}
                   </h1>
                   <p className="mt-0.5 text-xs text-ink/60">
-                    {COPY.shareableSummary.phasePrefix} <span className="font-medium text-ink">{protocol.phase}</span>
+                    {COPY.shareableSummary.phasePrefix} <span className="font-medium text-ink">{routine.phase}</span>
                   </p>
                 </div>
                 <div className="text-right text-xs text-ink/60">
                   <p className="font-medium text-ink">{COPY.shareableSummary.generatedOn(todayFormatted)}</p>
-                  <p>{COPY.shareableSummary.studyYear(protocol.paper.year)}</p>
+                  <p>{COPY.shareableSummary.studyYear(routine.paper.year)}</p>
                 </div>
               </div>
 
@@ -154,19 +155,19 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                   {COPY.shareableSummary.trialCitation}
                 </p>
                 <p className="mt-1 text-sm font-semibold leading-snug text-ink">
-                  {protocol.paper.title}
+                  {routine.paper.title}
                 </p>
                 <p className="mt-1 text-xs text-ink/65">
-                  {protocol.paper.authors} — <span className="italic">{protocol.paper.journal}</span> ({protocol.paper.year})
+                  {routine.paper.authors} — <span className="italic">{routine.paper.journal}</span> ({routine.paper.year})
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-2 text-2xs">
-                  <span className="font-mono text-ink/60">{COPY.shareableSummary.doi(protocol.paper.doi)}</span>
+                  <span className="font-mono text-ink/60">{COPY.shareableSummary.doi(routine.paper.doi)}</span>
                   <span>•</span>
-                  <span>{protocol.paper.trialType}</span>
+                  <span>{routine.paper.trialType}</span>
                   <span>•</span>
-                  <span>{COPY.shareableSummary.sampleSize(protocol.paper.sampleSize)}</span>
+                  <span>{COPY.shareableSummary.sampleSize(routine.paper.sampleSize)}</span>
                   <div className="ml-auto flex gap-1">
-                    {protocol.paper.evidenceBadges.map((badge) => (
+                    {routine.paper.evidenceBadges.map((badge) => (
                       <EvidenceBadgeChip key={badge} badge={badge} />
                     ))}
                   </div>
@@ -215,7 +216,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                   {COPY.shareableSummary.prescribedRoutine}
                 </h3>
                 <div className="mt-2 divide-y divide-ink/10 rounded-tile border border-ink/15 overflow-hidden">
-                  {protocol.steps.map((step, idx) => (
+                  {routine.steps.map((step, idx) => (
                     <div key={step.id} className="flex items-start gap-4 p-3.5 text-xs bg-white">
                       <span className="font-mono font-bold text-ink/60">
                         {String(idx + 1).padStart(2, '0')}
@@ -309,7 +310,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
               <div className="mt-8 border-t border-ink/10 pt-4 text-center text-3xs leading-relaxed text-ink/60">
                 <p>{COPY.shareableSummary.disclaimer}</p>
                 <p className="mt-1 font-mono">
-                  {COPY.shareableSummary.footerAudit(protocol.paper.doi)}
+                  {COPY.shareableSummary.footerAudit(routine.paper.doi)}
                 </p>
               </div>
             </div>

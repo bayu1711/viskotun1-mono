@@ -2,7 +2,7 @@
  * Canonical Research Paper Fingerprinting & Normalization
  *
  * Provides deterministic hashing and identification for scientific papers
- * across multiple users, ensuring research protocols are de-duplicated and linked
+ * across multiple users, ensuring research routines are de-duplicated and linked
  * to a shared canonical entity in Firestore.
  */
 
@@ -32,7 +32,7 @@ export function sanitizeDocId(raw: string): string {
   return raw.replace(/[^a-zA-Z0-9_-]/g, '_');
 }
 
-/** Known pre-calibrated sample protocol mappings to preserve friendly IDs */
+/** Known pre-calibrated sample routine mappings to preserve friendly IDs */
 const KNOWN_PRESET_MAP: Record<string, string> = {
   achilles: 'achilles',
   'hair-loss': 'hair-loss',

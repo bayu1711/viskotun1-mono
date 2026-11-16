@@ -27,18 +27,18 @@ export function RoutineCard() {
   const rule = routine.progressionRules[0];
 
   return (
-    <Panel aria-label={COPY.protocolCard.label} className="sm:p-5">
+    <Panel aria-label={COPY.routineCard.label} className="sm:p-5">
       <SectionHeading
-        eyebrow={COPY.protocolCard.eyebrow(routine.phase)}
-        title={COPY.protocolCard.title}
+        eyebrow={COPY.routineCard.eyebrow(routine.phase)}
+        title={COPY.routineCard.title}
         action={
-          <CircleButton label={COPY.protocolCard.openRoutine} href={ROUTES.routine} onClick={closeAssistant}>
+          <CircleButton label={COPY.routineCard.openRoutine} href={ROUTES.routine} onClick={closeAssistant}>
             <Icon icon={NorthEastIcon} size="md" />
           </CircleButton>
         }
       />
 
-      <MissingDataBanner protocol={routine} className="mt-3 rounded-tile" />
+      <MissingDataBanner routine={routine} className="mt-3 rounded-tile" />
 
       {routine.steps.length === 0 ? (
         <EmptyState className="mt-5" title={COPY.routine.emptyStepsTitle} description={COPY.routine.emptyStepsBody} />
@@ -58,7 +58,7 @@ export function RoutineCard() {
 
       {rule && (
         <p className="mt-3 px-1 text-xs leading-relaxed text-ink/60">
-          {COPY.protocolCard.rulePrefix} {COPY.protocolCard.ruleCondition(rule.condition)} {COPY.protocolCard.ruleArrow}{' '}
+          {COPY.routineCard.rulePrefix} {COPY.routineCard.ruleCondition(rule.condition)} {COPY.routineCard.ruleArrow}{' '}
           <span className="text-ink">{rule.action.toLowerCase()}</span>
         </p>
       )}
