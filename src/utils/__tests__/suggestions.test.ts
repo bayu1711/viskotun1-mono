@@ -19,7 +19,10 @@ const mockProtocol: Routine = {
     year: 1998,
     doi: '10.1177/03635465980260030301',
     sampleSize: 15,
-    trialType: 'Prospective Clinical Cohort'
+    trialType: 'Prospective Clinical Cohort',
+    fileName: 'alfredson-1998.pdf',
+    evidenceBadges: ['pilot'],
+    pages: 6
   },
   steps: [
     {
@@ -35,12 +38,14 @@ const mockProtocol: Routine = {
   ],
   progressionRules: [
     {
+      id: 'prog-1',
       condition: 'Pain < 2/10 for 3 days',
       action: 'Add 5% load'
     }
   ],
   contraindications: [
     {
+      id: 'contra-1',
       severity: 'stop',
       text: 'Acute sharp pain'
     }

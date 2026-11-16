@@ -34,10 +34,12 @@ describe('Admin Testing Controls - Simulate Full Completion', () => {
 
   it('calculates 100% adherence rate across all completed study days', () => {
     const totalDays = 84;
-    const routine: Routine = {
+    const routine = {
       id: 'achilles-simulated',
       title: 'Achilles Tendinopathy Protocol',
       shortTitle: 'achilles',
+      phase: 'Phase 1',
+      phaseLabel: 'Eccentric Loading',
       icon: 'straight-knee',
       totalDays,
       currentDay: totalDays,
@@ -50,14 +52,15 @@ describe('Admin Testing Controls - Simulate Full Completion', () => {
           action: 'Eccentric Heel Drops',
           sets: 3,
           reps: 15,
-          frequency: '2x Daily'
+          frequency: '2x Daily',
+          detail: '3 sets of 15 repetitions'
         }
       ],
       progressionRules: [],
       contraindications: [],
       missingDataFlags: [],
       dayHistory: new Array(totalDays).fill(1.0)
-    };
+    } as unknown as Routine;
 
     const adherence = adherenceOf(routine, 1.0);
     expect(adherence).toBe(100);

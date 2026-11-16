@@ -48,7 +48,6 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     community: 'المجتمع'
   },
   shell: {
-    skipToContent: 'الانتقال إلى المحتوى الرئيسي',
     streak: (days: number) =>
       days === 1
         ? 'يوم التزام واحد'
@@ -57,48 +56,51 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
         : days <= 10
         ? `${days} أيام التزام`
         : `${days} يوماً من الالتزام`,
-    addPaper: 'إضافة بحث سريري',
-    searchPlaceholder: 'ابحث في الأبحاث والخطط السريرية...',
+    addPaper: 'إضافة بحث جديد',
+    openAssistant: 'اسأل ڤيسكوتو',
     resetDemo: 'إعادة ضبط التجربة',
-    syncing: 'جارٍ المزامنة السحابية...',
-    offline: 'العمل في وضع عدم الاتصال',
-    closeHowTo: 'إغلاق نافذة الإرشادات'
+    assistantFab: (title: string) => `اسأل ڤيسكوتو عن ${title} أو ارفع ملف PDF`,
+    todaySummaryLabel: 'تقدم اليوم',
+    noActiveProtocol: 'لا توجد خطة نشطة',
+    noActiveRoutine: 'لا توجد خطة نشطة',
+    noActivePrompt: 'قم برفع ورقة بحثية أو استكشف الخطط الرائجة لبدء المتابعة.',
+    dayOfTotal: (day: number, total: number) => `اليوم ${day} / ${total}`,
+    dropTitle: 'اسحب للاستخراج الفوري',
+    dropSubtitle: 'سنعزل منهجية الدراسة ونبني خطتك الصحية',
+    dropScope: 'أبحاث سريرية بشرية تداخلية · تجارب منضبطة وخطط سلوكية'
   },
   switcher: {
-    label: 'تبديل الخطة الصحية',
-    active: 'الخطة النشطة',
-    completed: 'مكتملة',
-    switchAction: 'تفعيل'
+    heading: 'أوراقك البحثية',
+    addPaper: 'إضافة بحث جديد',
+    meta: (day: number, total: number, percent: number) => `اليوم ${day}/${total} · ${percent}% اليوم`
   },
   papers: {
-    eyebrow: 'البروتوكول السريري',
-    title: 'الخطة اليومية',
-    currentDay: (day: number, total: number) => `اليوم ${day} من ${total}`,
-    targetToday: 'المستهدف لليوم',
-    allCompleted: 'أحسنت! أكملت جميع الخطوات المقررة لليوم.',
-    momentumScore: (momentum: number) => `مؤشر الالتزام ${momentum}%`,
-    activeProtocol: 'البروتوكول السريري النشط'
+    queuedNote: 'جارٍ استخراج الخطة...',
+    initialQueuedPaperName: 'تقييد الإضاءة المسائية وفترة الدخول في النوم',
+    initialQueuedPaperNote: 'دراسة أولية · بانتظار مراجعتك'
   },
   routine: {
-    eyebrow: 'الخطة السريرية',
-    title: 'الخطة اليومية',
-    dayLabel: (day: number) => `اليوم ${day}`,
-    dayFraction: (current: number, total: number) => `اليوم ${current} من ${total}`,
-    completionLabel: (percent: number) => `${percent}% منجز اليوم`,
-    emptyTitle: 'لا توجد خطة نشطة حالياً',
-    emptyBody: 'قم برفع ورقة بحثية سريرية أو اختر من الأبحاث الرائجة لبدء خطتك اليومية.',
-    allDoneToday: 'أحسنت! تم إنجاز جميع متطلبات اليوم بنجاح.',
-    momentumBadge: (score: number) => `زخم الالتزام: ${score}%`,
-    streakBadge: (streak: number) => `${streak} أيام التزام مستمر`
+    eyebrow: (day: number, total: number) => `اليوم ${day} من ${total}`,
+    title: (percent: number) => `اكتمل بنسبة ${percent}%`,
+    progressLabel: 'التقدم اليومي',
+    historyEyebrow: 'الخطة',
+    historyTitle: 'السجل',
+    openDashboard: 'فتح لوحة المؤشرات',
+    feedbackEyebrow: 'التقييم',
+    feedbackTitle: 'التسجيل',
+    metricEyebrow: (name?: string) => (name ? name : 'التقييم الذاتي'),
+    metricTitle: (title?: string) => (title ? title : 'السجل'),
+    feedbackDay: (day: number) => `اليوم ${day}`,
+    noNotes: 'لا توجد ملاحظات',
+    emptyFeedbackTitle: 'لم يتم تسجيل تقييم بعد',
+    emptyMetricTitle: (name?: string) => (name ? `لم يتم تسجيل ${name} بعد` : 'لم يتم تسجيل تقييم بعد'),
+    emptyFeedbackBody: 'سجل استجابتك وشعورك بعد كل جلسة لتتمكن الخطة من التكيف الذاتي.',
+    emptyStepsTitle: 'لم تُستخرج خطوات',
+    emptyStepsBody: 'لم يوثق هذا البحث خطوات سريرية قابلة للتنفيذ.'
   },
   reEntry: {
     badge: 'مرحباً بعودتك',
     title: 'استئناف الخطة بسلاسة',
-    eyebrow: 'استعادة النشاط',
-    welcomeBackDays: (days: number) =>
-      days === 1
-        ? 'مرحباً بعودتك! بعد يوم من التوقف، تقدمك وسلسلة التزامك محفوظة بالكامل دون أي خصم.'
-        : `مرحباً بعودتك! بعد ${days} أيام من التوقف، تقدمك وسلسلة التزامك محفوظة بالكامل دون أي خصم.`,
     subtitle: (days: number) =>
       days > 1
         ? `توقفت لمدة ${days} أيام. الانقطاعات المؤقتة جزء طبيعي تماماً من بناء العادات الصحية طويلة الأمد. دعنا نكيّف خطة اليوم للحفاظ على زخم التزامك.`
@@ -131,23 +133,6 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
         description: 'التزامات عائلية، ظروف طارئة، أو أولويات شخصية'
       }
     },
-    nonPunitiveAssurance:
-      'المرونة هي جوهر الاستدامة السلوكية. بدلاً من إعادة البدء من الصفر، يمكنك اختيار مستوى الإنجاز المناسب لظروفك اليوم لاستعادة زخم النشاط بسلاسة.',
-    barrierPrompt: 'ما الذي حال دون إتمام خطتك خلال الأيام السابقة؟ (اختياري - يساعدنا على مواءمة خطتك):',
-    barrierTypes: {
-      fatigue: 'إرهاق عام أو قلة نوم',
-      pain_flare: 'زيادة الشعور بالإجهاد أو عدم الارتياح',
-      busy_work: 'ضغط العمل أو نوبات دوام طويلة',
-      travel: 'سفر أو تنقل خارج الروتين المعتاد',
-      low_motivation: 'تراجع الحافز مؤقتاً',
-      ramadan_fasting: 'التكيف مع ساعات صيام رمضان',
-      gulf_heat: 'ارتفاع درجات الحرارة نهاراً',
-      other: 'ظرف أو مانع آخر'
-    },
-    barrierOtherPlaceholder: 'صف العائق باختصار (مثال: جدول نوبات ليلية متقلب)...',
-    chooseDoseLabel: 'اختر نمط الإنجاز لليوم:',
-    resumeButton: 'متابعة الخطة اليومية',
-    dismissButton: 'سأبدأ مباشرة',
     doseModeHeading: 'اختر نمط إنجاز اليوم',
     doseModes: {
       standard: {
@@ -177,18 +162,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     micro: 'خطوة ميسّرة (~2 د)',
     rest: 'استشفاء نشط',
     activeTooltip: (mode: string) => `النمط النشط حالياً: ${mode}`,
-    microNotice: 'الخطوة الميسّرة مفعلة: أنجز مجموعة واحدة لتحقيق نسبة 100% لإنجاز اليوم.',
-    badge: 'نمط الإنجاز اليومي',
-    selectorLabel: 'اختر حجم جلسة اليوم',
-    standardTitle: 'الجرعة الكاملة',
-    standardDesc: 'تنفيذ جميع المجموعات والتكرارات المقررة بالكامل في البحث السريري.',
-    microTitle: 'الخطوة الميسّرة (30-40%)',
-    microDesc:
-      'تنفيذ جلسة واحدة مصغّرة للحفاظ على استمرارية العادة السلوكية وزخم الالتزام دون إجهاد بدني.',
-    restTitle: 'استراحة واستشفاء نشط',
-    restDesc: 'تسجيل يوم استشفاء إيجابي مع الحفاظ التام على سلسلة التزامك دون انقطاع.',
-    activeBadge: 'النمط المفعل لليوم',
-    switchSuccess: (mode: string) => `تم تحويل جلسة اليوم إلى نمط: ${mode}`
+    microNotice: 'الخطوة الميسّرة مفعلة: أنجز مجموعة واحدة لتحقيق نسبة 100% لإنجاز اليوم.'
   },
   lifestyleTuning: {
     badge: 'التكيف السياقي',
@@ -262,21 +236,21 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     severe: 'شديد'
   },
   feedbackDrawer: {
-    eyebrow: 'التقييم الذاتي السريري',
-    title: 'تسجيل الاستجابة الحيوية',
-    scorePrompt: 'ما مدى شعورك بعدم الارتياح أو الإجهاد أثناء إنجاز خطوات اليوم؟',
-    scoreLowHint: '0-3: استجابة ممتازة ضمن النطاق المستهدف',
-    scoreMidHint: '4-6: إجهاد ملحوظ — قد يلزم تثبيت الشدة',
-    scoreHighHint: '7-10: عدم ارتياح مرتفع — سيتم خفض الحمل تلقائياً غداً',
-    saveButton: 'حفظ التقييم والمتابعة',
-    closeButton: 'إلغاء'
+    dialogLabel: 'نافذة التقييم الذاتي',
+    close: 'إغلاق نافذة التقييم',
+    header: (day: number) => `التقييم الذاتي · اليوم ${day}`,
+    minLabel: (min: number) => `${min} · لا يوجد إجهاد`,
+    maxLabel: (max: number) => `${max} · أقصى إجهاد`,
+    notesLabel: 'الملاحظات والاستجابة',
+    notesPlaceholder: 'مثال: شعرت بتحسن بعد التمرين، تيبس خفيف في الصباح...',
+    save: 'حفظ التقييم والمتابعة',
+    saved: 'تم حفظ التقييم بنجاح'
   },
   task: {
-    setsCompleted: (done: number, total: number) => `${done} من ${total} مجموعات منجزة`,
-    logSet: 'تسجيل مجموعة',
-    viewDetails: 'عرض التفاصيل والتقنية السريرية',
-    safetyStopRule: 'قاعدة إيقاف الأمان:',
-    taskQuestionPrompt: (action: string) => `كيف أنفذ "${action}" بالطريقة السريرية الصحيحة؟`
+    complete: (action: string) => `إكمال ${action}`,
+    uncheck: (action: string) => `إلغاء تحديد ${action}`,
+    frequency: 'التكرار اليومي',
+    taskQuestionPrompt: (action: string) => `ما هي التقنية السريرية الصحيحة لتنفيذ "${action}"؟`
   },
   community: {
     eyebrow: 'المجتمع والبيانات الواقعية',
@@ -373,18 +347,20 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     }
   },
   upload: {
-    title: 'رفع ورقة بحثية سريرية',
-    dropzone: 'اسحب ملف الـ PDF هنا أو اضغط للاختيار',
-    supportedFormats: 'يدعم ملفات PDF للتجارب السريرية البشرية المنشورة',
+    title: 'رفع ورقة بحثية سريرية (PDF)',
+    body: 'اسحب ملف PDF هنا أو اضغط للاختيار من جهازك',
+    browse: 'تصفح الملفات',
     invalidType: 'نوع الملف غير صالح. يرجى رفع ملف PDF فقط.'
   },
   auth: {
-    welcome: 'مرحباً بك في ڤيسكوتو N1',
-    subtitle: 'تسجيل الدخول لمزامنة خططك السريرية وتتبع التزامك',
+    loginTitle: 'مرحباً بعودتك',
+    loginSubtitle: 'تسجيل الدخول لمتابعة خطتك ومزامنة نتائجك',
+    signupTitle: 'إنشاء حساب سريري',
+    signupSubtitle: 'ابدأ بمتابعة بروتوكولاتك السريرية وتتبع التزامك',
     emailLabel: 'البريد الإلكتروني',
     passwordLabel: 'كلمة المرور',
-    signInButton: 'تسجيل الدخول',
-    signUpButton: 'إنشاء حساب جديد',
+    loginButton: 'تسجيل الدخول',
+    signupButton: 'إنشاء الحساب',
     guestButton: 'المتابعة كضيف',
     signOut: 'تسجيل الخروج',
     defaultGuestName: 'مشارك سريري',
@@ -393,9 +369,8 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
   },
   howTo: {
     dialogLabel: 'دليل الاستخدام والأبحاث الرائجة',
-    close: 'إغلاق الدليل',
-    eyebrow: 'إرشادات الاستخدام',
-    title: 'كيف تحول أبحاث العلوم الإنسانية إلى خطط يومية'
+    title: 'كيف تحول أبحاث العلوم الإنسانية إلى خطط صحية يومية',
+    eyebrow: 'إرشادات الاستخدام'
   },
   onboarding: {
     welcomeEyebrow: 'البداية السريعة',
