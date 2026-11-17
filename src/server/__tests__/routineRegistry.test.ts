@@ -76,12 +76,12 @@ describe('routineRegistry', () => {
     // First save: creates new canonical routine
     const firstSave = await saveCanonicalRoutine(mockRoutine);
     expect(firstSave.isNew).toBe(true);
-    expect(firstSave.protocol.isCanonical).toBe(true);
+    expect((firstSave.routine || firstSave.protocol).isCanonical).toBe(true);
 
     // Second save with same DOI: deduplicates and returns existing entity
     const secondSave = await saveCanonicalRoutine(mockRoutine);
     expect(secondSave.isNew).toBe(false);
-    expect(secondSave.protocol.id).toBe(firstSave.protocol.id);
+    expect((secondSave.routine || secondSave.protocol).id).toBe((firstSave.routine || firstSave.protocol).id);
   });
 
   it('records and returns community reviews for a routine', async () => {

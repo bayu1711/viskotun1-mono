@@ -70,7 +70,7 @@ describe('canonical registration', () => {
   });
 
   it('registers the routine when the user confirms it', async () => {
-    saveCanonicalRoutine.mockResolvedValue({ protocol: candidate, isNew: true });
+    saveCanonicalRoutine.mockResolvedValue({ routine: candidate, protocol: candidate, isNew: true });
     const req = new Request('http://localhost/api/papers', {
       method: 'POST',
       body: JSON.stringify({ paper: { id: candidate.id, title: candidate.title }, routine: candidate, protocol: candidate })
