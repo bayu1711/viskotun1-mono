@@ -10,8 +10,9 @@ interface PaperSummaryCardProps {
 }
 
 export function PaperSummaryCard({ intro }: PaperSummaryCardProps) {
-  const { routine, protocol = routine } = useRoutine();
-  const { paper } = routine || protocol;
+  const { routine } = useRoutine();
+  if (!routine) return null;
+  const { paper } = routine;
   const meta = [
   { label: COPY.assistant.meta.sample, value: COPY.assistant.meta.sampleValue(paper.sampleSize) },
   {

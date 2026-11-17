@@ -9,14 +9,13 @@ import { StepIcon } from '../ui/StepIcon';
 import { PaperRowText } from './PaperRowText';
 
 interface RoutineOptionProps {
-  routine?: RoutineSummary;
-  protocol?: RoutineSummary;
+  routine: RoutineSummary;
   active: boolean;
   onSelect: (id: string) => void;
 }
 
-export function RoutineOption({ routine, protocol, active, onSelect }: RoutineOptionProps) {
-  const item = routine || protocol;
+export function RoutineOption({ routine, active, onSelect }: RoutineOptionProps) {
+  const item = routine;
   if (!item) return null;
 
   return (
@@ -44,4 +43,3 @@ export function RoutineOption({ routine, protocol, active, onSelect }: RoutineOp
   );
 }
 
-export const ProtocolOption = RoutineOption;

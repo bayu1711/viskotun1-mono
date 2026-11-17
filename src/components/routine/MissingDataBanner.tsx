@@ -4,20 +4,20 @@ import React from 'react';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
-import type { Routine, Protocol } from '../../types/routine';
+import type { Routine } from '../../types/routine';
 import { Callout } from '../feedback/Callout';
 import { Icon } from '../ui/Icon';
 import { IconTile } from '../ui/IconTile';
 
 interface MissingDataBannerProps {
-  routine?: Routine | Protocol | null;
-  protocol?: Routine | Protocol | null;
+  routine?: Routine | null;
+  protocol?: Routine | null;
   className?: string;
 }
 
 export function MissingDataBanner({ routine: propRoutine, protocol: propProtocol, className }: MissingDataBannerProps = {}) {
-  const { routine, protocol = routine, missingDataFlagEnabled } = useRoutine();
-  const current = propRoutine !== undefined ? propRoutine : (propProtocol !== undefined ? propProtocol : (routine || protocol));
+  const { routine, missingDataFlagEnabled } = useRoutine();
+  const current = propRoutine !== undefined ? propRoutine : (propProtocol !== undefined ? propProtocol : routine);
 
   if (!missingDataFlagEnabled || !current) return null;
 

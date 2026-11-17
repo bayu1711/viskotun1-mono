@@ -147,7 +147,7 @@ export function AssistantSheet() {
           >
             <AssistantHeader
               mode={mode}
-              routineTitle={routine ? routine.shortTitle : (COPY.assistant.noActiveRoutineForAskTitle || COPY.assistant.noActiveProtocolForAskTitle)}
+              routineTitle={routine ? routine.shortTitle : COPY.assistant.noActiveRoutineForAskTitle}
               customTitle={
                 !isAsk && stagingRoutine
                   ? COPY.assistant.stagingTitle
@@ -197,8 +197,8 @@ export function AssistantSheet() {
                   <div className="py-8 text-center space-y-4">
                     <EmptyState
                       icon={ChatBubbleOutlineIcon}
-                      title={COPY.assistant.noActiveRoutineForAskTitle || COPY.assistant.noActiveProtocolForAskTitle}
-                      description={COPY.assistant.noActiveRoutineForAskBody || COPY.assistant.noActiveProtocolForAskBody}
+                      title={COPY.assistant.noActiveRoutineForAskTitle}
+                      description={COPY.assistant.noActiveRoutineForAskBody}
                     />
                     <button
                       type="button"

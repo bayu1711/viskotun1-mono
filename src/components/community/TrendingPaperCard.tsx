@@ -13,7 +13,7 @@ import { useAssistant } from '../../contexts/AssistantContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
-import { PRECALIBRATED_SAMPLE_ROUTINES, PRECALIBRATED_SAMPLE_PROTOCOLS, type SamplePaper } from '../../data/samplePapers';
+import { PRECALIBRATED_SAMPLE_ROUTINES, type SamplePaper } from '../../data/samplePapers';
 import type { StepIconKey } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { resolvePaperRoutineStatus } from '../../utils/routineMetrics';
@@ -31,7 +31,7 @@ export interface TrendingPaperCardProps {
 
 export function getIconForRoutine(targetId?: string, category?: string): StepIconKey {
   if (targetId) {
-    const matched = PRECALIBRATED_SAMPLE_ROUTINES[targetId] || PRECALIBRATED_SAMPLE_PROTOCOLS[targetId];
+    const matched = PRECALIBRATED_SAMPLE_ROUTINES[targetId];
     if (matched?.icon) return matched.icon;
     if (targetId === 'achilles') return 'straight-knee';
     if (targetId === 'hair-loss') return 'serum';
@@ -85,19 +85,17 @@ export function TrendingPaperCard({
     routine,
     routines,
     activeRoutineId,
-    activeProtocolId,
     setActiveRoutine,
     dayIsComplete,
     todayFraction,
     currentDay,
     totalDays,
     loadSampleRoutine,
-    loadSampleProtocol,
     redoRoutine
   } = useRoutine();
 
-  const loadRoutine = loadSampleRoutine || loadSampleProtocol;
-  const currentActiveId = routine?.id || activeRoutineId || activeProtocolId;
+  const loadRoutine = loadSampleRoutine;
+  const currentActiveId = routine?.id || activeRoutineId;
 
   const {
     targetId,

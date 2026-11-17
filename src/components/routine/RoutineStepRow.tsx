@@ -57,5 +57,3 @@ export function RoutineStepRow({ step }: RoutineStepRowProps) {
     </li>
   );
 }
-
-export const ProtocolStepRow = RoutineStepRow;

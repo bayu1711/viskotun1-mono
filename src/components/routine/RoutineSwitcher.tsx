@@ -111,5 +111,3 @@ export function RoutineSwitcher() {
     </div>
   );
 }
-
-export const ProtocolSwitcher = RoutineSwitcher;

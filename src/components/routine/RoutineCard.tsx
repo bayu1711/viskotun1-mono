@@ -73,5 +73,3 @@ export function RoutineCard() {
     </Panel>
   );
 }
-
-export const ProtocolCard = RoutineCard;

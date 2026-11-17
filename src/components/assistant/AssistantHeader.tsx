@@ -28,7 +28,6 @@ const MODE_OPTIONS: { id: AssistantMode; label: string }[] = [
 interface AssistantHeaderProps {
   mode: AssistantMode;
   routineTitle?: string;
-  protocolTitle?: string;
   titleId: string;
   onModeChange: (mode: AssistantMode) => void;
   onClose: () => void;
@@ -41,7 +40,6 @@ interface AssistantHeaderProps {
 export function AssistantHeader({
   mode,
   routineTitle,
-  protocolTitle,
   titleId,
   onModeChange,
   onClose,
@@ -50,7 +48,7 @@ export function AssistantHeader({
   lastEngine
 }: AssistantHeaderProps) {
   const isAsk = mode === 'ask';
-  const displayTitle = routineTitle || protocolTitle || '';
+  const displayTitle = routineTitle || '';
   const [isEdgeAvailable, setIsEdgeAvailable] = useState<boolean>(false);
   const [isDisclaimerOpen, setIsDisclaimerOpen] = useState<boolean>(false);
   const disclaimerRef = useRef<HTMLDivElement>(null);

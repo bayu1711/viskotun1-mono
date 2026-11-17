@@ -23,8 +23,8 @@ const COHORT_FILTER_OPTIONS: { id: CohortFilter; label: string }[] = [
 ];
 
 export function ReviewsPanel() {
-  const { routine, protocol = routine, openReviewDrawer } = useRoutine();
-  const targetRoutine = routine || protocol;
+  const { routine, openReviewDrawer } = useRoutine();
+  const targetRoutine = routine;
   const [filter, setFilter] = useState<ReviewFilter>('all');
   const [cohortFilter, setCohortFilter] = useState<CohortFilter>('all');
   const [liveReviews, setLiveReviews] = useState<CommunityReview[]>(

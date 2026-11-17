@@ -10,14 +10,13 @@ import { StepIcon } from '../ui/StepIcon';
 import { PaperRowText } from './PaperRowText';
 
 interface PaperListItemProps {
-  routine?: RoutineSummary;
-  protocol?: RoutineSummary;
+  routine: RoutineSummary;
   active: boolean;
   onOpen: (id: string) => void;
 }
 
-export function PaperListItem({ routine, protocol = routine, active, onOpen }: PaperListItemProps) {
-  const item = (routine || protocol)!;
+export function PaperListItem({ routine, active, onOpen }: PaperListItemProps) {
+  const item = routine;
   return (
     <li>
       <button

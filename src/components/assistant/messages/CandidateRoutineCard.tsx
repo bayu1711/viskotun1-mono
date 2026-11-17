@@ -5,7 +5,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import { COPY } from '../../../data/copy';
-import type { Routine, Protocol, RoutineStep, ProtocolStep } from '../../../types/routine';
+import type { Routine, RoutineStep } from '../../../types/routine';
 import { cn } from '../../../utils/cn';
 import { isRandomizedTrial, stopRuleOf } from '../../../utils/routineMetrics';
 import { Callout } from '../../feedback/Callout';
@@ -16,25 +16,21 @@ import { AIIcon } from '../../ui/AIIcon';
 import { MetaItem } from './MetaItem';
 
 interface CandidateRoutineCardProps {
-  routine?: Routine | Protocol;
-  protocol?: Routine | Protocol;
+  routine: Routine;
   onConfirm: () => void;
   onDiscard: () => void;
   onToggleExcludeStep?: (stepId: string) => void;
-  onAskAboutStep?: (step: RoutineStep | ProtocolStep) => void;
+  onAskAboutStep?: (step: RoutineStep) => void;
 }
-
-export type CandidateProtocolCardProps = CandidateRoutineCardProps;
 
 export function CandidateRoutineCard({
   routine,
-  protocol: propProtocol,
   onConfirm,
   onDiscard,
   onToggleExcludeStep,
   onAskAboutStep
 }: CandidateRoutineCardProps) {
-  const targetRoutine = (routine || propProtocol)!;
+  const targetRoutine = routine;
   const paper = targetRoutine.paper;
   const stopRule = stopRuleOf(targetRoutine);
   const progressionRule = targetRoutine.progressionRules?.[0];
@@ -100,7 +96,7 @@ export function CandidateRoutineCard({
       )}
 
       {/* Missing Parameters / Lineage Banner */}
-      <MissingDataBanner routine={targetRoutine} protocol={targetRoutine} className="rounded-tile text-xs" />
+      <MissingDataBanner routine={targetRoutine} className="rounded-tile text-xs" />
 
       {targetRoutine.dataCollectionSpec?.some(
         (field) => field.proposedWidget?.status === 'pending_review'
@@ -251,5 +247,3 @@ export function CandidateRoutineCard({
     </article>
   );
 }
-
-export const CandidateProtocolCard = CandidateRoutineCard;

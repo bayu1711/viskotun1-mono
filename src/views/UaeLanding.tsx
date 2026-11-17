@@ -569,10 +569,10 @@ export function UaeLandingView() {
         <div className="mx-auto max-w-6xl px-5 lg:px-8">
           <div className="max-w-2xl">
             <h2 className="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-              {t.routinesTitle || t.protocolsTitle}
+              {t.routinesTitle}
             </h2>
             <p className="mt-3 text-pretty text-base leading-relaxed text-ink/80">
-              {t.routinesSubtitle || t.protocolsSubtitle}
+              {t.routinesSubtitle}
             </p>
           </div>
 
@@ -582,20 +582,20 @@ export function UaeLandingView() {
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="rounded-full bg-yellow/80 px-2.5 py-0.5 text-2xs font-bold text-ink">
-                    {(t.routineCards || t.protocolCards).heat.tag}
+                    {t.routineCards.heat.tag}
                   </span>
                   <span className="text-2xs font-medium text-ink/60">
-                    {(t.routineCards || t.protocolCards).heat.duration}
+                    {t.routineCards.heat.duration}
                   </span>
                 </div>
                 <h3 className="mt-4 font-display text-lg font-bold text-ink">
-                  {(t.routineCards || t.protocolCards).heat.title}
+                  {t.routineCards.heat.title}
                 </h3>
                 <p className="mt-1 text-xs font-semibold text-ink/65">
-                  {(t.routineCards || t.protocolCards).heat.institution}
+                  {t.routineCards.heat.institution}
                 </p>
                 <p className="mt-3 text-xs leading-relaxed text-ink/80">
-                  {(t.routineCards || t.protocolCards).heat.action}
+                  {t.routineCards.heat.action}
                 </p>
               </div>
 
@@ -605,7 +605,7 @@ export function UaeLandingView() {
                   onClick={() => handleStartUae(['extreme_heat_summer'])}
                   className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-ink bg-ink text-white px-4 text-xs font-bold hover:bg-ink/85 transition-colors cursor-pointer"
                 >
-                  <span>{t.launchRoutineCta || t.launchProtocolCta}</span>
+                  <span>{t.launchRoutineCta}</span>
                   <Icon
                     icon={ArrowForwardIcon}
                     size="xs"
@@ -620,20 +620,20 @@ export function UaeLandingView() {
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="rounded-full bg-sky/80 px-2.5 py-0.5 text-2xs font-bold text-ink">
-                    {(t.routineCards || t.protocolCards).ramadan.tag}
+                    {t.routineCards.ramadan.tag}
                   </span>
                   <span className="text-2xs font-medium text-ink/60">
-                    {(t.routineCards || t.protocolCards).ramadan.duration}
+                    {t.routineCards.ramadan.duration}
                   </span>
                 </div>
                 <h3 className="mt-4 font-display text-lg font-bold text-ink">
-                  {(t.routineCards || t.protocolCards).ramadan.title}
+                  {t.routineCards.ramadan.title}
                 </h3>
                 <p className="mt-1 text-xs font-semibold text-ink/65">
-                  {(t.routineCards || t.protocolCards).ramadan.institution}
+                  {t.routineCards.ramadan.institution}
                 </p>
                 <p className="mt-3 text-xs leading-relaxed text-ink/80">
-                  {(t.routineCards || t.protocolCards).ramadan.action}
+                  {t.routineCards.ramadan.action}
                 </p>
               </div>
 
@@ -643,7 +643,7 @@ export function UaeLandingView() {
                   onClick={() => handleStartUae(['ramadan_fasting'])}
                   className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-ink bg-ink text-white px-4 text-xs font-bold hover:bg-ink/85 transition-colors cursor-pointer"
                 >
-                  <span>{t.launchRoutineCta || t.launchProtocolCta}</span>
+                  <span>{t.launchRoutineCta}</span>
                   <Icon
                     icon={ArrowForwardIcon}
                     size="xs"
@@ -658,20 +658,20 @@ export function UaeLandingView() {
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="rounded-full bg-mint/80 px-2.5 py-0.5 text-2xs font-bold text-ink">
-                    {(t.routineCards || t.protocolCards).midwakh.tag}
+                    {t.routineCards.midwakh.tag}
                   </span>
                   <span className="text-2xs font-medium text-ink/60">
-                    {(t.routineCards || t.protocolCards).midwakh.duration}
+                    {t.routineCards.midwakh.duration}
                   </span>
                 </div>
                 <h3 className="mt-4 font-display text-lg font-bold text-ink">
-                  {(t.routineCards || t.protocolCards).midwakh.title}
+                  {t.routineCards.midwakh.title}
                 </h3>
                 <p className="mt-1 text-xs font-semibold text-ink/65">
-                  {(t.routineCards || t.protocolCards).midwakh.institution}
+                  {t.routineCards.midwakh.institution}
                 </p>
                 <p className="mt-3 text-xs leading-relaxed text-ink/80">
-                  {(t.routineCards || t.protocolCards).midwakh.action}
+                  {t.routineCards.midwakh.action}
                 </p>
               </div>
 
@@ -681,7 +681,7 @@ export function UaeLandingView() {
                   onClick={() => handleStartUae(['midwakh_dokha', 'shisha_waterpipe'])}
                   className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-ink bg-ink text-white px-4 text-xs font-bold hover:bg-ink/85 transition-colors cursor-pointer"
                 >
-                  <span>{t.launchRoutineCta || t.launchProtocolCta}</span>
+                  <span>{t.launchRoutineCta}</span>
                   <Icon
                     icon={ArrowForwardIcon}
                     size="xs"

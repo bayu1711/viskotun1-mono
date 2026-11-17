@@ -30,7 +30,7 @@ export function EmptyRoutineView() {
     return availablePapers
       .filter((p) => {
         if (p.isGuardrailRejectionTest) return false;
-        if (!(p.routineId || p.protocolId)) return false;
+        if (!p.routineId && !p.protocolId) return false;
         if (selectedCategory !== 'all' && p.category !== selectedCategory) return false;
         return true;
       })

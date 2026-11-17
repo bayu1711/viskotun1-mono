@@ -20,7 +20,7 @@ describe('UAE & Abu Dhabi Edition Contracts and Routing', () => {
     expect(uae.simulator.barrierHeat).toContain('48°C');
     expect(uae.simulator.barrierShift).toContain('Shift');
     expect(uae.simulator.barrierRamadan).toContain('Ramadan');
-    const cards = uae.routineCards || uae.protocolCards;
+    const cards = uae.routineCards;
     expect(cards.heat.title).toContain('Heat');
     expect(cards.ramadan.title).toContain('Ramadan');
     expect(cards.midwakh.title).toContain('Midwakh');
@@ -38,7 +38,7 @@ describe('UAE & Abu Dhabi Edition Contracts and Routing', () => {
     expect(uaeAr.simulator.barrierHeat).toContain('48° مئوية');
     expect(uaeAr.simulator.barrierShift).toContain('نوبة عمل');
     expect(uaeAr.simulator.barrierRamadan).toContain('صيام شهر رمضان');
-    const cardsAr = uaeAr.routineCards || uaeAr.protocolCards;
+    const cardsAr = uaeAr.routineCards;
     expect(cardsAr.midwakh.title).toContain('المدواخ والدخة');
   });
 

@@ -19,14 +19,13 @@ interface CommunityReviewDrawerProps {
 export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerProps = {}) {
   const {
     routine,
-    protocol = routine,
     adherenceRate,
     isReviewDrawerOpen,
     closeReviewDrawer,
     submitCommunityReview,
     lifestyleProfile
   } = useRoutine();
-  const currentRoutine = routine || protocol;
+  const currentRoutine = routine;
 
   const isOpen = open ?? isReviewDrawerOpen;
   const handleClose = onClose ?? closeReviewDrawer;
