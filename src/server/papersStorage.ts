@@ -40,8 +40,8 @@ function createInitialSamplePapers(): StoredPaper[] {
     activeTrackersCount: paper.activeTrackersCount ?? 0,
     totalLogsCount: paper.totalLogsCount ?? 0,
     trendingRank: paper.trendingRank,
-    routine: (paper.routineId ? PRECALIBRATED_SAMPLE_PROTOCOLS[paper.routineId] : undefined) || (paper.protocolId ? PRECALIBRATED_SAMPLE_PROTOCOLS[paper.protocolId] : undefined),
-    protocol: (paper.routineId ? PRECALIBRATED_SAMPLE_PROTOCOLS[paper.routineId] : undefined) || (paper.protocolId ? PRECALIBRATED_SAMPLE_PROTOCOLS[paper.protocolId] : undefined),
+    routine: (paper.routineId ? PRECALIBRATED_SAMPLE_ROUTINES[paper.routineId] : undefined) || (paper.protocolId ? PRECALIBRATED_SAMPLE_ROUTINES[paper.protocolId] : undefined),
+    protocol: (paper.routineId ? PRECALIBRATED_SAMPLE_ROUTINES[paper.routineId] : undefined) || (paper.protocolId ? PRECALIBRATED_SAMPLE_ROUTINES[paper.protocolId] : undefined),
     userId: 'fazarathfazal@gmail.com',
     userEmail: 'fazarathfazal@gmail.com',
     uploadedBy: 'fazarathfazal@gmail.com',
@@ -113,7 +113,7 @@ export async function getSamplePapers(): Promise<{
       const snapshot = await db.collection(PAPERS_COLLECTION).where('isSample', '==', true).get();
       if (!snapshot.empty) {
         const samplePapers: SamplePaper[] = [];
-        const protocols: Record<string, Protocol> = {};
+        const routines: Record<string, Routine> = {};
 
         snapshot.forEach((doc) => {
           const data = doc.data() as StoredPaper;
@@ -146,15 +146,17 @@ export async function getSamplePapers(): Promise<{
             uploadedBy: data.uploadedBy || 'fazarathfazal@gmail.com'
           });
 
-          if (data.protocolId && data.protocol) {
-            protocols[data.protocolId] = data.protocol;
+          const rId = data.routineId || data.protocolId;
+          const rObj = data.routine || data.protocol;
+          if (rId && rObj) {
+            routines[rId] = rObj;
           }
         });
 
         // Ensure pre-calibrated fallbacks exist if any were omitted
-        for (const [key, proto] of Object.entries(PRECALIBRATED_SAMPLE_PROTOCOLS)) {
-          if (!protocols[key]) {
-            protocols[key] = proto;
+        for (const [key, proto] of Object.entries(PRECALIBRATED_SAMPLE_ROUTINES)) {
+          if (!routines[key]) {
+            routines[key] = proto;
           }
         }
 
@@ -167,8 +169,8 @@ export async function getSamplePapers(): Promise<{
         return {
           trendingPapers: sorted,
           samplePapers: sorted,
-          routines: protocols,
-          protocols,
+          routines,
+          protocols: routines,
           source: 'firestore-live'
         };
       }
@@ -179,7 +181,7 @@ export async function getSamplePapers(): Promise<{
 
   // Graceful fallback to memory cache
   const samplePapers: SamplePaper[] = [];
-  const protocols: Record<string, Protocol> = { ...PRECALIBRATED_SAMPLE_PROTOCOLS };
+  const routines: Record<string, Routine> = { ...PRECALIBRATED_SAMPLE_ROUTINES };
 
   for (const item of papersMemoryCache.values()) {
     if (item.isSample) {
@@ -209,8 +211,10 @@ export async function getSamplePapers(): Promise<{
         userEmail: item.userEmail || 'fazarathfazal@gmail.com',
         uploadedBy: item.uploadedBy || 'fazarathfazal@gmail.com'
       });
-      if (item.protocolId && item.protocol) {
-        protocols[item.protocolId] = item.protocol;
+      const rId = item.routineId || item.protocolId;
+      const rObj = item.routine || item.protocol;
+      if (rId && rObj) {
+        routines[rId] = rObj;
       }
     }
   }
@@ -224,8 +228,8 @@ export async function getSamplePapers(): Promise<{
   return {
     trendingPapers: sorted,
     samplePapers: sorted,
-    routines: protocols,
-    protocols,
+    routines,
+    protocols: routines,
     source: 'memory-cache'
   };
 }

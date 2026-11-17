@@ -204,7 +204,7 @@ const matchesProtocol = matchesRoutine;
  * - activeTrackersCount: number of distinct users actively tracking or having this routine in their list
  * - userLogsCount: sum of all feedbackLogs, morphingLogs, dayHistory entries, and completed sets
  */
-export async function getLiveUserStats(protocolId: string): Promise<{
+export async function getLiveUserStats(routineId: string): Promise<{
   activeTrackersCount: number;
   userLogsCount: number;
 }> {
@@ -214,19 +214,19 @@ export async function getLiveUserStats(protocolId: string): Promise<{
 
   for (const user of users) {
     const isActivelyTracking =
-      matchesProtocol(user.activeRoutineId, protocolId) ||
-      matchesProtocol(user.activeProtocolId, protocolId);
+      matchesRoutine(user.activeRoutineId, routineId) ||
+      matchesRoutine(user.activeProtocolId, routineId);
 
     const hasInRoutines =
-      (Array.isArray(user.routines) && user.routines.some((r) => matchesProtocol(r.id, protocolId))) ||
-      (Array.isArray(user.protocols) && user.protocols.some((p) => matchesProtocol(p.id, protocolId)));
+      (Array.isArray(user.routines) && user.routines.some((r) => matchesRoutine(r.id, routineId))) ||
+      (Array.isArray(user.protocols) && user.protocols.some((p) => matchesRoutine(p.id, routineId)));
 
     const userRuntime =
-      user.runtime?.[protocolId] ||
-      (protocolId === 'achilles' ? user.runtime?.['achilles-rehab'] : undefined) ||
-      (protocolId === 'achilles-rehab' ? user.runtime?.['achilles'] : undefined) ||
-      (protocolId === 'hair-loss' ? user.runtime?.['hair-regrowth'] : undefined) ||
-      (protocolId === 'hair-regrowth' ? user.runtime?.['hair-loss'] : undefined);
+      user.runtime?.[routineId] ||
+      (routineId === 'achilles' ? user.runtime?.['achilles-rehab'] : undefined) ||
+      (routineId === 'achilles-rehab' ? user.runtime?.['achilles'] : undefined) ||
+      (routineId === 'hair-loss' ? user.runtime?.['hair-regrowth'] : undefined) ||
+      (routineId === 'hair-regrowth' ? user.runtime?.['hair-loss'] : undefined);
 
     const hasRuntime = Boolean(userRuntime);
 

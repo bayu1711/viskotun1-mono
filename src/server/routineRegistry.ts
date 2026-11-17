@@ -1,29 +1,27 @@
 /**
- * Shared Canonical Protocol & Community Registry
- *
- * Implements deterministic deduplication and canonical linking for research papers in Firestore.
- * When multiple users study or practice the same research paper, they link to the single canonical
- * protocol entity, pooling community reviews, drop-off curves, and efficacy telemetry.
- *
- * Includes hot in-memory fallback cache for offline development or unconfigured credentials.
+ * Shared Canonical Routine & Community Registry
+ * 
+ * Provides global de-duplication across users for research papers.
+ * When multiple users add the same PubMed/DOI paper, they attach to a single canonical
+ * routine entity, pooling community reviews, drop-off curves, and efficacy telemetry.
+ * 
+ * Persists to Cloud Firestore when configured, or transparently falls back to
+ * an in-memory registry for local development and test environments.
  */
 
 import { getFirestore } from './guardrailLedger';
 import { achillesRoutine } from '../data/routines/achilles';
 import { hairLossRoutine } from '../data/routines/hairLoss';
+import { FALLBACK_CREATINE_SLEEP, FALLBACK_PATELLAR_REHAB } from './fallbackRoutines';
 import { calibratedRoutines } from '../data/routines/calibrated';
-import {
-  FALLBACK_CREATINE_SLEEP,
-  FALLBACK_PATELLAR_REHAB
-} from './fallbackRoutines';
 import type {
   Routine,
   Protocol,
   CommunityReview,
   NewCommunityReview,
   CommunityInsights,
-  PaperMeta,
   ProposedWidgetSpec,
+  RoutineChangelogEntry,
   ProtocolChangelogEntry
 } from '../types/routine';
 import {
@@ -34,12 +32,13 @@ import {
 } from '../utils/paperFingerprint';
 import { getLiveUserStats } from './userStorage';
 
+const ROUTINES_COLLECTION = 'routines';
 const PROTOCOLS_COLLECTION = 'protocols';
 const REVIEWS_SUBCOLLECTION = 'reviews';
 const METRICS_SUBCOLLECTION = 'community_metrics';
 
-// Built-in verified seed protocols
-const BUILTIN_PROTOCOLS: Record<string, Protocol> = {
+// Built-in verified seed routines
+const BUILTIN_ROUTINES: Record<string, Routine> = {
   achilles: {
     ...achillesRoutine,
     canonicalId: 'achilles',
@@ -118,37 +117,37 @@ const BUILTIN_PROTOCOLS: Record<string, Protocol> = {
 };
 
 // In-memory fallback stores
-const memoryProtocols = new Map<string, Protocol>(Object.entries(BUILTIN_PROTOCOLS));
+const memoryRoutines = new Map<string, Routine>(Object.entries(BUILTIN_ROUTINES));
 const memoryReviews = new Map<string, CommunityReview[]>();
 
 // Seed initial memory reviews
-for (const [id, protocol] of Object.entries(BUILTIN_PROTOCOLS)) {
-  if (protocol.community?.reviews) {
-    memoryReviews.set(id, [...protocol.community.reviews]);
+for (const [id, routine] of Object.entries(BUILTIN_ROUTINES)) {
+  if (routine.community?.reviews) {
+    memoryReviews.set(id, [...routine.community.reviews]);
   }
 }
 
 /**
- * Searches for an existing canonical protocol matching a research paper.
+ * Searches for an existing canonical routine matching a research paper.
  * Checks normalized DOI first, then normalized title.
  */
-export async function findCanonicalProtocol(
+export async function findCanonicalRoutine(
   paper: PaperIdentifierInput,
   fallbackId?: string
-): Promise<Protocol | null> {
+): Promise<Routine | null> {
   const canonicalId = getCanonicalPaperId(paper, fallbackId);
 
   // 1. Check in-memory fast cache / built-in catalog
-  if (memoryProtocols.has(canonicalId)) {
-    return memoryProtocols.get(canonicalId)!;
+  if (memoryRoutines.has(canonicalId)) {
+    return memoryRoutines.get(canonicalId)!;
   }
 
   // Check DOI match across memory
   const normDoi = normalizeDoi(paper.doi);
   if (normDoi) {
-    for (const p of memoryProtocols.values()) {
-      if (normalizeDoi(p.paper?.doi) === normDoi) {
-        return p;
+    for (const r of memoryRoutines.values()) {
+      if (normalizeDoi(r.paper?.doi) === normDoi) {
+        return r;
       }
     }
   }
@@ -188,83 +187,98 @@ const TITLE_ALIASES: Record<string, string[]> = {
     const searchSlug = normalizeTitle(paper.title);
     const cleanSearch = paper.title.toLowerCase().replace(/\.pdf$/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
     if (searchSlug && searchSlug !== 'untitled-paper') {
-      for (const p of memoryProtocols.values()) {
-        const pSlug = normalizeTitle(p.paper?.title || p.title);
-        if (pSlug === searchSlug || searchSlug.includes(pSlug) || pSlug.includes(searchSlug)) {
-          return p;
+      for (const r of memoryRoutines.values()) {
+        const rSlug = normalizeTitle(r.paper?.title || r.title);
+        if (rSlug === searchSlug || searchSlug.includes(rSlug) || rSlug.includes(searchSlug)) {
+          return r;
         }
-        const aliases = TITLE_ALIASES[p.id] || [];
+        const aliases = TITLE_ALIASES[r.id] || [];
         if (aliases.some((alias) => cleanSearch.includes(alias) || alias.includes(cleanSearch))) {
-          return p;
+          return r;
         }
-        if (p.paper?.fileName) {
-          const fn = p.paper.fileName.toLowerCase().replace(/\.pdf$/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
+        if (r.paper?.fileName) {
+          const fn = r.paper.fileName.toLowerCase().replace(/\.pdf$/i, '').replace(/[^a-z0-9]+/g, ' ').trim();
           if (fn && (cleanSearch.includes(fn) || fn.includes(cleanSearch))) {
-            return p;
+            return r;
           }
         }
       }
     }
   }
 
-  // 2. Check Firestore live protocols collection
+  // 2. Check Firestore live routines/protocols collection
   const db = getFirestore();
   if (db) {
     try {
-      // Direct canonical document ID lookup
-      const docRef = db.collection(PROTOCOLS_COLLECTION).doc(canonicalId);
-      const snapshot = await docRef.get();
+      let docRef = db.collection(ROUTINES_COLLECTION).doc(canonicalId);
+      let snapshot = await docRef.get();
+      if (!snapshot.exists) {
+        docRef = db.collection(PROTOCOLS_COLLECTION).doc(canonicalId);
+        snapshot = await docRef.get();
+      }
+
       if (snapshot.exists) {
-        const data = snapshot.data() as Protocol;
-        memoryProtocols.set(canonicalId, data);
+        const data = snapshot.data() as Routine;
+        memoryRoutines.set(canonicalId, data);
         return data;
       }
 
-      // Query by DOI if document ID differed
+      // Query by DOI in Firestore
       if (normDoi) {
-        const querySnap = await db
-          .collection(PROTOCOLS_COLLECTION)
-          .where('paper.doi', '==', paper.doi)
+        let querySnap = await db
+          .collection(ROUTINES_COLLECTION)
+          .where('paper.doi', '==', normDoi)
           .limit(1)
           .get();
-
+        if (querySnap.empty) {
+          querySnap = await db
+            .collection(PROTOCOLS_COLLECTION)
+            .where('paper.doi', '==', normDoi)
+            .limit(1)
+            .get();
+        }
         if (!querySnap.empty) {
-          const matched = querySnap.docs[0].data() as Protocol;
-          memoryProtocols.set(matched.id, matched);
+          const matched = querySnap.docs[0].data() as Routine;
+          memoryRoutines.set(matched.id, matched);
           return matched;
         }
       }
 
-      // Query by normalized title
-      const titleSlug = normalizeTitle(paper.title);
-      if (titleSlug && titleSlug !== 'untitled-paper') {
-        const titleQuery = await db
-          .collection(PROTOCOLS_COLLECTION)
-          .where('paper.title', '==', paper.title)
+      // Query by Title in Firestore
+      if (paper.title && paper.title !== 'Untitled Paper') {
+        let titleQuery = await db
+          .collection(ROUTINES_COLLECTION)
+          .where('title', '==', paper.title)
           .limit(1)
           .get();
-
+        if (titleQuery.empty) {
+          titleQuery = await db
+            .collection(PROTOCOLS_COLLECTION)
+            .where('title', '==', paper.title)
+            .limit(1)
+            .get();
+        }
         if (!titleQuery.empty) {
-          const matched = titleQuery.docs[0].data() as Protocol;
-          memoryProtocols.set(matched.id, matched);
+          const matched = titleQuery.docs[0].data() as Routine;
+          memoryRoutines.set(matched.id, matched);
           return matched;
         }
       }
     } catch (err: any) {
-      console.warn('[ProtocolRegistry] Firestore lookup failed, falling back to local memory:', err?.message || err);
+      console.warn('[RoutineRegistry] Firestore lookup failed, falling back to local memory:', err?.message || err);
     }
   }
 
   return null;
 }
 
-/** Gives a protocol its canonical paper id and initial version history without registering it. */
-export function toCanonicalProtocol(protocol: Protocol): Protocol {
-  const canonicalId = getCanonicalPaperId(protocol.paper, protocol.id);
-  const initialVersion = protocol.version || '1.0';
-  const initialChangelog: ProtocolChangelogEntry[] =
-    protocol.changelog && protocol.changelog.length > 0
-      ? protocol.changelog
+/** Gives a routine its canonical paper id and initial version history without registering it. */
+export function toCanonicalRoutine(routine: Routine): Routine {
+  const canonicalId = getCanonicalPaperId(routine.paper, routine.id);
+  const initialVersion = routine.version || '1.0';
+  const initialChangelog: RoutineChangelogEntry[] =
+    routine.changelog && routine.changelog.length > 0
+      ? routine.changelog
       : [
           {
             version: initialVersion,
@@ -275,7 +289,7 @@ export function toCanonicalProtocol(protocol: Protocol): Protocol {
         ];
 
   return {
-    ...protocol,
+    ...routine,
     id: canonicalId,
     canonicalId,
     version: initialVersion,
@@ -286,44 +300,44 @@ export function toCanonicalProtocol(protocol: Protocol): Protocol {
 }
 
 /**
- * Saves or de-duplicates a protocol in the canonical Firestore registry.
- * If the protocol already exists, returns the existing canonical entity without duplicating.
+ * Saves or de-duplicates a routine in the canonical Firestore registry.
+ * If the routine already exists, returns the existing canonical entity without duplicating.
  * Only call this for routines a user has confirmed: later extractions of the same paper reuse this entry.
  */
-export async function saveCanonicalProtocol(
-  protocol: Protocol
-): Promise<{ routine: Routine; protocol: Protocol; isNew: boolean }> {
+export async function saveCanonicalRoutine(
+  routine: Routine
+): Promise<{ routine: Routine; protocol: Routine; isNew: boolean }> {
   // Check if already registered
-  const existing = await findCanonicalProtocol(protocol.paper, protocol.id);
+  const existing = await findCanonicalRoutine(routine.paper, routine.id);
   if (existing) {
     return { routine: existing, protocol: existing, isNew: false };
   }
 
-  const canonicalProtocol: Protocol = { ...toCanonicalProtocol(protocol), isCanonical: true };
-  const canonicalId = canonicalProtocol.id;
+  const canonicalRoutine: Routine = { ...toCanonicalRoutine(routine), isCanonical: true };
+  const canonicalId = canonicalRoutine.id;
 
   // Update in-memory registry
-  memoryProtocols.set(canonicalId, canonicalProtocol);
+  memoryRoutines.set(canonicalId, canonicalRoutine);
 
   // Initialize reviews cache
-  if (protocol.community?.reviews) {
-    memoryReviews.set(canonicalId, [...protocol.community.reviews]);
+  if (routine.community?.reviews) {
+    memoryReviews.set(canonicalId, [...routine.community.reviews]);
   }
 
   // Persist to Cloud Firestore if connected
   const db = getFirestore();
   if (db) {
     try {
-      const docRef = db.collection(PROTOCOLS_COLLECTION).doc(canonicalId);
+      const docRef = db.collection(ROUTINES_COLLECTION).doc(canonicalId);
       await docRef.set({
-        ...canonicalProtocol,
+        ...canonicalRoutine,
         createdAt: new Date().toISOString()
       }, { merge: true });
 
       // Seed initial baseline reviews as subcollection documents
-      if (protocol.community?.reviews && protocol.community.reviews.length > 0) {
+      if (routine.community?.reviews && routine.community.reviews.length > 0) {
         const batch = db.batch();
-        for (const review of protocol.community.reviews) {
+        for (const review of routine.community.reviews) {
           const revRef = docRef.collection(REVIEWS_SUBCOLLECTION).doc(review.id);
           batch.set(revRef, {
             ...review,
@@ -333,31 +347,41 @@ export async function saveCanonicalProtocol(
         await batch.commit();
       }
     } catch (err: any) {
-      console.warn('[ProtocolRegistry] Could not persist canonical protocol to Firestore:', err?.message || err);
+      console.warn('[RoutineRegistry] Could not persist canonical routine to Firestore:', err?.message || err);
     }
   }
 
-  return { routine: canonicalProtocol, protocol: canonicalProtocol, isNew: true };
+  return { routine: canonicalRoutine, protocol: canonicalRoutine, isNew: true };
 }
 
 /**
- * Retrieves community reviews for a canonical protocol.
+ * Retrieves community reviews for a canonical routine.
  * Merges live Firestore community reviews with seeded baseline reviews.
  */
-export async function getCommunityReviews(protocolId: string): Promise<CommunityReview[]> {
-  const canonicalId = getCanonicalPaperId({ id: protocolId }, protocolId);
+export async function getCommunityReviews(routineId: string): Promise<CommunityReview[]> {
+  const canonicalId = getCanonicalPaperId({ id: routineId }, routineId);
   const reviews: CommunityReview[] = [];
 
   const db = getFirestore();
   if (db) {
     try {
-      const snapshot = await db
-        .collection(PROTOCOLS_COLLECTION)
+      let snapshot = await db
+        .collection(ROUTINES_COLLECTION)
         .doc(canonicalId)
         .collection(REVIEWS_SUBCOLLECTION)
         .orderBy('createdAt', 'desc')
         .limit(50)
         .get();
+
+      if (snapshot.empty) {
+        snapshot = await db
+          .collection(PROTOCOLS_COLLECTION)
+          .doc(canonicalId)
+          .collection(REVIEWS_SUBCOLLECTION)
+          .orderBy('createdAt', 'desc')
+          .limit(50)
+          .get();
+      }
 
       if (!snapshot.empty) {
         for (const doc of snapshot.docs) {
@@ -368,152 +392,148 @@ export async function getCommunityReviews(protocolId: string): Promise<Community
             day: data.day || 1,
             outcome: data.outcome || 'improved',
             text: data.text || '',
-            adherence: data.adherence || 100,
+            adherence: data.adherence ?? 85,
             createdAt: data.createdAt,
-            userId: data.userId
+            userId: data.userId,
+            lifestyleCohort: data.lifestyleCohort,
+            tags: data.tags
           });
         }
         return reviews;
       }
     } catch (err: any) {
-      console.warn('[ProtocolRegistry] Error reading community reviews from Firestore:', err?.message || err);
+      console.warn('[RoutineRegistry] Error reading community reviews from Firestore:', err?.message || err);
     }
   }
 
-  // Memory fallback
-  const local = memoryReviews.get(canonicalId) || memoryReviews.get(protocolId);
+  // Fallback to in-memory store
+  const local = memoryReviews.get(canonicalId) || memoryReviews.get(routineId);
   if (local && local.length > 0) {
-    return local;
+    return [...local];
   }
 
-  // Check if protocol definition has baseline reviews
-  const proto = memoryProtocols.get(canonicalId) || memoryProtocols.get(protocolId);
-  return proto?.community?.reviews || [];
+  // Check if routine definition has baseline reviews
+  const r = memoryRoutines.get(canonicalId) || memoryRoutines.get(routineId);
+  return r?.community?.reviews ? [...r.community.reviews] : [];
 }
 
 /**
- * Adds a new community review to a canonical protocol.
- * Stores in Firestore subcollection `protocols/{canonicalId}/reviews` and updates memory cache.
+ * Adds a new community review to a canonical routine.
+ * Stores in Firestore subcollection `routines/{canonicalId}/reviews` and updates memory cache.
  */
 export async function addCommunityReview(
-  protocolId: string,
-  newReview: NewCommunityReview,
+  routineId: string,
+  review: NewCommunityReview,
   userId?: string
 ): Promise<CommunityReview> {
-  const canonicalId = getCanonicalPaperId({ id: protocolId }, protocolId);
-  const reviewId = `rev_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-  const nowIso = new Date().toISOString();
-
-  const review: CommunityReview = {
-    id: reviewId,
-    handle: newReview.handle?.trim() || 'Anonymous participant',
-    day: Math.max(1, Math.round(newReview.day)),
-    outcome: newReview.outcome,
-    text: newReview.text.trim(),
-    adherence: Math.max(0, Math.min(100, Math.round(newReview.adherence))),
-    createdAt: nowIso,
-    userId,
-    lifestyleCohort: newReview.lifestyleCohort,
-    tags: newReview.tags
+  const canonicalId = getCanonicalPaperId({ id: routineId }, routineId);
+  const newReview: CommunityReview = {
+    ...review,
+    id: `rev_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    handle: review.handle || 'Anonymous participant',
+    userId: userId || review.userId,
+    createdAt: new Date().toISOString()
   };
 
-  // 1. Update in-memory cache
-  const currentReviews = memoryReviews.get(canonicalId) || [];
-  memoryReviews.set(canonicalId, [review, ...currentReviews]);
+  // Update in-memory cache
+  const existing = memoryReviews.get(canonicalId) || memoryReviews.get(routineId) || [];
+  const updated = [newReview, ...existing];
+  memoryReviews.set(canonicalId, updated);
+  if (routineId !== canonicalId) {
+    memoryReviews.set(routineId, updated);
+  }
 
-  // 2. Persist to Cloud Firestore
+  // Persist to Cloud Firestore
   const db = getFirestore();
   if (db) {
     try {
-      const docRef = db
-        .collection(PROTOCOLS_COLLECTION)
+      await db
+        .collection(ROUTINES_COLLECTION)
         .doc(canonicalId)
         .collection(REVIEWS_SUBCOLLECTION)
-        .doc(reviewId);
+        .doc(newReview.id)
+        .set(newReview);
 
-      await docRef.set(review);
-
-      // Increment or update community aggregate telemetry
-      const metricsRef = db
-        .collection(PROTOCOLS_COLLECTION)
+      // Invalidate / update metrics cache
+      await db
+        .collection(ROUTINES_COLLECTION)
         .doc(canonicalId)
         .collection(METRICS_SUBCOLLECTION)
-        .doc('aggregate');
-
-      const allReviews = memoryReviews.get(canonicalId) || [review];
-      const improvedCount = allReviews.filter((r) => r.outcome === 'improved').length;
-      const calculatedEfficacy = Math.round((improvedCount / allReviews.length) * 100);
-
-      await metricsRef.set(
-        {
-          totalReviews: allReviews.length,
-          realWorldEfficacy: calculatedEfficacy,
-          lastReviewAt: nowIso
-        },
-        { merge: true }
-      );
+        .doc('aggregate')
+        .delete()
+        .catch(() => {});
     } catch (err: any) {
-      console.warn('[ProtocolRegistry] Failed to persist review to Firestore:', err?.message || err);
+      console.warn('[RoutineRegistry] Failed to persist review to Firestore:', err?.message || err);
     }
   }
 
-  return review;
+  return newReview;
 }
 
 /**
- * Retrieves aggregate community metrics for a canonical protocol.
+ * Retrieves aggregate community metrics for a canonical routine.
  */
 export async function getCommunityMetrics(
-  protocolId: string
+  routineId: string
 ): Promise<CommunityInsights | null> {
-  const canonicalId = getCanonicalPaperId({ id: protocolId }, protocolId);
-  const proto = memoryProtocols.get(canonicalId) || memoryProtocols.get(protocolId);
+  const canonicalId = getCanonicalPaperId({ id: routineId }, routineId);
+  const routine = memoryRoutines.get(canonicalId) || memoryRoutines.get(routineId);
+  if (!routine) return null;
 
-  const baselineInsights = proto?.community;
-  if (!baselineInsights) return null;
+  const baseline = routine.community;
 
-  const allReviews = await getCommunityReviews(protocolId);
+  // Compute live reviews and user counts
+  const allReviews = await getCommunityReviews(routineId);
   const improvedCount = allReviews.filter((r) => r.outcome === 'improved').length;
-  const calculatedEfficacy =
-    allReviews.length > 0 ? Math.round((improvedCount / allReviews.length) * 100) : 0;
+  const liveEfficacy =
+    allReviews.length > 0 ? Math.round((improvedCount / allReviews.length) * 100) : baseline.realWorldEfficacy;
 
-  const userStats = await getLiveUserStats(protocolId);
-  const userStatsCanonical =
-    canonicalId !== protocolId ? await getLiveUserStats(canonicalId) : { activeTrackersCount: 0, userLogsCount: 0 };
-  const realActiveTrackers = Math.max(
-    userStats.activeTrackersCount,
-    userStatsCanonical.activeTrackersCount
-  );
+  // Real-time telemetry from Firestore user storage
+  const userStats = await getLiveUserStats(routineId);
+  const canonicalStats =
+    canonicalId !== routineId ? await getLiveUserStats(canonicalId) : { activeTrackersCount: 0, userLogsCount: 0 };
 
-  const totalParticipants = Math.max(realActiveTrackers, allReviews.length);
+  const totalLiveTrackers = userStats.activeTrackersCount + canonicalStats.activeTrackersCount;
+  const totalUserCount = Math.max(baseline.userCount, totalLiveTrackers);
 
+  // Read cached metrics from Firestore if available
   const db = getFirestore();
   if (db) {
     try {
-      const metricsDoc = await db
-        .collection(PROTOCOLS_COLLECTION)
+      let metricsDoc = await db
+        .collection(ROUTINES_COLLECTION)
         .doc(canonicalId)
         .collection(METRICS_SUBCOLLECTION)
         .doc('aggregate')
         .get();
 
+      if (!metricsDoc.exists) {
+        metricsDoc = await db
+          .collection(PROTOCOLS_COLLECTION)
+          .doc(canonicalId)
+          .collection(METRICS_SUBCOLLECTION)
+          .doc('aggregate')
+          .get();
+      }
+
       if (metricsDoc.exists) {
-        const data = metricsDoc.data();
         return {
-          ...baselineInsights,
-          realWorldEfficacy: data?.realWorldEfficacy ?? calculatedEfficacy,
-          userCount: Math.max(totalParticipants, data?.totalReviews || 0)
+          ...baseline,
+          ...(metricsDoc.data() as Partial<CommunityInsights>),
+          reviews: allReviews,
+          userCount: totalUserCount
         };
       }
     } catch (err: any) {
-      console.warn('[ProtocolRegistry] Could not fetch community metrics from Firestore:', err?.message || err);
+      console.warn('[RoutineRegistry] Could not fetch community metrics from Firestore:', err?.message || err);
     }
   }
 
   return {
-    ...baselineInsights,
-    realWorldEfficacy: calculatedEfficacy,
-    userCount: totalParticipants
+    ...baseline,
+    realWorldEfficacy: liveEfficacy,
+    userCount: totalUserCount,
+    reviews: allReviews
   };
 }
 
@@ -531,9 +551,9 @@ export async function injectApprovedWidgetIntoCanonicalRoutine(
     targetId
   );
   const existing =
-    memoryProtocols.get(canonicalId) ||
-    memoryProtocols.get(targetId) ||
-    (await findCanonicalProtocol({ id: targetId }, targetId));
+    memoryRoutines.get(canonicalId) ||
+    memoryRoutines.get(targetId) ||
+    (await findCanonicalRoutine({ id: targetId }, targetId));
 
   if (!existing || !existing.dataCollectionSpec) {
     return null;
@@ -552,48 +572,48 @@ export async function injectApprovedWidgetIntoCanonicalRoutine(
     return field;
   });
 
-  const updatedProtocol: Protocol = {
+  const updatedRoutine: Routine = {
     ...existing,
     dataCollectionSpec: updatedSpec
   };
 
-  memoryProtocols.set(canonicalId, updatedProtocol);
+  memoryRoutines.set(canonicalId, updatedRoutine);
   if (targetId !== canonicalId) {
-    memoryProtocols.set(targetId, updatedProtocol);
+    memoryRoutines.set(targetId, updatedRoutine);
   }
 
   const db = getFirestore();
   if (db) {
     try {
       await db
-        .collection(PROTOCOLS_COLLECTION)
+        .collection(ROUTINES_COLLECTION)
         .doc(canonicalId)
         .set({ dataCollectionSpec: updatedSpec }, { merge: true });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      console.warn('[ProtocolRegistry] Failed to persist approved widget to canonical protocol:', message);
+      console.warn('[RoutineRegistry] Failed to persist approved widget to canonical routine:', message);
     }
   }
 
-  return updatedProtocol;
+  return updatedRoutine;
 }
 
 /**
- * Updates a canonical protocol with user or clinical improvements, bumping its version.
+ * Updates a canonical routine with user or clinical improvements, bumping its version.
  */
-export async function updateCanonicalProtocolVersion(
-  protocolId: string,
-  updates: Partial<Protocol>,
+export async function updateCanonicalRoutineVersion(
+  routineId: string,
+  updates: Partial<Routine>,
   summary: string,
   author = 'Community Contributor',
   addedFields?: string[],
   updatedFields?: string[]
-): Promise<Protocol | null> {
-  const canonicalId = getCanonicalPaperId({ id: protocolId }, protocolId);
+): Promise<Routine | null> {
+  const canonicalId = getCanonicalPaperId({ id: routineId }, routineId);
   const existing =
-    memoryProtocols.get(canonicalId) ||
-    memoryProtocols.get(protocolId) ||
-    (await findCanonicalProtocol({ id: protocolId }, protocolId));
+    memoryRoutines.get(canonicalId) ||
+    memoryRoutines.get(routineId) ||
+    (await findCanonicalRoutine({ id: routineId }, routineId));
 
   if (!existing) return null;
 
@@ -604,7 +624,7 @@ export async function updateCanonicalProtocolVersion(
   const minor = parseInt(parts[1] || '0', 10);
   const nextVersion = `${major}.${minor + 1}`;
 
-  const newEntry: ProtocolChangelogEntry = {
+  const newEntry: RoutineChangelogEntry = {
     version: nextVersion,
     date: new Date().toISOString(),
     summary,
@@ -615,7 +635,7 @@ export async function updateCanonicalProtocolVersion(
 
   const updatedChangelog = [newEntry, ...(existing.changelog || [])];
 
-  const updatedProtocol: Protocol = {
+  const updatedRoutine: Routine = {
     ...existing,
     ...updates,
     id: existing.id,
@@ -625,16 +645,16 @@ export async function updateCanonicalProtocolVersion(
     isCanonical: true
   };
 
-  memoryProtocols.set(canonicalId, updatedProtocol);
-  if (protocolId !== canonicalId) {
-    memoryProtocols.set(protocolId, updatedProtocol);
+  memoryRoutines.set(canonicalId, updatedRoutine);
+  if (routineId !== canonicalId) {
+    memoryRoutines.set(routineId, updatedRoutine);
   }
 
   const db = getFirestore();
   if (db) {
     try {
       await db
-        .collection(PROTOCOLS_COLLECTION)
+        .collection(ROUTINES_COLLECTION)
         .doc(canonicalId)
         .set(
           {
@@ -646,15 +666,18 @@ export async function updateCanonicalProtocolVersion(
           { merge: true }
         );
     } catch (err: unknown) {
-      console.warn('[ProtocolRegistry] Failed to persist protocol version bump:', err);
+      console.warn('[RoutineRegistry] Failed to persist routine version bump:', err);
     }
   }
 
-  return updatedProtocol;
+  return updatedRoutine;
 }
 
-export const findCanonicalRoutine = findCanonicalProtocol;
-export const saveCanonicalRoutine = saveCanonicalProtocol;
-export const updateCanonicalRoutineVersion = updateCanonicalProtocolVersion;
-export const toCanonicalRoutine = toCanonicalProtocol;
+// Backward-compatibility aliases
+export const findCanonicalProtocol = findCanonicalRoutine;
+export const saveCanonicalProtocol = saveCanonicalRoutine;
+export const updateCanonicalProtocolVersion = updateCanonicalRoutineVersion;
+export const toCanonicalProtocol = toCanonicalRoutine;
 export const injectApprovedWidgetIntoCanonicalProtocol = injectApprovedWidgetIntoCanonicalRoutine;
+export const BUILTIN_PROTOCOLS = BUILTIN_ROUTINES;
+export const memoryProtocols = memoryRoutines;
