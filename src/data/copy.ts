@@ -612,6 +612,7 @@ export const COPY = {
     adoptExistingRoutine: 'Start this routine',
     proposeImprovementButton: 'Discuss or Propose Fix',
     protocolUpdatedNotice: (v: string) => `Routine updated to v${v}`,
+    routineUpdatedNotice: (v: string) => `Routine updated to v${v}`,
     uploadAnother: 'Upload another paper',
     candidateStepsTitle: 'Extracted intervention steps',
     candidateSafetyTitle: 'Safety guardrail & stop rule',
