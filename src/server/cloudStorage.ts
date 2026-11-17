@@ -1,7 +1,7 @@
 /**
  * Google Cloud Storage Service Ledger
  * 
- * Manages media uploads (clinical assessment photos, protocol imagery)
+ * Manages media uploads (clinical assessment photos, routine imagery)
  * using the official Google Cloud Storage SDK (@google-cloud/storage).
  * Automatically authenticates via Application Default Credentials (ADC)
  * on Google Cloud Run, explicit service account credentials, or provides

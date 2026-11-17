@@ -91,7 +91,7 @@ async function enrichPaperWithLiveTelemetry(paper: SamplePaper): Promise<SampleP
 }
 
 /**
- * Fetch sample research papers and pre-calibrated protocols.
+ * Fetch sample research papers and pre-calibrated routines.
  * Resolves from live Cloud Firestore when available, or gracefully falls back to memory cache.
  */
 export async function getSamplePapers(): Promise<{

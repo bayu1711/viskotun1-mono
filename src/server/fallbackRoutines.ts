@@ -188,7 +188,7 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
     {
       id: 'cr-msg-3',
       role: 'ai',
-      kind: 'protocol',
+      kind: 'routine',
       content: 'creatine-sleep',
       timestamp: '9:01 AM'
     }
@@ -402,13 +402,13 @@ export const FALLBACK_PATELLAR_REHAB: Protocol = {
       role: 'ai',
       kind: 'text',
       content:
-        'Parsed 11 pages and isolated the Heavy Slow Resistance protocol. Discussion and surgical references were excluded.',
+        'Parsed 11 pages and isolated the Heavy Slow Resistance routine. Discussion and surgical references were excluded.',
       timestamp: '10:16 AM'
     },
     {
       id: 'pat-msg-3',
       role: 'ai',
-      kind: 'protocol',
+      kind: 'routine',
       content: 'patellar-rehab',
       timestamp: '10:16 AM'
     }
@@ -470,14 +470,14 @@ export function generateFallbackRoutine(source: string): Routine {
     return FALLBACK_PATELLAR_REHAB;
   }
 
-  // Generic customized protocol based on source
+  // Generic customized routine based on source
   const cleanTitle = source
     .replace(/\.pdf$/i, '')
     .replace(/[_-]+/g, ' ')
     .trim()
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
-  const slug = cleanTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'extracted-protocol';
+  const slug = cleanTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'extracted-routine';
 
   return {
     id: slug,
@@ -486,7 +486,7 @@ export function generateFallbackRoutine(source: string): Routine {
       {
         version: '1.0',
         date: new Date().toISOString(),
-        summary: 'Initial clinical protocol extraction',
+        summary: 'Initial clinical routine extraction',
         author: 'Viskotu Extraction Engine'
       }
     ],
@@ -596,6 +596,7 @@ export function generateFallbackRoutine(source: string): Routine {
           title: `${cleanTitle.split(' ').slice(0, 2).join(' ')} Interactive Calibrator`,
           description: `Bespoke multi-parameter calibration widget synthesized from ${cleanTitle} study methodology.`,
           status: 'pending_review',
+          routineId: slug,
           protocolId: slug,
           paperTitle: cleanTitle,
           fieldId: `${slug}-custom-endpoint`,

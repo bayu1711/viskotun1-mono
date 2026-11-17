@@ -3,7 +3,7 @@
  * 
  * Manages user workspaces, active routine assignments, and runtime telemetry
  * (feedback logs, morphing logs, day history, completed sets).
- * Provides live aggregate statistics for protocols without dummy or simulated multipliers.
+ * Provides live aggregate statistics for routines without dummy or simulated multipliers.
  */
 
 import fs from 'fs';
@@ -189,7 +189,7 @@ export async function getAllUserRecords(): Promise<UserRecord[]> {
   return Array.from(recordsMap.values());
 }
 
-function matchesProtocol(candidateId: string | undefined, targetId: string): boolean {
+function matchesRoutine(candidateId: string | undefined, targetId: string): boolean {
   if (!candidateId) return false;
   if (candidateId === targetId) return true;
   if ((candidateId === 'achilles-rehab' && targetId === 'achilles') || (candidateId === 'achilles' && targetId === 'achilles-rehab')) return true;
@@ -197,9 +197,11 @@ function matchesProtocol(candidateId: string | undefined, targetId: string): boo
   return false;
 }
 
+const matchesProtocol = matchesRoutine;
+
 /**
- * Computes live user telemetry for a specific protocol or routine ID:
- * - activeTrackersCount: number of distinct users actively tracking or having this protocol in their routine list
+ * Computes live user telemetry for a specific routine or protocol ID:
+ * - activeTrackersCount: number of distinct users actively tracking or having this routine in their list
  * - userLogsCount: sum of all feedbackLogs, morphingLogs, dayHistory entries, and completed sets
  */
 export async function getLiveUserStats(protocolId: string): Promise<{

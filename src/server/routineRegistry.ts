@@ -49,7 +49,7 @@ const BUILTIN_PROTOCOLS: Record<string, Protocol> = {
       {
         version: '1.0',
         date: '2026-10-18T00:00:00.000Z',
-        summary: 'Initial clinical protocol extraction',
+        summary: 'Initial clinical routine extraction',
         author: 'Viskotu Scientific Board'
       }
     ]
@@ -63,7 +63,7 @@ const BUILTIN_PROTOCOLS: Record<string, Protocol> = {
       {
         version: '1.0',
         date: '2026-10-18T00:00:00.000Z',
-        summary: 'Initial clinical protocol extraction',
+        summary: 'Initial clinical routine extraction',
         author: 'Viskotu Scientific Board'
       }
     ]
@@ -77,7 +77,7 @@ const BUILTIN_PROTOCOLS: Record<string, Protocol> = {
       {
         version: '1.0',
         date: '2026-10-18T00:00:00.000Z',
-        summary: 'Initial clinical protocol extraction',
+        summary: 'Initial clinical routine extraction',
         author: 'Viskotu Scientific Board'
       }
     ]
@@ -91,7 +91,7 @@ const BUILTIN_PROTOCOLS: Record<string, Protocol> = {
       {
         version: '1.0',
         date: '2026-10-18T00:00:00.000Z',
-        summary: 'Initial clinical protocol extraction',
+        summary: 'Initial clinical routine extraction',
         author: 'Viskotu Scientific Board'
       }
     ]
@@ -108,7 +108,7 @@ const BUILTIN_PROTOCOLS: Record<string, Protocol> = {
           {
             version: '1.0',
             date: '2026-10-18T00:00:00.000Z',
-            summary: 'Initial clinical protocol extraction',
+            summary: 'Initial clinical routine extraction',
             author: 'Viskotu Scientific Board'
           }
         ]
@@ -269,7 +269,7 @@ export function toCanonicalProtocol(protocol: Protocol): Protocol {
           {
             version: initialVersion,
             date: new Date().toISOString(),
-            summary: 'Initial clinical protocol extraction',
+            summary: 'Initial clinical routine extraction',
             author: 'Viskotu Extraction Engine'
           }
         ];
@@ -292,11 +292,11 @@ export function toCanonicalProtocol(protocol: Protocol): Protocol {
  */
 export async function saveCanonicalProtocol(
   protocol: Protocol
-): Promise<{ protocol: Protocol; isNew: boolean }> {
+): Promise<{ routine: Routine; protocol: Protocol; isNew: boolean }> {
   // Check if already registered
   const existing = await findCanonicalProtocol(protocol.paper, protocol.id);
   if (existing) {
-    return { protocol: existing, isNew: false };
+    return { routine: existing, protocol: existing, isNew: false };
   }
 
   const canonicalProtocol: Protocol = { ...toCanonicalProtocol(protocol), isCanonical: true };
@@ -337,7 +337,7 @@ export async function saveCanonicalProtocol(
     }
   }
 
-  return { protocol: canonicalProtocol, isNew: true };
+  return { routine: canonicalProtocol, protocol: canonicalProtocol, isNew: true };
 }
 
 /**
