@@ -140,9 +140,9 @@ export interface ProposedWidgetSpec {
 
 /**
  * Who owns an escalation message. 'policy' messages are replaced when the guardrail ledger
- * changes; 'protocol' messages carry paper-specific advice (e.g. split the dose) and are kept.
+ * changes; 'routine' messages carry paper-specific advice (e.g. split the dose) and are kept.
  */
-export type EscalationSource = 'policy' | 'protocol';
+export type EscalationSource = 'policy' | 'routine' | 'protocol';
 
 export interface DataCollectionField {
   id: string;
@@ -297,7 +297,7 @@ export interface Routine {
   canonicalId?: string;
   isCanonical?: boolean;
   version?: string;
-  changelog?: ProtocolChangelogEntry[];
+  changelog?: RoutineChangelogEntry[];
   title: string;
   shortTitle: string;
   icon: StepIconKey;

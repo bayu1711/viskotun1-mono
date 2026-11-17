@@ -266,7 +266,7 @@ export const imstBloodPressureRoutine: Routine = {
     escalationThreshold: 4,
     escalationMessage:
       'Dizziness threshold exceeded (≥ 4/10). Escalation paused. Sit down, check your blood pressure, and reduce resistance to 50% PImax for the next session.',
-    escalationSource: 'protocol'
+    escalationSource: 'routine'
   },
   dataCollectionSpec: [
     {
@@ -308,7 +308,7 @@ export const imstBloodPressureRoutine: Routine = {
       escalationThreshold: 4,
       escalationMessage:
         'Dizziness threshold exceeded (≥ 4/10). Escalation paused. Sit down, check your blood pressure, and reduce resistance to 50% PImax for the next session.',
-      escalationSource: 'protocol'
+      escalationSource: 'routine'
     }
   ],
   initialMorphingLogs: [],
@@ -444,7 +444,7 @@ export const warmBathSleepRoutine: Routine = {
     escalationThreshold: 4,
     escalationMessage:
       'Grogginess threshold exceeded (≥ 4/10). Escalation paused. Keep the bath at least 90 minutes before bed and lower the water toward 40°C tonight.',
-    escalationSource: 'protocol'
+    escalationSource: 'routine'
   },
   dataCollectionSpec: [
     {
@@ -634,7 +634,7 @@ export const cervicalPostureRoutine: Routine = {
     escalationThreshold: 4,
     escalationMessage:
       'Cervical tension threshold exceeded (≥ 4/10). Escalation paused. Keep the current volume, shorten holds to 3 seconds, and stop if the headache gets worse.',
-    escalationSource: 'protocol'
+    escalationSource: 'routine'
   },
   dataCollectionSpec: [
     {
@@ -658,7 +658,7 @@ export const cervicalPostureRoutine: Routine = {
       escalationThreshold: 4,
       escalationMessage:
         'Cervical tension threshold exceeded (≥ 4/10). Escalation paused. Keep the current volume, shorten holds to 3 seconds, and stop if the headache gets worse.',
-      escalationSource: 'protocol'
+      escalationSource: 'routine'
     }
   ],
   initialMorphingLogs: [],
@@ -796,7 +796,7 @@ export const ashwagandhaStressRoutine: Routine = {
     escalationThreshold: 4,
     escalationMessage:
       'GI distress threshold exceeded (≥ 4/10). Escalation paused. Split-dose rule: take each 300 mg capsule in the middle of a full meal, never both at once.',
-    escalationSource: 'protocol'
+    escalationSource: 'routine'
   },
   dataCollectionSpec: [
     {
@@ -811,7 +811,7 @@ export const ashwagandhaStressRoutine: Routine = {
       escalationThreshold: 4,
       escalationMessage:
         'GI distress threshold exceeded (≥ 4/10). Escalation paused. Split-dose rule: take each 300 mg capsule in the middle of a full meal, never both at once.',
-      escalationSource: 'protocol'
+      escalationSource: 'routine'
     },
     {
       id: 'ash-pss',
@@ -943,7 +943,7 @@ export const dualNBackRoutine: Routine = {
     escalationThreshold: 4,
     escalationMessage:
       'Mental fatigue threshold exceeded (≥ 4/10). Escalation paused. Stay at your current N-level tomorrow and take a short break between blocks.',
-    escalationSource: 'protocol'
+    escalationSource: 'routine'
   },
   dataCollectionSpec: [
     {
@@ -971,7 +971,7 @@ export const dualNBackRoutine: Routine = {
       escalationThreshold: 4,
       escalationMessage:
         'Mental fatigue threshold exceeded (≥ 4/10). Escalation paused. Stay at your current N-level tomorrow and take a short break between blocks.',
-      escalationSource: 'protocol'
+      escalationSource: 'routine'
     },
     {
       id: 'nb-level',

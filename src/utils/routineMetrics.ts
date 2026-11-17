@@ -383,9 +383,10 @@ export function resolvePaperRoutineStatus({
 
 type EscalationTarget = Pick<FeedbackMetric, 'escalationThreshold' | 'escalationMessage' | 'escalationSource'>;
 
-/** Paper-specific advice (escalationSource 'protocol') survives policy message changes. */
+/** Paper-specific advice (escalationSource 'routine' or 'protocol') survives policy message changes. */
 function policyMessageFor<T extends EscalationTarget>(target: T, message?: string) {
-  return message && target.escalationSource !== 'protocol' ? message : target.escalationMessage;
+  const isRoutineAuthored = target.escalationSource === 'routine' || target.escalationSource === 'protocol';
+  return message && !isRoutineAuthored ? message : target.escalationMessage;
 }
 
 /**
