@@ -3,8 +3,8 @@ import { toast } from 'sonner';
 import { AuthContext } from '../contexts/AuthContext';
 import { DEFAULT_CONFIRMATION_SCORE, FEEDBACK_ESCALATION_THRESHOLD } from '../data/config';
 import { COPY } from '../data/copy';
-import { initialQueuedPapers, protocols as initialProtocols, sampleProtocols } from '../data/routines';
-import { PRECALIBRATED_SAMPLE_PROTOCOLS, SAMPLE_PAPERS, type SamplePaper } from '../data/samplePapers';
+import { initialQueuedPapers, routines as initialRoutines, protocols as initialProtocols, sampleRoutines, sampleProtocols } from '../data/routines';
+import { PRECALIBRATED_SAMPLE_ROUTINES, PRECALIBRATED_SAMPLE_PROTOCOLS, SAMPLE_PAPERS, type SamplePaper } from '../data/samplePapers';
 import type {
   BarrierLog,
   BarrierType,
@@ -112,8 +112,9 @@ export function useRoutineState() {
   const userId = auth?.user?.id;
   const isAdmin = auth?.isAdmin;
 
-  const [protocolList, setProtocolList] = useState<Protocol[]>([]);
-  const [activeProtocolId, setActiveProtocol] = useState<string>('');
+  const [routineList, setRoutineList] = useState<Routine[]>([]);
+  const [activeRoutineId, setActiveRoutine] = useState<string>('');
+
   const [queuedPapers, setQueuedPapers] = useState<QueuedPaper[]>(initialQueuedPapers);
   const [isFeedbackDrawerOpen, setIsFeedbackDrawerOpen] = useState(false);
   const [isReviewDrawerOpen, setIsReviewDrawerOpen] = useState(false);
@@ -121,18 +122,18 @@ export function useRoutineState() {
   const [isBctLedgerOpen, setIsBctLedgerOpen] = useState(false);
   const [isReEntryOpen, setIsReEntryOpen] = useState(false);
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
-  const [runtime, setRuntime] = useState<Record<string, ProtocolRuntime>>({});
+  const [runtime, setRuntime] = useState<Record<string, RoutineRuntime>>({});
   const [hasHydrated, setHasHydrated] = useState(false);
   const [hasRemoteHydrated, setHasRemoteHydrated] = useState(false);
 
-  const activeProtocolIdRef = useRef(activeProtocolId);
-  activeProtocolIdRef.current = activeProtocolId;
+  const activeRoutineIdRef = useRef(activeRoutineId);
+  activeRoutineIdRef.current = activeRoutineId;
   const runtimeRef = useRef(runtime);
   runtimeRef.current = runtime;
   const rolloverTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Staging candidate paper for pre-confirmation review & discussion
-  const [stagingProtocol, setStagingProtocol] = useState<Protocol | null>(null);
+  const [stagingRoutine, setStagingRoutine] = useState<Routine | null>(null);
   const [isExtractingPaper, setIsExtractingPaper] = useState(false);
   const [extractingSourceName, setExtractingSourceName] = useState('');
   const [stagingMessages, setStagingMessages] = useState<ChatMessage[]>([]);
@@ -142,7 +143,7 @@ export function useRoutineState() {
 
   // Dynamic sample research papers pulled from Firebase Firestore
   const [samplePapers, setSamplePapers] = useState<SamplePaper[]>(SAMPLE_PAPERS);
-  const [sampleProtocolsMap, setSampleProtocolsMap] = useState<Record<string, Protocol>>(PRECALIBRATED_SAMPLE_PROTOCOLS);
+  const [sampleRoutinesMap, setSampleRoutinesMap] = useState<Record<string, Routine>>(PRECALIBRATED_SAMPLE_ROUTINES);
   const [sampleSource, setSampleSource] = useState<'firestore-live' | 'memory-cache'>('memory-cache');
 
   // Pull sample papers from Firebase Firestore on startup
@@ -158,8 +159,9 @@ export function useRoutineState() {
             if (Array.isArray(papers) && papers.length > 0) {
               setSamplePapers(papers);
             }
-            if (data.protocols && typeof data.protocols === 'object') {
-              setSampleProtocolsMap((prev) => ({ ...prev, ...data.protocols }));
+            const routinesData = data.routines || data.protocols;
+            if (routinesData && typeof routinesData === 'object') {
+              setSampleRoutinesMap((prev) => ({ ...prev, ...routinesData }));
             }
             if (data.source) {
               setSampleSource(data.source);
@@ -226,13 +228,13 @@ export function useRoutineState() {
         }
       }
 
-      let loadedProtocols: Routine[] = [];
+      let loadedRoutines: Routine[] = [];
       if (savedRoutinesRaw) {
         try {
           const parsed = JSON.parse(savedRoutinesRaw);
           if (Array.isArray(parsed)) {
-            // Sanitize any legacy sample protocols from prior sessions that had Day 4 or pre-filled sets
-            loadedProtocols = parsed.map((p) => {
+            // Sanitize any legacy sample routines from prior sessions that had Day 4 or pre-filled sets
+            loadedRoutines = parsed.map((p) => {
               if (['achilles', 'hair-loss', 'creatine-sleep'].includes(p.id)) {
                 if (p.currentDay > 1 || (p.dayHistory && p.dayHistory.length > 0)) {
                   let r: any = null;
@@ -260,7 +262,7 @@ export function useRoutineState() {
               return p;
             });
             if (isMounted) {
-              setProtocolList(loadedProtocols);
+              setRoutineList(loadedRoutines);
             }
           }
         } catch (err) {
@@ -268,16 +270,16 @@ export function useRoutineState() {
         }
       } else {
         if (isMounted) {
-          setProtocolList([]);
+          setRoutineList([]);
         }
       }
 
-      if (savedActiveId && loadedProtocols.some((p) => p.id === savedActiveId)) {
-        if (isMounted) setActiveProtocol(savedActiveId);
-      } else if (loadedProtocols.length > 0) {
-        if (isMounted) setActiveProtocol(loadedProtocols[0].id);
+      if (savedActiveId && loadedRoutines.some((p) => p.id === savedActiveId)) {
+        if (isMounted) setActiveRoutine(savedActiveId);
+      } else if (loadedRoutines.length > 0) {
+        if (isMounted) setActiveRoutine(loadedRoutines[0].id);
       } else {
-        if (isMounted) setActiveProtocol('');
+        if (isMounted) setActiveRoutine('');
       }
 
       if (savedRuntimeRaw) {
@@ -327,13 +329,13 @@ export function useRoutineState() {
     if (!hasHydrated || isAuthLoading) return;
     const keys = getStorageKeys(isAuthenticated ? userId : undefined);
     try {
-      window.localStorage.setItem(keys.routines, JSON.stringify(protocolList));
-      window.localStorage.setItem(keys.activeId, activeProtocolId);
+      window.localStorage.setItem(keys.routines, JSON.stringify(routineList));
+      window.localStorage.setItem(keys.activeId, activeRoutineId);
       window.localStorage.setItem(keys.runtime, JSON.stringify(runtime));
     } catch (err) {
       console.error('[useRoutineState] LocalStorage write error:', err);
     }
-  }, [protocolList, activeProtocolId, runtime, hasHydrated, isAuthLoading, isAuthenticated, userId]);
+  }, [routineList, activeRoutineId, runtime, hasHydrated, isAuthLoading, isAuthenticated, userId]);
 
   // Fetch cloud state when authenticating as a signed-in user
   useEffect(() => {
@@ -364,7 +366,7 @@ export function useRoutineState() {
 
               if (isLegacyAutoSynced) {
                 // If local state is also empty or legacy, clean up remote record
-                setProtocolList((currentLocal) => {
+                setRoutineList((currentLocal) => {
                   if (
                     currentLocal.length === 0 ||
                     currentLocal.every((p) => ['achilles', 'hair-loss', 'creatine-sleep'].includes(p.id))
@@ -375,19 +377,21 @@ export function useRoutineState() {
                       body: JSON.stringify({
                         userId,
                         activeProtocolId: '',
+                        activeRoutineId: '',
                         protocols: [],
+                        routines: [],
                         runtime: {}
                       })
                     }).catch(() => {});
-                    setActiveProtocol('');
+                    setActiveRoutine('');
                     setRuntime({});
                     return [];
                   }
                   return currentLocal;
                 });
               } else {
-                setProtocolList((currentLocal) => {
-                  const remoteList: Protocol[] = data.protocols;
+                setRoutineList((currentLocal) => {
+                  const remoteList: Routine[] = data.routines || data.protocols;
                   // If local state already has routines not present in remote, merge and preserve them
                   const missingFromRemote = currentLocal.filter(
                     (lp) => !remoteList.some((rp) => rp.id === lp.id)
@@ -399,7 +403,9 @@ export function useRoutineState() {
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
                         userId,
-                        activeProtocolId: data.activeProtocolId || merged[0]?.id || '',
+                        activeRoutineId: data.activeRoutineId || data.activeProtocolId || merged[0]?.id || '',
+                        activeProtocolId: data.activeRoutineId || data.activeProtocolId || merged[0]?.id || '',
+                        routines: merged,
                         protocols: merged,
                         runtime: { ...(data.runtime || {}), ...runtimeRef.current }
                       })
@@ -409,10 +415,9 @@ export function useRoutineState() {
                   return remoteList;
                 });
 
-                if (data.activeProtocolId) {
-                  setActiveProtocol((curr) => curr || data.activeProtocolId);
-                } else if (data.protocols[0]?.id) {
-                  setActiveProtocol((curr) => curr || data.protocols[0].id);
+                const targetActiveId = data.activeRoutineId || data.activeProtocolId || (data.routines || data.protocols)?.[0]?.id;
+                if (targetActiveId) {
+                  setActiveRoutine((curr) => curr || targetActiveId);
                 }
 
                 if (data.runtime && typeof data.runtime === 'object') {
@@ -457,14 +462,16 @@ export function useRoutineState() {
             } else {
               // Remote returned found=false or empty protocols list
               // DO NOT wipe local state! If the user already has routines locally, sync them to remote!
-              setProtocolList((currentLocal) => {
+              setRoutineList((currentLocal) => {
                 if (currentLocal.length > 0) {
                   fetch('/api/user/sync', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                       userId,
-                      activeProtocolId: activeProtocolIdRef.current,
+                      activeRoutineId: activeRoutineIdRef.current,
+                      activeProtocolId: activeRoutineIdRef.current,
+                      routines: currentLocal,
                       protocols: currentLocal,
                       runtime: runtimeRef.current
                     })
@@ -502,17 +509,19 @@ export function useRoutineState() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId,
-          activeProtocolId,
-          protocols: protocolList,
+          activeRoutineId,
+          activeProtocolId: activeRoutineId,
+          routines: routineList,
+          protocols: routineList,
           runtime
         })
       }).catch((err) => {
-        console.error('[useProtocolState] Cloud sync error:', err);
+        console.error('[useRoutineState] Cloud sync error:', err);
       });
     }, 1000);
 
     return () => window.clearTimeout(timer);
-  }, [protocolList, activeProtocolId, runtime, hasHydrated, isAuthLoading, isAuthenticated, userId, hasRemoteHydrated]);
+  }, [routineList, activeRoutineId, runtime, hasHydrated, isAuthLoading, isAuthenticated, userId, hasRemoteHydrated]);
 
   const resetToDefaults = useCallback(() => {
     if (!isAdmin) {
@@ -532,8 +541,8 @@ export function useRoutineState() {
       console.error('[useRoutineState] Error clearing localStorage:', err);
     }
 
-    setProtocolList([]);
-    setActiveProtocol('');
+    setRoutineList([]);
+    setActiveRoutine('');
     setQueuedPapers(initialQueuedPapers);
     setRuntime({});
 
@@ -543,7 +552,9 @@ export function useRoutineState() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId,
+          activeRoutineId: '',
           activeProtocolId: '',
+          routines: [],
           protocols: [],
           runtime: {}
         })
@@ -562,17 +573,17 @@ export function useRoutineState() {
   const loadSampleRoutine = useCallback(
     (sampleId: string, options?: { forceRestart?: boolean }) => {
       const sample =
-        sampleProtocolsMap[sampleId] ||
-        PRECALIBRATED_SAMPLE_PROTOCOLS[sampleId] ||
+        sampleRoutinesMap[sampleId] ||
+        PRECALIBRATED_SAMPLE_ROUTINES[sampleId] ||
         sampleProtocols.find((p) => p.id === sampleId) ||
-        protocolList.find((p) => p.id === sampleId);
+        routineList.find((p) => p.id === sampleId);
       if (!sample) {
         toast.error(`Sample routine "${sampleId}" not found`);
         return;
       }
 
       // Ensure every new user or guest starts on Day 1 with clean history and 0 streak
-      const cleanProtocol: Protocol = {
+      const cleanRoutine: Routine = {
         ...sample,
         currentDay: 1,
         dayHistory: [],
@@ -583,20 +594,20 @@ export function useRoutineState() {
         initialMorphingLogs: []
       };
 
-      const initialRuntimeEntry: ProtocolRuntime = {
+      const initialRuntimeEntry: RoutineRuntime = {
         setsDone: {},
-        excludedStepIds: cleanProtocol.initialExcludedStepIds ?? [],
+        excludedStepIds: cleanRoutine.initialExcludedStepIds ?? [],
         feedbackLogs: [],
         morphingLogs: [],
         lastActiveDate: getLocalTodayDateString(),
-        messages: cleanProtocol.initialMessages?.length
-          ? stampSeedMessages(cleanProtocol.initialMessages)
+        messages: cleanRoutine.initialMessages?.length
+          ? stampSeedMessages(cleanRoutine.initialMessages)
           : [
               {
                 id: createId('msg'),
                 role: 'ai',
                 kind: 'routine',
-                content: cleanProtocol.id,
+                content: cleanRoutine.id,
                 timestamp: nowLabel()
               }
             ],
@@ -604,22 +615,22 @@ export function useRoutineState() {
         assistantTyping: false
       };
 
-      let updatedList: Protocol[] = [];
-      setProtocolList((prev) => {
-        const exists = prev.some((p) => p.id === cleanProtocol.id);
+      let updatedList: Routine[] = [];
+      setRoutineList((prev) => {
+        const exists = prev.some((p) => p.id === cleanRoutine.id);
         if (options?.forceRestart) {
           updatedList = exists
-            ? prev.map((p) => (p.id === cleanProtocol.id ? cleanProtocol : p))
-            : [...prev, cleanProtocol];
+            ? prev.map((p) => (p.id === cleanRoutine.id ? cleanRoutine : p))
+            : [...prev, cleanRoutine];
         } else {
-          updatedList = exists ? prev : [...prev, cleanProtocol];
+          updatedList = exists ? prev : [...prev, cleanRoutine];
         }
 
         // Synchronous write to localStorage guarantees persistence even on immediate page refresh
         const keys = getStorageKeys(isAuthenticated ? userId : undefined);
         try {
           window.localStorage.setItem(keys.routines, JSON.stringify(updatedList));
-          window.localStorage.setItem(keys.activeId, cleanProtocol.id);
+          window.localStorage.setItem(keys.activeId, cleanRoutine.id);
         } catch {
           // Ignore write restrictions
         }
@@ -627,16 +638,16 @@ export function useRoutineState() {
         return updatedList;
       });
 
-      setActiveProtocol(cleanProtocol.id);
+      setActiveRoutine(cleanRoutine.id);
 
-      let updatedRuntime: Record<string, ProtocolRuntime> = {};
+      let updatedRuntime: Record<string, RoutineRuntime> = {};
       setRuntime((prev) => {
         if (options?.forceRestart) {
-          updatedRuntime = { ...prev, [cleanProtocol.id]: initialRuntimeEntry };
+          updatedRuntime = { ...prev, [cleanRoutine.id]: initialRuntimeEntry };
         } else {
-          updatedRuntime = prev[cleanProtocol.id]
+          updatedRuntime = prev[cleanRoutine.id]
             ? prev
-            : { ...prev, [cleanProtocol.id]: initialRuntimeEntry };
+            : { ...prev, [cleanRoutine.id]: initialRuntimeEntry };
         }
 
         const keys = getStorageKeys(isAuthenticated ? userId : undefined);
@@ -656,24 +667,24 @@ export function useRoutineState() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userId,
-            activeProtocolId: cleanProtocol.id,
-            activeRoutineId: cleanProtocol.id,
-            protocols: updatedList.length > 0 ? updatedList : [cleanProtocol],
-            routines: updatedList.length > 0 ? updatedList : [cleanProtocol],
-            runtime: Object.keys(updatedRuntime).length > 0 ? updatedRuntime : { [cleanProtocol.id]: initialRuntimeEntry }
+            activeProtocolId: cleanRoutine.id,
+            activeRoutineId: cleanRoutine.id,
+            protocols: updatedList.length > 0 ? updatedList : [cleanRoutine],
+            routines: updatedList.length > 0 ? updatedList : [cleanRoutine],
+            runtime: Object.keys(updatedRuntime).length > 0 ? updatedRuntime : { [cleanRoutine.id]: initialRuntimeEntry }
           })
         }).catch((err) => {
-          console.warn('[loadSampleProtocol] Cloud sync error:', err);
+          console.warn('[loadSampleRoutine] Cloud sync error:', err);
         });
       }
 
       setIsHowToOpen(false);
       const toastMessage = options?.forceRestart
-        ? COPY.howTo.redoToast(cleanProtocol.shortTitle || cleanProtocol.title)
-        : COPY.howTo.loadedToast(cleanProtocol.shortTitle || cleanProtocol.title);
+        ? COPY.howTo.redoToast(cleanRoutine.shortTitle || cleanRoutine.title)
+        : COPY.howTo.loadedToast(cleanRoutine.shortTitle || cleanRoutine.title);
       toast.success(toastMessage);
     },
-    [sampleProtocolsMap, protocolList, isAuthenticated, userId]
+    [sampleRoutinesMap, routineList, isAuthenticated, userId]
   );
 
   const loadSampleProtocol = loadSampleRoutine;
@@ -683,9 +694,10 @@ export function useRoutineState() {
     [loadSampleRoutine]
   );
 
-  const protocol = (protocolList.find((item) => item.id === activeProtocolId) ?? protocolList[0]) || null;
-  const state: ProtocolRuntime = protocol && runtime[protocol.id]
-    ? runtime[protocol.id]
+  const routine = (routineList.find((item) => item.id === activeRoutineId) ?? routineList[0]) || null;
+  const protocol = routine;
+  const state: RoutineRuntime = routine && runtime[routine.id]
+    ? runtime[routine.id]
     : {
         setsDone: {},
         feedbackLogs: [],
@@ -801,9 +813,9 @@ export function useRoutineState() {
       )
     : false;
 
-  const summaries = useMemo<ProtocolSummary[]>(
+  const summaries = useMemo<RoutineSummary[]>(
     () =>
-      protocolList.map((item) => {
+      routineList.map((item) => {
         const itemState = runtime[item.id]?.setsDone ?? {};
         const itemExcluded = runtime[item.id]?.excludedStepIds ?? [];
         const itemDose = runtime[item.id]?.doseMode ?? item.initialDoseMode ?? 'standard';
@@ -823,7 +835,7 @@ export function useRoutineState() {
           todayPercent: toPercent(fraction)
         };
       }),
-    [protocolList, runtime]
+    [routineList, runtime]
   );
 
   const findStep = useCallback(
@@ -901,7 +913,7 @@ export function useRoutineState() {
     const nextStreak = (protocol.streak || 0) + 1;
     const todayStr = getLocalTodayDateString();
 
-    setProtocolList((prev) =>
+    setRoutineList((prev) =>
       prev.map((p) =>
         p.id === protocol.id
           ? {
@@ -1006,7 +1018,7 @@ export function useRoutineState() {
       }
       const todayStr = getLocalTodayDateString();
 
-      setProtocolList((prev) =>
+      setRoutineList((prev) =>
         prev.map((p) =>
           p.id === protocol.id
             ? {
@@ -1115,7 +1127,7 @@ export function useRoutineState() {
         }
       }
 
-      setProtocolList((prev) =>
+      setRoutineList((prev) =>
         prev.map((p) =>
           p.id === protocol.id
             ? {
@@ -1316,7 +1328,7 @@ export function useRoutineState() {
     );
     const allSetsDone = Object.fromEntries(nonExcludedSteps.map((step) => [step.id, step.sets]));
 
-    setProtocolList((prev) =>
+    setRoutineList((prev) =>
       prev.map((p) =>
         p.id === protocol.id
           ? {
@@ -1356,7 +1368,7 @@ export function useRoutineState() {
   const checkMidnightRollover = useCallback(() => {
     const todayStr = getLocalTodayDateString();
 
-    setProtocolList((currentProtocols) => {
+    setRoutineList((currentProtocols) => {
       let hasAnyChanges = false;
       const updated = currentProtocols.map((p) => {
         if (!p.lastActiveDate) {
@@ -1405,7 +1417,7 @@ export function useRoutineState() {
             kind: 'confirmation',
             content: COPY.assistant.reEntryWelcome(daysPassed, nextDay)
           });
-          if (p.id === activeProtocolIdRef.current) {
+          if (p.id === activeRoutineIdRef.current) {
             setIsReEntryOpen(true);
           }
         } else {
@@ -1654,7 +1666,7 @@ export function useRoutineState() {
 
   const addRoutine = useCallback((newRoutine: Routine) => {
     let updatedList: Routine[] = [];
-    setProtocolList((prev) => {
+    setRoutineList((prev) => {
       const exists = prev.some((p) => p.id === newRoutine.id);
       updatedList = exists ? prev.map((p) => (p.id === newRoutine.id ? newRoutine : p)) : [...prev, newRoutine];
 
@@ -1690,7 +1702,7 @@ export function useRoutineState() {
       return updatedRuntime;
     });
 
-    setActiveProtocol(newRoutine.id);
+    setActiveRoutine(newRoutine.id);
 
     if (isAuthenticated && userId) {
       fetch('/api/user/sync', {
@@ -1713,31 +1725,31 @@ export function useRoutineState() {
   const addProtocol = addRoutine;
 
   const uploadPaper = useCallback(
-    async (source: string | File, extractedProtocol?: Protocol): Promise<PaperUploadResult> => {
-      if (extractedProtocol) {
-        setStagingProtocol(extractedProtocol);
+    async (source: string | File, extractedRoutine?: Routine): Promise<PaperUploadResult> => {
+      if (extractedRoutine) {
+        setStagingRoutine(extractedRoutine);
         setStagingError(null);
         setStagingMessages([
           {
             id: createId('msg'),
             role: 'user',
             kind: 'file',
-            content: extractedProtocol.paper?.title || extractedProtocol.title,
+            content: extractedRoutine.paper?.title || extractedRoutine.title,
             timestamp: nowLabel()
           },
           {
             id: createId('msg'),
             role: 'ai',
             kind: 'candidate',
-            content: extractedProtocol.id,
+            content: extractedRoutine.id,
             timestamp: nowLabel()
           }
         ]);
-        return { success: true, eligible: true, protocol: extractedProtocol };
+        return { success: true, eligible: true, routine: extractedRoutine, protocol: extractedRoutine };
       }
 
       const fileName = typeof source === 'string' ? source : source.name;
-      setStagingProtocol(null);
+      setStagingRoutine(null);
       setStagingError(null);
       setIsExtractingPaper(true);
       setExtractingSourceName(fileName);
@@ -1772,7 +1784,7 @@ export function useRoutineState() {
         const extractedRoutine = result.routine || result.protocol;
 
         if (result.eligible && extractedRoutine) {
-          setStagingProtocol(extractedRoutine);
+          setStagingRoutine(extractedRoutine);
           setStagingMessages((prev) => [
             ...prev,
             {
@@ -1826,14 +1838,14 @@ export function useRoutineState() {
 
   const clearStagingError = useCallback(() => {
     setStagingError(null);
-    if (!stagingProtocol) {
+    if (!stagingRoutine) {
       setStagingMessages([]);
     }
-  }, [stagingProtocol]);
+  }, [stagingRoutine]);
 
   const confirmStagingRoutine = useCallback(() => {
-    if (!stagingProtocol) return;
-    const target = stagingProtocol;
+    if (!stagingRoutine) return;
+    const target = stagingRoutine;
     addRoutine(target);
 
     // Persist uploaded paper to unified Firebase papers collection
@@ -1868,16 +1880,16 @@ export function useRoutineState() {
     });
 
     const displayTitle = target.shortTitle || target.title;
-    setStagingProtocol(null);
+    setStagingRoutine(null);
     setStagingMessages([]);
     setStagingError(null);
     toast.success(COPY.assistant.confirmedToast(displayTitle));
-  }, [stagingProtocol, addRoutine, userId]);
+  }, [stagingRoutine, addRoutine, userId]);
 
   const confirmStagingProtocol = confirmStagingRoutine;
 
   const discardStagingRoutine = useCallback(() => {
-    setStagingProtocol(null);
+    setStagingRoutine(null);
     setStagingMessages([]);
     setStagingError(null);
     setIsExtractingPaper(false);
@@ -1888,7 +1900,7 @@ export function useRoutineState() {
 
   const askStagingQuestion = useCallback(
     async (text: string) => {
-      if (!stagingProtocol && !stagingError) return;
+      if (!stagingRoutine && !stagingError) return;
       const userMsg: ChatMessage = {
         id: createId('msg'),
         role: 'user',
@@ -1899,7 +1911,7 @@ export function useRoutineState() {
       setStagingMessages((prev) => [...prev, userMsg]);
       setIsStagingAssistantTyping(true);
 
-      if (!stagingProtocol && stagingError) {
+      if (!stagingRoutine && stagingError) {
         try {
           const res = await fetch('/api/assistant', {
             method: 'POST',
@@ -1961,7 +1973,7 @@ export function useRoutineState() {
         return;
       }
 
-      const target = stagingProtocol!;
+      const target = stagingRoutine!;
 
       try {
         const canUseEdgeGemma = await isEdgeGemmaAvailable();
@@ -1993,6 +2005,7 @@ export function useRoutineState() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             question: text,
+            routineTitle: target.title,
             protocolTitle: target.title,
             shortTitle: target.shortTitle,
             faqs: target.faqs,
@@ -2053,11 +2066,11 @@ export function useRoutineState() {
         setIsStagingAssistantTyping(false);
       }
     },
-    [stagingProtocol, stagingError, extractingSourceName]
+    [stagingRoutine, stagingError, extractingSourceName]
   );
 
   const toggleStagingExcludeStep = useCallback((stepId: string) => {
-    setStagingProtocol((prev) => {
+    setStagingRoutine((prev) => {
       if (!prev) return prev;
       const current = prev.initialExcludedStepIds ?? [];
       const isExcluded = current.includes(stepId);
@@ -2122,7 +2135,7 @@ export function useRoutineState() {
 
         const data = await res.json();
         if (data.success && data.review) {
-          setProtocolList((prev) =>
+          setRoutineList((prev) =>
             prev.map((p) => {
               if (p.id !== protocol.id) return p;
               const existingReviews = p.community?.reviews || [];
@@ -2205,7 +2218,7 @@ export function useRoutineState() {
   const updateGuardrailThreshold = useCallback(
     (threshold: number, message?: string) => {
       if (!protocol || applyGuardrailThreshold(protocol, threshold, message) === protocol) return;
-      setProtocolList((prev) =>
+      setRoutineList((prev) =>
         prev.map((p) => (p.id === protocol.id ? applyGuardrailThreshold(p, threshold, message) : p))
       );
     },
@@ -2213,24 +2226,24 @@ export function useRoutineState() {
   );
 
   const approveProposedWidget = useCallback((proposal: ProposedWidgetSpec) => {
-    const applyApproval = (p: Protocol): Protocol => {
+    const applyApproval = (p: Routine): Routine => {
       if (!p.dataCollectionSpec) return p;
       const matches = p.dataCollectionSpec.some(
-        (f) => f.proposedWidget?.id === proposal.id || (p.id === proposal.protocolId && f.id === proposal.fieldId)
+        (f) => f.proposedWidget?.id === proposal.id || ((p.id === proposal.routineId || p.id === proposal.protocolId) && f.id === proposal.fieldId)
       );
       if (!matches) return p;
       return {
         ...p,
         dataCollectionSpec: p.dataCollectionSpec.map((f) =>
-          f.proposedWidget?.id === proposal.id || (p.id === proposal.protocolId && f.id === proposal.fieldId)
+          f.proposedWidget?.id === proposal.id || ((p.id === proposal.routineId || p.id === proposal.protocolId) && f.id === proposal.fieldId)
             ? { ...f, proposedWidget: { ...proposal, status: 'approved' } }
             : f
         )
       };
     };
 
-    setProtocolList((prev) => prev.map(applyApproval));
-    setStagingProtocol((prev) => (prev ? applyApproval(prev) : null));
+    setRoutineList((prev) => prev.map(applyApproval));
+    setStagingRoutine((prev) => (prev ? applyApproval(prev) : null));
   }, []);
 
   return useMemo(
@@ -2238,17 +2251,17 @@ export function useRoutineState() {
       routines: summaries,
       protocols: summaries,
       queuedPapers,
-      activeRoutineId: protocol?.id ?? '',
-      activeProtocolId: protocol?.id ?? '',
-      setActiveRoutine: setActiveProtocol,
-      setActiveProtocol,
-      routine: protocol,
-      protocol,
-      hasRoutines: protocolList.length > 0,
-      hasProtocols: protocolList.length > 0,
-      currentDay: protocol?.currentDay ?? 1,
-      totalDays: protocol?.totalDays ?? 14,
-      streak: protocol?.streak ?? 0,
+      activeRoutineId: routine?.id ?? '',
+      activeProtocolId: routine?.id ?? '',
+      setActiveRoutine,
+      setActiveProtocol: setActiveRoutine,
+      routine,
+      protocol: routine,
+      hasRoutines: routineList.length > 0,
+      hasProtocols: routineList.length > 0,
+      currentDay: routine?.currentDay ?? 1,
+      totalDays: routine?.totalDays ?? 14,
+      streak: routine?.streak ?? 0,
       messages: state.messages,
       setsDone: state.setsDone,
       feedbackLogs: state.feedbackLogs ?? [],
@@ -2317,8 +2330,8 @@ export function useRoutineState() {
       askQuestion,
       askAboutStep,
       uploadPaper,
-      stagingRoutine: stagingProtocol,
-      stagingProtocol,
+      stagingRoutine,
+      stagingProtocol: stagingRoutine,
       isExtractingPaper,
       extractingSourceName,
       stagingMessages,
@@ -2345,8 +2358,8 @@ export function useRoutineState() {
     [
       summaries,
       queuedPapers,
-      protocol,
-      protocolList.length,
+      routine,
+      routineList.length,
       state.messages,
       state.setsDone,
       state.feedbackLogs,
@@ -2410,7 +2423,7 @@ export function useRoutineState() {
       askQuestion,
       askAboutStep,
       uploadPaper,
-      stagingProtocol,
+      stagingRoutine,
       isExtractingPaper,
       extractingSourceName,
       stagingMessages,
