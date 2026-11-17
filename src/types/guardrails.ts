@@ -3,7 +3,7 @@
  */
 
 export interface GuardrailPolicy {
-  /** Pain score (0-10) above which protocol progression is paused. */
+  /** Pain score (0-10) above which routine progression is paused. */
   painEscalationThreshold: number;
   /** Percent load/dose reduction recommended when threshold is exceeded. */
   loadReductionPercent: number;

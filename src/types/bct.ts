@@ -3,7 +3,7 @@
  * Grounded in Michie et al. (2013), Annals of Behavioral Medicine.
  *
  * Provides accredited behavioral medicine coding for all adaptive features,
- * micro-dosing protocols, and barrier mitigations in ViskotuN1.
+ * micro-dosing routines, and barrier mitigations in ViskotuN1.
  */
 
 export interface BctTaxonomyEntry {

@@ -493,20 +493,20 @@ export function generateFallbackRoutine(source: string): Routine {
     title: cleanTitle,
     shortTitle: cleanTitle.split(' ').slice(0, 2).join(' ').toLowerCase(),
     icon: 'science',
-    phase: COPY.fallbackProtocol.phase,
-    phaseLabel: COPY.fallbackProtocol.phaseLabel,
+    phase: COPY.fallbackRoutine.phase,
+    phaseLabel: COPY.fallbackRoutine.phaseLabel,
     totalDays: 14,
     currentDay: 1,
     streak: 1,
     paper: {
       title: cleanTitle,
       fileName: source.endsWith('.pdf') ? source : `${slug}.pdf`,
-      authors: COPY.fallbackProtocol.authors,
+      authors: COPY.fallbackRoutine.authors,
       year: 2024,
-      journal: COPY.fallbackProtocol.journal,
+      journal: COPY.fallbackRoutine.journal,
       doi: `10.1016/j.jihs.${slug.slice(0, 8)}`,
       sampleSize: 44,
-      trialType: COPY.fallbackProtocol.trialType,
+      trialType: COPY.fallbackRoutine.trialType,
       evidenceBadges: ['rct', 'missing-parameters'],
       pages: 10
     },
@@ -515,63 +515,63 @@ export function generateFallbackRoutine(source: string): Routine {
         id: `${slug}-1`,
         tone: 'orange',
         icon: 'science',
-        action: COPY.fallbackProtocol.step1Action,
-        detail: COPY.fallbackProtocol.step1Detail,
+        action: COPY.fallbackRoutine.step1Action,
+        detail: COPY.fallbackRoutine.step1Detail,
         sets: 1,
         reps: 1,
-        frequency: COPY.fallbackProtocol.step1Frequency,
-        setLabel: COPY.fallbackProtocol.step1SetLabel,
-        perSetLabel: COPY.fallbackProtocol.step1PerSetLabel,
-        statLabel: COPY.fallbackProtocol.step1StatLabel,
-        statValue: COPY.fallbackProtocol.step1StatValue
+        frequency: COPY.fallbackRoutine.step1Frequency,
+        setLabel: COPY.fallbackRoutine.step1SetLabel,
+        perSetLabel: COPY.fallbackRoutine.step1PerSetLabel,
+        statLabel: COPY.fallbackRoutine.step1StatLabel,
+        statValue: COPY.fallbackRoutine.step1StatValue
       },
       {
         id: `${slug}-2`,
         tone: 'yellow',
         icon: 'timer',
-        action: COPY.fallbackProtocol.step2Action,
-        detail: COPY.fallbackProtocol.step2Detail,
+        action: COPY.fallbackRoutine.step2Action,
+        detail: COPY.fallbackRoutine.step2Detail,
         sets: 3,
         reps: 1,
-        frequency: COPY.fallbackProtocol.step2Frequency,
+        frequency: COPY.fallbackRoutine.step2Frequency,
         durationSeconds: 30,
         inferred: true,
         inferredProvenance: {
           tier: 'guideline',
           source: 'ACSM Clinical Guidelines',
-          rationale: COPY.fallbackProtocol.step2Detail
+          rationale: COPY.fallbackRoutine.step2Detail
         }
       }
     ],
     progressionRules: [
       {
         id: `${slug}-rule-1`,
-        condition: COPY.fallbackProtocol.progressionCondition,
-        action: COPY.fallbackProtocol.progressionAction
+        condition: COPY.fallbackRoutine.progressionCondition,
+        action: COPY.fallbackRoutine.progressionAction
       }
     ],
     contraindications: [
       {
         id: `${slug}-c-1`,
-        text: COPY.fallbackProtocol.contraindicationText,
+        text: COPY.fallbackRoutine.contraindicationText,
         severity: 'stop'
       }
     ],
     missingDataFlags: [
       {
         stepId: `${slug}-2`,
-        parameter: COPY.fallbackProtocol.missingParameter,
-        fallback: COPY.fallbackProtocol.missingFallback,
+        parameter: COPY.fallbackRoutine.missingParameter,
+        fallback: COPY.fallbackRoutine.missingFallback,
         sourceGuideline: 'ACSM Clinical Guidelines'
       }
     ],
     dayHistory: [],
     initialSetsDone: { [`${slug}-1`]: 1, [`${slug}-2`]: 0 },
     feedbackMetric: {
-      name: COPY.fallbackProtocol.metricName,
-      label: COPY.fallbackProtocol.metricLabel,
-      eyebrow: COPY.fallbackProtocol.eyebrow,
-      logTitle: COPY.fallbackProtocol.logTitle,
+      name: COPY.fallbackRoutine.metricName,
+      label: COPY.fallbackRoutine.metricLabel,
+      eyebrow: COPY.fallbackRoutine.eyebrow,
+      logTitle: COPY.fallbackRoutine.logTitle,
       minLabel: COPY.feedbackDrawer.minLabel(0),
       maxLabel: COPY.feedbackDrawer.maxLabel(10),
       maxScore: 10,
@@ -608,8 +608,8 @@ export function generateFallbackRoutine(source: string): Routine {
       },
       {
         id: `${slug}-tolerability-scale`,
-        name: COPY.fallbackProtocol.metricName,
-        label: COPY.fallbackProtocol.metricLabel,
+        name: COPY.fallbackRoutine.metricName,
+        label: COPY.fallbackRoutine.metricLabel,
         type: 'scale',
         frequency: 'daily',
         min: 0,
@@ -639,7 +639,7 @@ export function generateFallbackRoutine(source: string): Routine {
       {
         id: `${slug}-msg-3`,
         role: 'ai',
-        kind: 'protocol',
+        kind: 'routine',
         content: slug,
         timestamp: COPY.assistant.timestampJustNow
       }
@@ -649,7 +649,7 @@ export function generateFallbackRoutine(source: string): Routine {
       realWorldEfficacy: 100,
       userCount: 1,
       medianAdherence: 78,
-      dropOffUnit: COPY.fallbackProtocol.dropOffUnit,
+      dropOffUnit: COPY.fallbackRoutine.dropOffUnit,
       peakPeriod: 7,
       dropOff: [
         { period: 1, dropOff: 4 },
