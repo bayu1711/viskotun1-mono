@@ -1,5 +1,5 @@
 /**
- * ViskotuN1 — Gulf Clinical & Behavioral Change Glossary
+ * TrialN1 — Gulf Clinical & Behavioral Change Glossary
  * Aligned with UAE Department of Health (DoH Abu Dhabi), SEHA, and MoHAP clinical communication standards.
  * Used for culturally attuned, non-punitive, and accessible Arabic localization.
  */

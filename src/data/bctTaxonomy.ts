@@ -1,7 +1,7 @@
 import type { BctTaxonomyEntry } from '../types/bct';
 
 /**
- * Standardized BCT Taxonomy v1 Mappings for ViskotuN1
+ * Standardized BCT Taxonomy v1 Mappings for TrialN1
  * Reference: Michie S, et al. The Behavior Change Technique Taxonomy (v1).
  * Annals of Behavioral Medicine, 2013; 46(1):81-95.
  */

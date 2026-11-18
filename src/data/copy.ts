@@ -8,7 +8,7 @@ const ruleCondition = (condition: string) => condition.replace(/^if\s+/i, '').to
 export const COPY = {
   metadata: {
     lang: 'en',
-    title: 'ViskotuN1 // AI Research & Daily Routines',
+    title: 'TrialN1 // AI Research & Daily Routines',
     description:
       'An AI-powered digital experience transforming complex peer-reviewed research papers into executable, adaptive, and personalized routines.',
     keywords: [
@@ -19,14 +19,14 @@ export const COPY = {
       'personalized medicine',
       'rehabilitation'
     ],
-    openGraphTitle: 'ViskotuN1 // AI Research & Daily Routines',
+    openGraphTitle: 'TrialN1 // AI Research & Daily Routines',
     openGraphDescription:
       'Transforming complex research papers into executable daily routines with Viskotu, an adaptive safety companion.'
   },
   brand: {
     mark: '//',
-    name: 'ViskotuN1',
-    initials: 'VN',
+    name: 'TrialN1',
+    initials: 'TN1',
     logoUrl: '/images/viskotun1-logo.png',
     iconUrl: '/images/viskotun1-icon.png'
   },
@@ -210,7 +210,7 @@ export const COPY = {
     escalationShort: `Escalation paused — load/dose reduced ${DEFAULT_LOAD_REDUCTION_PERCENT}% for tomorrow`,
     pausedRecommendation: `Paused — reduce load/dose by ${DEFAULT_LOAD_REDUCTION_PERCENT}% tomorrow.`,
     clinicalDisclaimer:
-      'Medical Disclaimer: ViskotuN1 provides educational routine extraction grounded strictly in human interventional clinical literature. It does not provide medical diagnosis, prescription, or replace personalized clinical supervision from a licensed physician or physical therapist.',
+      'Medical Disclaimer: TrialN1 provides educational routine extraction grounded strictly in human interventional clinical literature. It does not provide medical diagnosis, prescription, or replace personalized clinical supervision from a licensed physician or physical therapist.',
     baselineEscalationAlert:
       `Pain threshold exceeded (≥ ${DEFAULT_ESCALATION_THRESHOLD}/10). Escalation paused. Recommendation: Reduce load by ${DEFAULT_LOAD_REDUCTION_PERCENT}% tomorrow or consult your therapist.`
   },
@@ -351,7 +351,7 @@ export const COPY = {
     eyebrow: 'Behavioral Medicine',
     title: 'BCT Taxonomy v1 Ledger',
     subtitle:
-      'Formal Behavioral Change Techniques (Michie et al. 2013) accredited across ViskotuN1 interventions.',
+      'Formal Behavioral Change Techniques (Michie et al. 2013) accredited across TrialN1 interventions.',
     dialogLabel: 'Behavior Change Techniques Ledger',
     closeButton: 'Close Ledger',
     clusterLabel: 'Taxonomy Cluster',
@@ -394,7 +394,7 @@ export const COPY = {
     printButton: 'Print / save as PDF',
     closeButton: 'Close',
     disclaimer:
-      'ViskotuN1 translates human interventional research into structured daily routines. This summary is intended for personal tracking, coaching, or clinical review and does not constitute medical advice.',
+      'TrialN1 translates human interventional research into structured daily routines. This summary is intended for personal tracking, coaching, or clinical review and does not constitute medical advice.',
     trialCitation: 'Study citation & methodology',
     adherenceAndStreak: 'Adherence & progression',
     prescribedRoutine: 'Prescribed routine & methods',
@@ -428,7 +428,7 @@ export const COPY = {
     dayValue: (day: number) => `Day ${day}`,
     totalDaysValue: (total: number) => `/ ${total}`,
     logScoreMeta: (day: number, score: number) => `Day ${day} · Score ${score}/10`,
-    footerAudit: (doi: string) => `ViskotuN1 • Interventional Human Science • Source: ${doi}`
+    footerAudit: (doi: string) => `TrialN1 • Interventional Human Science • Source: ${doi}`
   },
   shareModal: {
     title: 'Share Clinical Routine',
@@ -653,12 +653,12 @@ export const COPY = {
       answers: {
         whyPrefix: "Here is the gatekeeper's reasoning: ",
         criteria:
-          'ViskotuN1 only builds routines from interventional studies in which human participants followed a defined routine, such as rehabilitation, pharmacology, sleep, nutrition or fasting, cognitive focus, or ergonomics. Upload a study like that (PDF or DOI/PubMed link) and I can extract a routine you can follow.',
+          'TrialN1 only builds routines from interventional studies in which human participants followed a defined routine, such as rehabilitation, pharmacology, sleep, nutrition or fasting, cognitive focus, or ergonomics. Upload a study like that (PDF or DOI/PubMed link) and I can extract a routine you can follow.',
         nonHuman:
           'Results from animal or lab models have not been shown to work the same way in people, so turning them into a routine for you would be guesswork. A human interventional trial that tested the routine directly is needed.',
         scopeNote: "I can only speak to why this paper wasn't suitable, not to its content.",
         outOfScope:
-          "I can only explain why this paper wasn't suitable for ViskotuN1. I can't discuss the study's methods or findings. Upload a human interventional paper and I can help with its routine."
+          "I can only explain why this paper wasn't suitable for TrialN1. I can't discuss the study's methods or findings. Upload a human interventional paper and I can help with its routine."
       }
     },
     suggestionsLabel: 'Suggested questions',
@@ -799,9 +799,9 @@ export const COPY = {
     declinedTitle: 'Paper declined by gatekeeper',
     declinedPrefix: 'Declined: ',
     declinedNonHuman:
-      'This study appears to be non-human (in vitro or animal model) or purely observational. ViskotuN1 only builds executable routines from interventional studies conducted on human participants.',
+      'This study appears to be non-human (in vitro or animal model) or purely observational. TrialN1 only builds executable routines from interventional studies conducted on human participants.',
     declinedTheoretical:
-      'This paper appears to be theoretical physics, mathematics, or cosmology without human subject testing. ViskotuN1 is specialized for human clinical, rehabilitation, and lifestyle interventions.',
+      'This paper appears to be theoretical physics, mathematics, or cosmology without human subject testing. TrialN1 is specialized for human clinical, rehabilitation, and lifestyle interventions.',
     errorTitle: 'Extraction failed',
     errorGeneral:
       'Could not extract a routine from this document. Please verify it is an interventional study or try another PDF.',
@@ -815,15 +815,15 @@ export const COPY = {
     paperLookupFailed: 'Could not reach Europe PMC to fetch this paper. Try again or upload the PDF.',
     modelUnavailable: 'The paper was found, but the extraction model is busy right now. Try again in a minute.',
     matchedBannedKeyword: (keyword: string, version: string) =>
-      `Paper declined: Matched restricted non-human / theoretical policy criterion ("${keyword}"). ViskotuN1 enforces interventional human science only per clinical policy v${version}.`,
+      `Paper declined: Matched restricted non-human / theoretical policy criterion ("${keyword}"). TrialN1 enforces interventional human science only per clinical policy v${version}.`,
     declinedAnimalReason:
-      'Declined: Non-human animal or in-vitro study. ViskotuN1 specializes strictly in interventional studies with human participants (clinical rehab, pharmacology, nutrition, sleep, cognitive habits).',
+      'Declined: Non-human animal or in-vitro study. TrialN1 specializes strictly in interventional studies with human participants (clinical rehab, pharmacology, nutrition, sleep, cognitive habits).',
     declinedTheoreticalReason:
-      'Declined: Theoretical physics, mathematics, or non-interventional topic. ViskotuN1 only builds executable routines from interventional studies conducted on human participants.',
+      'Declined: Theoretical physics, mathematics, or non-interventional topic. TrialN1 only builds executable routines from interventional studies conducted on human participants.',
     declinedAnimalModel:
-      'Declined: Non-human / rodent model. This is a preclinical animal study, so its methodology was never tested on people. ViskotuN1 only builds routines from interventional studies with human participants.',
+      'Declined: Non-human / rodent model. This is a preclinical animal study, so its methodology was never tested on people. TrialN1 only builds routines from interventional studies with human participants.',
     declinedInVitro:
-      'Declined: In vitro / cell culture study. Results from cells in a dish do not tell you what dose, schedule or safety limits apply to a person. ViskotuN1 only builds routines from interventional studies with human participants.',
+      'Declined: In vitro / cell culture study. Results from cells in a dish do not tell you what dose, schedule or safety limits apply to a person. TrialN1 only builds routines from interventional studies with human participants.',
     declinedTheoreticalScience:
       'Declined: Theoretical / non-human science. This paper studies physics, mathematics or another non-clinical field and contains no routine that a person can follow.',
     declinedObservational:
@@ -834,7 +834,7 @@ export const COPY = {
     heroEyebrow: 'Evidence into action',
     heroTitle: 'Live healthier with daily routines from real human science.',
     heroSubtitle:
-      'ViskotuN1 converts dense, peer-reviewed human clinical research into simple, colorful daily habits with voice coaching, parameter auditing, and zero guesswork.',
+      'TrialN1 converts dense, peer-reviewed human clinical research into simple, colorful daily habits with voice coaching, parameter auditing, and zero guesswork.',
     heroCtaPrimary: 'Start your routine — Free',
     heroCtaSecondary: 'See health domains',
     heroTrustPoints: [
@@ -919,7 +919,7 @@ export const COPY = {
     ],
     rigorTitle: 'Built on uncompromising scientific rigor',
     rigorSubtitle:
-      'ViskotuN1 is engineered strictly for human health interventions—not theoretical physics or animal models.',
+      'TrialN1 is engineered strictly for human health interventions—not theoretical physics or animal models.',
     ctaGuest: 'Try as guest',
     ctaLogin: 'Sign in',
     ctaSignup: 'Create account',
@@ -943,7 +943,7 @@ export const COPY = {
     },
     demoTitle: 'Ready to build science-backed daily habits?',
     demoSubtitle: 'Drop any clinical research PDF or explore pre-loaded clinical routines with zero setup.',
-    architectureTitle: 'How ViskotuN1 works',
+    architectureTitle: 'How TrialN1 works',
     capabilitiesTitle: 'Built for clinical rigour',
     nav: {
       howItWorks: 'How it works',
@@ -965,7 +965,7 @@ export const COPY = {
       step4Title: 'Clinical Adherence Brief',
       step4Body: 'One-page summary of adherence trends, biomarker improvements, and pain logs formatted for physician review.'
     },
-    footerTagline: 'ViskotuN1 · Interventional human research intelligence',
+    footerTagline: 'TrialN1 · Interventional human research intelligence',
     footerSignIn: 'Sign in',
     footerCreateAccount: 'Create account',
     footerGithub: 'GitHub',
@@ -973,7 +973,7 @@ export const COPY = {
   },
   uaeLanding: {
     meta: {
-      title: 'ViskotuN1 UAE // Sustaining Healthy Behaviors in Abu Dhabi',
+      title: 'TrialN1 UAE // Sustaining Healthy Behaviors in Abu Dhabi',
       description:
         'Future Health Digital Innovation Challenge: Adaptive behavioral health platform tailored for Abu Dhabi & the UAE. Eliminating streak collapse through clinical micro-dosing, extreme heat resilience, and Ramadan synchronization.'
     },
@@ -981,7 +981,7 @@ export const COPY = {
     challengeSubbadge: 'Focus Area 03: Wellbeing · Challenge 09: Sustaining Healthy Behaviors',
     heroTitle: 'Sustaining Healthy Behaviors in Abu Dhabi & the UAE — Without Punitive Streaks.',
     heroSubtitle:
-      'Extreme summer heat, rotating shift work, and regional lifestyle patterns break rigid fitness apps. ViskotuN1 adapts your clinical routines with micro-dosing and non-punitive re-entry so your momentum never resets to zero.',
+      'Extreme summer heat, rotating shift work, and regional lifestyle patterns break rigid fitness apps. TrialN1 adapts your clinical routines with micro-dosing and non-punitive re-entry so your momentum never resets to zero.',
     ctaStartTrial: 'Start UAE Adapted Routine',
     ctaExploreRoutines: 'Explore Clinical Routines',
     backToGlobal: 'Global Edition',
@@ -1007,7 +1007,7 @@ export const COPY = {
       traditionalResultBody:
         'Missed the prescribed 45-min gym session. Streak drops to zero. 82% of users abandon the habit within 14 days due to the abstinence violation effect.',
       traditionalBadge: 'Binary Punishment',
-      viskotuAppTitle: 'ViskotuN1 Adaptive Engine',
+      viskotuAppTitle: 'TrialN1 Adaptive Engine',
       viskotuResultTitle: 'Streak Maintained: Day 19',
       viskotuResultBody:
         'Barrier detected. The routine automatically scales down to a 4-minute indoor mobility micro-dose. Zero shame, 100% habit momentum conserved.',
@@ -1423,12 +1423,12 @@ export const COPY = {
     buttonLabel: 'How to use & trending papers',
     buttonShort: 'How to',
     buttonExploreSamples: 'Explore trending papers',
-    dialogLabel: 'How to use ViskotuN1 & trending research papers',
-    title: 'How ViskotuN1 Works',
+    dialogLabel: 'How to use TrialN1 & trending research papers',
+    title: 'How TrialN1 Works',
     eyebrow: 'User guide & trending clinical research papers',
     badge: 'Interactive Research Pipeline',
     intro:
-      'ViskotuN1 converts dense, peer-reviewed human interventional research into executable daily routines with zero hallucinated gaps and Viskotu, an evidence-grounded safety companion.',
+      'TrialN1 converts dense, peer-reviewed human interventional research into executable daily routines with zero hallucinated gaps and Viskotu, an evidence-grounded safety companion.',
     tabs: {
       guide: 'How it works',
       samples: 'Trending papers',
@@ -1480,7 +1480,7 @@ export const COPY = {
     featuresHeader: 'Trial Endpoints & Morphing UI Tested:',
     scopeTitle: 'Strict Gatekeeper Scope',
     scopeSubtitle:
-      'ViskotuN1 specializes strictly in Interventional Human Science. Theoretical topics and non-human animal models are safely rejected.',
+      'TrialN1 specializes strictly in Interventional Human Science. Theoretical topics and non-human animal models are safely rejected.',
     acceptedHeader: 'Accepted Topics (Eligible)',
     acceptedList: [
       'Musculoskeletal & physical therapy rehabilitation routines',
@@ -1506,7 +1506,7 @@ export const COPY = {
     welcomeEyebrow: 'Getting started',
     welcomeTitle: 'Turn clinical research into daily routines',
     welcomeSubtitle:
-      'ViskotuN1 ingests peer-reviewed clinical research and transforms it into executable, adaptive daily health routines. Start fresh with your own research PDF or pick from top trending clinical papers in our database.',
+      'TrialN1 ingests peer-reviewed clinical research and transforms it into executable, adaptive daily health routines. Start fresh with your own research PDF or pick from top trending clinical papers in our database.',
     ctaUpload: 'Upload research paper',
     ctaHowTo: 'How to & trending papers',
     dropPrompt: 'Drop a research PDF here to extract',

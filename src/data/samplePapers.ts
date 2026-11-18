@@ -201,7 +201,7 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     openAccessUrl: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8465477/',
     pdfUrl: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8465477/pdf/41598_2021_98555-5.pdf',
     summary:
-      'Preclinical in vivo study in mice evaluating hypertrophy from weighted wheel pulling. Used to test the ViskotuN1 AI safety gatekeeper.',
+      'Preclinical in vivo study in mice evaluating hypertrophy from weighted wheel pulling. Used to test the TrialN1 AI safety gatekeeper.',
     featuresTested: [
       'Triggers automated Gatekeeper rejection',
       'Firestore Policy Ledger keyword detection (rodent / mouse)',
