@@ -40,8 +40,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: COPY.brand.logoUrl,
-        width: 1013,
-        height: 246,
+        width: 1153,
+        height: 302,
         alt: COPY.brand.name,
       },
     ],
