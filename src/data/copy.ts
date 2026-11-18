@@ -982,9 +982,129 @@ export const COPY = {
     heroTitle: 'Sustaining Healthy Behaviors in Abu Dhabi & the UAE — Without Punitive Streaks.',
     heroSubtitle:
       'Extreme summer heat, rotating shift work, and regional lifestyle patterns break rigid fitness apps. TrialN1 adapts your clinical routines with micro-dosing and non-punitive re-entry so your momentum never resets to zero.',
-    ctaStartTrial: 'Start UAE Adapted Routine',
-    ctaExploreRoutines: 'Explore Clinical Routines',
+    ctaStartTrial: 'Start UAE routine — Free',
+    ctaExploreRoutines: 'See UAE adaptations',
     backToGlobal: 'Global Edition',
+    heroTrustPoints: [
+      'Zero streak shame · 48°C & Ramadan adaptive',
+      '100% human interventional trials',
+      'Bilingual English & Arabic RTL support'
+    ],
+    interactivePreview: {
+      tag: 'UAE Preview',
+      title: "Today's adapted routine",
+      progressLabel: 'Progress today',
+      step1Action: 'Indoor AC Isometric Mobility',
+      step1Detail: 'ACSM Heat Fallback · 48°C midday swap',
+      step1Meta: '4 min micro-dose',
+      step2Action: 'Post-Iftar Hydration & Light Pacing',
+      step2Detail: 'Gulf Endocrine Sync · Circadian timing',
+      step2Meta: '5 min session',
+      tryHint: 'Tap a step to check it off.',
+      allDone: 'Streak preserved. Nice work.'
+    },
+    domainsTitle: 'Built for everyday life in the UAE',
+    domainsSubtitle:
+      'What we engineered specifically for Abu Dhabi’s climate, work shifts, and cultural rhythm.',
+    domains: [
+      {
+        id: 'heat',
+        tag: 'Climate Resilience',
+        title: 'Thermal & 48°C Heat Adaptation',
+        description:
+          'Automatically swaps outdoor cardio for indoor air-conditioned micro-routines during extreme Gulf summer heat.',
+        tone: 'orange' as const,
+        stat: 'Indoor micro-dose swaps',
+        image: '/images/image2.png',
+        imageAlt: 'Participant demonstrating indoor mobility and joint rehabilitation stretch'
+      },
+      {
+        id: 'ramadan',
+        tag: 'Chronobiology',
+        title: 'Ramadan Circadian Sync',
+        description:
+          'Aligns hydration, low-glycemic nutrient timing, and light exposure around Suhoor and Iftar windows.',
+        tone: 'yellow' as const,
+        stat: 'Suhoor & Iftar timing'
+      },
+      {
+        id: 'midwakh',
+        tag: 'Harm Reduction',
+        title: 'Midwakh, Dokha & Shisha Tapering',
+        description:
+          'Clinical behavioral substitution, urge surfing, and weekly step-down routines for regional tobacco habits.',
+        tone: 'sky' as const,
+        stat: '42-day tapering plan'
+      },
+      {
+        id: 'shifts',
+        tag: 'Shift Recovery',
+        title: '14-Hour Shift Anchoring',
+        description:
+          'Protects circadian consistency for Abu Dhabi healthcare and energy-sector workers on rotating shifts.',
+        tone: 'lavender' as const,
+        stat: 'Decompression routines'
+      },
+      {
+        id: 'reentry',
+        tag: 'Zero Streak Shame',
+        title: 'Non-Punitive Re-Entry',
+        description:
+          'Multi-day breaks trigger a gentle 3-minute micro-dose check-in instead of resetting your progress to zero.',
+        tone: 'peach' as const,
+        stat: 'Streak conserved'
+      },
+      {
+        id: 'arabic',
+        tag: 'Bilingual UX',
+        title: 'Arabic RTL & Local Tagging',
+        description:
+          'Full Arabic translation with RTL layout and regional lifestyle tags tailored to Abu Dhabi & UAE residents.',
+        tone: 'mint' as const,
+        stat: 'EN | العربية ready'
+      }
+    ],
+    architectureTitle: 'How the UAE edition works',
+    steps: {
+      step1Number: '01',
+      step1Title: 'UAE-Calibrated Clinical Trials',
+      step1Body:
+        'Includes pre-calibrated routines for thermal hydration, Ramadan metabolic stability, and Midwakh/Dokha tapering alongside any uploaded PDF.',
+      step2Number: '02',
+      step2Title: 'Regional Context & Barrier Detection',
+      step2Body:
+        'Accounts for 45°C+ summer heat, rotating 12–14 hour shifts, and fasting schedules before prescribing daily sets.',
+      step3Number: '03',
+      step3Title: '3-Minute Micro-Dosing & Re-Entry',
+      step3Body:
+        'Scales down to indoor air-conditioned micro-doses when life gets disrupted so your habit loop stays intact.',
+      step4Number: '04',
+      step4Title: 'SEHA & Cleveland Clinic Brief',
+      step4Body:
+        'Exports a 1-page clinical adherence and biofeedback summary formatted for consultations at SEHA, CCAD, and SSMC.'
+    },
+    scopeBadge: 'Grounded in Gulf & global human clinical evidence',
+    rigorTitle: 'Built for Abu Dhabi clinical rigor',
+    rigorSubtitle:
+      'Every UAE adaptation is mapped to peer-reviewed human guidelines—never generic fitness streaks or guesswork.',
+    scopeNote:
+      'Our UAE routines follow ACSM thermal safety thresholds, Gulf Endocrine Society Ramadan guidance, and Cochrane tobacco harm-reduction protocols, aligned with ADPHC standards.',
+    capabilitiesTitle: 'What we built for the UAE',
+    features: {
+      gatekeeperTitle: 'Indoor Heat Micro-Dosing',
+      gatekeeperBody:
+        'Replaces outdoor exertion with 3–4 minute indoor AC isometric and mobility steps when temperatures spike.',
+      auditingTitle: 'Ramadan & Shift Synchronization',
+      auditingBody:
+        'Shifts hydration, light exposure, and activity windows smoothly around Suhoor, Iftar, and rotating shift schedules.',
+      safetyTitle: 'Midwakh & Shisha Harm Reduction',
+      safetyBody:
+        'Applies evidence-based urge surfing and tactile substitution to step down high-nicotine Dokha and social shisha use.',
+      summaryTitle: 'SEHA / CCAD Physician Brief',
+      summaryBody:
+        'Generates a clean 1-page adherence, micro-dose conversion, and biofeedback summary in English or Arabic.'
+    },
+    footerTagline: 'TrialN1 · Abu Dhabi & UAE Edition',
     trustMetrics: {
       noStreakBreakTitle: 'Zero Streak Shame',
       noStreakBreakDesc: 'Lapses trigger adaptive re-entry instead of resetting your days to 0.',
