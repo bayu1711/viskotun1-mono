@@ -1,4 +1,4 @@
-# ViskotuN1
+# TrialN1
 
 An AI-powered digital experience transforming complex peer-reviewed research papers into executable, adaptive, and personalized health and rehabilitation routines.
 
@@ -8,7 +8,7 @@ Built with **Next.js 14 (App Router)**, **TypeScript**, and **Tailwind CSS**, de
 
 ## Overview
 
-Peer-reviewed clinical literature is notoriously dense and difficult for patients and athletes to follow safely. **ViskotuN1** bridges this gap by:
+Peer-reviewed clinical literature is notoriously dense and difficult for patients and athletes to follow safely. **TrialN1** bridges this gap by:
 - **Multimodal Paper Ingestion & Gatekeeping**: Ingesting scientific PDFs and full-text links, isolating actionable methods, dosing, tempo, and contraindications while strictly rejecting non-human (animal/in-vitro) or non-interventional studies—complete with an interactive **Suitability Q&A** flow explaining why a declined paper is ineligible.
 - **The "Morphing" Pipeline (Schema-Driven Adaptive UI & AI Widget Oversight)**: Dynamically generating bespoke data collection widgets and dashboard analytics tailored to the study's endpoints—spanning 6 core clinical primitives (`scale`, `photo`, `numeric`, `timer`, `multichoice`, `boolean`) plus **AI-Proposed Custom Widgets (`ProposedWidgetSpec`)** governed by a human-in-the-loop administrator approval queue.
 - **Canonical Paper Registry & Semantic Routine Versioning (`v1.0` → `v1.1`)**: Deduplicating papers by normalized DOI and title fingerprint so all participants tracking the same study share a single canonical routine, pooling real-world efficacy telemetry, drop-off curves, and a public version changelog updated via AI-verified community corrections.
@@ -20,7 +20,7 @@ Peer-reviewed clinical literature is notoriously dense and difficult for patient
 
 ## The "Morphing" Pipeline (Schema-Driven Adaptive UI & AI Widget Oversight)
 
-A core innovation of ViskotuN1 is **Schema-Driven Adaptive UI** (Generative UI). Instead of forcing every clinical study into an identical generic slider or checkbox, the research paper dynamically constructs its own user interface—and can propose brand-new custom widgets when a study measures a specialized clinical endpoint:
+A core innovation of TrialN1 is **Schema-Driven Adaptive UI** (Generative UI). Instead of forcing every clinical study into an identical generic slider or checkbox, the research paper dynamically constructs its own user interface—and can propose brand-new custom widgets when a study measures a specialized clinical endpoint:
 
 ```text
 Research Paper (PDF / Full-Text Link)
@@ -65,7 +65,7 @@ Research Paper (PDF / Full-Text Link)
 
 ## Canonical Paper Registry, Semantic Versioning & Community Corrections
 
-When multiple users upload or study the same peer-reviewed paper, ViskotuN1 prevents fragmented duplicate routines through a **Canonical Paper Registry** (`src/server/routineRegistry.ts`) paired with **Semantic Routine Versioning**:
+When multiple users upload or study the same peer-reviewed paper, TrialN1 prevents fragmented duplicate routines through a **Canonical Paper Registry** (`src/server/routineRegistry.ts`) paired with **Semantic Routine Versioning**:
 
 ```text
 User Uploads PDF or Pastes Paper URL
@@ -103,7 +103,7 @@ User Uploads PDF or Pastes Paper URL
 
 ## Hybrid AI Architecture: Cloud Gemini + Edge Gemma
 
-ViskotuN1 employs a **Hybrid AI Tiering** model designed to optimize cost, resilience, latency, and patient privacy:
+TrialN1 employs a **Hybrid AI Tiering** model designed to optimize cost, resilience, latency, and patient privacy:
 
 ```text
                                   User Action
@@ -137,7 +137,7 @@ ViskotuN1 employs a **Hybrid AI Tiering** model designed to optimize cost, resil
 
 ## Dynamic Guardrail Policy Ledger & Widget Oversight (Google Cloud Firestore)
 
-In safety-critical clinical and health applications, hardcoded thresholds in code are insufficient when medical advisory guidelines update or when AI proposes novel UI widgets. ViskotuN1 features a **Dynamic Guardrail Policy Ledger** backed by **Google Cloud Firestore**:
+In safety-critical clinical and health applications, hardcoded thresholds in code are insufficient when medical advisory guidelines update or when AI proposes novel UI widgets. TrialN1 features a **Dynamic Guardrail Policy Ledger** backed by **Google Cloud Firestore**:
 
 ```text
                          ┌─────────────────────────────────────┐
@@ -173,7 +173,7 @@ In safety-critical clinical and health applications, hardcoded thresholds in cod
 
 ## Zero-Hallucination Parameter Resolution (3-Tier Clinical Pipeline)
 
-When academic papers describe interventions in their Methods section, authors frequently omit minor execution parameters (e.g., stating *"participants performed static stretching"* without publishing hold duration or sets). Rather than silently hallucinating numbers or breaking routine execution, ViskotuN1 executes a deterministic **3-Tier Resolution Pipeline**:
+When academic papers describe interventions in their Methods section, authors frequently omit minor execution parameters (e.g., stating *"participants performed static stretching"* without publishing hold duration or sets). Rather than silently hallucinating numbers or breaking routine execution, TrialN1 executes a deterministic **3-Tier Resolution Pipeline**:
 
 ```text
 Paper Omission Detected (e.g., Calf Stretch hold duration missing)
@@ -261,7 +261,7 @@ npm run start
 
 ## Testing & Authentication Modes Guide
 
-ViskotuN1 offers multiple authentication and testing pathways designed for evaluators, clinical researchers, patients, and administrators. You can test each tier without needing pre-existing credentials.
+TrialN1 offers multiple authentication and testing pathways designed for evaluators, clinical researchers, patients, and administrators. You can test each tier without needing pre-existing credentials.
 
 ### Authentication Pathways
 
@@ -319,7 +319,7 @@ ViskotuN1 offers multiple authentication and testing pathways designed for evalu
 
 ### Google Cloud Run Deployment
 
-ViskotuN1 uses Next.js 14 `output: 'standalone'` and a multi-stage Dockerfile producing a minimal (<150MB) production container image.
+TrialN1 uses Next.js 14 `output: 'standalone'` and a multi-stage Dockerfile producing a minimal (<150MB) production container image.
 
 #### 1. One-Click Deploy via Google Cloud Run
 Deploy directly from local source to Google Cloud Run using Cloud Build:

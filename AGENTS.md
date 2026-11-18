@@ -1,6 +1,6 @@
-# ViskotuN1 — AI Agent Guidelines (`AGENTS.md`)
+# TrialN1 — AI Agent Guidelines (`AGENTS.md`)
 
-This document establishes the architectural principles, engineering standards, and operational guidelines for any AI agent or developer working on the **ViskotuN1** codebase.
+This document establishes the architectural principles, engineering standards, and operational guidelines for any AI agent or developer working on the **TrialN1** codebase.
 
 ---
 
@@ -25,7 +25,7 @@ This document establishes the architectural principles, engineering standards, a
   - Window- or canvas-measuring libraries (such as Recharts in [`DropOffChart.tsx`](file:///src/components/community/DropOffChart.tsx)) must be loaded with `dynamic(() => import(...), { ssr: false })` to avoid hydration mismatches.
 
 ### C. Domain Modeling: Interventional Human Science Only
-- **Scope Guardrail**: ViskotuN1 specializes strictly in **Interventional Human Research** (clinical rehabilitation, pharmacology, sleep hygiene, nutrition/fasting, cognitive focus, ergonomics).
+- **Scope Guardrail**: TrialN1 specializes strictly in **Interventional Human Research** (clinical rehabilitation, pharmacology, sleep hygiene, nutrition/fasting, cognitive focus, ergonomics).
 - **Reject Non-Actionable Papers**: Do not generate hallucinated routines for theoretical physics, macroeconomics, or pure math. The system must gracefully reject papers that lack an actionable routine applied to human participants.
 
 ### D. React Lifecycle & Memory Safety

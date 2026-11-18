@@ -10,7 +10,7 @@ Adults who follow a study-based health routine on their own, most often Achilles
 
 ## Product Purpose
 
-ViskotuN1 turns peer-reviewed interventional human research into a simple daily routine. It tracks sets, adherence and discomfort, pauses progression when pain reaches the safety threshold, and answers questions from the paper's Methods section. Success means a user follows the routine correctly for its full length, logs honestly, and never gets advice the paper does not support.
+TrialN1 turns peer-reviewed interventional human research into a simple daily routine. It tracks sets, adherence and discomfort, pauses progression when pain reaches the safety threshold, and answers questions from the paper's Methods section. Success means a user follows the routine correctly for its full length, logs honestly, and never gets advice the paper does not support.
 
 ## Brand Personality
 
