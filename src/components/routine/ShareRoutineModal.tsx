@@ -100,8 +100,8 @@ export function ShareRoutineModal() {
 
   const handleNativeShare = async () => {
     await triggerNativeShare({
-      title: `ViskotuN1 — ${displayTitle}`,
-      text: `Follow this evidence-grounded clinical routine on ViskotuN1: "${displayTitle}"`,
+      title: `TrialN1 — ${displayTitle}`,
+      text: `Follow this evidence-grounded clinical routine on TrialN1: "${displayTitle}"`,
       url: shareUrl
     });
   };

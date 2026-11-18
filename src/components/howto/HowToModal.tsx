@@ -224,7 +224,7 @@ export function HowToModal() {
             {/* Footer */}
             <div className="flex items-center justify-between border-t border-ink/10 bg-white px-6 py-3">
               <p className="text-2xs text-ink/60">
-                ViskotuN1 · Interventional Human Science Pipeline
+                TrialN1 · Interventional Human Science Pipeline
               </p>
               <PillButton size="sm" variant="outline" onClick={closeHowTo}>
                 {COPY.policyLedger.cancel}

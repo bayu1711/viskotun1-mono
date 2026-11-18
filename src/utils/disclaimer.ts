@@ -10,7 +10,7 @@ export function stripClinicalDisclaimer(text: string): string {
 
   // Match and strip any Clinical Advisory / Medical Disclaimer markdown header or text block
   cleaned = cleaned.replace(
-    /(?:(?:\*{1,3}|_{1,3})?\s*(?:\*{2}|_{2})?Clinical Advisory:?(?:\*{2}|_{2})?:?\s*)?(?:Medical Disclaimer:?\s*)?ViskotuN1 provides educational routine extraction grounded strictly in human interventional clinical literature[\s\S]*?(?:licensed physician or physical therapist\.?)/gi,
+    /(?:(?:\*{1,3}|_{1,3})?\s*(?:\*{2}|_{2})?Clinical Advisory:?(?:\*{2}|_{2})?:?\s*)?(?:Medical Disclaimer:?\s*)?(?:TrialN1|ViskotuN1) provides educational routine extraction grounded strictly in human interventional clinical literature[\s\S]*?(?:licensed physician or physical therapist\.?)/gi,
     ''
   );
 

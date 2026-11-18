@@ -817,7 +817,7 @@ export function UaeLandingView() {
               unoptimized
               className="h-5 w-5 object-contain"
             />
-            <p>ViskotuN1 · Abu Dhabi & UAE Edition</p>
+            <p>TrialN1 · Abu Dhabi & UAE Edition</p>
           </div>
           <div className="flex items-center gap-5">
             <Link

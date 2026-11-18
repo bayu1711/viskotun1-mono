@@ -21,7 +21,7 @@ const displayFont = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://viskotun1.app'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://trialn1.app'),
   title: COPY.metadata.title,
   description: COPY.metadata.description,
   keywords: [...COPY.metadata.keywords],

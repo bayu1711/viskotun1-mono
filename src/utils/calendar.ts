@@ -81,7 +81,7 @@ export function buildRoutineCalendarDescription(routine: Routine): string {
   const lines: string[] = [];
 
   const displayTitle = routine.shortTitle || routine.title;
-  lines.push(`ViskotuN1 — ${displayTitle}`);
+  lines.push(`TrialN1 — ${displayTitle}`);
   lines.push(`Trial: ${routine.paper?.title || routine.title}`);
   if (routine.paper?.doi) {
     lines.push(`DOI: https://doi.org/${routine.paper.doi}`);
@@ -105,7 +105,7 @@ export function buildRoutineCalendarDescription(routine: Routine): string {
   }
 
   lines.push('');
-  lines.push('Track adherence and biofeedback: https://viskotun1.app/routine');
+  lines.push('Track adherence and biofeedback: https://trialn1.app/routine');
 
   return lines.join('\n');
 }
@@ -124,14 +124,14 @@ export function generateIcsCalendar(routine: Routine, options: CalendarExportOpt
 
   const totalDays = Math.max(1, routine.totalDays ?? 14);
   const title = routine.shortTitle || routine.title;
-  const summary = `ViskotuN1: ${title}`;
+  const summary = `TrialN1: ${title}`;
   const description = escapeIcsText(buildRoutineCalendarDescription(routine));
-  const uid = `viskotun1-${routine.id}-${now.getTime()}@viskotun1.app`;
+  const uid = `trialn1-${routine.id}-${now.getTime()}@trialn1.app`;
 
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//ViskotuN1//Clinical Routine Calendar//EN',
+    'PRODID:-//TrialN1//Clinical Routine Calendar//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'BEGIN:VEVENT',
@@ -165,7 +165,7 @@ export function downloadIcsFile(routine: Routine, options: CalendarExportOptions
     const link = document.createElement('a');
     link.href = url;
     const safeSlug = (routine.shortTitle || routine.id).toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    link.download = `viskotun1-${safeSlug}.ics`;
+    link.download = `trialn1-${safeSlug}.ics`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -188,7 +188,7 @@ export function getGoogleCalendarUrl(routine: Routine, options: CalendarExportOp
   const end = new Date(start.getTime() + duration * 60 * 1000);
 
   const totalDays = Math.max(1, routine.totalDays ?? 14);
-  const title = `ViskotuN1: ${routine.shortTitle || routine.title}`;
+  const title = `TrialN1: ${routine.shortTitle || routine.title}`;
   const details = buildRoutineCalendarDescription(routine);
 
   const datesParam = `${formatGoogleCalendarDateTime(start)}/${formatGoogleCalendarDateTime(end)}`;
