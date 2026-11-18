@@ -54,13 +54,6 @@ export function AppShell({ children }: AppShellProps) {
           <ErrorBoundary>{children}</ErrorBoundary>
         </main>
         <AssistantSheet />
-        <FeedbackDrawer />
-        <CommunityReviewDrawer />
-        <PolicyLedgerDrawer />
-        <HowToModal />
-        <ReEntryModal />
-        <BctLedgerDrawer />
-        <ShareRoutineModal />
         <FileDropOverlay visible={isDragging} />
       </div>
     );

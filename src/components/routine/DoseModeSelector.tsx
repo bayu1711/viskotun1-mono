@@ -47,7 +47,12 @@ export function DoseModeSelector({ className }: { className?: string }) {
         <button
           type="button"
           onClick={openReEntryModal}
-          className="inline-flex items-center gap-1 text-3xs font-medium text-ink/70 hover:text-ink transition-colors underline decoration-dotted"
+          className={cn(
+            'inline-flex items-center gap-1 text-3xs transition-colors cursor-pointer',
+            pendingReEntryCheckin
+              ? 'rounded-full bg-mint/50 px-2.5 py-0.5 font-semibold text-ink hover:bg-mint'
+              : 'font-medium text-ink/70 hover:text-ink underline decoration-dotted'
+          )}
         >
           <Icon icon={HelpOutlineOutlinedIcon} size="xs" />
           <span>{locale === 'ar' ? 'تعطل جدولك؟ تكييف الخطة' : 'Life disrupted? Adapt routine'}</span>

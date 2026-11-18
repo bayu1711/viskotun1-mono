@@ -120,6 +120,8 @@ export function useRoutineState() {
 
   const activeRoutineIdRef = useRef(activeRoutineId);
   activeRoutineIdRef.current = activeRoutineId;
+  const routineListRef = useRef(routineList);
+  routineListRef.current = routineList;
   const runtimeRef = useRef(runtime);
   runtimeRef.current = runtime;
   const rolloverTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -1362,78 +1364,83 @@ export function useRoutineState() {
 
   const checkMidnightRollover = useCallback(() => {
     const todayStr = getLocalTodayDateString();
+    const currentRoutines = routineListRef.current;
+    if (currentRoutines.length === 0) return;
 
-    setRoutineList((currentRoutines) => {
-      let hasAnyChanges = false;
-      const updated = currentRoutines.map((p) => {
-        if (!p.lastActiveDate) {
-          hasAnyChanges = true;
-          return { ...p, lastActiveDate: todayStr };
-        }
+    let hasAnyChanges = false;
+    const runtimeUpdates: Array<{
+      id: string;
+      isMultiDayLapse: boolean;
+      daysPassed: number;
+      nextDay: number;
+    }> = [];
 
-        const daysPassed = getDaysDifference(p.lastActiveDate, todayStr);
-        if (daysPassed <= 0) return p;
-
+    const updated = currentRoutines.map((p) => {
+      if (!p.lastActiveDate) {
         hasAnyChanges = true;
-        const currentRt = runtimeRef.current[p.id];
-        const currentSets = currentRt?.setsDone ?? {};
-        const excluded = currentRt?.excludedStepIds ?? p.initialExcludedStepIds ?? [];
-        const currentDose = currentRt?.doseMode ?? p.initialDoseMode ?? 'standard';
-        const todayFraction = completionOf(p, currentSets, excluded, currentDose);
+        return { ...p, lastActiveDate: todayStr };
+      }
 
-        const nextHistory = [...(p.dayHistory || [])];
-        if (p.currentDay > 0) {
-          nextHistory[p.currentDay - 1] = todayFraction;
+      const daysPassed = getDaysDifference(p.lastActiveDate, todayStr);
+      if (daysPassed <= 0) return p;
+
+      hasAnyChanges = true;
+      const currentRt = runtimeRef.current[p.id];
+      const currentSets = currentRt?.setsDone ?? {};
+      const excluded = currentRt?.excludedStepIds ?? p.initialExcludedStepIds ?? [];
+      const currentDose = currentRt?.doseMode ?? p.initialDoseMode ?? 'standard';
+      const todayFraction = completionOf(p, currentSets, excluded, currentDose);
+
+      const nextHistory = [...(p.dayHistory || [])];
+      if (p.currentDay > 0) {
+        nextHistory[p.currentDay - 1] = todayFraction;
+      }
+      for (let d = p.currentDay + 1; d < p.currentDay + daysPassed; d++) {
+        if (d <= p.totalDays) {
+          nextHistory[d - 1] = 0;
         }
-        for (let d = p.currentDay + 1; d < p.currentDay + daysPassed; d++) {
-          if (d <= p.totalDays) {
-            nextHistory[d - 1] = 0;
-          }
-        }
+      }
 
-        const nextDay = Math.min(p.totalDays, p.currentDay + daysPassed);
-        const isMultiDayLapse = daysPassed >= 2;
-        const streakContinues = todayFraction >= 0.8 && daysPassed === 1;
-        // Non-punitive consistency: multi-day lapse preserves streak baseline rather than resetting to 0
-        const nextStreak = streakContinues ? (p.streak || 0) + 1 : (isMultiDayLapse ? p.streak || 0 : 0);
+      const nextDay = Math.min(p.totalDays, p.currentDay + daysPassed);
+      const isMultiDayLapse = daysPassed >= 2;
+      const streakContinues = todayFraction >= 0.8 && daysPassed === 1;
+      // Non-punitive consistency: multi-day lapse preserves streak baseline rather than resetting to 0
+      const nextStreak = streakContinues ? (p.streak || 0) + 1 : (isMultiDayLapse ? p.streak || 0 : 0);
 
-        updateRuntime(p.id, (prev) => ({
-          ...prev,
-          setsDone: {},
-          doseMode: 'standard',
-          pendingReEntryCheckin: isMultiDayLapse,
-          lapseDays: isMultiDayLapse ? daysPassed : undefined,
-          lastActiveDate: todayStr
-        }));
+      runtimeUpdates.push({ id: p.id, isMultiDayLapse, daysPassed, nextDay });
 
-        if (isMultiDayLapse) {
-          pushMessages(p.id, {
-            role: 'ai',
-            kind: 'confirmation',
-            content: COPY.assistant.reEntryWelcome(daysPassed, nextDay)
-          });
-          if (p.id === activeRoutineIdRef.current) {
-            setIsReEntryOpen(true);
-          }
-        } else {
-          pushMessages(p.id, {
-            role: 'ai',
-            kind: 'confirmation',
-            content: COPY.assistant.dayRolloverNotification(nextDay)
-          });
-        }
-
-        return {
-          ...p,
-          currentDay: nextDay,
-          streak: nextStreak,
-          dayHistory: nextHistory,
-          lastActiveDate: todayStr
-        };
-      });
-
-      return hasAnyChanges ? updated : currentRoutines;
+      return {
+        ...p,
+        currentDay: nextDay,
+        streak: nextStreak,
+        dayHistory: nextHistory,
+        lastActiveDate: todayStr
+      };
     });
+
+    if (!hasAnyChanges) return;
+
+    setRoutineList(updated);
+
+    // Surface multi-day lapses non-intrusively via pendingReEntryCheckin and chat instead of auto-opening a modal on page load
+    for (const item of runtimeUpdates) {
+      updateRuntime(item.id, (prev) => ({
+        ...prev,
+        setsDone: {},
+        doseMode: 'standard',
+        pendingReEntryCheckin: item.isMultiDayLapse,
+        lapseDays: item.isMultiDayLapse ? item.daysPassed : undefined,
+        lastActiveDate: todayStr
+      }));
+
+      pushMessages(item.id, {
+        role: 'ai',
+        kind: 'confirmation',
+        content: item.isMultiDayLapse
+          ? COPY.assistant.reEntryWelcome(item.daysPassed, item.nextDay)
+          : COPY.assistant.dayRolloverNotification(item.nextDay)
+      });
+    }
   }, [updateRuntime, pushMessages]);
 
   useEffect(() => {
