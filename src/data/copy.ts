@@ -27,7 +27,7 @@ export const COPY = {
     mark: '//',
     name: 'TrialN1',
     initials: 'TN1',
-    logoUrl: '/images/viskotun1-logo.png',
+    logoUrl: '/images/trialn1-logo.png',
     iconUrl: '/images/viskotun1-icon.png'
   },
   greeting: {

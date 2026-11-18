@@ -445,7 +445,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       traditionalResultBody:
         'تعذّر أداء 45 دقيقة كاملة. انقطعت السلسلة وعاد العداد إلى الصفر، مما يصيب 82% من المستخدمين بالإحباط وترك العادة نهائياً.',
       traditionalBadge: 'عقاب ثنائي صارم',
-      viskotuAppTitle: 'محرك فيسكوتو التكيفي',
+      viskotuAppTitle: 'محرك TrialN1 التكيفي',
       viskotuResultTitle: 'استمرار السلسلة: اليوم 19 محفوظ',
       viskotuResultBody:
         'تم رصد التحدي فوراً. تقلّصت الخطة اليومية تلقائياً إلى خطوة ميسّرة مدتها 4 دقائق داخل المكان المكيّف، دون لوم وحفاظاً على العزم الإيجابي.',
