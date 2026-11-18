@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import type { Routine, RoutineRuntime, Protocol } from '../../../../types/routine';
+import type { Routine, RoutineRuntime } from '../../../../types/routine';
 import { saveCanonicalRoutine } from '../../../../server/routineRegistry';
 import { getUserRecord, saveUserRecord, type UserRecord } from '../../../../server/userStorage';
 import { COPY } from '../../../../data/copy';
@@ -7,30 +7,25 @@ import { COPY } from '../../../../data/copy';
 interface UserSyncPayload {
   userId: string;
   activeRoutineId?: string;
-  activeProtocolId?: string;
   routines?: Routine[];
-  protocols?: Protocol[];
   runtime: Record<string, RoutineRuntime>;
 }
 
 export async function POST(request: Request) {
   try {
     const body: UserSyncPayload = await request.json();
-    const { userId, activeRoutineId, activeProtocolId, routines, protocols, runtime } = body;
+    const { userId, activeRoutineId, routines, runtime } = body;
 
     if (!userId) {
       return NextResponse.json({ error: COPY.api.userSync.userIdRequired }, { status: 400 });
     }
 
-    const resolvedActiveId = activeRoutineId || activeProtocolId;
-    const resolvedRoutines = routines || protocols || [];
+    const resolvedRoutines = routines || [];
 
     const payload: UserRecord = {
       userId,
-      activeRoutineId: resolvedActiveId,
-      activeProtocolId: resolvedActiveId,
+      activeRoutineId,
       routines: resolvedRoutines,
-      protocols: resolvedRoutines,
       runtime: runtime || {},
       updatedAt: Date.now()
     };
@@ -47,8 +42,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       syncedAt: Date.now(),
-      routineCount: resolvedRoutines.length,
-      protocolCount: resolvedRoutines.length
+      routineCount: resolvedRoutines.length
     });
   } catch (error) {
     console.error('User sync error:', error);
@@ -70,17 +64,14 @@ export async function GET(request: Request) {
       return NextResponse.json({
         found: false,
         routines: [],
-        protocols: [],
         runtime: {}
       });
     }
 
     return NextResponse.json({
       found: true,
-      activeRoutineId: record.activeRoutineId || record.activeProtocolId,
-      activeProtocolId: record.activeRoutineId || record.activeProtocolId,
-      routines: record.routines || record.protocols,
-      protocols: record.routines || record.protocols,
+      activeRoutineId: record.activeRoutineId,
+      routines: record.routines || [],
       runtime: record.runtime,
       updatedAt: record.updatedAt
     });

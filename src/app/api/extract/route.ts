@@ -28,8 +28,8 @@ export async function POST(request: Request) {
 
     const result = await extractPaperRoutine({ file, url, text });
 
-    if (result.success && (result.routine || result.protocol)) {
-      const targetRoutine = (result.routine || result.protocol)!;
+    if (result.success && result.routine) {
+      const targetRoutine = result.routine;
       // Reuse a routine users already confirmed for this paper. A new extraction is only a candidate:
       // it is registered when the user confirms it (POST /api/papers), never here.
       const existing = await findCanonicalRoutine(targetRoutine.paper, targetRoutine.id);
@@ -37,7 +37,6 @@ export async function POST(request: Request) {
       return NextResponse.json({
         ...result,
         routine: canonicalRoutine,
-        protocol: canonicalRoutine,
         isExistingCanonical: Boolean(existing)
       });
     }

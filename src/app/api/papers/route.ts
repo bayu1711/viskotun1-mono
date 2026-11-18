@@ -36,12 +36,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, seeded, message: COPY.api.papers.seedSuccess });
     }
 
-    const { paper, protocol, routine } = body;
+    const { paper, routine } = body;
     if (!paper) {
       return NextResponse.json({ error: COPY.api.papers.paperRequired }, { status: 400 });
     }
 
-    const targetRoutine = routine || protocol || paper.routine || paper.protocol;
+    const targetRoutine = routine || paper.routine;
     const paperDocument: StoredPaper = {
       id: paper.id,
       title: paper.title,
@@ -57,8 +57,7 @@ export async function POST(request: Request) {
       pdfUrl: paper.pdfUrl || '',
       summary: paper.summary || '',
       featuresTested: paper.featuresTested || [],
-      routineId: paper.routineId || paper.protocolId || paper.id,
-      protocolId: paper.routineId || paper.protocolId || paper.id,
+      routineId: paper.routineId || paper.id,
       isSample: Boolean(paper.isSample),
       isGuardrailRejectionTest: Boolean(paper.isGuardrailRejectionTest),
       popularityScore: paper.popularityScore ?? (paper.isSample ? 90 : 10),
@@ -66,7 +65,6 @@ export async function POST(request: Request) {
       totalLogsCount: paper.totalLogsCount ?? 0,
       trendingRank: paper.trendingRank,
       routine: targetRoutine || undefined,
-      protocol: targetRoutine || undefined,
       userId: paper.userId || null,
       createdAt: paper.createdAt || Date.now(),
       updatedAt: Date.now()

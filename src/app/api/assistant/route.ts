@@ -21,7 +21,6 @@ export async function POST(request: Request) {
     const {
       question,
       routineTitle,
-      protocolTitle,
       shortTitle,
       faqs,
       contraindications,
@@ -34,7 +33,7 @@ export async function POST(request: Request) {
       rejectedFileName
     } = body;
 
-    const resolvedTitle = routineTitle || protocolTitle || 'Study';
+    const resolvedTitle = routineTitle || 'Study';
 
     if (!question) {
       return NextResponse.json({ error: COPY.api.assistant.questionRequired }, { status: 400 });

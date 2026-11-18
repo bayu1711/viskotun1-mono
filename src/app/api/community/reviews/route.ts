@@ -12,11 +12,11 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const routineId = searchParams.get('routineId') || searchParams.get('protocolId');
+    const routineId = searchParams.get('routineId');
 
     if (!routineId) {
       return NextResponse.json(
-        { error: COPY.api.community.protocolIdRequired },
+        { error: COPY.api.community.routineIdRequired },
         { status: 400 }
       );
     }
@@ -27,7 +27,6 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
       routineId,
-      protocolId: routineId,
       reviews,
       metrics
     });
@@ -45,12 +44,12 @@ const VALID_OUTCOMES: Set<ReviewOutcome> = new Set(['improved', 'adjusted', 'pau
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const routineId = body.routineId || body.protocolId;
+    const routineId = body.routineId;
     const { handle, outcome, day, adherence, text, userId, lifestyleCohort, tags } = body;
 
     if (!routineId) {
       return NextResponse.json(
-        { error: COPY.api.community.protocolIdRequired },
+        { error: COPY.api.community.routineIdRequired },
         { status: 400 }
       );
     }

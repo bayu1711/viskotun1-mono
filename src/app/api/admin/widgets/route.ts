@@ -43,8 +43,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       message: COPY.api.widgets.approveSuccess,
       proposal: approved,
-      routine: updatedRoutine,
-      protocol: updatedRoutine
+      routine: updatedRoutine
     });
   } catch (error) {
     console.error('[AdminWidgetsAPI] Failed to approve widget proposal:', error);

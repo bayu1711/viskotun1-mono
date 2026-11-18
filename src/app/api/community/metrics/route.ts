@@ -7,11 +7,11 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const routineId = searchParams.get('routineId') || searchParams.get('protocolId');
+    const routineId = searchParams.get('routineId');
 
     if (!routineId) {
       return NextResponse.json(
-        { error: COPY.api.community.protocolIdRequired },
+        { error: COPY.api.community.routineIdRequired },
         { status: 400 }
       );
     }
@@ -21,7 +21,6 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
       routineId,
-      protocolId: routineId,
       metrics
     });
   } catch (error) {
