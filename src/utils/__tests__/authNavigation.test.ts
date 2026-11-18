@@ -15,7 +15,7 @@ describe('Auth and Navigation Routing Contracts', () => {
   it('contains expected labels and copy for sign out and authentication', () => {
     expect(COPY.auth.signOut).toBe('Sign out');
     expect(COPY.auth.defaultGuestName).toBe('Guest Explorer');
-    expect(COPY.brand.name).toBe('ViskotuN1');
+    expect(COPY.brand.name).toBe('TrialN1');
   });
 
   it('ensures TopBar and Sidebar brand logo links point to ROUTES.landing', () => {

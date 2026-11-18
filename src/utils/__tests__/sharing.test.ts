@@ -13,7 +13,7 @@ describe('sharing utility', () => {
   });
 
   it('generates properly encoded social share URLs for WhatsApp, X, LinkedIn, and Email', () => {
-    const shareUrl = 'https://viskotun1.app/routine?routineId=achilles';
+    const shareUrl = 'https://trialn1.app/routine?routineId=achilles';
     const title = 'Achilles Tendon Loading';
     const urls = getSocialShareUrls(shareUrl, title, 'Physical Therapy');
 
@@ -27,11 +27,11 @@ describe('sharing utility', () => {
     expect(urls.linkedin).toContain(encodeURIComponent(shareUrl));
 
     expect(urls.email).toContain('mailto:?subject=');
-    expect(urls.email).toContain(encodeURIComponent('ViskotuN1 Clinical Routine: Achilles Tendon Loading'));
+    expect(urls.email).toContain(encodeURIComponent('TrialN1 Clinical Routine: Achilles Tendon Loading'));
   });
 
   it('generates a valid QR code data URL', async () => {
-    const dataUrl = await generateQrCodeDataUrl('https://viskotun1.app/routine?routineId=achilles');
+    const dataUrl = await generateQrCodeDataUrl('https://trialn1.app/routine?routineId=achilles');
     expect(dataUrl).toMatch(/^data:image\/png;base64,/);
   });
 

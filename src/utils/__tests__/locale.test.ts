@@ -52,7 +52,7 @@ describe('Bilingual Localization & Clinical Glossary', () => {
       expect(copy.reEntry.doseModes.micro.title).toContain('الخطوة الميسّرة');
       expect(copy.lifestyleTuning.title).toContain('الملف السلوكي');
       expect(copy.safety.clinicalDisclaimer).toContain('تنويه طبي سريري');
-      expect(copy.safety.clinicalDisclaimer).toContain('ڤيسكوتو N1');
+      expect(copy.safety.clinicalDisclaimer).toContain('TrialN1');
     });
 
     it('guarantees 100% top-level key parity between English and Arabic', () => {

@@ -29,7 +29,7 @@ describe('calendar utility', () => {
 
   it('builds multi-line plain text routine description including steps and stop rules', () => {
     const desc = buildRoutineCalendarDescription(achillesRoutine);
-    expect(desc).toContain('ViskotuN1 — achilles rehab');
+    expect(desc).toContain('TrialN1 — achilles rehab');
     expect(desc).toContain('Prescribed Steps:');
     expect(desc).toContain('Straight-Knee Eccentric Heel Drops');
     expect(desc).toContain('Stop Rule');
@@ -45,9 +45,9 @@ describe('calendar utility', () => {
 
     expect(ics).toContain('BEGIN:VCALENDAR');
     expect(ics).toContain('VERSION:2.0');
-    expect(ics).toContain('PRODID:-//ViskotuN1//Clinical Routine Calendar//EN');
+    expect(ics).toContain('PRODID:-//TrialN1//Clinical Routine Calendar//EN');
     expect(ics).toContain('BEGIN:VEVENT');
-    expect(ics).toContain('SUMMARY:ViskotuN1: achilles rehab');
+    expect(ics).toContain('SUMMARY:TrialN1: achilles rehab');
     expect(ics).toContain('RRULE:FREQ=DAILY;COUNT=84');
     expect(ics).toContain('BEGIN:VALARM');
     expect(ics).toContain('TRIGGER:-PT15M');
@@ -63,7 +63,7 @@ describe('calendar utility', () => {
 
     expect(url).toContain('https://calendar.google.com/calendar/render?');
     expect(url).toContain('action=TEMPLATE');
-    expect(url).toContain('ViskotuN1%3A+achilles+rehab');
+    expect(url).toContain('TrialN1%3A+achilles+rehab');
     expect(url).toContain('RRULE%3AFREQ%3DDAILY%3BCOUNT%3D84');
   });
 
