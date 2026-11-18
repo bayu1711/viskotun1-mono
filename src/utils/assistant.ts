@@ -1,9 +1,9 @@
 import { PAPER_LINK_PATTERN } from '../data/config';
 import { COPY } from '../data/copy';
-import type { Routine, Protocol } from '../types/routine';
+import type { Routine } from '../types/routine';
 import { getStepDisplay } from './steps';
 
-export function answerFor(routine: Routine | Protocol, question: string): string {
+export function answerFor(routine: Routine, question: string): string {
   const text = question.toLowerCase();
 
   // 1. Check direct FAQ keyword matches

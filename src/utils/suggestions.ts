@@ -1,5 +1,5 @@
 import { COPY } from '../data/copy';
-import type { ChatMessage, Routine, Protocol } from '../types/routine';
+import type { ChatMessage, Routine } from '../types/routine';
 
 /**
  * Normalizes question strings for comparison (lowercased, alphanumeric only).
@@ -42,7 +42,7 @@ export function hasQuestionBeenAsked(candidate: string, askedQuestions: string[]
  *    provide rich follow-ups so chips adapt continuously across the conversation.
  */
 export function getDynamicSuggestions(
-  routine?: Routine | Protocol | null,
+  routine?: Routine | null,
   messages: ChatMessage[] = [],
   maxSuggestions = 4
 ): string[] {

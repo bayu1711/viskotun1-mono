@@ -295,7 +295,6 @@ export interface PaperRoutineStatusInput {
   paper: {
     id: string;
     routineId?: string;
-    protocolId?: string;
     doi?: string;
   };
   routines: RoutineSummary[];
@@ -336,7 +335,7 @@ export function resolvePaperRoutineStatus({
   currentDay = 1,
   totalDays = 14
 }: PaperRoutineStatusInput): PaperRoutineStatusResult {
-  const targetId = paper.routineId || paper.protocolId;
+  const targetId = paper.routineId;
   const normPaperDoi = normalizeDoi(paper.doi);
 
   const matchedSummary = routines.find(
@@ -383,9 +382,9 @@ export function resolvePaperRoutineStatus({
 
 type EscalationTarget = Pick<FeedbackMetric, 'escalationThreshold' | 'escalationMessage' | 'escalationSource'>;
 
-/** Paper-specific advice (escalationSource 'routine' or 'protocol') survives policy message changes. */
+/** Paper-specific advice (escalationSource 'routine') survives policy message changes. */
 function policyMessageFor<T extends EscalationTarget>(target: T, message?: string) {
-  const isRoutineAuthored = target.escalationSource === 'routine' || target.escalationSource === 'protocol';
+  const isRoutineAuthored = target.escalationSource === 'routine';
   return message && !isRoutineAuthored ? message : target.escalationMessage;
 }
 

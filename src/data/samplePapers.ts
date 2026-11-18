@@ -1,4 +1,4 @@
-import type { Routine, Protocol } from '../types/routine';
+import type { Routine } from '../types/routine';
 import { achillesRoutine } from './routines/achilles';
 import { hairLossRoutine } from './routines/hairLoss';
 import {
@@ -24,7 +24,6 @@ export interface SamplePaper {
   summary: string;
   featuresTested: string[];
   routineId?: string; // Pre-calibrated routine available for instant 1-click loading
-  protocolId?: string; // Pre-calibrated protocol available for instant 1-click loading (alias)
   isGuardrailRejectionTest?: boolean;
   popularityScore?: number; // Popularity score for trending ranking (e.g. 0-100)
   activeTrackersCount?: number; // Real-world active community participants tracking this paper
@@ -62,7 +61,6 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
       'Dynamic 20% load reduction when threshold exceeded'
     ],
     routineId: 'achilles',
-    protocolId: 'achilles',
     popularityScore: 98,
     activeTrackersCount: 0,
     totalLogsCount: 0,
@@ -93,7 +91,6 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
       'Scalp irritation & erythema biofeedback'
     ],
     routineId: 'hair-loss',
-    protocolId: 'hair-loss',
     popularityScore: 95,
     activeTrackersCount: 0,
     totalLogsCount: 0,
@@ -124,7 +121,6 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
       'GI distress biofeedback & split dose rule'
     ],
     routineId: 'creatine-sleep',
-    protocolId: 'creatine-sleep',
     popularityScore: 91,
     activeTrackersCount: 0,
     totalLogsCount: 0,
@@ -240,7 +236,6 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
       'Thermal fatigue & exhaustion self-monitoring (0–10 scale)'
     ],
     routineId: 'uae-heat-circadian',
-    protocolId: 'uae-heat-circadian',
     popularityScore: 97,
     activeTrackersCount: 42,
     totalLogsCount: 168,
@@ -270,7 +265,6 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
       'Late-afternoon energy level biofeedback tracking'
     ],
     routineId: 'uae-ramadan-metabolic',
-    protocolId: 'uae-ramadan-metabolic',
     popularityScore: 95,
     activeTrackersCount: 68,
     totalLogsCount: 290,
@@ -300,7 +294,6 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
       'Peak craving intensity self-monitoring (0–10 scale)'
     ],
     routineId: 'uae-midwakh-tapering',
-    protocolId: 'uae-midwakh-tapering',
     popularityScore: 93,
     activeTrackersCount: 94,
     totalLogsCount: 420,
@@ -322,6 +315,4 @@ export const PRECALIBRATED_SAMPLE_ROUTINES: Record<string, Routine> = {
   'uae-midwakh-tapering': uaeMidwakhTaperingRoutine
 };
 
-export const PRECALIBRATED_SAMPLE_PROTOCOLS: Record<string, Protocol> = PRECALIBRATED_SAMPLE_ROUTINES;
 export const PRECALIBRATED_TRENDING_ROUTINES = PRECALIBRATED_SAMPLE_ROUTINES;
-export const PRECALIBRATED_TRENDING_PROTOCOLS = PRECALIBRATED_SAMPLE_PROTOCOLS;

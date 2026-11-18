@@ -1,4 +1,4 @@
-import type { Routine, Protocol } from '../../types/routine';
+import type { Routine } from '../../types/routine';
 
 export const achillesRoutine: Routine = {
   id: 'achilles',
@@ -239,5 +239,3 @@ export const achillesRoutine: Routine = {
     }
   ]
 };
-
-export const achillesProtocol = achillesRoutine;

@@ -1,4 +1,4 @@
-import type { Routine, Protocol } from '../../types/routine';
+import type { Routine } from '../../types/routine';
 
 export const hairLossRoutine: Routine = {
   id: 'hair-loss',
@@ -230,5 +230,3 @@ export const hairLossRoutine: Routine = {
   }]
 
 };
-
-export const hairLossProtocol = hairLossRoutine;
