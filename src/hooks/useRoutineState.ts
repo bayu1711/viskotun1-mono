@@ -169,7 +169,7 @@ export function useRoutineState() {
           }
         }
       } catch (err) {
-        console.warn('[useProtocolState] Could not fetch trending papers from Firebase, using baseline:', err);
+        console.warn('[useRoutineState] Could not fetch trending papers from Firebase, using baseline:', err);
       }
     }
 
@@ -484,7 +484,7 @@ export function useRoutineState() {
           }
         }
       } catch (err) {
-        console.error('[useProtocolState] Cloud fetch error:', err);
+        console.error('[useRoutineState] Cloud fetch error:', err);
       } finally {
         if (isMounted) {
           setHasRemoteHydrated(true);
@@ -707,7 +707,7 @@ export function useRoutineState() {
         assistantTyping: false
       };
 
-  const updateRuntime = useCallback((id: string, update: (prev: ProtocolRuntime) => ProtocolRuntime) => {
+  const updateRuntime = useCallback((id: string, update: (prev: RoutineRuntime) => RoutineRuntime) => {
     setRuntime((prev) => {
       const current = prev[id] ?? {
         setsDone: {},
@@ -723,8 +723,8 @@ export function useRoutineState() {
 
   const feedbackMetric = useMemo(
     () =>
-      protocol
-        ? resolveFeedbackMetric(protocol)
+      routine
+        ? resolveFeedbackMetric(routine)
         : {
             name: 'tolerability',
             label: 'symptom / tolerability',
@@ -736,23 +736,23 @@ export function useRoutineState() {
             escalationThreshold: FEEDBACK_ESCALATION_THRESHOLD,
             escalationMessage: 'Adverse threshold exceeded. Escalation paused.'
           },
-    [protocol]
+    [routine]
   );
   const dataCollectionSpec = useMemo(
-    () => (protocol ? resolveDataCollectionSpec(protocol) : []),
-    [protocol]
+    () => (routine ? resolveDataCollectionSpec(routine) : []),
+    [routine]
   );
   const morphingLogs = useMemo(
-    () => state.morphingLogs ?? protocol?.initialMorphingLogs ?? [],
-    [state.morphingLogs, protocol?.initialMorphingLogs]
+    () => state.morphingLogs ?? routine?.initialMorphingLogs ?? [],
+    [state.morphingLogs, routine?.initialMorphingLogs]
   );
   const isCurrentDayMilestone = useMemo(
-    () => (protocol ? isMilestoneDay(protocol, protocol.currentDay) : false),
-    [protocol]
+    () => (routine ? isMilestoneDay(routine, routine.currentDay) : false),
+    [routine]
   );
   const scheduledFields = useMemo(
-    () => (protocol ? getScheduledFieldsForDay(protocol, protocol.currentDay) : []),
-    [protocol]
+    () => (routine ? getScheduledFieldsForDay(routine, routine.currentDay) : []),
+    [routine]
   );
 
   const pushMessages = useCallback(
@@ -773,15 +773,15 @@ export function useRoutineState() {
 
   const toggleExcludeStep = useCallback(
     (stepId: string) => {
-      if (!protocol) return;
-      updateRuntime(protocol.id, (prev) => {
+      if (!routine) return;
+      updateRuntime(routine.id, (prev) => {
         const current = prev.excludedStepIds ?? [];
         const isExcluded = current.includes(stepId);
         const next = isExcluded ? current.filter((id) => id !== stepId) : [...current, stepId];
         return { ...prev, excludedStepIds: next };
       });
     },
-    [protocol, updateRuntime]
+    [routine, updateRuntime]
   );
 
   const isStepExcluded = useCallback(
@@ -790,22 +790,22 @@ export function useRoutineState() {
   );
 
   // Derived values
-  const currentDoseMode: DoseMode = state.doseMode ?? protocol?.initialDoseMode ?? 'standard';
-  const todayFraction = protocol
-    ? completionOf(protocol, state.setsDone, state.excludedStepIds ?? [], currentDoseMode)
+  const currentDoseMode: DoseMode = state.doseMode ?? routine?.initialDoseMode ?? 'standard';
+  const todayFraction = routine
+    ? completionOf(routine, state.setsDone, state.excludedStepIds ?? [], currentDoseMode)
     : 0;
   const todayPercent = toPercent(todayFraction);
   const activeSteps = useMemo(
-    () => (protocol ? protocol.steps.filter((s) => !(state.excludedStepIds ?? []).includes(s.id)) : []),
-    [protocol, state.excludedStepIds]
+    () => (routine ? routine.steps.filter((s) => !(state.excludedStepIds ?? []).includes(s.id)) : []),
+    [routine, state.excludedStepIds]
   );
-  const dayIsComplete = protocol && activeSteps.length > 0 ? todayFraction === 1 : false;
-  const isCompleted = protocol
-    ? isRoutineCompleted(protocol, dayIsComplete || todayFraction >= 1)
+  const dayIsComplete = routine && activeSteps.length > 0 ? todayFraction === 1 : false;
+  const isCompleted = routine
+    ? isRoutineCompleted(routine, dayIsComplete || todayFraction >= 1)
     : false;
-  const adherenceRate = protocol ? adherenceOf(protocol, todayFraction) : 0;
-  const momentum = protocol ? momentumOf(protocol, todayFraction, protocol.streak || 0) : 0;
-  const progressionReady = protocol
+  const adherenceRate = routine ? adherenceOf(routine, todayFraction) : 0;
+  const momentum = routine ? momentumOf(routine, todayFraction, routine.streak || 0) : 0;
+  const progressionReady = routine
     ? isProgressionReady(
         state.feedbackLogs,
         state.escalationPaused,
@@ -839,29 +839,29 @@ export function useRoutineState() {
   );
 
   const findStep = useCallback(
-    (stepId: string) => (protocol ? protocol.steps.find((step) => step.id === stepId) : undefined),
-    [protocol]
+    (stepId: string) => (routine ? routine.steps.find((step) => step.id === stepId) : undefined),
+    [routine]
   );
 
   const isStepComplete = useCallback(
     (stepId: string) => {
-      if (!protocol) return false;
+      if (!routine) return false;
       if ((state.excludedStepIds ?? []).includes(stepId)) return false;
-      const step = protocol.steps.find((s) => s.id === stepId);
+      const step = routine.steps.find((s) => s.id === stepId);
       if (!step) return false;
       const target = targetSetsForStep(step, currentDoseMode);
       return (state.setsDone[stepId] ?? 0) >= target;
     },
-    [protocol, state.setsDone, state.excludedStepIds, currentDoseMode]
+    [routine, state.setsDone, state.excludedStepIds, currentDoseMode]
   );
 
   const updateSetCount = useCallback(
     (stepId: string, next: (current: number, max: number) => number) => {
-      if (!protocol) return;
-      const step = protocol.steps.find((s) => s.id === stepId);
+      if (!routine) return;
+      const step = routine.steps.find((s) => s.id === stepId);
       if (!step) return;
       const target = targetSetsForStep(step, currentDoseMode);
-      updateRuntime(protocol.id, (prev) => ({
+      updateRuntime(routine.id, (prev) => ({
         ...prev,
         setsDone: {
           ...prev.setsDone,
@@ -869,7 +869,7 @@ export function useRoutineState() {
         }
       }));
     },
-    [protocol, updateRuntime, currentDoseMode]
+    [routine, updateRuntime, currentDoseMode]
   );
 
   const incrementSet = useCallback((stepId: string) => updateSetCount(stepId, (current, max) => current + 1), [updateSetCount]);
@@ -880,14 +880,14 @@ export function useRoutineState() {
   );
 
   const markTodayComplete = useCallback(() => {
-    if (!protocol) return;
-    const nonExcludedSteps = protocol.steps.filter(
+    if (!routine) return;
+    const nonExcludedSteps = routine.steps.filter(
       (step) => !(state.excludedStepIds ?? []).includes(step.id)
     );
     const allSetsDone = Object.fromEntries(
       nonExcludedSteps.map((step) => [step.id, targetSetsForStep(step, currentDoseMode)])
     );
-    updateRuntime(protocol.id, (prev) => ({
+    updateRuntime(routine.id, (prev) => ({
       ...prev,
       setsDone: { ...prev.setsDone, ...allSetsDone }
     }));
@@ -895,27 +895,27 @@ export function useRoutineState() {
     if (currentDoseMode === 'micro') {
       toast.success(COPY.reEntry.microDoseCompletedToast);
     }
-  }, [protocol, state.excludedStepIds, currentDoseMode, updateRuntime]);
+  }, [routine, state.excludedStepIds, currentDoseMode, updateRuntime]);
 
   const advanceToNextDay = useCallback(() => {
-    if (!protocol) return;
-    if (protocol.currentDay >= protocol.totalDays) {
-      toast.info(`Already at maximum Day ${protocol.totalDays}`);
+    if (!routine) return;
+    if (routine.currentDay >= routine.totalDays) {
+      toast.info(`Already at maximum Day ${routine.totalDays}`);
       return;
     }
 
-    const prevDay = protocol.currentDay;
+    const prevDay = routine.currentDay;
     const nextDay = prevDay + 1;
-    const fraction = completionOf(protocol, state.setsDone, state.excludedStepIds, currentDoseMode);
-    const nextHistory = [...(protocol.dayHistory || [])];
+    const fraction = completionOf(routine, state.setsDone, state.excludedStepIds, currentDoseMode);
+    const nextHistory = [...(routine.dayHistory || [])];
     // Record current day's progress (at least 1.0 when manually advancing)
     nextHistory[prevDay - 1] = Math.max(fraction, 1);
-    const nextStreak = (protocol.streak || 0) + 1;
+    const nextStreak = (routine.streak || 0) + 1;
     const todayStr = getLocalTodayDateString();
 
     setRoutineList((prev) =>
       prev.map((p) =>
-        p.id === protocol.id
+        p.id === routine.id
           ? {
               ...p,
               currentDay: nextDay,
@@ -927,7 +927,7 @@ export function useRoutineState() {
       )
     );
 
-    updateRuntime(protocol.id, (prev) => ({
+    updateRuntime(routine.id, (prev) => ({
       ...prev,
       setsDone: {},
       doseMode: 'standard',
@@ -935,33 +935,33 @@ export function useRoutineState() {
       lastActiveDate: todayStr
     }));
 
-    pushMessages(protocol.id, {
+    pushMessages(routine.id, {
       role: 'ai',
       kind: 'confirmation',
       content: COPY.assistant.dayAdvancedConfirmation(prevDay, nextDay)
     });
 
     toast.success(COPY.dayActions.advancedToast(nextDay));
-  }, [protocol, state.setsDone, state.excludedStepIds, currentDoseMode, updateRuntime, pushMessages]);
+  }, [routine, state.setsDone, state.excludedStepIds, currentDoseMode, updateRuntime, pushMessages]);
 
   const setDoseMode = useCallback(
     (mode: DoseMode) => {
-      if (!protocol) return;
-      updateRuntime(protocol.id, (prev) => ({
+      if (!routine) return;
+      updateRuntime(routine.id, (prev) => ({
         ...prev,
         doseMode: mode
       }));
     },
-    [protocol, updateRuntime]
+    [routine, updateRuntime]
   );
 
   const logBarrier = useCallback(
     (barrier: BarrierType, selectedDose: DoseMode, note?: string) => {
-      if (!protocol) return;
+      if (!routine) return;
       const barrierLabel = COPY.reEntry.barriers[barrier]?.label || barrier;
       const newLog: BarrierLog = {
         id: createId('barr'),
-        day: protocol.currentDay,
+        day: routine.currentDay,
         barrier,
         barrierLabel,
         selectedDoseMode: selectedDose,
@@ -969,7 +969,7 @@ export function useRoutineState() {
         loggedAt: nowLabel()
       };
 
-      updateRuntime(protocol.id, (prev) => ({
+      updateRuntime(routine.id, (prev) => ({
         ...prev,
         doseMode: selectedDose,
         barrierLogs: [...(prev.barrierLogs ?? []), newLog],
@@ -979,7 +979,7 @@ export function useRoutineState() {
       setIsReEntryOpen(false);
 
       const doseLabel = COPY.reEntry.doseModes[selectedDose]?.title || selectedDose;
-      pushMessages(protocol.id, {
+      pushMessages(routine.id, {
         role: 'ai',
         kind: 'confirmation',
         content: COPY.assistant.barrierLoggedConfirmation(barrierLabel, doseLabel)
@@ -987,17 +987,17 @@ export function useRoutineState() {
 
       toast.success(COPY.reEntry.barrierLoggedToast(doseLabel));
     },
-    [protocol, updateRuntime, pushMessages]
+    [routine, updateRuntime, pushMessages]
   );
 
   const dismissReEntryCheckin = useCallback(() => {
-    if (!protocol) return;
-    updateRuntime(protocol.id, (prev) => ({
+    if (!routine) return;
+    updateRuntime(routine.id, (prev) => ({
       ...prev,
       pendingReEntryCheckin: false
     }));
     setIsReEntryOpen(false);
-  }, [protocol, updateRuntime]);
+  }, [routine, updateRuntime]);
 
   const openReEntryModal = useCallback(() => {
     setIsReEntryOpen(true);
@@ -1009,18 +1009,18 @@ export function useRoutineState() {
 
   const simulateLapse = useCallback(
     (days = 3) => {
-      if (!protocol) return;
-      const missedCount = Math.min(days, protocol.totalDays - protocol.currentDay);
-      const nextDay = Math.min(protocol.totalDays, protocol.currentDay + missedCount);
-      const nextHistory = [...(protocol.dayHistory || [])];
-      for (let d = protocol.currentDay; d < nextDay; d++) {
+      if (!routine) return;
+      const missedCount = Math.min(days, routine.totalDays - routine.currentDay);
+      const nextDay = Math.min(routine.totalDays, routine.currentDay + missedCount);
+      const nextHistory = [...(routine.dayHistory || [])];
+      for (let d = routine.currentDay; d < nextDay; d++) {
         nextHistory[d - 1] = 0;
       }
       const todayStr = getLocalTodayDateString();
 
       setRoutineList((prev) =>
         prev.map((p) =>
-          p.id === protocol.id
+          p.id === routine.id
             ? {
                 ...p,
                 currentDay: nextDay,
@@ -1031,7 +1031,7 @@ export function useRoutineState() {
         )
       );
 
-      updateRuntime(protocol.id, (prev) => ({
+      updateRuntime(routine.id, (prev) => ({
         ...prev,
         setsDone: {},
         pendingReEntryCheckin: true,
@@ -1041,7 +1041,7 @@ export function useRoutineState() {
 
       setIsReEntryOpen(true);
 
-      pushMessages(protocol.id, {
+      pushMessages(routine.id, {
         role: 'ai',
         kind: 'confirmation',
         content: COPY.assistant.reEntryWelcome(missedCount, nextDay)
@@ -1049,13 +1049,13 @@ export function useRoutineState() {
 
       toast.info(`Simulated ${missedCount}-day lapse. Compassionate re-entry activated.`);
     },
-    [protocol, updateRuntime, pushMessages]
+    [routine, updateRuntime, pushMessages]
   );
 
   const simulatePastDays = useCallback(
     (daysCount = 4) => {
-      if (!protocol) return;
-      const count = Math.min(daysCount, protocol.totalDays - 1);
+      if (!routine) return;
+      const count = Math.min(daysCount, routine.totalDays - 1);
       const targetDay = count + 1;
       const history = Array.from({ length: count }, () => 1.0);
       const todayStr = getLocalTodayDateString();
@@ -1063,7 +1063,7 @@ export function useRoutineState() {
       const pastFeedbackLogs: FeedbackLog[] = [];
       const pastMorphingLogs: MorphingDataLog[] = [];
 
-      if (protocol.id === 'achilles') {
+      if (routine.id === 'achilles') {
         const achNotes = [
           'Initial eccentric loading, mild morning tendon tenderness',
           'Soreness manageable during lowering phase',
@@ -1089,7 +1089,7 @@ export function useRoutineState() {
             loggedAt: `Day ${i} · 8:15 AM`
           });
         }
-      } else if (protocol.id === 'hair-loss') {
+      } else if (routine.id === 'hair-loss') {
         const hairNotes = [
           'Scalp tolerated 1.5mm dermaroller with mild pinkness',
           'Minoxidil applied 2x daily without irritation',
@@ -1121,7 +1121,7 @@ export function useRoutineState() {
             id: createId('log'),
             day: i,
             score: 1,
-            note: `Completed Day ${i} protocol as prescribed`,
+            note: `Completed Day ${i} routine as prescribed`,
             loggedAt: `Day ${i} · 8:00 AM`
           });
         }
@@ -1129,7 +1129,7 @@ export function useRoutineState() {
 
       setRoutineList((prev) =>
         prev.map((p) =>
-          p.id === protocol.id
+          p.id === routine.id
             ? {
                 ...p,
                 currentDay: targetDay,
@@ -1141,7 +1141,7 @@ export function useRoutineState() {
         )
       );
 
-      updateRuntime(protocol.id, (prev) => ({
+      updateRuntime(routine.id, (prev) => ({
         ...prev,
         setsDone: {},
         feedbackLogs: pastFeedbackLogs,
@@ -1149,7 +1149,7 @@ export function useRoutineState() {
         lastActiveDate: todayStr
       }));
 
-      pushMessages(protocol.id, {
+      pushMessages(routine.id, {
         role: 'ai',
         kind: 'confirmation',
         content: COPY.assistant.simulatedHistoryConfirmation(count, targetDay)
@@ -1157,21 +1157,21 @@ export function useRoutineState() {
 
       toast.success(COPY.dayActions.simulatedToast(count));
     },
-    [protocol, updateRuntime, pushMessages]
+    [routine, updateRuntime, pushMessages]
   );
 
   const simulateFullCompletion = useCallback(() => {
-    if (!protocol) return;
-    const totalDays = protocol.totalDays;
+    if (!routine) return;
+    const totalDays = routine.totalDays;
     const history = Array.from({ length: totalDays }, () => 1.0);
     const todayStr = getLocalTodayDateString();
 
     const pastFeedbackLogs: FeedbackLog[] = [];
     const pastMorphingLogs: MorphingDataLog[] = [];
 
-    const spec = resolveDataCollectionSpec(protocol);
+    const spec = resolveDataCollectionSpec(routine);
 
-    if (protocol.id === 'achilles') {
+    if (routine.id === 'achilles') {
       const achProgressions = [
         { day: 1, score: 3, note: 'Initial eccentric loading, mild morning tendon tenderness', dorsi: 28 },
         { day: 7, score: 3, note: 'Soreness manageable during lowering phase, completing all sets', dorsi: 30 },
@@ -1207,7 +1207,7 @@ export function useRoutineState() {
           loggedAt: `Day ${item.day} · 8:15 AM`
         });
       }
-    } else if (protocol.id === 'hair-loss') {
+    } else if (routine.id === 'hair-loss') {
       const hairProgressions = [
         { day: 1, score: 2, note: 'Baseline scalp clinical photo captured, 1.5mm dermaroller well tolerated' },
         { day: 14, score: 2, note: 'Minoxidil applied 2x daily without irritation, mild pinkness after microneedling' },
@@ -1256,7 +1256,7 @@ export function useRoutineState() {
           score,
           note: isEnd
             ? `Completed final Day ${totalDays} intervention. Full clinical trial routine completed.`
-            : `Completed Day ${day} protocol as prescribed with high adherence.`,
+            : `Completed Day ${day} routine as prescribed with high adherence.`,
           loggedAt: `Day ${day} · 8:00 AM`
         });
 
@@ -1323,14 +1323,14 @@ export function useRoutineState() {
       }
     }
 
-    const nonExcludedSteps = protocol.steps.filter(
+    const nonExcludedSteps = routine.steps.filter(
       (step) => !(state.excludedStepIds ?? []).includes(step.id)
     );
     const allSetsDone = Object.fromEntries(nonExcludedSteps.map((step) => [step.id, step.sets]));
 
     setRoutineList((prev) =>
       prev.map((p) =>
-        p.id === protocol.id
+        p.id === routine.id
           ? {
               ...p,
               currentDay: totalDays,
@@ -1342,7 +1342,7 @@ export function useRoutineState() {
       )
     );
 
-    updateRuntime(protocol.id, (prev) => ({
+    updateRuntime(routine.id, (prev) => ({
       ...prev,
       setsDone: allSetsDone,
       feedbackLogs: pastFeedbackLogs,
@@ -1351,26 +1351,26 @@ export function useRoutineState() {
       lastActiveDate: todayStr
     }));
 
-    pushMessages(protocol.id, {
+    pushMessages(routine.id, {
       role: 'ai',
       kind: 'confirmation',
       content: COPY.assistant.simulatedFullCompletionConfirmation(
-        protocol.shortTitle || protocol.title,
+        routine.shortTitle || routine.title,
         totalDays
       )
     });
 
     toast.success(
-      COPY.dayActions.simulateFullCompletionToast(protocol.shortTitle || protocol.title, totalDays)
+      COPY.dayActions.simulateFullCompletionToast(routine.shortTitle || routine.title, totalDays)
     );
-  }, [protocol, state.excludedStepIds, updateRuntime, pushMessages]);
+  }, [routine, state.excludedStepIds, updateRuntime, pushMessages]);
 
   const checkMidnightRollover = useCallback(() => {
     const todayStr = getLocalTodayDateString();
 
-    setRoutineList((currentProtocols) => {
+    setRoutineList((currentRoutines) => {
       let hasAnyChanges = false;
-      const updated = currentProtocols.map((p) => {
+      const updated = currentRoutines.map((p) => {
         if (!p.lastActiveDate) {
           hasAnyChanges = true;
           return { ...p, lastActiveDate: todayStr };
@@ -1437,7 +1437,7 @@ export function useRoutineState() {
         };
       });
 
-      return hasAnyChanges ? updated : currentProtocols;
+      return hasAnyChanges ? updated : currentRoutines;
     });
   }, [updateRuntime, pushMessages]);
 
@@ -1478,12 +1478,12 @@ export function useRoutineState() {
 
   const logFeedback = useCallback(
     (score: number, note: string) => {
-      if (!protocol) return;
-      const metric = resolveFeedbackMetric(protocol);
+      if (!routine) return;
+      const metric = resolveFeedbackMetric(routine);
       const threshold = metric.escalationThreshold ?? FEEDBACK_ESCALATION_THRESHOLD;
       const exceeded = exceedsFeedbackThreshold(score, threshold);
-      const newLog = { id: createId('log'), day: protocol.currentDay, score, note, loggedAt: nowLabel() };
-      updateRuntime(protocol.id, (prev) => {
+      const newLog = { id: createId('log'), day: routine.currentDay, score, note, loggedAt: nowLabel() };
+      updateRuntime(routine.id, (prev) => {
         const existing = prev.feedbackLogs ?? [];
         const next = [...existing, newLog];
         return {
@@ -1493,23 +1493,23 @@ export function useRoutineState() {
         };
       });
       pushMessages(
-        protocol.id,
+        routine.id,
         exceeded
           ? {
               role: 'ai',
               kind: 'alert',
               content: COPY.safety.dynamicEscalationAlert(metric.name, metric.escalationMessage)
             }
-          : { role: 'ai', kind: 'confirmation', content: COPY.assistant.confirmSafe(protocol.currentDay, score) }
+          : { role: 'ai', kind: 'confirmation', content: COPY.assistant.confirmSafe(routine.currentDay, score) }
       );
     },
-    [protocol, updateRuntime, pushMessages]
+    [routine, updateRuntime, pushMessages]
   );
 
   const logMorphingData = useCallback(
     (fieldId: string, value: number | string | boolean, note = '') => {
-      if (!protocol) return;
-      const spec = resolveDataCollectionSpec(protocol);
+      if (!routine) return;
+      const spec = resolveDataCollectionSpec(routine);
       const field = spec.find((f) => f.id === fieldId) ?? spec[0];
       if (!field) return;
       const isNumeric = typeof value === 'number';
@@ -1518,13 +1518,13 @@ export function useRoutineState() {
       const newMorphLog: MorphingDataLog = {
         id: createId('morph'),
         fieldId,
-        day: protocol.currentDay,
+        day: routine.currentDay,
         value,
         note,
         loggedAt: nowLabel()
       };
 
-      updateRuntime(protocol.id, (prev) => {
+      updateRuntime(routine.id, (prev) => {
         const existingMorph = prev.morphingLogs ?? [];
         const nextMorph = [...existingMorph, newMorphLog];
 
@@ -1532,7 +1532,7 @@ export function useRoutineState() {
         if (field.type === 'scale' && isNumeric) {
           nextFeedback = [
             ...nextFeedback,
-            { id: createId('log'), day: protocol.currentDay, score: value, note, loggedAt: nowLabel() }
+            { id: createId('log'), day: routine.currentDay, score: value, note, loggedAt: nowLabel() }
           ];
         }
 
@@ -1554,7 +1554,7 @@ export function useRoutineState() {
           : `${value}${field.unit ? ' ' + field.unit : ''}`;
 
       pushMessages(
-        protocol.id,
+        routine.id,
         exceeded
           ? {
               role: 'ai',
@@ -1564,20 +1564,20 @@ export function useRoutineState() {
           : {
               role: 'ai',
               kind: 'confirmation',
-              content: COPY.morphing.values.fieldConfirmation(field.name, protocol.currentDay, displayVal)
+              content: COPY.morphing.values.fieldConfirmation(field.name, routine.currentDay, displayVal)
             }
       );
     },
-    [protocol, updateRuntime, pushMessages]
+    [routine, updateRuntime, pushMessages]
   );
 
   const askQuestion = useCallback(
     async (text: string) => {
-      if (!protocol) {
-        toast.info(COPY.errors.noProtocolsBody);
+      if (!routine) {
+        toast.info(COPY.errors.noRoutinesBody || COPY.errors.noProtocolsBody);
         return;
       }
-      const target = protocol;
+      const target = routine;
       pushMessages(target.id, { role: 'user', kind: 'question', content: text });
       updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: true }));
 
@@ -1598,7 +1598,7 @@ export function useRoutineState() {
           }
         }
       } catch (edgeErr) {
-        console.info('[useProtocolState] Edge Gemma bypassed, routing to API:', edgeErr);
+        console.info('[useRoutineState] Edge Gemma bypassed, routing to API:', edgeErr);
       }
 
       // Tier 2: Cloud Gemini / Server Gemma Route Handler
@@ -1654,11 +1654,11 @@ export function useRoutineState() {
         updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: false }));
       }
     },
-    [protocol, pushMessages, updateRuntime]
+    [routine, pushMessages, updateRuntime]
   );
 
   const askAboutStep = useCallback(
-    (step: RoutineStep | ProtocolStep) => {
+    (step: RoutineStep) => {
       askQuestion(COPY.task.taskQuestionPrompt(step.action));
     },
     [askQuestion]
@@ -2108,14 +2108,15 @@ export function useRoutineState() {
       lifestyleCohort?: 'smoker' | 'non_smoker' | 'ramadan' | 'shift_work' | 'general';
       tags?: string[];
     }) => {
-      if (!protocol) return;
+      if (!routine) return;
 
       const payload = {
-        protocolId: protocol.id,
+        routineId: routine.id,
+        protocolId: routine.id,
         outcome: reviewData.outcome,
         text: reviewData.text,
         handle: reviewData.handle,
-        day: reviewData.day ?? protocol.currentDay,
+        day: reviewData.day ?? routine.currentDay,
         adherence: reviewData.adherence ?? adherenceRate,
         userId: userId || undefined,
         lifestyleCohort: reviewData.lifestyleCohort,
@@ -2137,7 +2138,7 @@ export function useRoutineState() {
         if (data.success && data.review) {
           setRoutineList((prev) =>
             prev.map((p) => {
-              if (p.id !== protocol.id) return p;
+              if (p.id !== routine.id) return p;
               const existingReviews = p.community?.reviews || [];
               const updatedReviews = [
                 data.review,
@@ -2161,14 +2162,14 @@ export function useRoutineState() {
         toast.error(COPY.community.reviewErrorToast);
       }
     },
-    [protocol, adherenceRate, userId, closeReviewDrawer]
+    [routine, adherenceRate, userId, closeReviewDrawer]
   );
 
   const tuneLifestyle = useCallback(
     async (message: string) => {
       const currentProf = auth?.lifestyleProfile;
       const country = currentProf?.region?.countryCode || 'AE';
-      const targetId = protocol?.id || '';
+      const targetId = routine?.id || '';
 
       pushMessages(targetId, {
         role: 'user',
@@ -2212,17 +2213,17 @@ export function useRoutineState() {
       }
       return null;
     },
-    [auth, protocol, pushMessages, updateRuntime]
+    [auth, routine, pushMessages, updateRuntime]
   );
 
   const updateGuardrailThreshold = useCallback(
     (threshold: number, message?: string) => {
-      if (!protocol || applyGuardrailThreshold(protocol, threshold, message) === protocol) return;
+      if (!routine || applyGuardrailThreshold(routine, threshold, message) === routine) return;
       setRoutineList((prev) =>
-        prev.map((p) => (p.id === protocol.id ? applyGuardrailThreshold(p, threshold, message) : p))
+        prev.map((p) => (p.id === routine.id ? applyGuardrailThreshold(p, threshold, message) : p))
       );
     },
-    [protocol]
+    [routine]
   );
 
   const approveProposedWidget = useCallback((proposal: ProposedWidgetSpec) => {
