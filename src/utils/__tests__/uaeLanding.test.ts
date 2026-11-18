@@ -58,14 +58,13 @@ describe('UAE & Abu Dhabi Edition Contracts and Routing', () => {
     expect(content).not.toContain("'use client'");
   });
 
-  it('verifies src/views/UaeLanding.tsx is marked use client and wires design tokens', () => {
+  it('verifies src/views/UaeLanding.tsx is marked use client and reuses LandingShowcase', () => {
     const viewPath = path.resolve(__dirname, '../../views/UaeLanding.tsx');
     expect(fs.existsSync(viewPath)).toBe(true);
     const content = fs.readFileSync(viewPath, 'utf-8');
     expect(content.startsWith("'use client'")).toBe(true);
     expect(content).toContain('useLocale');
-    expect(content).toContain('useAuth');
-    expect(content).toContain('useAssistant');
+    expect(content).toContain('LandingShowcase');
     expect(content).toContain('isRtl');
   });
 });
