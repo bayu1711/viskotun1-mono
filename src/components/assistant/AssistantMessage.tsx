@@ -51,7 +51,6 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
         );
       }
       case 'routine':
-      case 'protocol':
         return <RoutineCard />;
       case 'processing':
         return <ProcessingCard source={message.content} createdAt={message.createdAt ?? 0} />;

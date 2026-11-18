@@ -3,8 +3,8 @@ import { toast } from 'sonner';
 import { AuthContext } from '../contexts/AuthContext';
 import { DEFAULT_CONFIRMATION_SCORE, FEEDBACK_ESCALATION_THRESHOLD } from '../data/config';
 import { COPY } from '../data/copy';
-import { initialQueuedPapers, routines as initialRoutines, protocols as initialProtocols, sampleRoutines, sampleProtocols } from '../data/routines';
-import { PRECALIBRATED_SAMPLE_ROUTINES, PRECALIBRATED_SAMPLE_PROTOCOLS, SAMPLE_PAPERS, type SamplePaper } from '../data/samplePapers';
+import { initialQueuedPapers, routines as initialRoutines, sampleRoutines } from '../data/routines';
+import { PRECALIBRATED_SAMPLE_ROUTINES, SAMPLE_PAPERS, type SamplePaper } from '../data/samplePapers';
 import type {
   BarrierLog,
   BarrierType,
@@ -16,10 +16,6 @@ import type {
   NewChatMessage,
   PaperUploadResult,
   ProposedWidgetSpec,
-  Protocol,
-  ProtocolRuntime,
-  ProtocolStep,
-  ProtocolSummary,
   Routine,
   RoutineRuntime,
   RoutineStep,
@@ -89,18 +85,13 @@ function stampSeedMessages(messages: ChatMessage[]): ChatMessage[] {
 
 const STORAGE_VERSION = 'v2';
 const STORAGE_KEY_PREFIX = `viskotun1_${STORAGE_VERSION}`;
-const LEGACY_STORAGE_KEY_PREFIX = `protocol_engine_${STORAGE_VERSION}`;
 
 function getStorageKeys(userId?: string) {
   const scope = userId ? `usr_${userId}` : 'guest';
   return {
     routines: `${STORAGE_KEY_PREFIX}_${scope}_routines`,
     activeId: `${STORAGE_KEY_PREFIX}_${scope}_active_id`,
-    runtime: `${STORAGE_KEY_PREFIX}_${scope}_runtime`,
-    // Legacy migration keys
-    legacyProtocols: `${LEGACY_STORAGE_KEY_PREFIX}_${scope}_protocols`,
-    legacyActiveId: `${LEGACY_STORAGE_KEY_PREFIX}_${scope}_active_id`,
-    legacyRuntime: `${LEGACY_STORAGE_KEY_PREFIX}_${scope}_runtime`
+    runtime: `${STORAGE_KEY_PREFIX}_${scope}_runtime`
   };
 }
 
@@ -159,7 +150,7 @@ export function useRoutineState() {
             if (Array.isArray(papers) && papers.length > 0) {
               setSamplePapers(papers);
             }
-            const routinesData = data.routines || data.protocols;
+            const routinesData = data.routines;
             if (routinesData && typeof routinesData === 'object') {
               setSampleRoutinesMap((prev) => ({ ...prev, ...routinesData }));
             }
@@ -186,25 +177,10 @@ export function useRoutineState() {
 
     let isMounted = true;
     try {
-      // Clean up legacy v1 storage keys that may contain old default pre-seeded papers
-      window.localStorage.removeItem('protocol_engine_protocols_v1');
-      window.localStorage.removeItem('protocol_engine_active_id_v1');
-      window.localStorage.removeItem('protocol_engine_runtime_v1');
-
       const keys = getStorageKeys(isAuthenticated ? userId : undefined);
       let savedRoutinesRaw = window.localStorage.getItem(keys.routines);
       let savedActiveId = window.localStorage.getItem(keys.activeId);
       let savedRuntimeRaw = window.localStorage.getItem(keys.runtime);
-
-      // Auto-migrate from protocol_engine_v2 if viskotun1_v2 is not yet present
-      if (!savedRoutinesRaw) {
-        const legacyProtocols = window.localStorage.getItem(keys.legacyProtocols);
-        if (legacyProtocols) {
-          savedRoutinesRaw = legacyProtocols;
-          savedActiveId = savedActiveId || window.localStorage.getItem(keys.legacyActiveId);
-          savedRuntimeRaw = savedRuntimeRaw || window.localStorage.getItem(keys.legacyRuntime);
-        }
-      }
 
       // Guest -> Authenticated user migration: if user is signed in and has no stored routines,
       // but has routines in guest storage from this browser session, migrate them into the user account
@@ -351,11 +327,11 @@ export function useRoutineState() {
         if (res.ok) {
           const data = await res.json();
           if (isMounted) {
-            if (data.found && Array.isArray(data.protocols) && data.protocols.length > 0) {
+            if (data.found && Array.isArray(data.routines) && data.routines.length > 0) {
               // Sanitize legacy auto-synced default papers if user never made active progress on them
               const isLegacyAutoSynced =
-                data.protocols.length === 3 &&
-                data.protocols.every((p: Protocol) =>
+                data.routines.length === 3 &&
+                data.routines.every((p: Routine) =>
                   ['achilles', 'hair-loss', 'creatine-sleep'].includes(p.id)
                 ) &&
                 (!data.runtime ||
@@ -376,9 +352,7 @@ export function useRoutineState() {
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
                         userId,
-                        activeProtocolId: '',
                         activeRoutineId: '',
-                        protocols: [],
                         routines: [],
                         runtime: {}
                       })
@@ -391,7 +365,7 @@ export function useRoutineState() {
                 });
               } else {
                 setRoutineList((currentLocal) => {
-                  const remoteList: Routine[] = data.routines || data.protocols;
+                  const remoteList: Routine[] = data.routines;
                   // If local state already has routines not present in remote, merge and preserve them
                   const missingFromRemote = currentLocal.filter(
                     (lp) => !remoteList.some((rp) => rp.id === lp.id)
@@ -403,10 +377,8 @@ export function useRoutineState() {
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
                         userId,
-                        activeRoutineId: data.activeRoutineId || data.activeProtocolId || merged[0]?.id || '',
-                        activeProtocolId: data.activeRoutineId || data.activeProtocolId || merged[0]?.id || '',
+                        activeRoutineId: data.activeRoutineId || merged[0]?.id || '',
                         routines: merged,
-                        protocols: merged,
                         runtime: { ...(data.runtime || {}), ...runtimeRef.current }
                       })
                     }).catch(() => {});
@@ -415,16 +387,16 @@ export function useRoutineState() {
                   return remoteList;
                 });
 
-                const targetActiveId = data.activeRoutineId || data.activeProtocolId || (data.routines || data.protocols)?.[0]?.id;
+                const targetActiveId = data.activeRoutineId || data.routines?.[0]?.id;
                 if (targetActiveId) {
                   setActiveRoutine((curr) => curr || targetActiveId);
                 }
 
                 if (data.runtime && typeof data.runtime === 'object') {
                   setRuntime((prev) => {
-                    const merged: Record<string, ProtocolRuntime> = { ...prev };
+                    const merged: Record<string, RoutineRuntime> = { ...prev };
                     for (const [id, remoteRt] of Object.entries(data.runtime)) {
-                      const remote = remoteRt as ProtocolRuntime;
+                      const remote = remoteRt as RoutineRuntime;
                       if (!merged[id]) {
                         merged[id] = remote;
                       } else {
@@ -460,7 +432,7 @@ export function useRoutineState() {
                 }
               }
             } else {
-              // Remote returned found=false or empty protocols list
+              // Remote returned found=false or empty routines list
               // DO NOT wipe local state! If the user already has routines locally, sync them to remote!
               setRoutineList((currentLocal) => {
                 if (currentLocal.length > 0) {
@@ -470,9 +442,7 @@ export function useRoutineState() {
                     body: JSON.stringify({
                       userId,
                       activeRoutineId: activeRoutineIdRef.current,
-                      activeProtocolId: activeRoutineIdRef.current,
                       routines: currentLocal,
-                      protocols: currentLocal,
                       runtime: runtimeRef.current
                     })
                   }).catch(() => {});
@@ -510,9 +480,7 @@ export function useRoutineState() {
         body: JSON.stringify({
           userId,
           activeRoutineId,
-          activeProtocolId: activeRoutineId,
           routines: routineList,
-          protocols: routineList,
           runtime
         })
       }).catch((err) => {
@@ -534,9 +502,6 @@ export function useRoutineState() {
       window.localStorage.removeItem(keys.routines);
       window.localStorage.removeItem(keys.activeId);
       window.localStorage.removeItem(keys.runtime);
-      window.localStorage.removeItem(keys.legacyProtocols);
-      window.localStorage.removeItem(keys.legacyActiveId);
-      window.localStorage.removeItem(keys.legacyRuntime);
     } catch (err) {
       console.error('[useRoutineState] Error clearing localStorage:', err);
     }
@@ -553,9 +518,7 @@ export function useRoutineState() {
         body: JSON.stringify({
           userId,
           activeRoutineId: '',
-          activeProtocolId: '',
           routines: [],
-          protocols: [],
           runtime: {}
         })
       }).catch(() => {});
@@ -575,7 +538,7 @@ export function useRoutineState() {
       const sample =
         sampleRoutinesMap[sampleId] ||
         PRECALIBRATED_SAMPLE_ROUTINES[sampleId] ||
-        sampleProtocols.find((p) => p.id === sampleId) ||
+        sampleRoutines.find((p) => p.id === sampleId) ||
         routineList.find((p) => p.id === sampleId);
       if (!sample) {
         toast.error(`Sample routine "${sampleId}" not found`);
@@ -667,9 +630,7 @@ export function useRoutineState() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userId,
-            activeProtocolId: cleanRoutine.id,
             activeRoutineId: cleanRoutine.id,
-            protocols: updatedList.length > 0 ? updatedList : [cleanRoutine],
             routines: updatedList.length > 0 ? updatedList : [cleanRoutine],
             runtime: Object.keys(updatedRuntime).length > 0 ? updatedRuntime : { [cleanRoutine.id]: initialRuntimeEntry }
           })
@@ -687,15 +648,12 @@ export function useRoutineState() {
     [sampleRoutinesMap, routineList, isAuthenticated, userId]
   );
 
-  const loadSampleProtocol = loadSampleRoutine;
-
   const redoRoutine = useCallback(
     (targetId: string) => loadSampleRoutine(targetId, { forceRestart: true }),
     [loadSampleRoutine]
   );
 
   const routine = (routineList.find((item) => item.id === activeRoutineId) ?? routineList[0]) || null;
-  const protocol = routine;
   const state: RoutineRuntime = routine && runtime[routine.id]
     ? runtime[routine.id]
     : {
@@ -1574,7 +1532,7 @@ export function useRoutineState() {
   const askQuestion = useCallback(
     async (text: string) => {
       if (!routine) {
-        toast.info(COPY.errors.noRoutinesBody || COPY.errors.noProtocolsBody);
+        toast.info(COPY.errors.noRoutinesBody);
         return;
       }
       const target = routine;
@@ -1608,7 +1566,7 @@ export function useRoutineState() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             question: text,
-            protocolTitle: target.title,
+            routineTitle: target.title,
             shortTitle: target.shortTitle,
             faqs: target.faqs,
             contraindications: target.contraindications,
@@ -1710,9 +1668,7 @@ export function useRoutineState() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId,
-          activeProtocolId: newRoutine.id,
           activeRoutineId: newRoutine.id,
-          protocols: updatedList.length > 0 ? updatedList : [newRoutine],
           routines: updatedList.length > 0 ? updatedList : [newRoutine],
           runtime: Object.keys(updatedRuntime).length > 0 ? updatedRuntime : { [newRoutine.id]: newRuntimeEntry }
         })
@@ -1721,8 +1677,6 @@ export function useRoutineState() {
       });
     }
   }, [isAuthenticated, userId]);
-
-  const addProtocol = addRoutine;
 
   const uploadPaper = useCallback(
     async (source: string | File, extractedRoutine?: Routine): Promise<PaperUploadResult> => {
@@ -1745,7 +1699,7 @@ export function useRoutineState() {
             timestamp: nowLabel()
           }
         ]);
-        return { success: true, eligible: true, routine: extractedRoutine, protocol: extractedRoutine };
+        return { success: true, eligible: true, routine: extractedRoutine };
       }
 
       const fileName = typeof source === 'string' ? source : source.name;
@@ -1781,7 +1735,7 @@ export function useRoutineState() {
         }
 
         const result = await res.json();
-        const extractedRoutine = result.routine || result.protocol;
+        const extractedRoutine = result.routine;
 
         if (result.eligible && extractedRoutine) {
           setStagingRoutine(extractedRoutine);
@@ -1796,7 +1750,7 @@ export function useRoutineState() {
             }
           ]);
           toast.success(COPY.processing.ready);
-          return { success: true, eligible: true, protocol: extractedRoutine };
+          return { success: true, eligible: true, routine: extractedRoutine };
         } else {
           const reason = result.rejectionReason || COPY.extraction.declinedNonHuman;
           setStagingError(reason);
@@ -1868,12 +1822,10 @@ export function useRoutineState() {
           summary: target.steps?.map((s: RoutineStep) => s.action).join('. ') || '',
           featuresTested: target.steps?.map((s: RoutineStep) => s.action) || [],
           routineId: target.id,
-          protocolId: target.id,
           isSample: false,
           userId: userId || 'guest'
         },
-        routine: target,
-        protocol: target
+        routine: target
       })
     }).catch((err) => {
       console.warn('[confirmStagingRoutine] Could not persist to Firebase papers collection:', err);
@@ -1886,8 +1838,6 @@ export function useRoutineState() {
     toast.success(COPY.assistant.confirmedToast(displayTitle));
   }, [stagingRoutine, addRoutine, userId]);
 
-  const confirmStagingProtocol = confirmStagingRoutine;
-
   const discardStagingRoutine = useCallback(() => {
     setStagingRoutine(null);
     setStagingMessages([]);
@@ -1895,8 +1845,6 @@ export function useRoutineState() {
     setIsExtractingPaper(false);
     toast.info(COPY.assistant.discardedToast);
   }, []);
-
-  const discardStagingProtocol = discardStagingRoutine;
 
   const askStagingQuestion = useCallback(
     async (text: string) => {
@@ -2006,7 +1954,6 @@ export function useRoutineState() {
           body: JSON.stringify({
             question: text,
             routineTitle: target.title,
-            protocolTitle: target.title,
             shortTitle: target.shortTitle,
             faqs: target.faqs,
             contraindications: target.contraindications,
@@ -2112,7 +2059,6 @@ export function useRoutineState() {
 
       const payload = {
         routineId: routine.id,
-        protocolId: routine.id,
         outcome: reviewData.outcome,
         text: reviewData.text,
         handle: reviewData.handle,
@@ -2230,13 +2176,13 @@ export function useRoutineState() {
     const applyApproval = (p: Routine): Routine => {
       if (!p.dataCollectionSpec) return p;
       const matches = p.dataCollectionSpec.some(
-        (f) => f.proposedWidget?.id === proposal.id || ((p.id === proposal.routineId || p.id === proposal.protocolId) && f.id === proposal.fieldId)
+        (f) => f.proposedWidget?.id === proposal.id || (p.id === proposal.routineId && f.id === proposal.fieldId)
       );
       if (!matches) return p;
       return {
         ...p,
         dataCollectionSpec: p.dataCollectionSpec.map((f) =>
-          f.proposedWidget?.id === proposal.id || ((p.id === proposal.routineId || p.id === proposal.protocolId) && f.id === proposal.fieldId)
+          f.proposedWidget?.id === proposal.id || (p.id === proposal.routineId && f.id === proposal.fieldId)
             ? { ...f, proposedWidget: { ...proposal, status: 'approved' } }
             : f
         )
@@ -2250,16 +2196,11 @@ export function useRoutineState() {
   return useMemo(
     () => ({
       routines: summaries,
-      protocols: summaries,
       queuedPapers,
       activeRoutineId: routine?.id ?? '',
-      activeProtocolId: routine?.id ?? '',
       setActiveRoutine,
-      setActiveProtocol: setActiveRoutine,
       routine,
-      protocol: routine,
       hasRoutines: routineList.length > 0,
-      hasProtocols: routineList.length > 0,
       currentDay: routine?.currentDay ?? 1,
       totalDays: routine?.totalDays ?? 14,
       streak: routine?.streak ?? 0,
@@ -2308,9 +2249,7 @@ export function useRoutineState() {
       closeBctLedger,
       loadTrendingRoutine: loadSampleRoutine,
       loadSampleRoutine,
-      loadSampleProtocol: loadSampleRoutine,
       redoRoutine,
-      redoProtocol: redoRoutine,
       trendingPapers: samplePapers,
       samplePapers,
       sampleSource,
@@ -2332,7 +2271,6 @@ export function useRoutineState() {
       askAboutStep,
       uploadPaper,
       stagingRoutine,
-      stagingProtocol: stagingRoutine,
       isExtractingPaper,
       extractingSourceName,
       stagingMessages,
@@ -2340,13 +2278,10 @@ export function useRoutineState() {
       clearStagingError,
       isStagingAssistantTyping,
       confirmStagingRoutine,
-      confirmStagingProtocol: confirmStagingRoutine,
       discardStagingRoutine,
-      discardStagingProtocol: discardStagingRoutine,
       askStagingQuestion,
       toggleStagingExcludeStep,
       addRoutine,
-      addProtocol: addRoutine,
       lifestyleProfile: auth?.lifestyleProfile,
       updateLifestyleProfile: auth?.updateLifestyleProfile,
       confirmRegion: auth?.confirmRegion,
@@ -2449,5 +2384,3 @@ export function useRoutineState() {
 }
 
 export type RoutineState = ReturnType<typeof useRoutineState>;
-export type ProtocolState = RoutineState;
-export const useProtocolState = useRoutineState;

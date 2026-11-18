@@ -39,10 +39,3 @@ export function useRoutine(): RoutineContextValue {
   }
   return context;
 }
-
-/** Backward-compatibility aliases */
-export const ProtocolContext = RoutineContext;
-export const ProtocolProvider = RoutineProvider;
-export const useProtocol = useRoutine;
-export type ProtocolContextValue = RoutineContextValue;
-export type ProtocolProviderProps = RoutineProviderProps;

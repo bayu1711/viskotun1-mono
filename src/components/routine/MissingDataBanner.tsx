@@ -11,13 +11,12 @@ import { IconTile } from '../ui/IconTile';
 
 interface MissingDataBannerProps {
   routine?: Routine | null;
-  protocol?: Routine | null;
   className?: string;
 }
 
-export function MissingDataBanner({ routine: propRoutine, protocol: propProtocol, className }: MissingDataBannerProps = {}) {
+export function MissingDataBanner({ routine: propRoutine, className }: MissingDataBannerProps = {}) {
   const { routine, missingDataFlagEnabled } = useRoutine();
-  const current = propRoutine !== undefined ? propRoutine : (propProtocol !== undefined ? propProtocol : routine);
+  const current = propRoutine !== undefined ? propRoutine : routine;
 
   if (!missingDataFlagEnabled || !current) return null;
 

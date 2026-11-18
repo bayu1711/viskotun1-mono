@@ -16,7 +16,6 @@ import { getFirebaseAuth } from '../lib/firebase';
 import type { AuthState, RegionContext, User, UserLifestyleProfile } from '../types/auth';
 
 const STORAGE_KEY = 'viskotun1_auth_user';
-const LEGACY_STORAGE_KEY = 'protocol_engine_auth_user';
 const LIFESTYLE_STORAGE_KEY = 'viskotun1_lifestyle_profile';
 
 export const DEFAULT_LIFESTYLE_PROFILE: UserLifestyleProfile = {
@@ -104,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Safe client hydration from localStorage
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem(STORAGE_KEY) || window.localStorage.getItem(LEGACY_STORAGE_KEY);
+      const saved = window.localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         setUser(parsed);
@@ -180,7 +179,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextUser));
       } else {
         window.localStorage.removeItem(STORAGE_KEY);
-        window.localStorage.removeItem(LEGACY_STORAGE_KEY);
       }
     } catch {
       // Ignore storage write issues
