@@ -509,5 +509,27 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     ctaBannerSubtitle:
       'انضم إلى مجتمع المشاركين والأطباء المعتمدين على الخطوات الميسّرة القائمة على الأدلة. دون الحاجة لبطاقة ائتمان أو إعداد معقد.',
     ctaBannerButton: 'ابدأ تجربة أبوظبي الصحية — مجاناً'
+  },
+  shareModal: {
+    title: 'مشاركة الخطة العلاجية',
+    eyebrow: 'رابط مباشر للأطباء والمشاركين',
+    description: 'امسح رمز الاستجابة السريعة (QR) للفتح المباشر على الهاتف، أو شارك الرابط عبر القنوات السريرية والشخصية.',
+    copyLink: 'نسخ الرابط',
+    copiedToast: 'تم نسخ رابط الخطة إلى الحافظة',
+    nativeShare: 'مشاركة عبر الجهاز…',
+    socialWhatsApp: 'واتساب',
+    socialX: 'منصة إكس (تويتر)',
+    socialLinkedIn: 'لينكد إن',
+    socialEmail: 'البريد الإلكتروني',
+    calendarSectionTitle: 'تنبيهات التقويم',
+    calendarSectionDesc: 'مزامنة جدول الخطة اليومية مع تنبيهات تقويم Apple أو Google أو Outlook.',
+    googleCalendar: 'تقويم Google',
+    downloadIcs: 'تقويم Apple / Outlook (.ics)',
+    downloadedIcsToast: 'تم تنزيل ملف التقويم (.ics)',
+    deepLinkToast: (title: string) => `تم تحميل الخطة المشتركة: ${title}`,
+    openShareButton: 'مشاركة',
+    addToCalendarButton: 'التقويم',
+    scanQrLabel: 'امسح بكاميرا الهاتف لتحميل الخطة',
+    closeButton: 'إغلاق'
   }
 };

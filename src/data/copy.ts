@@ -430,6 +430,28 @@ export const COPY = {
     logScoreMeta: (day: number, score: number) => `Day ${day} · Score ${score}/10`,
     footerAudit: (doi: string) => `ViskotuN1 • Interventional Human Science • Source: ${doi}`
   },
+  shareModal: {
+    title: 'Share Clinical Routine',
+    eyebrow: 'Clinician & Patient Deep-Link',
+    description: 'Scan the QR code to open directly on mobile, or share across clinical & personal channels.',
+    copyLink: 'Copy Link',
+    copiedToast: 'Routine link copied to clipboard',
+    nativeShare: 'Share via device…',
+    socialWhatsApp: 'WhatsApp',
+    socialX: 'X (Twitter)',
+    socialLinkedIn: 'LinkedIn',
+    socialEmail: 'Email',
+    calendarSectionTitle: 'Calendar Reminders',
+    calendarSectionDesc: 'Sync daily routine schedule with native reminders on your Apple, Google, or Outlook calendar.',
+    googleCalendar: 'Google Calendar',
+    downloadIcs: 'Apple / Outlook (.ics)',
+    downloadedIcsToast: 'Calendar event file (.ics) downloaded',
+    deepLinkToast: (title: string) => `Loaded shared routine: ${title}`,
+    openShareButton: 'Share',
+    addToCalendarButton: 'Calendar',
+    scanQrLabel: 'Scan with mobile camera to load routine',
+    closeButton: 'Close'
+  },
   voiceCoach: {
     eyebrow: 'Hands-free',
     title: 'Voice coach',
