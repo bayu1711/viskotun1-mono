@@ -112,6 +112,7 @@ export function useRoutineState() {
   const [isHowToOpen, setIsHowToOpen] = useState(false);
   const [isBctLedgerOpen, setIsBctLedgerOpen] = useState(false);
   const [isReEntryOpen, setIsReEntryOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
   const [runtime, setRuntime] = useState<Record<string, RoutineRuntime>>({});
   const [hasHydrated, setHasHydrated] = useState(false);
@@ -533,6 +534,9 @@ export function useRoutineState() {
   const openBctLedger = useCallback(() => setIsBctLedgerOpen(true), []);
   const closeBctLedger = useCallback(() => setIsBctLedgerOpen(false), []);
 
+  const openShareModal = useCallback(() => setIsShareModalOpen(true), []);
+  const closeShareModal = useCallback(() => setIsShareModalOpen(false), []);
+
   const loadSampleRoutine = useCallback(
     (sampleId: string, options?: { forceRestart?: boolean }) => {
       const sample =
@@ -678,6 +682,39 @@ export function useRoutineState() {
       return { ...prev, [id]: update(current) };
     });
   }, []);
+
+  // Clinician deep-link parsing: /routine?routineId=... or /routine?id=...
+  useEffect(() => {
+    if (!hasHydrated || typeof window === 'undefined') return;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const targetId = params.get('routineId') || params.get('id');
+      if (!targetId) return;
+
+      const localFound = routineList.find((r) => r.id === targetId);
+      if (localFound) {
+        if (activeRoutineId !== targetId) {
+          setActiveRoutine(targetId);
+          toast.success(COPY.shareModal.deepLinkToast(localFound.shortTitle || localFound.title));
+        }
+      } else {
+        const sampleFound =
+          sampleRoutinesMap[targetId] ||
+          PRECALIBRATED_SAMPLE_ROUTINES[targetId] ||
+          sampleRoutines.find((r) => r.id === targetId);
+        if (sampleFound) {
+          loadSampleRoutine(targetId);
+          toast.success(COPY.shareModal.deepLinkToast(sampleFound.shortTitle || sampleFound.title));
+        }
+      }
+
+      // Clean the query string from the browser URL bar without page refresh
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+    } catch {
+      // Safe continue
+    }
+  }, [hasHydrated, routineList, activeRoutineId, sampleRoutinesMap, loadSampleRoutine]);
 
   const feedbackMetric = useMemo(
     () =>
@@ -2247,6 +2284,9 @@ export function useRoutineState() {
       isBctLedgerOpen,
       openBctLedger,
       closeBctLedger,
+      isShareModalOpen,
+      openShareModal,
+      closeShareModal,
       loadTrendingRoutine: loadSampleRoutine,
       loadSampleRoutine,
       redoRoutine,
@@ -2331,6 +2371,9 @@ export function useRoutineState() {
       isBctLedgerOpen,
       openBctLedger,
       closeBctLedger,
+      isShareModalOpen,
+      openShareModal,
+      closeShareModal,
       isReEntryOpen,
       openReEntryModal,
       closeReEntryModal,

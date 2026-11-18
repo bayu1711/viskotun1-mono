@@ -2,6 +2,7 @@
 
 import React, { useId } from 'react';
 import NorthEastIcon from '@mui/icons-material/NorthEast';
+import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import { Callout } from '../components/feedback/Callout';
 import { PageContainer } from '../components/layout/PageContainer';
 import { PageHeader } from '../components/layout/PageHeader';
@@ -34,6 +35,7 @@ export function RoutinePage() {
     feedbackMetric,
     incrementSet,
     isStepExcluded,
+    openShareModal,
     hasHydrated
   } = useRoutine();
   const historyHeadingId = useId();
@@ -64,7 +66,21 @@ export function RoutinePage() {
     <PageContainer>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-main-aside lg:gap-10">
         <div>
-          <PageHeader eyebrow={COPY.routine.eyebrow(currentDay, totalDays)} title={COPY.routine.title(todayPercent)}>
+          <PageHeader
+            eyebrow={COPY.routine.eyebrow(currentDay, totalDays)}
+            title={COPY.routine.title(todayPercent)}
+            switcherExtra={
+              <button
+                type="button"
+                onClick={openShareModal}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 hover:bg-cream px-3.5 text-xs font-semibold text-ink transition-colors cursor-pointer"
+                title="Share clinical routine & QR code"
+              >
+                <Icon icon={ShareOutlinedIcon} size="xs" />
+                <span>{COPY.shareModal.openShareButton}</span>
+              </button>
+            }
+          >
             <DailyProgressBar fraction={todayFraction} percent={todayPercent} />
           </PageHeader>
 
