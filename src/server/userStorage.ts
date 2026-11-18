@@ -9,15 +9,13 @@
 import fs from 'fs';
 import path from 'path';
 import { getFirestore } from './guardrailLedger';
-import type { Routine, RoutineRuntime, Protocol } from '../types/routine';
+import type { Routine, RoutineRuntime } from '../types/routine';
 import { SEEDED_COMMUNITY_USERS } from './seedUsers';
 
 export interface UserRecord {
   userId: string;
   activeRoutineId?: string;
-  activeProtocolId?: string;
   routines: Routine[];
-  protocols: Protocol[];
   runtime: Record<string, RoutineRuntime>;
   updatedAt: number;
 }
@@ -100,10 +98,8 @@ export async function getUserRecord(userId: string): Promise<UserRecord | null> 
         if (data) {
           const resolved: UserRecord = {
             userId,
-            activeRoutineId: data.activeRoutineId || data.activeProtocolId,
-            activeProtocolId: data.activeRoutineId || data.activeProtocolId,
-            routines: data.routines || data.protocols || [],
-            protocols: data.routines || data.protocols || [],
+            activeRoutineId: data.activeRoutineId,
+            routines: data.routines || [],
             runtime: data.runtime || {},
             updatedAt: data.updatedAt || Date.now()
           };
@@ -169,10 +165,8 @@ export async function getAllUserRecords(): Promise<UserRecord[]> {
           if (uid) {
             const resolved: UserRecord = {
               userId: uid,
-              activeRoutineId: data.activeRoutineId || data.activeProtocolId,
-              activeProtocolId: data.activeRoutineId || data.activeProtocolId,
-              routines: data.routines || data.protocols || [],
-              protocols: data.routines || data.protocols || [],
+              activeRoutineId: data.activeRoutineId,
+              routines: data.routines || [],
               runtime: data.runtime || {},
               updatedAt: data.updatedAt || Date.now()
             };
@@ -197,10 +191,8 @@ function matchesRoutine(candidateId: string | undefined, targetId: string): bool
   return false;
 }
 
-const matchesProtocol = matchesRoutine;
-
 /**
- * Computes live user telemetry for a specific routine or protocol ID:
+ * Computes live user telemetry for a specific routine:
  * - activeTrackersCount: number of distinct users actively tracking or having this routine in their list
  * - userLogsCount: sum of all feedbackLogs, morphingLogs, dayHistory entries, and completed sets
  */
@@ -213,13 +205,10 @@ export async function getLiveUserStats(routineId: string): Promise<{
   let userLogsCount = 0;
 
   for (const user of users) {
-    const isActivelyTracking =
-      matchesRoutine(user.activeRoutineId, routineId) ||
-      matchesRoutine(user.activeProtocolId, routineId);
+    const isActivelyTracking = matchesRoutine(user.activeRoutineId, routineId);
 
     const hasInRoutines =
-      (Array.isArray(user.routines) && user.routines.some((r) => matchesRoutine(r.id, routineId))) ||
-      (Array.isArray(user.protocols) && user.protocols.some((p) => matchesRoutine(p.id, routineId)));
+      Array.isArray(user.routines) && user.routines.some((r) => matchesRoutine(r.id, routineId));
 
     const userRuntime =
       user.runtime?.[routineId] ||

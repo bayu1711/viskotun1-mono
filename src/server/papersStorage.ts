@@ -7,8 +7,8 @@
  */
 
 import { getFirestore } from './guardrailLedger';
-import { SAMPLE_PAPERS, PRECALIBRATED_SAMPLE_PROTOCOLS, PRECALIBRATED_SAMPLE_ROUTINES, type SamplePaper } from '../data/samplePapers';
-import type { Routine, Protocol, StoredPaper } from '../types/routine';
+import { SAMPLE_PAPERS, PRECALIBRATED_SAMPLE_ROUTINES, type SamplePaper } from '../data/samplePapers';
+import type { Routine, StoredPaper } from '../types/routine';
 import { getLiveUserStats } from './userStorage';
 
 export const PAPERS_COLLECTION = 'papers';
@@ -32,16 +32,14 @@ function createInitialSamplePapers(): StoredPaper[] {
     pdfUrl: paper.pdfUrl,
     summary: paper.summary,
     featuresTested: paper.featuresTested,
-    routineId: paper.routineId || paper.protocolId,
-    protocolId: paper.routineId || paper.protocolId,
+    routineId: paper.routineId,
     isSample: true,
     isGuardrailRejectionTest: paper.isGuardrailRejectionTest,
     popularityScore: paper.popularityScore ?? 0,
     activeTrackersCount: paper.activeTrackersCount ?? 0,
     totalLogsCount: paper.totalLogsCount ?? 0,
     trendingRank: paper.trendingRank,
-    routine: (paper.routineId ? PRECALIBRATED_SAMPLE_ROUTINES[paper.routineId] : undefined) || (paper.protocolId ? PRECALIBRATED_SAMPLE_ROUTINES[paper.protocolId] : undefined),
-    protocol: (paper.routineId ? PRECALIBRATED_SAMPLE_ROUTINES[paper.routineId] : undefined) || (paper.protocolId ? PRECALIBRATED_SAMPLE_ROUTINES[paper.protocolId] : undefined),
+    routine: paper.routineId ? PRECALIBRATED_SAMPLE_ROUTINES[paper.routineId] : undefined,
     userId: 'fazarathfazal@gmail.com',
     userEmail: 'fazarathfazal@gmail.com',
     uploadedBy: 'fazarathfazal@gmail.com',
@@ -80,7 +78,7 @@ export async function seedSamplePapersIfEmpty(): Promise<boolean> {
 }
 
 async function enrichPaperWithLiveTelemetry(paper: SamplePaper): Promise<SamplePaper> {
-  const targetId = paper.routineId || paper.protocolId || paper.id;
+  const targetId = paper.routineId || paper.id;
   const userStats = await getLiveUserStats(targetId);
 
   return {
@@ -98,7 +96,6 @@ export async function getSamplePapers(): Promise<{
   trendingPapers: SamplePaper[];
   samplePapers: SamplePaper[];
   routines: Record<string, Routine>;
-  protocols: Record<string, Protocol>;
   source: 'firestore-live' | 'memory-cache';
 }> {
   const db = getFirestore();
@@ -134,8 +131,7 @@ export async function getSamplePapers(): Promise<{
             pdfUrl: data.pdfUrl,
             summary: data.summary,
             featuresTested: data.featuresTested || [],
-            routineId: data.routineId || data.protocolId,
-            protocolId: data.protocolId || data.routineId,
+            routineId: data.routineId,
             isGuardrailRejectionTest: data.isGuardrailRejectionTest,
             popularityScore: data.popularityScore ?? 0,
             activeTrackersCount: data.activeTrackersCount ?? 0,
@@ -146,8 +142,8 @@ export async function getSamplePapers(): Promise<{
             uploadedBy: data.uploadedBy || 'fazarathfazal@gmail.com'
           });
 
-          const rId = data.routineId || data.protocolId;
-          const rObj = data.routine || data.protocol;
+          const rId = data.routineId;
+          const rObj = data.routine;
           if (rId && rObj) {
             routines[rId] = rObj;
           }
@@ -170,7 +166,6 @@ export async function getSamplePapers(): Promise<{
           trendingPapers: sorted,
           samplePapers: sorted,
           routines,
-          protocols: routines,
           source: 'firestore-live'
         };
       }
@@ -200,8 +195,7 @@ export async function getSamplePapers(): Promise<{
         pdfUrl: item.pdfUrl,
         summary: item.summary,
         featuresTested: item.featuresTested,
-        routineId: item.routineId || item.protocolId,
-        protocolId: item.protocolId || item.routineId,
+        routineId: item.routineId,
         isGuardrailRejectionTest: item.isGuardrailRejectionTest,
         popularityScore: item.popularityScore ?? 0,
         activeTrackersCount: item.activeTrackersCount ?? 0,
@@ -211,8 +205,8 @@ export async function getSamplePapers(): Promise<{
         userEmail: item.userEmail || 'fazarathfazal@gmail.com',
         uploadedBy: item.uploadedBy || 'fazarathfazal@gmail.com'
       });
-      const rId = item.routineId || item.protocolId;
-      const rObj = item.routine || item.protocol;
+      const rId = item.routineId;
+      const rObj = item.routine;
       if (rId && rObj) {
         routines[rId] = rObj;
       }
@@ -229,7 +223,6 @@ export async function getSamplePapers(): Promise<{
     trendingPapers: sorted,
     samplePapers: sorted,
     routines,
-    protocols: routines,
     source: 'memory-cache'
   };
 }

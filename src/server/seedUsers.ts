@@ -18,9 +18,7 @@ export const SEEDED_COMMUNITY_USERS: UserRecord[] = [
   {
     userId: 'user-ach-runner-41m',
     activeRoutineId: 'achilles',
-    activeProtocolId: 'achilles',
     routines: [achillesRoutine],
-    protocols: [achillesRoutine],
     runtime: {
       achilles: {
         setsDone: { 'ach-1': 3, 'ach-2': 3, 'ach-3': 3 },
@@ -44,9 +42,7 @@ export const SEEDED_COMMUNITY_USERS: UserRecord[] = [
   {
     userId: 'user-ach-desk-33f',
     activeRoutineId: 'achilles',
-    activeProtocolId: 'achilles',
     routines: [achillesRoutine],
-    protocols: [achillesRoutine],
     runtime: {
       achilles: {
         setsDone: { 'ach-1': 3, 'ach-2': 3 },
@@ -68,9 +64,7 @@ export const SEEDED_COMMUNITY_USERS: UserRecord[] = [
   {
     userId: 'user-ach-bball-29m',
     activeRoutineId: 'achilles',
-    activeProtocolId: 'achilles',
     routines: [achillesRoutine],
-    protocols: [achillesRoutine],
     runtime: {
       achilles: {
         setsDone: { 'ach-1': 3, 'ach-2': 3, 'ach-3': 3 },
@@ -91,9 +85,7 @@ export const SEEDED_COMMUNITY_USERS: UserRecord[] = [
   {
     userId: 'user-ach-hiker-52f',
     activeRoutineId: 'achilles',
-    activeProtocolId: 'achilles',
     routines: [achillesRoutine],
-    protocols: [achillesRoutine],
     runtime: {
       achilles: {
         setsDone: { 'ach-1': 3, 'ach-3': 3 },
@@ -119,9 +111,7 @@ export const SEEDED_COMMUNITY_USERS: UserRecord[] = [
   {
     userId: 'user-hair-norwood-31m',
     activeRoutineId: 'hair-loss',
-    activeProtocolId: 'hair-loss',
     routines: [hairLossRoutine],
-    protocols: [hairLossRoutine],
     runtime: {
       'hair-loss': {
         setsDone: { 'hair-1': 2, 'hair-2': 1, 'hair-3': 1 },
@@ -141,9 +131,7 @@ export const SEEDED_COMMUNITY_USERS: UserRecord[] = [
   {
     userId: 'user-hair-diffuse-44m',
     activeRoutineId: 'hair-loss',
-    activeProtocolId: 'hair-loss',
     routines: [hairLossRoutine],
-    protocols: [hairLossRoutine],
     runtime: {
       'hair-loss': {
         setsDone: { 'hair-1': 2 },
@@ -163,9 +151,7 @@ export const SEEDED_COMMUNITY_USERS: UserRecord[] = [
   {
     userId: 'user-hair-temples-27m',
     activeRoutineId: 'hair-loss',
-    activeProtocolId: 'hair-loss',
     routines: [hairLossRoutine],
-    protocols: [hairLossRoutine],
     runtime: {
       'hair-loss': {
         setsDone: { 'hair-1': 2, 'hair-2': 1, 'hair-3': 1 },
@@ -185,9 +171,7 @@ export const SEEDED_COMMUNITY_USERS: UserRecord[] = [
   {
     userId: 'user-hair-female-38f',
     activeRoutineId: 'hair-loss',
-    activeProtocolId: 'hair-loss',
     routines: [hairLossRoutine],
-    protocols: [hairLossRoutine],
     runtime: {
       'hair-loss': {
         setsDone: { 'hair-1': 2, 'hair-3': 1 },
@@ -211,9 +195,7 @@ export const SEEDED_COMMUNITY_USERS: UserRecord[] = [
   {
     userId: 'user-cr-shift-28m',
     activeRoutineId: 'creatine-sleep',
-    activeProtocolId: 'creatine-sleep',
     routines: [FALLBACK_CREATINE_SLEEP],
-    protocols: [FALLBACK_CREATINE_SLEEP],
     runtime: {
       'creatine-sleep': {
         setsDone: { 'cr-1': 1, 'cr-2': 1, 'cr-3': 4 },
@@ -233,9 +215,7 @@ export const SEEDED_COMMUNITY_USERS: UserRecord[] = [
   {
     userId: 'user-cr-clin-34f',
     activeRoutineId: 'creatine-sleep',
-    activeProtocolId: 'creatine-sleep',
     routines: [FALLBACK_CREATINE_SLEEP],
-    protocols: [FALLBACK_CREATINE_SLEEP],
     runtime: {
       'creatine-sleep': {
         setsDone: { 'cr-1': 1, 'cr-2': 1, 'cr-3': 4 },

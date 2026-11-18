@@ -4,7 +4,6 @@ import {
   type DataCollectionField,
   type ProposedWidgetSpec,
   type Routine,
-  type Protocol,
   type WidgetType
 } from '../types/routine';
 
@@ -97,9 +96,9 @@ export async function registerWidgetProposal(proposal: ProposedWidgetSpec): Prom
  * If a field requests an unsupported widget type or specifies a custom proposedWidget,
  * registers the proposal for human oversight while assigning a safe fallback WidgetType.
  */
-export async function validateAndRegisterRoutineWidgets(routine: Routine | Protocol): Promise<Routine> {
+export async function validateAndRegisterRoutineWidgets(routine: Routine): Promise<Routine> {
   if (!routine.dataCollectionSpec || routine.dataCollectionSpec.length === 0) {
-    return routine as Routine;
+    return routine;
   }
 
   const validatedFields: DataCollectionField[] = [];
@@ -131,7 +130,7 @@ export async function validateAndRegisterRoutineWidgets(routine: Routine | Proto
         rawField.instructions ||
         `Custom clinical endpoint widget for ${rawField.name}`,
       status: rawField.proposedWidget?.status === 'approved' ? 'approved' : 'pending_review',
-      protocolId: routine.id,
+      routineId: routine.id,
       paperTitle: routine.paper?.title || routine.title,
       fieldId: rawField.id,
       unit: rawField.proposedWidget?.unit ?? rawField.unit,
@@ -155,10 +154,8 @@ export async function validateAndRegisterRoutineWidgets(routine: Routine | Proto
   return {
     ...routine,
     dataCollectionSpec: validatedFields
-  } as Routine;
+  };
 }
-
-export const validateAndRegisterProtocolWidgets = validateAndRegisterRoutineWidgets;
 
 export async function listWidgetProposals(): Promise<ProposedWidgetSpec[]> {
   const merged = new Map<string, ProposedWidgetSpec>(memoryWidgetProposals);

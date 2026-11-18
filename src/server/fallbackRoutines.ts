@@ -1,4 +1,4 @@
-import type { Routine, Protocol } from '../types/routine';
+import type { Routine } from '../types/routine';
 import { COPY } from '../data/copy';
 import { classifyPaperSource } from './gatekeeper';
 
@@ -254,7 +254,7 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
   ]
 };
 
-export const FALLBACK_PATELLAR_REHAB: Protocol = {
+export const FALLBACK_PATELLAR_REHAB: Routine = {
   id: 'patellar-rehab',
   title: 'Patellar Tendinopathy Heavy Slow Resistance',
   shortTitle: 'patellar rehab',
@@ -597,7 +597,6 @@ export function generateFallbackRoutine(source: string): Routine {
           description: `Bespoke multi-parameter calibration widget synthesized from ${cleanTitle} study methodology.`,
           status: 'pending_review',
           routineId: slug,
-          protocolId: slug,
           paperTitle: cleanTitle,
           fieldId: `${slug}-custom-endpoint`,
           unit: 'index pts',
@@ -681,5 +680,4 @@ export function generateFallbackRoutine(source: string): Routine {
   };
 }
 
-export const generateFallbackProtocol = generateFallbackRoutine;
 export const FALLBACK_PATELLAR_ROUTINE = FALLBACK_PATELLAR_REHAB;

@@ -16,13 +16,11 @@ import { FALLBACK_CREATINE_SLEEP, FALLBACK_PATELLAR_REHAB } from './fallbackRout
 import { calibratedRoutines } from '../data/routines/calibrated';
 import type {
   Routine,
-  Protocol,
   CommunityReview,
   NewCommunityReview,
   CommunityInsights,
   ProposedWidgetSpec,
-  RoutineChangelogEntry,
-  ProtocolChangelogEntry
+  RoutineChangelogEntry
 } from '../types/routine';
 import {
   getCanonicalPaperId,
@@ -33,7 +31,6 @@ import {
 import { getLiveUserStats } from './userStorage';
 
 const ROUTINES_COLLECTION = 'routines';
-const PROTOCOLS_COLLECTION = 'protocols';
 const REVIEWS_SUBCOLLECTION = 'reviews';
 const METRICS_SUBCOLLECTION = 'community_metrics';
 
@@ -167,17 +164,14 @@ const TITLE_ALIASES: Record<string, string[]> = {
   'dual-n-back': ['improving fluid intelligence with training on working memory'],
   'uae-heat-circadian': [
     'efficacy of morning retinal photic stimulation and indoor thermal micro-conditioning',
-    'circadian light heat resilient hydration protocol',
     'circadian light heat resilient hydration routine'
   ],
   'uae-ramadan-metabolic': [
     'chronobiological synchronization and postprandial glycemic stabilization during intermittent fasting',
-    'ramadan circadian metabolic rhythm protocol',
     'ramadan circadian metabolic rhythm routine'
   ],
   'uae-midwakh-tapering': [
     'clinical efficacy of behavioral substitution and urge surfing for high nicotine midwakh pipe cessation',
-    'midwakh dokha behavioral harm reduction tapering protocol',
     'midwakh dokha behavioral harm reduction tapering routine'
   ]
 };
@@ -206,16 +200,12 @@ const TITLE_ALIASES: Record<string, string[]> = {
     }
   }
 
-  // 2. Check Firestore live routines/protocols collection
+  // 2. Check Firestore live routines collection
   const db = getFirestore();
   if (db) {
     try {
-      let docRef = db.collection(ROUTINES_COLLECTION).doc(canonicalId);
-      let snapshot = await docRef.get();
-      if (!snapshot.exists) {
-        docRef = db.collection(PROTOCOLS_COLLECTION).doc(canonicalId);
-        snapshot = await docRef.get();
-      }
+      const docRef = db.collection(ROUTINES_COLLECTION).doc(canonicalId);
+      const snapshot = await docRef.get();
 
       if (snapshot.exists) {
         const data = snapshot.data() as Routine;
@@ -225,18 +215,11 @@ const TITLE_ALIASES: Record<string, string[]> = {
 
       // Query by DOI in Firestore
       if (normDoi) {
-        let querySnap = await db
+        const querySnap = await db
           .collection(ROUTINES_COLLECTION)
           .where('paper.doi', '==', normDoi)
           .limit(1)
           .get();
-        if (querySnap.empty) {
-          querySnap = await db
-            .collection(PROTOCOLS_COLLECTION)
-            .where('paper.doi', '==', normDoi)
-            .limit(1)
-            .get();
-        }
         if (!querySnap.empty) {
           const matched = querySnap.docs[0].data() as Routine;
           memoryRoutines.set(matched.id, matched);
@@ -246,18 +229,11 @@ const TITLE_ALIASES: Record<string, string[]> = {
 
       // Query by Title in Firestore
       if (paper.title && paper.title !== 'Untitled Paper') {
-        let titleQuery = await db
+        const titleQuery = await db
           .collection(ROUTINES_COLLECTION)
           .where('title', '==', paper.title)
           .limit(1)
           .get();
-        if (titleQuery.empty) {
-          titleQuery = await db
-            .collection(PROTOCOLS_COLLECTION)
-            .where('title', '==', paper.title)
-            .limit(1)
-            .get();
-        }
         if (!titleQuery.empty) {
           const matched = titleQuery.docs[0].data() as Routine;
           memoryRoutines.set(matched.id, matched);
@@ -306,11 +282,11 @@ export function toCanonicalRoutine(routine: Routine): Routine {
  */
 export async function saveCanonicalRoutine(
   routine: Routine
-): Promise<{ routine: Routine; protocol: Routine; isNew: boolean }> {
+): Promise<{ routine: Routine; isNew: boolean }> {
   // Check if already registered
   const existing = await findCanonicalRoutine(routine.paper, routine.id);
   if (existing) {
-    return { routine: existing, protocol: existing, isNew: false };
+    return { routine: existing, isNew: false };
   }
 
   const canonicalRoutine: Routine = { ...toCanonicalRoutine(routine), isCanonical: true };
@@ -351,7 +327,7 @@ export async function saveCanonicalRoutine(
     }
   }
 
-  return { routine: canonicalRoutine, protocol: canonicalRoutine, isNew: true };
+  return { routine: canonicalRoutine, isNew: true };
 }
 
 /**
@@ -365,23 +341,13 @@ export async function getCommunityReviews(routineId: string): Promise<CommunityR
   const db = getFirestore();
   if (db) {
     try {
-      let snapshot = await db
+      const snapshot = await db
         .collection(ROUTINES_COLLECTION)
         .doc(canonicalId)
         .collection(REVIEWS_SUBCOLLECTION)
         .orderBy('createdAt', 'desc')
         .limit(50)
         .get();
-
-      if (snapshot.empty) {
-        snapshot = await db
-          .collection(PROTOCOLS_COLLECTION)
-          .doc(canonicalId)
-          .collection(REVIEWS_SUBCOLLECTION)
-          .orderBy('createdAt', 'desc')
-          .limit(50)
-          .get();
-      }
 
       if (!snapshot.empty) {
         for (const doc of snapshot.docs) {
@@ -500,21 +466,12 @@ export async function getCommunityMetrics(
   const db = getFirestore();
   if (db) {
     try {
-      let metricsDoc = await db
+      const metricsDoc = await db
         .collection(ROUTINES_COLLECTION)
         .doc(canonicalId)
         .collection(METRICS_SUBCOLLECTION)
         .doc('aggregate')
         .get();
-
-      if (!metricsDoc.exists) {
-        metricsDoc = await db
-          .collection(PROTOCOLS_COLLECTION)
-          .doc(canonicalId)
-          .collection(METRICS_SUBCOLLECTION)
-          .doc('aggregate')
-          .get();
-      }
 
       if (metricsDoc.exists) {
         return {
@@ -543,7 +500,7 @@ export async function getCommunityMetrics(
 export async function injectApprovedWidgetIntoCanonicalRoutine(
   approvedProposal: ProposedWidgetSpec
 ): Promise<Routine | null> {
-  const targetId = approvedProposal.routineId || approvedProposal.protocolId;
+  const targetId = approvedProposal.routineId;
   if (!targetId) return null;
 
   const canonicalId = getCanonicalPaperId(
@@ -673,11 +630,3 @@ export async function updateCanonicalRoutineVersion(
   return updatedRoutine;
 }
 
-// Backward-compatibility aliases
-export const findCanonicalProtocol = findCanonicalRoutine;
-export const saveCanonicalProtocol = saveCanonicalRoutine;
-export const updateCanonicalProtocolVersion = updateCanonicalRoutineVersion;
-export const toCanonicalProtocol = toCanonicalRoutine;
-export const injectApprovedWidgetIntoCanonicalProtocol = injectApprovedWidgetIntoCanonicalRoutine;
-export const BUILTIN_PROTOCOLS = BUILTIN_ROUTINES;
-export const memoryProtocols = memoryRoutines;

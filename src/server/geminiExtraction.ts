@@ -1,12 +1,12 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { COPY } from '../data/copy';
-import type { Routine, Protocol } from '../types/routine';
+import type { Routine } from '../types/routine';
 import { applyGuardrailThreshold } from '../utils/routineMetrics';
 import { generateFallbackRoutine } from './fallbackRoutines';
 import { classifyPaperSource, containsTerm } from './gatekeeper';
 import { getEffectiveGuardrails } from './guardrailLedger';
-import { findCanonicalRoutine, findCanonicalProtocol } from './routineRegistry';
-import { validateAndRegisterRoutineWidgets, validateAndRegisterProtocolWidgets } from './widgetRegistry';
+import { findCanonicalRoutine } from './routineRegistry';
+import { validateAndRegisterRoutineWidgets } from './widgetRegistry';
 import { executeWithGeminiFailover, getGeminiApiKeys } from './geminiKeys';
 import { resolvePaperSource, type PaperResolution } from './paperSource';
 
@@ -21,7 +21,6 @@ export interface ExtractResult {
   eligible: boolean;
   rejectionReason?: string;
   routine?: Routine;
-  protocol?: Routine;
   isExistingCanonical?: boolean;
   source: string;
 }
@@ -224,7 +223,6 @@ async function screenPaper(
       success: true,
       eligible: true,
       routine,
-      protocol: routine,
       isExistingCanonical: true,
       source: sourceName
     };
@@ -356,7 +354,7 @@ export async function extractPaperRoutine(input: ExtractInput): Promise<ExtractR
           };
         }
 
-        const rawRoutine = parsed.routine || parsed.protocol;
+        const rawRoutine = parsed.routine;
         if (rawRoutine) {
           const routine: Routine = {
             ...rawRoutine,
@@ -412,7 +410,6 @@ export async function extractPaperRoutine(input: ExtractInput): Promise<ExtractR
             success: true,
             eligible: true,
             routine: validatedRoutine,
-            protocol: validatedRoutine,
             source: sourceName
           };
         }
@@ -454,10 +451,8 @@ export async function extractPaperRoutine(input: ExtractInput): Promise<ExtractR
     success: true,
     eligible: true,
     routine: fallbackRoutine,
-    protocol: fallbackRoutine,
     source: sourceName
   };
 }
 
-export const extractPaperProtocol = extractPaperRoutine;
 
