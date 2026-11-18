@@ -68,7 +68,7 @@ describe('Scientific Gatekeeper & Fallback Routines', () => {
     });
 
     it('includes required missing parameter tags and adaptive safe defaults', () => {
-      const routine = generateFallbackRoutine('Novel Resistance Protocol.pdf');
+      const routine = generateFallbackRoutine('Novel Resistance Routine.pdf');
       expect(routine.paper.evidenceBadges).toContain('missing-parameters');
       expect(routine.steps[0].statLabel).toBeDefined();
     });

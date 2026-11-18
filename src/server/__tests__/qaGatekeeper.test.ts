@@ -60,7 +60,6 @@ describe('QA TC-07…TC-10 · gatekeeper rejection suite', () => {
     expect(result.eligible).toBe(false);
     expect(result.rejectionReason).toContain(label);
     expect(result.routine).toBeUndefined();
-    expect(result.protocol).toBeUndefined();
   });
 });
 

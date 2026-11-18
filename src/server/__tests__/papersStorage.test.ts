@@ -5,12 +5,12 @@ import { GET, POST } from '../../app/api/papers/route';
 
 describe('papersStorage and /api/papers endpoint', () => {
   it('retrieves sample and trending papers with pre-calibrated routines sorted by popularity', async () => {
-    const { samplePapers, trendingPapers, routines, protocols, source } = await getSamplePapers();
+    const { samplePapers, trendingPapers, routines, source } = await getSamplePapers();
     expect(samplePapers.length).toBeGreaterThanOrEqual(6);
     expect(trendingPapers.length).toBeGreaterThanOrEqual(6);
-    expect((routines || protocols)['achilles']).toBeDefined();
-    expect((routines || protocols)['hair-loss']).toBeDefined();
-    expect((routines || protocols)['creatine-sleep']).toBeDefined();
+    expect(routines['achilles']).toBeDefined();
+    expect(routines['hair-loss']).toBeDefined();
+    expect(routines['creatine-sleep']).toBeDefined();
     expect(['firestore-live', 'memory-cache']).toContain(source);
 
     // Verify trending papers are sorted descending by popularityScore
@@ -34,7 +34,7 @@ describe('papersStorage and /api/papers endpoint', () => {
     expect(fastingPaper?.totalLogsCount).toBe(0);
 
     // Verify routines start on Day 1 with empty history and no initial logs
-    const routineMap = routines || protocols;
+    const routineMap = routines;
     expect(routineMap['achilles'].currentDay).toBe(1);
     expect(routineMap['achilles'].dayHistory).toEqual([]);
     expect(routineMap['achilles'].initialSetsDone).toEqual({});
@@ -79,8 +79,8 @@ describe('papersStorage and /api/papers endpoint', () => {
     expect(data.trendingPapers).toBeDefined();
     expect(Array.isArray(data.trendingPapers)).toBe(true);
     expect(data.trendingPapers[0].trendingRank).toBe(1);
-    expect(data.routines || data.protocols).toBeDefined();
-    expect((data.routines || data.protocols)['achilles'].currentDay).toBe(1);
+    expect(data.routines).toBeDefined();
+    expect(data.routines['achilles'].currentDay).toBe(1);
   });
 
   it('POST /api/papers validates paper presence', async () => {

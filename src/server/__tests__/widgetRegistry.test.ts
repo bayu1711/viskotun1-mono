@@ -4,8 +4,7 @@ import {
   inferFallbackWidgetType,
   isSupportedWidgetType,
   listWidgetProposals,
-  validateAndRegisterRoutineWidgets,
-  validateAndRegisterProtocolWidgets
+  validateAndRegisterRoutineWidgets
 } from '../widgetRegistry';
 import { generateFallbackRoutine } from '../fallbackRoutines';
 

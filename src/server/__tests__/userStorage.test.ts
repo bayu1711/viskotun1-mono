@@ -52,9 +52,7 @@ describe('userStorage and live community telemetry', () => {
     const testUser: UserRecord = {
       userId: 'test-real-user-live-sync@domain.com',
       activeRoutineId: 'achilles',
-      activeProtocolId: 'achilles',
       routines: [],
-      protocols: [],
       runtime: {
         achilles: {
           setsDone: { 'ach-1': 3, 'ach-2': 3 },

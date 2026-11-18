@@ -15,7 +15,7 @@ describe('User Sync API Route', () => {
 
     const data = await res.json();
     expect(data.found).toBe(false);
-    expect(data.protocols).toEqual([]);
+    expect(data.routines).toEqual([]);
     expect(data.runtime).toEqual({});
   });
 
@@ -23,8 +23,6 @@ describe('User Sync API Route', () => {
     const payload = {
       userId: testUserId,
       activeRoutineId: 'achilles',
-      activeProtocolId: 'achilles',
-      protocols: [sampleRoutine],
       routines: [sampleRoutine],
       runtime: {
         achilles: {
@@ -58,9 +56,9 @@ describe('User Sync API Route', () => {
 
     const getData = await getRes.json();
     expect(getData.found).toBe(true);
-    expect(getData.activeProtocolId).toBe('achilles');
-    expect(getData.protocols).toHaveLength(1);
-    expect(getData.protocols[0].id).toBe('achilles');
+    expect(getData.activeRoutineId).toBe('achilles');
+    expect(getData.routines).toHaveLength(1);
+    expect(getData.routines[0].id).toBe('achilles');
     expect(getData.runtime.achilles.setsDone['ach-1']).toBe(1);
 
     // Clean up

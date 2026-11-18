@@ -45,7 +45,7 @@ beforeEach(() => {
 
 describe('canonical registration', () => {
   it('does not register a fresh extraction, but gives it its canonical id', async () => {
-    extractPaperRoutine.mockResolvedValue({ success: true, eligible: true, routine: candidate, protocol: candidate, source: 'x' });
+    extractPaperRoutine.mockResolvedValue({ success: true, eligible: true, routine: candidate, source: 'x' });
     findCanonicalRoutine.mockResolvedValue(null);
 
     const data = await (await extractPost(extractRequest())).json();
@@ -59,7 +59,7 @@ describe('canonical registration', () => {
 
   it('reuses a routine already confirmed for the same paper', async () => {
     const confirmed = { ...candidate, id: 'doi__10_1177_1941738116631498', title: 'Confirmed routine' };
-    extractPaperRoutine.mockResolvedValue({ success: true, eligible: true, routine: candidate, protocol: candidate, source: 'x' });
+    extractPaperRoutine.mockResolvedValue({ success: true, eligible: true, routine: candidate, source: 'x' });
     findCanonicalRoutine.mockResolvedValue(confirmed);
 
     const data = await (await extractPost(extractRequest())).json();
@@ -70,10 +70,10 @@ describe('canonical registration', () => {
   });
 
   it('registers the routine when the user confirms it', async () => {
-    saveCanonicalRoutine.mockResolvedValue({ routine: candidate, protocol: candidate, isNew: true });
+    saveCanonicalRoutine.mockResolvedValue({ routine: candidate, isNew: true });
     const req = new Request('http://localhost/api/papers', {
       method: 'POST',
-      body: JSON.stringify({ paper: { id: candidate.id, title: candidate.title }, routine: candidate, protocol: candidate })
+      body: JSON.stringify({ paper: { id: candidate.id, title: candidate.title }, routine: candidate })
     });
 
     const res = await papersPost(req);
