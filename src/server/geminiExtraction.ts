@@ -25,7 +25,7 @@ export interface ExtractResult {
   source: string;
 }
 
-const SYSTEM_PROMPT = `You are ViskotuN1, an expert clinical & scientific routine extraction AI.
+const SYSTEM_PROMPT = `You are TrialN1, an expert clinical & scientific routine extraction AI.
 Your role is to transform dense peer-reviewed research papers into executable, adaptive daily routines with zero hallucinated gaps.
 
 ### STRICT GATEKEEPER CRITERIA:

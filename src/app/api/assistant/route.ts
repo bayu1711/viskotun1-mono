@@ -50,11 +50,11 @@ export async function POST(request: Request) {
         });
       }
 
-      const rejectionInstruction = `You are the ViskotuN1 Gatekeeper Policy Assistant.
+      const rejectionInstruction = `You are the TrialN1 Gatekeeper Policy Assistant.
 A user uploaded "${rejectedFileName || 'a research paper'}" and it was declined before extraction with the following gatekeeper decision:
 "${trimmedReason}"
 
-ViskotuN1 Eligibility Policy:
+TrialN1 Eligibility Policy:
 - Only interventional human research (randomized controlled trials, clinical cohorts, structured physical therapy, nutrition, sleep, or cognitive routines tested on human participants) is eligible.
 - Animal models (mice, rats, primates), in-vitro studies, theoretical papers, and purely observational epidemiology without an actionable human intervention are strictly ineligible because dosing, loading, and tissue tolerance cannot be safely extrapolated to human self-experimentation.
 
