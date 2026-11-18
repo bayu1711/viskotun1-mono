@@ -55,7 +55,6 @@ export const COPY = {
     resetDemo: 'Reset to demo defaults',
     assistantFab: (title: string) => `Ask Viskotu about ${title} or drop a PDF`,
     todaySummaryLabel: "Today's progress",
-    noActiveProtocol: 'No active routine',
     noActiveRoutine: 'No active routine',
     noActivePrompt: 'Upload a research paper or explore trending routines to start tracking.',
     dayOfTotal: (day: number, total: number) => `Day ${day} / ${total}`,
@@ -297,16 +296,6 @@ export const COPY = {
     taskQuestionPrompt: (action: string) =>
       `What is "${action}" and what is needed to be done? Please provide a detailed step-by-step guide.`
   },
-  protocolCard: {
-    label: 'Extracted routine',
-    eyebrow: (phase: string) => `Extracted · ${phase}`,
-    title: 'Your routine',
-    openRoutine: "Open today's routine",
-    defaulted: ' · Defaulted',
-    rulePrefix: 'Rule: if',
-    ruleCondition,
-    ruleArrow: '→'
-  },
   routineCard: {
     label: 'Extracted routine',
     eyebrow: (phase: string) => `Extracted · ${phase}`,
@@ -328,7 +317,6 @@ export const COPY = {
     eyebrow: 'Track',
     title: 'Your experiments',
     metricsLabel: 'Key metrics',
-    activeProtocol: 'Active routine',
     activeRoutine: 'Active routine',
     adherence: 'Adherence',
     currentPhase: 'Current phase',
@@ -509,7 +497,6 @@ export const COPY = {
     exploreTab: 'Explore trending papers',
     goToRoutine: 'Go to daily routine',
     trackButton: 'Track',
-    defaultProtocolTitle: 'Research Routine',
     defaultRoutineTitle: 'Research Routine',
     versionPill: (v: string) => `v${v}`,
     versionUpdatedPill: (v: string) => `v${v} · Updated`,
@@ -611,7 +598,6 @@ export const COPY = {
     proposeImprovementPrompt: 'I noticed a discrepancy with the published paper: ',
     adoptExistingRoutine: 'Start this routine',
     proposeImprovementButton: 'Discuss or Propose Fix',
-    protocolUpdatedNotice: (v: string) => `Routine updated to v${v}`,
     routineUpdatedNotice: (v: string) => `Routine updated to v${v}`,
     uploadAnother: 'Upload another paper',
     candidateStepsTitle: 'Extracted intervention steps',
@@ -619,9 +605,7 @@ export const COPY = {
     candidateProgressionTitle: 'Progression criteria',
     confirmedToast: (title: string) => `"${title}" added to your routines!`,
     discardedToast: 'Candidate routine discarded.',
-    noActiveProtocolForAskTitle: 'No active routine selected',
     noActiveRoutineForAskTitle: 'No active routine selected',
-    noActiveProtocolForAskBody: 'Add a research paper or load a trending routine to start asking questions.',
     noActiveRoutineForAskBody: 'Add a research paper or load a trending routine to start asking questions.',
     switchToUpload: 'Add a paper',
     intakeInstructionTitle: 'Add an interventional study',
@@ -799,7 +783,6 @@ export const COPY = {
     errorTitle: 'Extraction failed',
     errorGeneral:
       'Could not extract a routine from this document. Please verify it is an interventional study or try another PDF.',
-    protocolReady: (title: string) => `Routine ready: ${title}`,
     routineReady: (title: string) => `Routine ready: ${title}`,
     failedWithStatus: (status: number) => `Extraction failed with HTTP ${status}`,
     linkNotRecognized:
@@ -978,7 +961,6 @@ export const COPY = {
     heroSubtitle:
       'Extreme summer heat, rotating shift work, and regional lifestyle patterns break rigid fitness apps. ViskotuN1 adapts your clinical routines with micro-dosing and non-punitive re-entry so your momentum never resets to zero.',
     ctaStartTrial: 'Start UAE Adapted Routine',
-    ctaExploreProtocols: 'Explore Clinical Routines',
     ctaExploreRoutines: 'Explore Clinical Routines',
     backToGlobal: 'Global Edition',
     trustMetrics: {
@@ -1028,35 +1010,9 @@ export const COPY = {
       title: 'Midwakh, Dokha & Shisha Harm Reduction',
       body: 'Clinical behavioral substitution routines specifically targeting high-nicotine Midwakh pipe habits and social shisha triggers.'
     },
-    protocolsTitle: 'Curated Abu Dhabi Research Routines',
     routinesTitle: 'Curated Abu Dhabi Research Routines',
-    protocolsSubtitle:
-      'Pre-configured interventional routines ready to run immediately in your browser.',
     routinesSubtitle:
       'Pre-configured interventional routines ready to run immediately in your browser.',
-    protocolCards: {
-      heat: {
-        title: 'Circadian Light & Heat Hydration Routine',
-        institution: 'Cleveland Clinic / ACSM Thermal Guidelines',
-        duration: '28 Days · Daily',
-        action: 'Morning light exposure before 8 AM + indoor isometric pacing',
-        tag: 'Heat Resilience'
-      },
-      ramadan: {
-        title: 'Ramadan Circadian & Metabolic Stability Routine',
-        institution: 'Gulf Endocrine Society / Lancet Diabetes',
-        duration: '30 Days · Ramadan Window',
-        action: 'Post-Iftar mobility + Suhoor low-glycemic hydration timing',
-        tag: 'Chronobiology'
-      },
-      midwakh: {
-        title: 'Midwakh & Dokha Behavioral Tapering Routine',
-        institution: 'UAE Public Health / Cochrane Tobacco Addiction',
-        duration: '42 Days · 6 Phases',
-        action: 'Urge surfing + tactile replacement + gradual frequency step-down',
-        tag: 'Harm Reduction'
-      }
-    },
     routineCards: {
       heat: {
         title: 'Circadian Light & Heat Hydration Routine',
@@ -1080,7 +1036,6 @@ export const COPY = {
         tag: 'Harm Reduction'
       }
     },
-    launchProtocolCta: 'Start Routine in App',
     launchRoutineCta: 'Start Routine in App',
     clinicalBriefTitle: 'Physician-Ready Clinical Summary',
     clinicalBriefSubtitle:
@@ -1162,9 +1117,7 @@ export const COPY = {
     boundaryTitle: 'Something went wrong',
     boundaryBody: 'This view failed to load. Your logs are safe.',
     retry: 'Reload view',
-    noProtocolsTitle: 'No routines available',
     noRoutinesTitle: 'No routines available',
-    noProtocolsBody: 'Add a research paper to get started.',
     noRoutinesBody: 'Add a research paper to get started.'
   },
   demo: {
@@ -1187,9 +1140,7 @@ export const COPY = {
     widgets: {
       evaluationRule: 'Evaluation Rule: ',
       measurementCriteria: 'Measurement Criteria: ',
-      protocolNote: 'Routine Note: ',
       routineNote: 'Routine Note: ',
-      protocolGuidelines: 'Routine Test Guidelines: ',
       routineGuidelines: 'Routine Test Guidelines: ',
       photo: {
         uploadPrompt: 'Capture or upload clinical photograph',
@@ -1410,7 +1361,6 @@ export const COPY = {
       saveSuccess: 'Paper saved to Firestore papers collection'
     },
     community: {
-      protocolIdRequired: 'Routine ID is required',
       routineIdRequired: 'Routine ID is required',
       invalidOutcome: 'Outcome must be one of: improved, adjusted, paused',
       textRequired: 'Review text is required',
@@ -1418,34 +1368,6 @@ export const COPY = {
       fetchError: 'Failed to retrieve community data',
       saveError: 'Failed to save community review'
     }
-  },
-  fallbackProtocol: {
-    phase: 'Phase 1: Week 1–2',
-    phaseLabel: 'Week 1',
-    authors: 'Research Collaborative & Clinical Investigators',
-    journal: 'Journal of Interventional Human Science',
-    trialType: 'Randomized Controlled Trial',
-    step1Action: 'Primary Prescribed Intervention',
-    step1Detail: 'Standardized experimental dosage/repetition routine under controlled observation.',
-    step1Frequency: '1x Daily',
-    step1SetLabel: 'Dose / round',
-    step1PerSetLabel: '1 routine round',
-    step1StatLabel: 'Target:',
-    step1StatValue: '1 daily session',
-    step2Action: 'Sustained Adaptation Hold',
-    step2Detail:
-      'Authors reported adaptation timing without specifying exact hold duration. Conservative 30s baseline applied.',
-    step2Frequency: '1x Daily',
-    progressionCondition: 'Compliance rate ≥ 85% with adverse symptom score ≤ 2/10 for 5 consecutive days',
-    progressionAction: 'Progress load or duration by 10% in Phase 2',
-    contraindicationText: 'Stop immediately if sharp acute discomfort or unexpected adverse symptoms occur.',
-    missingParameter: 'Rest interval and hold duration',
-    missingFallback: 'Conservative baseline: 3 × 30s with 60s recovery',
-    metricName: 'tolerability',
-    metricLabel: 'Symptom / tolerability',
-    eyebrow: 'Symptom',
-    logTitle: 'Log',
-    dropOffUnit: 'day'
   },
   fallbackRoutine: {
     phase: 'Phase 1: Week 1–2',
@@ -1571,9 +1493,7 @@ export const COPY = {
     trendingHeading: 'Get started with these trending research papers:',
     viewAllTrending: 'Explore all trending papers',
     quickLoadButton: 'Start routine',
-    noActiveProtocol: 'No active routine',
     noActiveRoutine: 'No active routine',
-    noActiveProtocolDesc: 'Upload a research paper or choose a trending clinical paper to start tracking.',
     noActiveRoutineDesc: 'Upload a research paper or choose a trending clinical paper to start tracking.'
   }
 } as const;

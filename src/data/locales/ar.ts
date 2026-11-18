@@ -61,7 +61,6 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     resetDemo: 'إعادة ضبط التجربة',
     assistantFab: (title: string) => `اسأل ڤيسكوتو عن ${title} أو ارفع ملف PDF`,
     todaySummaryLabel: 'تقدم اليوم',
-    noActiveProtocol: 'لا توجد خطة نشطة',
     noActiveRoutine: 'لا توجد خطة نشطة',
     noActivePrompt: 'قم برفع ورقة بحثية أو استكشف الخطط الرائجة لبدء المتابعة.',
     dayOfTotal: (day: number, total: number) => `اليوم ${day} / ${total}`,
@@ -284,7 +283,6 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     exploreTab: 'استكشاف الأبحاث الرائجة',
     goToRoutine: 'الانتقال إلى خطتي اليومية',
     trackButton: 'متابعة الخطة',
-    defaultProtocolTitle: 'خطة بحثية',
     defaultRoutineTitle: 'خطة بحثية',
     versionPill: (v: string) => `الإصدار ${v}`,
     comparisonLabel: 'البحث السريري مقابل التطبيق الواقعي',
@@ -345,9 +343,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     stagingEyebrow: 'الخطة المستخرجة',
     confirmAddPaper: 'تأكيد وبدء الخطة',
     discardCandidate: 'تجاهل',
-    noActiveProtocolForAskTitle: 'لا توجد خطة نشطة محددة',
     noActiveRoutineForAskTitle: 'لا توجد خطة نشطة محددة',
-    noActiveProtocolForAskBody: 'قم برفع ورقة بحثية أو اختر خطة من الأبحاث الرائجة للبدء في توجيه الأسئلة.',
     noActiveRoutineForAskBody: 'قم برفع ورقة بحثية أو اختر خطة من الأبحاث الرائجة للبدء في توجيه الأسئلة.',
     switchToUpload: 'إضافة بحث',
     typing: 'ڤيسكوتو يكتب الآن...',
@@ -425,7 +421,6 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     heroSubtitle:
       'حرارة الصيف المرتفعة ونوبات العمل المتغيرة والتحديات اليومية قد تعيق تطبيقات اللياقة التقليدية الصارمة. فيسكوتو يتكيف مع واقعك بخطوات ميسّرة وبمسار استعادة نشاط مرن يحفظ استمرارية عاداتك ولا يعيدك إلى نقطة الصفر.',
     ctaStartTrial: 'ابدأ الخطة المتكيفة مع الإمارات',
-    ctaExploreProtocols: 'استكشف الخطط الصحية الإكلينيكية',
     ctaExploreRoutines: 'استكشف الخطط الصحية الإكلينيكية',
     backToGlobal: 'الإصدار العالمي',
     trustMetrics: {
@@ -475,35 +470,9 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       title: 'الإقلاع عن المدواخ والدخة والشيشة',
       body: 'خطط إحلال سلوكية مثبتة إكلينيكياً لاستهداف عادة تدخين المدواخ والدخة الغنية بالنيكوتين ومحفزات الشيشة الاجتماعية.'
     },
-    protocolsTitle: 'خطط صحية مخصصة لأبوظبي',
     routinesTitle: 'خطط صحية مخصصة لأبوظبي',
-    protocolsSubtitle:
-      'خطط صحية محكمة ومضبوطة مسبقاً، جاهزة للتطبيق والتتبع الفوري في المتصفح.',
     routinesSubtitle:
       'خطط صحية محكمة ومضبوطة مسبقاً، جاهزة للتطبيق والتتبع الفوري في المتصفح.',
-    protocolCards: {
-      heat: {
-        title: 'خطة التكيف الحراري والإيقاع الحيوي',
-        institution: 'كليفلاند كلينك / إرشادات الكلية الأمريكية للطب الرياضي',
-        duration: '28 يوماً · يومياً',
-        action: 'التعرض للضوء الطبيعي قبل 8 صباحاً + تدريبات ثبات حركي داخلية',
-        tag: 'التكيف الحراري'
-      },
-      ramadan: {
-        title: 'الاستقرار الأيضي في شهر رمضان المبارك',
-        institution: 'جمعية الغدد الصماء الخليجية / لانسيت للسكري',
-        duration: '30 يوماً · شهر رمضان',
-        action: 'نشاط حركي خفيف بعد الإفطار + تنظيم السوائل بطيئة الامتصاص في السحور',
-        tag: 'التزامن الحيوي'
-      },
-      midwakh: {
-        title: 'برنامج التدرج السلوكي للإقلاع عن المدواخ والدخة',
-        institution: 'مركز أبوظبي للصحة العامة / قاعدة كوكرين للإدمان',
-        duration: '42 يوماً · 6 مراحل',
-        action: 'تقنية ركوب موجة الرغبة + البدائل الحركية + خفض وتيرة التدخين أسبوعياً',
-        tag: 'الحد من الأضرار'
-      }
-    },
     routineCards: {
       heat: {
         title: 'خطة التكيف الحراري والإيقاع الحيوي',
@@ -527,7 +496,6 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
         tag: 'الحد من الأضرار'
       }
     },
-    launchProtocolCta: 'بدء الخطة في التطبيق',
     launchRoutineCta: 'بدء الخطة في التطبيق',
     clinicalBriefTitle: 'ملخص سريري جاهز للطبيب المعالج',
     clinicalBriefSubtitle:

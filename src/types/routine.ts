@@ -72,9 +72,6 @@ export interface RoutineStep {
   microDoseStep?: MicroDoseStep;
 }
 
-/** Backward-compatibility alias */
-export type ProtocolStep = RoutineStep;
-
 export interface ProgressionRule {
   id: string;
   condition: string;
@@ -116,9 +113,6 @@ export interface RoutineChangelogEntry {
   updatedFields?: string[];
 }
 
-/** Backward-compatibility alias */
-export type ProtocolChangelogEntry = RoutineChangelogEntry;
-
 export interface ProposedWidgetSpec {
   id: string;
   requestedType: string;
@@ -126,7 +120,6 @@ export interface ProposedWidgetSpec {
   description: string;
   status: ProposedWidgetStatus;
   routineId?: string;
-  protocolId?: string;
   paperTitle?: string;
   fieldId?: string;
   unit?: string;
@@ -142,7 +135,7 @@ export interface ProposedWidgetSpec {
  * Who owns an escalation message. 'policy' messages are replaced when the guardrail ledger
  * changes; 'routine' messages carry paper-specific advice (e.g. split the dose) and are kept.
  */
-export type EscalationSource = 'policy' | 'routine' | 'protocol';
+export type EscalationSource = 'policy' | 'routine';
 
 export interface DataCollectionField {
   id: string;
@@ -222,7 +215,6 @@ export type ChatKind =
   | 'text'
   | 'file'
   | 'routine'
-  | 'protocol'
   | 'candidate'
   | 'alert'
   | 'confirmation'
@@ -328,9 +320,6 @@ export interface Routine {
   faqs: PaperFaq[];
 }
 
-/** Backward-compatibility alias */
-export type Protocol = Routine;
-
 export interface QueuedPaper {
   id: string;
   name: string;
@@ -358,9 +347,6 @@ export interface RoutineRuntime {
   lastActiveDate?: string;
 }
 
-/** Backward-compatibility alias */
-export type ProtocolRuntime = RoutineRuntime;
-
 export interface RoutineSummary {
   id: string;
   title: string;
@@ -375,9 +361,6 @@ export interface RoutineSummary {
   dayHistory?: number[];
   doi?: string;
 }
-
-/** Backward-compatibility alias */
-export type ProtocolSummary = RoutineSummary;
 
 export type NewChatMessage = Omit<ChatMessage, 'id' | 'timestamp'> & { id?: string };
 
@@ -398,7 +381,6 @@ export interface StoredPaper {
   summary: string;
   featuresTested: string[];
   routineId?: string;
-  protocolId?: string;
   isSample: boolean;
   isGuardrailRejectionTest?: boolean;
   popularityScore?: number;
@@ -406,7 +388,6 @@ export interface StoredPaper {
   totalLogsCount?: number;
   trendingRank?: number;
   routine?: Routine;
-  protocol?: Routine;
   userId?: string | null;
   userEmail?: string | null;
   uploadedBy?: string | null;
@@ -419,5 +400,4 @@ export interface PaperUploadResult {
   eligible: boolean;
   reason?: string;
   routine?: Routine;
-  protocol?: Routine;
 }
