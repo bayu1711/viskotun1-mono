@@ -52,6 +52,7 @@ export const COPY = {
     streak: (days: number) => `${days} day streak`,
     addPaper: 'Add new paper',
     openAssistant: 'Ask Viskotu',
+    openProfile: 'Open profile & adaptive lifestyle settings',
     resetDemo: 'Reset to demo defaults',
     assistantFab: (title: string) => `Ask Viskotu about ${title} or drop a PDF`,
     todaySummaryLabel: "Today's progress",
@@ -370,7 +371,94 @@ export const COPY = {
     metabolicRiskLabel: 'Metabolic Syndrome Risk Reduction',
     resilienceLabel: 'Habit Resilience Score',
     resilienceCaption: 'Micro-dose barrier conversion & habit retention rate',
-    bctLinkText: 'View Accredited BCT Coding'
+    bctLinkText: 'View Accredited BCT Coding',
+    setAgeLink: 'Personalize age'
+  },
+  profile: {
+    eyebrow: 'Personal & Context Baseline',
+    title: 'Profile & Adaptive Lifestyle',
+    subtitle: 'Your physiological baseline and daily schedule shape Health Age projections, calendar reminders, and routine adaptations.',
+    backToRoutine: 'Back to today’s routine',
+    saveButton: 'Save profile',
+    savedToast: 'Profile & adaptive lifestyle saved',
+    tuneWithAi: 'Tune with TrialN1 AI',
+    userProfileEyebrow: 'UserProfile',
+    userProfileTitle: 'Identity & Physiological Baseline',
+    displayNameLabel: 'Display name',
+    displayNamePlaceholder: 'Your name or handle',
+    ageLabel: 'Chronological age (years)',
+    agePlaceholder: 'e.g. 34',
+    ageHint: 'Used to compute your personalized Biological Health Age projection on Dashboard.',
+    sexLabel: 'Biological sex',
+    sexOptions: {
+      female: 'Female',
+      male: 'Male',
+      other: 'Other',
+      prefer_not_to_say: 'Prefer not to say'
+    },
+    reminderTimeLabel: 'Preferred daily reminder time',
+    reminderTimeHint: 'Used as default start time when exporting routines to Google Calendar or .ics.',
+    reminderPresets: [
+      { label: '08:00 Morning', value: '08:00' },
+      { label: '09:00 Standard', value: '09:00' },
+      { label: '20:30 Post-Iftar', value: '20:30' }
+    ],
+    goalsLabel: 'Primary health / rehab focus',
+    goalsPlaceholder: 'e.g. Return to pain-free 5K running, sleep regularity during night shifts',
+    lifestyleEyebrow: 'UserLifestyleProfile',
+    lifestyleTitle: 'Adaptive Lifestyle Context',
+    regionLabel: 'Region & city',
+    cityPlaceholder: 'City (e.g. Abu Dhabi, Dubai, Riyadh)',
+    regionConfirmed: 'Confirmed',
+    workPatternLabel: 'Work schedule',
+    workPatterns: {
+      standard: 'Standard daytime',
+      shift_work: 'Healthcare / shift work',
+      desk_sedentary: 'Desk-bound (8+ hrs)',
+      frequent_travel: 'Frequent travel',
+      flexible: 'Flexible schedule'
+    },
+    activityLabel: 'Baseline activity level',
+    activityLevels: {
+      sedentary: 'Sedentary',
+      light: 'Light',
+      moderate: 'Moderate',
+      active: 'Active'
+    },
+    smokingLabel: 'Smoking / tobacco profile',
+    smokingOptions: {
+      non_smoker: 'Non-smoker',
+      midwakh_dokha: 'Midwakh / Dokha',
+      shisha_waterpipe: 'Shisha / Waterpipe',
+      cigarettes: 'Cigarettes',
+      vape: 'Vape / E-cig',
+      former_smoker: 'Former smoker',
+      other: 'Other'
+    },
+    climateLabel: 'Climate & heat exposure',
+    climateOptions: {
+      summer_heat: 'Extreme summer heat',
+      moderate: 'Moderate / indoor',
+      cold_climate: 'Cold climate'
+    },
+    ramadanLabel: 'Ramadan fasting observer',
+    ramadanDesc: 'Shifts exertion windows, hydration pacing, and circadian guidance safely during fasting hours.',
+    cautionsLabel: 'Physical cautions',
+    cautionPresets: ['Morning stiffness', 'Knee sensitivity', 'Lower back caution', 'Heat fatigue'],
+    activeTagsLabel: 'Active adaptation tags',
+    noTagsYet: 'Toggle any factor above or open AI tuning to activate context tags.',
+    impactEyebrow: 'Connected Across TrialN1',
+    impactTitle: 'How this personalizes your app',
+    impactAgeItem: (age: number, isCustom: boolean) =>
+      `Dashboard Health Age uses ${age} yrs (${isCustom ? 'your saved age' : 'default baseline'}).`,
+    impactReminderItem: (time: string) =>
+      `Calendar exports (.ics & Google) schedule daily reminders at ${time}.`,
+    impactCohortItem: (cohort: string) =>
+      `Community reviews tag your cohort as "${cohort}".`,
+    accountCardTitle: 'Account & Cloud Sync',
+    guestNotice: 'You are exploring as a guest. Preferences save locally on this device — sign in to sync across devices.',
+    signedInNotice: (email: string) => `Signed in as ${email}. Routine progress and profile settings sync automatically.`,
+    signInCta: 'Sign in to sync'
   },
   evidence: {
     rctShort: 'RCT',

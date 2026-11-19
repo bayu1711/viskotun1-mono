@@ -58,6 +58,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
         : `${days} يوماً من الالتزام`,
     addPaper: 'إضافة بحث جديد',
     openAssistant: 'اسأل ڤيسكوتو',
+    openProfile: 'فتح الملف الشخصي وإعدادات نمط الحياة التكيفي',
     resetDemo: 'إعادة ضبط التجربة',
     assistantFab: (title: string) => `اسأل ڤيسكوتو عن ${title} أو ارفع ملف PDF`,
     todaySummaryLabel: 'تقدم اليوم',
@@ -120,7 +121,94 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     metabolicRiskLabel: 'انخفاض مخاطر المتلازمة الأيضية',
     resilienceLabel: 'مؤشر مرونة العادة السلوكية',
     resilienceCaption: 'معدل تحويل المعوقات لخطوات ميسّرة واستدامة الالتزام',
-    bctLinkText: 'الاطلاع على تقنيات BCT المعتمدة'
+    bctLinkText: 'الاطلاع على تقنيات BCT المعتمدة',
+    setAgeLink: 'تخصيص العمر'
+  },
+  profile: {
+    eyebrow: 'الملف الشخصي والبيئة اليومية',
+    title: 'الملف الشخصي ونمط الحياة التكيفي',
+    subtitle: 'تساعد بياناتك الأساسية وجدولك اليومي في تخصيص توقع العمر الصحي وتنبيهات التقويم وتكييف الخطط العلاجية.',
+    backToRoutine: 'العودة إلى خطة اليوم',
+    saveButton: 'حفظ الملف الشخصي',
+    savedToast: 'تم حفظ الملف الشخصي ونمط الحياة بنجاح',
+    tuneWithAi: 'التخصيص عبر مساعد TrialN1',
+    userProfileEyebrow: 'UserProfile',
+    userProfileTitle: 'الهوية والأساس الفسيولوجي',
+    displayNameLabel: 'الاسم المعروض',
+    displayNamePlaceholder: 'اسمك أو اللقب المفضل',
+    ageLabel: 'العمر الزمني (بالسنوات)',
+    agePlaceholder: 'مثال: 34',
+    ageHint: 'يُستخدم لحساب توقع العمر الصحي الحيوي المخصص لك في لوحة المؤشرات.',
+    sexLabel: 'الجنس البيولوجي',
+    sexOptions: {
+      female: 'أنثى',
+      male: 'ذكر',
+      other: 'آخر',
+      prefer_not_to_say: 'أفضل عدم التحديد'
+    },
+    reminderTimeLabel: 'الوقت المفضل للتنبيه اليومي',
+    reminderTimeHint: 'يُستخدم كوقت بدء افتراضي عند تصدير الخطط إلى تقويم Google أو .ics.',
+    reminderPresets: [
+      { label: '08:00 صباحاً', value: '08:00' },
+      { label: '09:00 قياسي', value: '09:00' },
+      { label: '20:30 بعد الإفطار', value: '20:30' }
+    ],
+    goalsLabel: 'الهدف الصحي أو التأهيلي الأساسي',
+    goalsPlaceholder: 'مثال: العودة للجري دون ألم، أو تنظيم النوم خلال مناوبات الليل',
+    lifestyleEyebrow: 'UserLifestyleProfile',
+    lifestyleTitle: 'سياق نمط الحياة التكيفي',
+    regionLabel: 'المنطقة والمدينة',
+    cityPlaceholder: 'المدينة (مثال: أبوظبي، دبي، الرياض)',
+    regionConfirmed: 'مؤكد',
+    workPatternLabel: 'نمط العمل',
+    workPatterns: {
+      standard: 'دوام نهاري قياسي',
+      shift_work: 'مناوبات صحية / ورديات',
+      desk_sedentary: 'عمل مكتبي (+8 ساعات)',
+      frequent_travel: 'سفر وتنقل متكرر',
+      flexible: 'جدول مرن'
+    },
+    activityLabel: 'مستوى النشاط الأساسي',
+    activityLevels: {
+      sedentary: 'خامل',
+      light: 'خفيف',
+      moderate: 'معتدل',
+      active: 'نشيط'
+    },
+    smokingLabel: 'التدخين والتبغ',
+    smokingOptions: {
+      non_smoker: 'غير مدخن',
+      midwakh_dokha: 'مدواخ / دوخة',
+      shisha_waterpipe: 'شيشة / أرجيلة',
+      cigarettes: 'سجائر',
+      vape: 'فيب / إلكتروني',
+      former_smoker: 'مدخن سابق',
+      other: 'أخرى'
+    },
+    climateLabel: 'التعرض للمناخ والحرارة',
+    climateOptions: {
+      summer_heat: 'حرارة الصيف الشديدة',
+      moderate: 'معتدل / داخلي',
+      cold_climate: 'مناخ بارد'
+    },
+    ramadanLabel: 'صيام شهر رمضان المبارك',
+    ramadanDesc: 'يعيد جدولة الجهد البدني والترطيب والإرشاد اليومي بما يتناسب بأمان مع ساعات الصيام.',
+    cautionsLabel: 'ملاحظات واحتياطات بدنية',
+    cautionPresets: ['تيبس صباحي', 'حساسية الركبة', 'حذر أسفل الظهر', 'إجهاد حراري'],
+    activeTagsLabel: 'الوسوم التكيفية النشطة',
+    noTagsYet: 'فعّل أياً من العوامل أعلاه أو استخدم التخصيص الذكي لإضافة وسوم السياق.',
+    impactEyebrow: 'ترابط ذكي عبر TrialN1',
+    impactTitle: 'كيف يخصص هذا تجربتك',
+    impactAgeItem: (age: number, isCustom: boolean) =>
+      `يعتمد العمر الصحي على عمر ${age} سنة (${isCustom ? 'عمرك المحفوظ' : 'المرجع الافتراضي'}).`,
+    impactReminderItem: (time: string) =>
+      `تُجدول تنبيهات التقويم (.ics وGoogle) يومياً عند الساعة ${time}.`,
+    impactCohortItem: (cohort: string) =>
+      `تُصنف مراجعات المجتمع ضمن فئة "${cohort}".`,
+    accountCardTitle: 'الحساب والمزامنة السحابية',
+    guestNotice: 'أنت تتصفح كضيف. تُحفظ التفضيلات محلياً — سجل الدخول للمزامنة عبر أجهزتك.',
+    signedInNotice: (email: string) => `تم تسجيل الدخول عبر ${email}. تتم مزامنة خططك وملفك تلقائياً.`,
+    signInCta: 'سجل الدخول للمزامنة'
   },
   reEntry: {
     badge: 'مرحباً بعودتك',
