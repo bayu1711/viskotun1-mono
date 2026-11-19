@@ -4,8 +4,12 @@ import {
   COPY_AR,
   COPY_EN,
   GULF_HEALTH_GLOSSARY,
+  SUPPORTED_LOCALES,
   getLocaleCopy,
-  mergeLocaleCopy
+  getLocaleMeta,
+  isSupportedLocale,
+  mergeLocaleCopy,
+  resolveLanguagePair
 } from '../../data/locales';
 
 describe('Bilingual Localization & Clinical Glossary', () => {
@@ -40,6 +44,10 @@ describe('Bilingual Localization & Clinical Glossary', () => {
       expect(copy.nav.today).toBe('Today');
       expect(copy.reEntry.badge).toBe('Adaptive Re-Entry');
       expect(copy.metadata.lang).toBe('en');
+      expect(copy.shell.openAssistant).toBe('Ask N1');
+      expect(copy.assistant.titleAsk).toBe('Ask N1');
+      expect(copy.assistant.dialogLabel).toBe('N1 AI');
+      expect(copy.profile.tuneWithAi).toBe('Tune with N1 AI');
     });
 
     it('returns Arabic copy for ar locale with clinical terminology', () => {
@@ -53,6 +61,10 @@ describe('Bilingual Localization & Clinical Glossary', () => {
       expect(copy.lifestyleTuning.title).toContain('الملف السلوكي');
       expect(copy.safety.clinicalDisclaimer).toContain('تنويه طبي سريري');
       expect(copy.safety.clinicalDisclaimer).toContain('TrialN1');
+      expect(copy.shell.openAssistant).toBe('اسأل N1');
+      expect(copy.assistant.titleAsk).toBe('اسأل N1');
+      expect(copy.assistant.dialogLabel).toContain('N1 AI');
+      expect(copy.profile.tuneWithAi).toContain('N1 AI');
     });
 
     it('guarantees 100% top-level key parity between English and Arabic', () => {
@@ -83,6 +95,25 @@ describe('Bilingual Localization & Clinical Glossary', () => {
       expect(merged.nav.today).toBe('اليوم');
       expect(merged.nav.stats).toBe(base.nav.stats);
       expect(merged.nav.community).toBe(base.nav.community);
+    });
+  });
+
+  describe('Scalable Locale Registry & Primary/Secondary Pair Resolution', () => {
+    it('exposes supported locale metadata with directionality', () => {
+      expect(SUPPORTED_LOCALES.length).toBeGreaterThanOrEqual(2);
+      expect(isSupportedLocale('en')).toBe(true);
+      expect(isSupportedLocale('ar')).toBe(true);
+      expect(isSupportedLocale('xx')).toBe(false);
+      expect(getLocaleMeta('en').dir).toBe('ltr');
+      expect(getLocaleMeta('ar').dir).toBe('rtl');
+    });
+
+    it('resolves primary/secondary language pairs cleanly including single-language mode', () => {
+      expect(resolveLanguagePair(undefined, undefined)).toEqual({ primary: 'en', secondary: 'ar' });
+      expect(resolveLanguagePair('ar', undefined)).toEqual({ primary: 'ar', secondary: 'en' });
+      expect(resolveLanguagePair('ar', 'en')).toEqual({ primary: 'ar', secondary: 'en' });
+      expect(resolveLanguagePair('en', 'none')).toEqual({ primary: 'en', secondary: null });
+      expect(resolveLanguagePair('ar', 'ar')).toEqual({ primary: 'ar', secondary: null });
     });
   });
 });
