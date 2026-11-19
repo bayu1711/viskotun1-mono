@@ -1,3 +1,5 @@
+import type { AppLocale, SecondaryLanguage } from '../data/locales/types';
+
 export type UserRole = 'admin' | 'user';
 
 export type SmokingStatus =
@@ -17,6 +19,16 @@ export type WorkPattern =
   | 'flexible';
 
 export type ActivityBaseline = 'sedentary' | 'light' | 'moderate' | 'active';
+
+export type CulturalRhythmId =
+  | 'ramadan_fasting'
+  | 'intermittent_fasting'
+  | 'periodic_religious_fasting'
+  | 'late_family_dinner'
+  | 'early_dawn_riser'
+  | 'midday_siesta_rest'
+  | 'sabbath_weekly_rest'
+  | 'collectivist_household';
 
 export interface RegionalLifestyleTag {
   id: string;
@@ -59,6 +71,10 @@ export interface UserProfile {
   /** Daily reminder time in 24-hour HH:mm format (used for calendar exports). */
   preferredReminderTime?: string;
   clinicalGoals?: string;
+  /** Preferred primary UI language. */
+  primaryLanguage?: AppLocale;
+  /** Optional secondary UI language for quick switching in the top header. */
+  secondaryLanguage?: SecondaryLanguage;
   updatedAt?: string;
 }
 
@@ -67,6 +83,7 @@ export interface UserLifestyleProfile {
   workPattern?: WorkPattern;
   smokingStatus?: SmokingStatus;
   activityBaseline?: ActivityBaseline;
+  culturalRhythms?: CulturalRhythmId[];
   isRamadanFastingObserver?: boolean;
   climateSensitivity?: 'summer_heat' | 'cold_climate' | 'moderate';
   physicalCautions?: string[];
