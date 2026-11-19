@@ -21,6 +21,7 @@ import type {
 import { formatLifestyleTagLabel, getLifestyleTagIcon } from '../../utils/lifestyleTags';
 import {
   deriveClinicalFocus,
+  getRegionalReminderPresets,
   sanitizeAge,
   syncLifestyleActiveTags
 } from '../../utils/profile';
@@ -185,6 +186,8 @@ export function LifestyleTuningView({
       const parsedCity = cityPart.trim();
       const parsedCountry = countryParts.join(',').trim();
       onConfirmRegion(parsedCountry || parsedCity, parsedCity || undefined);
+    } else if (/^(?:[A-Za-z]{2}|usa|uk|uae)$/i.test(raw)) {
+      onConfirmRegion(raw, undefined);
     } else {
       onConfirmRegion(raw, raw);
     }
@@ -269,6 +272,12 @@ export function LifestyleTuningView({
 
   const t = copy.lifestyleTuning.onboarding;
   const pCopy = copy.profile;
+  const reminderPresets = getRegionalReminderPresets({
+    countryCode,
+    isRamadanFastingObserver: ramadanDraft,
+    basePresets: pCopy.reminderPresets,
+    fastingPreset: pCopy.fastingReminderPreset
+  });
 
   const renderRegionSelector = () => (
     <div className="mt-3 space-y-2 border-t border-ink/10 pt-3">
@@ -411,7 +420,7 @@ export function LifestyleTuningView({
               </div>
 
               <div className="flex flex-wrap gap-1.5">
-                {pCopy.reminderPresets.map((preset) => (
+                {reminderPresets.map((preset) => (
                   <button
                     key={preset.value}
                     type="button"

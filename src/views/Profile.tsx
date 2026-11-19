@@ -33,6 +33,7 @@ import { resolveCountryCodeFromInput } from '../utils/geo';
 import {
   deriveClinicalFocus,
   deriveLifestyleCohort,
+  getRegionalReminderPresets,
   sanitizeAge,
   syncLifestyleActiveTags
 } from '../utils/profile';
@@ -182,6 +183,13 @@ export function ProfilePage() {
     routineTitle: routine?.shortTitle || routine?.title
   });
   const effectiveClinicalGoals = isGoalsCustom ? clinicalGoals : generatedFocus;
+  const resolvedCountryCodeForUi = resolveCountryCodeFromInput(countryName || countryCode);
+  const regionalReminderPresets = getRegionalReminderPresets({
+    countryCode: resolvedCountryCodeForUi,
+    isRamadanFastingObserver: isRamadanObserver,
+    basePresets: t.reminderPresets,
+    fastingPreset: t.fastingReminderPreset
+  });
 
   const toggleCaution = (item: string) => {
     setCautions((prev) =>
@@ -325,7 +333,7 @@ export function ProfilePage() {
                     onChange={(e) => setReminderTime(e.target.value)}
                     className="rounded-xl border border-ink/15 bg-canvas/60 px-3.5 py-2 text-sm text-ink outline-none focus:border-ink"
                   />
-                  {t.reminderPresets.map((preset) => (
+                  {regionalReminderPresets.map((preset) => (
                     <button
                       key={preset.value}
                       type="button"
