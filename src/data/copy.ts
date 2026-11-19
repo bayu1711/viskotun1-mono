@@ -21,7 +21,7 @@ export const COPY = {
     ],
     openGraphTitle: 'TrialN1 // AI Research & Daily Routines',
     openGraphDescription:
-      'Transforming complex research papers into executable daily routines with Viskotu, an adaptive safety companion.'
+      'Transforming complex research papers into executable daily routines with N1 AI, an adaptive safety companion.'
   },
   brand: {
     mark: '//',
@@ -50,10 +50,10 @@ export const COPY = {
   shell: {
     streak: (days: number) => `${days} day streak`,
     addPaper: 'Add new paper',
-    openAssistant: 'Ask Viskotu',
+    openAssistant: 'Ask N1',
     openProfile: 'Open profile & adaptive lifestyle settings',
     resetDemo: 'Reset to demo defaults',
-    assistantFab: (title: string) => `Ask Viskotu about ${title} or drop a PDF`,
+    assistantFab: (title: string) => `Ask N1 about ${title} or drop a PDF`,
     todaySummaryLabel: "Today's progress",
     noActiveRoutine: 'No active routine',
     noActivePrompt: 'Upload a research paper or explore trending routines to start tracking.',
@@ -100,7 +100,7 @@ export const COPY = {
         ? `You were away for ${days} days. Breaks and disruptions are a completely natural part of building long-term habits. Let's adapt today so you keep your momentum.`
         : "Let's adapt today's routine to match your current circumstances and energy.",
     question: 'What got in the way recently?',
-    barrierHint: 'Logging barriers helps Viskotu learn your patterns and personalize recovery recommendations.',
+    barrierHint: 'Logging barriers helps N1 AI learn your patterns and personalize recovery recommendations.',
     barriers: {
       time_crunch: {
         label: 'Time Crunch / Busy Day',
@@ -232,7 +232,7 @@ export const COPY = {
       q4Title: '4. Physical cautions & daily habits',
       q4Ask:
         'Any joint sensitivities or smoking/tobacco habits I should adapt pacing around safely? You can also type anything else below.',
-      autoFocusLabel: 'Derived focus for TrialN1 AI:'
+      autoFocusLabel: 'Derived focus for N1 AI:'
     }
   },
   dayActions: {
@@ -304,7 +304,7 @@ export const COPY = {
     minLabel: (min: number) => `${min} · None`,
     maxLabel: (max: number) => `${max} · Severe`,
     notesLabel: 'Notes',
-    notesPlaceholder: 'Optional notes for Viskotu adjustment...',
+    notesPlaceholder: 'Optional notes for N1 AI adjustment...',
     save: 'Save log to plan',
     saved: 'Log saved to your plan',
     savedMetric: (name?: string) => `${name || 'Feedback'} saved to your plan`
@@ -340,7 +340,7 @@ export const COPY = {
     holdSummary: (seconds: number) => `${seconds}s hold`,
     repsSummary: (reps: number) => `${reps} reps`,
     helpAriaLabel: (action: string) => `Detailed instructions for ${action}`,
-    helpTooltip: (action: string) => `How to perform ${action} · Ask Viskotu`,
+    helpTooltip: (action: string) => `How to perform ${action} · Ask N1`,
     taskQuestionPrompt: (action: string) =>
       `What is "${action}" and what is needed to be done? Please provide a detailed step-by-step guide.`
   },
@@ -404,7 +404,7 @@ export const COPY = {
     closeButton: 'Close Ledger',
     clusterLabel: 'Taxonomy Cluster',
     mechanismLabel: 'Mechanism of Action',
-    implementationLabel: 'Viskotu Execution',
+    implementationLabel: 'N1 AI Execution',
     targetBarriersLabel: 'Target Gulf Barriers',
     openLedgerButton: 'Inspect BCT Taxonomy'
   },
@@ -428,7 +428,7 @@ export const COPY = {
     backToRoutine: 'Back to today’s routine',
     saveButton: 'Save profile',
     savedToast: 'Profile & adaptive lifestyle saved',
-    tuneWithAi: 'Tune with TrialN1 AI',
+    tuneWithAi: 'Tune with N1 AI',
     userProfileEyebrow: 'UserProfile',
     userProfileTitle: 'Identity & Physiological Baseline',
     displayNameLabel: 'Display name',
@@ -456,7 +456,7 @@ export const COPY = {
     goalsLabel: 'Primary health / rehab focus',
     goalsPlaceholder: 'Auto-synthesized from your Lifestyle Profile — or customize here',
     goalsGenerateBtn: 'Generate from lifestyle',
-    goalsHint: 'Automatically adapts with your UserLifestyleProfile and is shared directly with TrialN1 AI.',
+    goalsHint: 'Automatically adapts with your UserLifestyleProfile and is shared directly with N1 AI.',
     languageSectionLabel: 'App language & header switcher',
     primaryLanguageLabel: 'Primary language',
     secondaryLanguageLabel: 'Secondary language',
@@ -759,20 +759,20 @@ export const COPY = {
     missingParameters: 'Missing parameters'
   },
   assistant: {
-    dialogLabel: 'Viskotu',
-    close: 'Close Viskotu',
-    modeLabel: 'Viskotu mode',
+    dialogLabel: 'N1 AI',
+    close: 'Close N1 AI',
+    modeLabel: 'N1 AI mode',
     modes: {
       ask: 'Ask',
       upload: 'Add paper',
       lifestyle: 'Lifestyle'
     },
     eyebrowUpload: 'New research',
-    titleAsk: 'Ask Viskotu',
+    titleAsk: 'Ask N1',
     titleUpload: 'Add a paper',
     stagingTitle: 'Review candidate routine',
     stagingEyebrow: 'Extracted routine',
-    stagingDescription: 'Inspect the extracted clinical routine and discuss with Viskotu before confirming.',
+    stagingDescription: 'Inspect the extracted clinical routine and discuss with N1 AI before confirming.',
     confirmAddPaper: 'Confirm & start routine',
     discardCandidate: 'Discard',
     existingCanonicalPill: (v: string) => `Active in Clinical Catalog · v${v}`,
@@ -793,15 +793,15 @@ export const COPY = {
     switchToUpload: 'Add a paper',
     intakeInstructionTitle: 'Add an interventional study',
     intakeInstructionBody: 'Upload a clinical trial PDF or enter a DOI/PubMed link. Gemini will extract the routine, steps, and safety rules so you can review and discuss it before adding it to your schedule.',
-    typing: 'Viskotu is typing…',
+    typing: 'N1 AI is typing…',
     attach: 'Attach a PDF',
     send: 'Send',
-    inputAsk: 'Ask Viskotu about this paper',
+    inputAsk: 'Ask N1 about this paper',
     inputUpload: 'Paste a DOI or PubMed link',
-    inputStaging: 'Ask Viskotu about candidate paper',
-    placeholderAsk: 'Ask Viskotu about this paper…',
+    inputStaging: 'Ask N1 about candidate paper',
+    placeholderAsk: 'Ask N1 about this paper…',
     placeholderUpload: 'Paste a DOI or PubMed link…',
-    placeholderStaging: 'Ask Viskotu about candidate paper before confirming…',
+    placeholderStaging: 'Ask N1 about candidate paper before confirming…',
     rejection: {
       inputLabel: 'Ask why this paper was declined',
       placeholder: 'Ask why it was declined, or paste a DOI to try another…',
@@ -1097,7 +1097,7 @@ export const COPY = {
       gatekeeperBody: 'Auto-filters non-human models and theoretical papers with educational feedback.',
       auditingTitle: 'Missing Parameter Auditing',
       auditingBody: 'Detects omitted dosages, hold durations, and execution parameters, applying conservative clinical defaults.',
-      safetyTitle: 'Viskotu Safety Companion',
+      safetyTitle: 'N1 AI Safety Companion',
       safetyBody: 'Ask dosage, frequency, and contraindication questions grounded strictly in the trial Methods.',
       summaryTitle: '1-Page Clinical Brief',
       summaryBody: 'Export formatted adherence and biofeedback trends for your specialist or personal records.'
@@ -1278,7 +1278,7 @@ export const COPY = {
       tag: 'Interactive Behavioral Simulator',
       title: 'Why Traditional Streak Apps Fail in the Gulf',
       subtitle:
-        'See how conventional all-or-nothing apps cause sudden user drop-off versus how Viskotu preserves your health momentum.',
+        'See how conventional all-or-nothing apps cause sudden user drop-off versus how N1 AI preserves your health momentum.',
       barrierLabel: 'Select an Abu Dhabi Barrier:',
       barrierHeat: '48°C Midday Summer Heat',
       barrierShift: '14-Hour Hospital / Energy Shift',
@@ -1301,7 +1301,7 @@ export const COPY = {
     pillar1: {
       tag: 'Climate Resilience',
       title: 'Thermal & Heat Adaptation',
-      body: 'Outdoor temperatures exceeding 45°C for 5 months make outdoor cardio risky. Viskotu swaps outdoor steps for indoor air-conditioned micro-routines with zero friction.'
+      body: 'Outdoor temperatures exceeding 45°C for 5 months make outdoor cardio risky. N1 AI swaps outdoor steps for indoor air-conditioned micro-routines with zero friction.'
     },
     pillar2: {
       tag: 'Cultural Chronobiology',
@@ -1499,7 +1499,7 @@ export const COPY = {
         severeSuffix: '· severe'
       },
       custom: {
-        pendingNotice: 'A New Widget! Viskotu will have this added iN few hours with human oversight!',
+        pendingNotice: 'A New Widget! N1 AI will have this added iN few hours with human oversight!',
         pendingSubtext:
           'You can continue tracking with the baseline control below. Once confirmed by clinical oversight, the bespoke AI-generated widget will automatically render here.',
         approvedBadge: 'AI-Generated Widget · Human Verified',
@@ -1709,7 +1709,7 @@ export const COPY = {
     eyebrow: 'User guide & trending clinical research papers',
     badge: 'Interactive Research Pipeline',
     intro:
-      'TrialN1 converts dense, peer-reviewed human interventional research into executable daily routines with zero hallucinated gaps and Viskotu, an evidence-grounded safety companion.',
+      'TrialN1 converts dense, peer-reviewed human interventional research into executable daily routines with zero hallucinated gaps and N1 AI, an evidence-grounded safety companion.',
     tabs: {
       guide: 'How it works',
       samples: 'Trending papers',

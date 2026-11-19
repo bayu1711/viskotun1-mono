@@ -22,7 +22,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     ],
     openGraphTitle: 'TrialN1 // أبحاث الذكاء الاصطناعي والخطط الصحية اليومية',
     openGraphDescription:
-      'تحويل أوراق البحث المعقدة إلى خطط صحية يومية قابلة للتنفيذ مع ڤيسكوتو، رفيق الأمان التكيفي.'
+      'تحويل أوراق البحث المعقدة إلى خطط صحية يومية قابلة للتنفيذ مع N1 AI، رفيق الأمان التكيفي.'
   },
   brand: {
     mark: '//',
@@ -56,10 +56,10 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
         ? `${days} أيام التزام`
         : `${days} يوماً من الالتزام`,
     addPaper: 'إضافة بحث جديد',
-    openAssistant: 'اسأل ڤيسكوتو',
+    openAssistant: 'اسأل N1',
     openProfile: 'فتح الملف الشخصي وإعدادات نمط الحياة التكيفي',
     resetDemo: 'إعادة ضبط التجربة',
-    assistantFab: (title: string) => `اسأل ڤيسكوتو عن ${title} أو ارفع ملف PDF`,
+    assistantFab: (title: string) => `اسأل N1 عن ${title} أو ارفع ملف PDF`,
     todaySummaryLabel: 'تقدم اليوم',
     noActiveRoutine: 'لا توجد خطة نشطة',
     noActivePrompt: 'قم برفع ورقة بحثية أو استكشف الخطط الرائجة لبدء المتابعة.',
@@ -107,7 +107,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     closeButton: 'إغلاق السجل',
     clusterLabel: 'تصنيف التقنية السلوكية',
     mechanismLabel: 'الآلية النفسية والعصبية',
-    implementationLabel: 'التطبيق العملي في ڤيسكوتو',
+    implementationLabel: 'التطبيق العملي في N1 AI',
     targetBarriersLabel: 'عوائق بيئة الخليج المستهدفة',
     openLedgerButton: 'استعراض تصنيف BCT السلوكي'
   },
@@ -131,7 +131,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     backToRoutine: 'العودة إلى خطة اليوم',
     saveButton: 'حفظ الملف الشخصي',
     savedToast: 'تم حفظ الملف الشخصي ونمط الحياة بنجاح',
-    tuneWithAi: 'التخصيص عبر مساعد TrialN1',
+    tuneWithAi: 'التخصيص عبر N1 AI',
     userProfileEyebrow: 'UserProfile',
     userProfileTitle: 'الهوية والأساس الفسيولوجي',
     displayNameLabel: 'الاسم المعروض',
@@ -159,7 +159,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     goalsLabel: 'الهدف الصحي أو التأهيلي الأساسي',
     goalsPlaceholder: 'يُنشأ تلقائياً من ملف نمط الحياة — أو يمكنك تعديله هنا',
     goalsGenerateBtn: 'توليد من نمط الحياة',
-    goalsHint: 'يتكيف تلقائياً مع ملف نمط الحياة التكيفي ويُرسل مباشرة إلى مساعد TrialN1 الذكي.',
+    goalsHint: 'يتكيف تلقائياً مع ملف نمط الحياة التكيفي ويُرسل مباشرة إلى N1 AI.',
     languageSectionLabel: 'لغة التطبيق ومبدّل الشريط العلوي',
     primaryLanguageLabel: 'اللغة الأساسية',
     secondaryLanguageLabel: 'اللغة الثانوية',
@@ -244,7 +244,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
         ? `توقفت لمدة ${days} أيام. الانقطاعات المؤقتة جزء طبيعي تماماً من بناء العادات الصحية طويلة الأمد. دعنا نكيّف خطة اليوم للحفاظ على زخم التزامك.`
         : 'دعنا نكيّف خطة اليوم لتناسب ظروفك الحالية ومستوى طاقتك.',
     question: 'ما الذي استجد أو حال دون إتمام خطتك؟',
-    barrierHint: 'تسجيل العوائق يساعد ڤيسكوتو على فهم جدولك وتقديم توصيات استشفاء مخصصة لك.',
+    barrierHint: 'تسجيل العوائق يساعد N1 AI على فهم جدولك وتقديم توصيات استشفاء مخصصة لك.',
     barriers: {
       time_crunch: {
         label: 'ضيق الوقت / انشغال مكثف',
@@ -377,7 +377,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       q4Title: '4. الاحتياطات البدنية والعادات اليومية',
       q4Ask:
         'هل لديك أي حساسية مفاصل أو عادات تدخين أحتاج لمراعاتها بأمان؟ يمكنك أيضاً كتابة أي تفاصيل إضافية أدناه.',
-      autoFocusLabel: 'التركيز المشتق لمساعد TrialN1 الذكي:'
+      autoFocusLabel: 'التركيز المشتق لـ N1 AI:'
     }
   },
   dayActions: {
@@ -489,8 +489,8 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     missingParameters: 'معايير مستنتجة'
   },
   assistant: {
-    dialogLabel: 'المساعد الذكي ڤيسكوتو',
-    close: 'إغلاق ڤيسكوتو',
+    dialogLabel: 'المساعد الذكي N1 AI',
+    close: 'إغلاق N1 AI',
     modeLabel: 'وضع المساعد',
     modes: {
       ask: 'استفسار',
@@ -498,7 +498,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       lifestyle: 'نمط الحياة'
     },
     eyebrowUpload: 'بحث سريري جديد',
-    titleAsk: 'اسأل ڤيسكوتو',
+    titleAsk: 'اسأل N1',
     titleUpload: 'إضافة ورقة بحثية',
     stagingTitle: 'مراجعة مسودة الخطة المستخرجة',
     stagingEyebrow: 'الخطة المستخرجة',
@@ -507,10 +507,10 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     noActiveRoutineForAskTitle: 'لا توجد خطة نشطة محددة',
     noActiveRoutineForAskBody: 'قم برفع ورقة بحثية أو اختر خطة من الأبحاث الرائجة للبدء في توجيه الأسئلة.',
     switchToUpload: 'إضافة بحث',
-    typing: 'ڤيسكوتو يكتب الآن...',
+    typing: 'N1 AI يكتب الآن...',
     attach: 'إرفاق ملف PDF',
     send: 'إرسال',
-    inputAsk: 'اسأل ڤيسكوتو عن هذه الخطة السريرية',
+    inputAsk: 'اسأل N1 عن هذه الخطة السريرية',
     inputUpload: 'أدخل رابط DOI أو PubMed أو ارفع الملف',
     placeholderAsk: 'اسأل عن الجرعات، التوقيت، الأمان، أو قواعد التقدم...',
     placeholderUpload: 'الصق رابط البحث أو ارفع ملف PDF...',
@@ -594,7 +594,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     challengeSubbadge: 'محور الرفاهية والصحة · التحدي 09: استدامة السلوكيات الصحية',
     heroTitle: 'استدامة السلوكيات الصحية في أبوظبي والإمارات — بمرونة علمية ودون انقطاع عقابي.',
     heroSubtitle:
-      'حرارة الصيف المرتفعة ونوبات العمل المتغيرة والتحديات اليومية قد تعيق تطبيقات اللياقة التقليدية الصارمة. فيسكوتو يتكيف مع واقعك بخطوات ميسّرة وبمسار استعادة نشاط مرن يحفظ استمرارية عاداتك ولا يعيدك إلى نقطة الصفر.',
+      'حرارة الصيف المرتفعة ونوبات العمل المتغيرة والتحديات اليومية قد تعيق تطبيقات اللياقة التقليدية الصارمة. N1 AI يتكيف مع واقعك بخطوات ميسّرة وبمسار استعادة نشاط مرن يحفظ استمرارية عاداتك ولا يعيدك إلى نقطة الصفر.',
     ctaStartTrial: 'ابدأ خطتك الإماراتية — مجاناً',
     ctaExploreRoutines: 'استكشف التكيفات الإماراتية',
     backToGlobal: 'الإصدار العالمي',
@@ -730,7 +730,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       tag: 'محاكي السلوك الصحي التفاعلي',
       title: 'لماذا تفشل تطبيقات العادات التقليدية في بيئة الخليج؟',
       subtitle:
-        'شاهد الفرق بين صرامة التطبيقات التقليدية التي تؤدي إلى التوقف المفاجئ، وبين مرونة فيسكوتو التي تحافظ على التزامك الصحي.',
+        'شاهد الفرق بين صرامة التطبيقات التقليدية التي تؤدي إلى التوقف المفاجئ، وبين مرونة N1 AI التي تحافظ على التزامك الصحي.',
       barrierLabel: 'اختر أحد التحديات اليومية في أبوظبي:',
       barrierHeat: 'حرارة الصيف الظهيرة 48° مئوية',
       barrierShift: 'نوبة عمل إضافية 14 ساعة في المستشفى أو قطاع الطاقة',
@@ -753,7 +753,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     pillar1: {
       tag: 'التكيف المناخي',
       title: 'التكيف الحراري والبيئي',
-      body: 'تجاوز درجات الحرارة 45° مئوية صيفاً يجعل الرياضة الخارجية محفوفة بالمخاطر. يستبدل فيسكوتو الخطوات الخارجية بتمارين حركية داخلية مكيّفة بسلاسة تامة.'
+      body: 'تجاوز درجات الحرارة 45° مئوية صيفاً يجعل الرياضة الخارجية محفوفة بالمخاطر. يستبدل N1 AI الخطوات الخارجية بتمارين حركية داخلية مكيّفة بسلاسة تامة.'
     },
     pillar2: {
       tag: 'التزامن الإيقاعي',
