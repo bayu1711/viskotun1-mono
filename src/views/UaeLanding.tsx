@@ -6,17 +6,18 @@ import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import LocalHospitalOutlinedIcon from '@mui/icons-material/LocalHospitalOutlined';
 import SmokeFreeOutlinedIcon from '@mui/icons-material/SmokeFreeOutlined';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
+import { LanguageSwitcher } from '../components/layout/LanguageSwitcher';
 import { useLocale } from '../contexts/LocaleContext';
 import { ROUTES } from '../data/navigation';
 import { LandingShowcase, type LandingShowcaseContent } from './Landing';
 
 export function UaeLandingView() {
-  const { locale, toggleLocale, copy, isRtl } = useLocale();
+  const { copy, isRtl } = useLocale();
   const t = copy.uaeLanding;
 
   const content = useMemo<LandingShowcaseContent>(
     () => ({
-      heroBadge: `🇦🇪 ${t.challengeSubbadge}`,
+      heroBadge: t.challengeSubbadge,
       heroTitle: t.heroTitle,
       heroSubtitle: t.heroSubtitle,
       heroCtaPrimary: t.ctaStartTrial,
@@ -68,7 +69,6 @@ export function UaeLandingView() {
       dir={isRtl ? 'rtl' : 'ltr'}
       content={content}
       headerLogoHref={ROUTES.uae}
-      editionBadge="🇦🇪 UAE"
       topBanner={
         <div className="bg-yellow text-ink">
           <div className="mx-auto flex min-h-11 max-w-6xl items-center justify-between gap-3 px-5 py-2 text-xs font-medium sm:text-sm lg:px-8">
@@ -88,22 +88,7 @@ export function UaeLandingView() {
                 {t.backToGlobal}
               </Link>
 
-              <button
-                type="button"
-                onClick={toggleLocale}
-                className="inline-flex items-center gap-1 rounded-full border border-ink/20 bg-white/70 px-2.5 py-0.5 text-xs font-semibold text-ink transition-colors hover:bg-white cursor-pointer"
-                aria-label={locale === 'en' ? 'التحويل إلى اللغة العربية' : 'Switch to English'}
-              >
-                <span className={locale === 'en' ? 'font-bold text-ink' : 'text-ink/60 font-normal'}>
-                  EN
-                </span>
-                <span className="text-ink/30" aria-hidden="true">
-                  |
-                </span>
-                <span className={locale === 'ar' ? 'font-bold text-ink' : 'text-ink/60 font-normal'}>
-                  العربية
-                </span>
-              </button>
+              <LanguageSwitcher variant="banner" forcePair={{ primary: 'en', secondary: 'ar' }} />
             </div>
           </div>
         </div>

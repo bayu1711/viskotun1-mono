@@ -132,7 +132,6 @@ export interface LandingShowcaseProps {
   content: LandingShowcaseContent;
   topBanner: React.ReactNode;
   headerLogoHref?: string;
-  editionBadge?: string;
   navExtra?: React.ReactNode;
   footerExtraLink?: React.ReactNode;
   dir?: 'ltr' | 'rtl';
@@ -237,7 +236,6 @@ export function LandingShowcase({
   content,
   topBanner,
   headerLogoHref = ROUTES.landing,
-  editionBadge,
   navExtra,
   footerExtraLink,
   dir = 'ltr'
@@ -292,11 +290,6 @@ export function LandingShowcase({
                 priority
                 className="h-8 w-auto object-contain"
               />
-              {editionBadge && (
-                <span className="rounded-full border border-ink/20 bg-cream px-2 py-0.5 text-2xs font-semibold text-ink">
-                  {editionBadge}
-                </span>
-              )}
             </Link>
 
             <nav className="hidden items-center gap-1 whitespace-nowrap text-sm font-medium text-ink/80 xl:flex">
