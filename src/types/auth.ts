@@ -34,6 +34,18 @@ export interface RegionContext {
   confirmed: boolean;
 }
 
+export type BiologicalSex = 'female' | 'male' | 'other' | 'prefer_not_to_say';
+
+export interface UserProfile {
+  displayName?: string;
+  age?: number;
+  biologicalSex?: BiologicalSex;
+  /** Daily reminder time in 24-hour HH:mm format (used for calendar exports). */
+  preferredReminderTime?: string;
+  clinicalGoals?: string;
+  updatedAt?: string;
+}
+
 export interface UserLifestyleProfile {
   region: RegionContext;
   workPattern?: WorkPattern;
@@ -56,6 +68,7 @@ export interface User {
   role?: UserRole;
   avatarUrl?: string;
   createdAt: number;
+  profile?: UserProfile;
   lifestyleProfile?: UserLifestyleProfile;
 }
 
@@ -65,6 +78,8 @@ export interface AuthState {
   isAuthenticated: boolean;
   isGuest: boolean;
   isAdmin: boolean;
+  userProfile: UserProfile;
+  updateUserProfile: (updates: Partial<UserProfile>) => void;
   lifestyleProfile: UserLifestyleProfile;
   updateLifestyleProfile: (updates: Partial<UserLifestyleProfile>) => void;
   confirmRegion: (countryName: string, city?: string) => void;

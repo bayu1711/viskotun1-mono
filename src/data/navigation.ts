@@ -11,6 +11,7 @@ export const ROUTES = {
   routine: '/routine',
   dashboard: '/dashboard',
   community: '/community',
+  profile: '/profile',
   login: '/login',
   signup: '/signup'
 } as const;
