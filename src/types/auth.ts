@@ -24,14 +24,30 @@ export interface RegionalLifestyleTag {
   category: 'schedule' | 'substance' | 'culture' | 'physical' | 'environment';
   countryCode: string;
   popularityCount: number;
+  description?: string;
+  source?: 'ai-regional' | 'preset' | 'crowdsourced';
 }
 
 export interface RegionContext {
   countryCode: string;
   countryName: string;
   city?: string;
-  detectedBy: 'middleware_header' | 'client_timezone' | 'user_selected' | 'default_uae';
+  detectedBy: 'middleware_header' | 'client_timezone' | 'user_selected' | 'default_uae' | 'default_global';
   confirmed: boolean;
+}
+
+export interface LifestyleAdaptationSpec {
+  bannerTitle: string;
+  bannerGuidance: string;
+  recommendedDoseMode: 'standard' | 'micro' | 'rest';
+  suggestedWindow: string;
+  /** Per-step context-aware guidance tips keyed by step ID. */
+  stepTips: Record<string, string>;
+  safetyGuardrailNote: string;
+  guardrailVerified: boolean;
+  source: 'gemini-global-ai' | 'deterministic-fallback';
+  regionLabel: string;
+  generatedAt: string;
 }
 
 export type BiologicalSex = 'female' | 'male' | 'other' | 'prefer_not_to_say';
@@ -57,6 +73,7 @@ export interface UserLifestyleProfile {
   activeTags: string[];
   intakeCompleted: boolean;
   lastTunedAt?: string;
+  activeAdaptation?: LifestyleAdaptationSpec;
 }
 
 export interface User {
