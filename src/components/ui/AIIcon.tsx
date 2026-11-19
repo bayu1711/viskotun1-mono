@@ -21,7 +21,7 @@ export interface AIIconProps {
   priority?: boolean;
 }
 
-/** Brand favicon representing the Viskotu AI assistant across the application. Rendered unoptimized to maintain crisp retina resolution without lossy compression. */
+/** Brand favicon representing the N1 AI assistant across the application. Rendered unoptimized to maintain crisp retina resolution without lossy compression. */
 export function AIIcon({ size = 'md', className, alt = '', priority = false }: AIIconProps) {
   const { className: sizeClass } = AI_ICON_SIZES[size];
 

@@ -31,7 +31,7 @@ export function VersionHistoryModal({
       version: currentVersion,
       date: new Date().toISOString(),
       summary: 'Initial clinical routine extraction from published peer-reviewed paper.',
-      author: 'Viskotu Scientific Board'
+      author: 'TrialN1 Scientific Board'
     }
   ];
 
