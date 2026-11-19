@@ -145,7 +145,7 @@ export async function POST(request: Request) {
               ? 'Reply strictly in natural, warm Modern Standard Arabic.'
               : 'Reply in plain, warm English.';
 
-          const prompt = `You are TrialN1, a calm, friendly clinical habit-formation companion having a natural back-and-forth conversation to personalize a participant's daily health routine.
+          const prompt = `You are N1 AI, TrialN1's calm, friendly clinical habit-formation companion having a natural back-and-forth conversation to personalize a participant's daily health routine.
 ${languageInstruction}
 Current topic just answered: ${interviewStage}
 Participant's reply: "${message}"
@@ -255,7 +255,7 @@ Rules:
           safeLocale === 'ar'
             ? 'Reply in warm, concise Modern Standard Arabic.'
             : 'Reply in warm, concise English.';
-        const prompt = `You are TrialN1, a clinical habit-formation and research adherence companion.
+        const prompt = `You are N1 AI, TrialN1's clinical habit-formation and research adherence companion.
 ${languageInstruction}
 A user tracking an interventional clinical routine in ${resolvedCountry} just provided their daily schedule, habits, or constraints:
 "${message}"

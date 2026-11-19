@@ -487,7 +487,7 @@ export function generateFallbackRoutine(source: string): Routine {
         version: '1.0',
         date: new Date().toISOString(),
         summary: 'Initial clinical routine extraction',
-        author: 'Viskotu Extraction Engine'
+        author: 'N1 AI Extraction Engine'
       }
     ],
     title: cleanTitle,

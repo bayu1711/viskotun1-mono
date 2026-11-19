@@ -46,7 +46,7 @@ const BUILTIN_ROUTINES: Record<string, Routine> = {
         version: '1.0',
         date: '2026-10-18T00:00:00.000Z',
         summary: 'Initial clinical routine extraction',
-        author: 'Viskotu Scientific Board'
+        author: 'TrialN1 Scientific Board'
       }
     ]
   },
@@ -60,7 +60,7 @@ const BUILTIN_ROUTINES: Record<string, Routine> = {
         version: '1.0',
         date: '2026-10-18T00:00:00.000Z',
         summary: 'Initial clinical routine extraction',
-        author: 'Viskotu Scientific Board'
+        author: 'TrialN1 Scientific Board'
       }
     ]
   },
@@ -74,7 +74,7 @@ const BUILTIN_ROUTINES: Record<string, Routine> = {
         version: '1.0',
         date: '2026-10-18T00:00:00.000Z',
         summary: 'Initial clinical routine extraction',
-        author: 'Viskotu Scientific Board'
+        author: 'TrialN1 Scientific Board'
       }
     ]
   },
@@ -88,7 +88,7 @@ const BUILTIN_ROUTINES: Record<string, Routine> = {
         version: '1.0',
         date: '2026-10-18T00:00:00.000Z',
         summary: 'Initial clinical routine extraction',
-        author: 'Viskotu Scientific Board'
+        author: 'TrialN1 Scientific Board'
       }
     ]
   },
@@ -105,7 +105,7 @@ const BUILTIN_ROUTINES: Record<string, Routine> = {
             version: '1.0',
             date: '2026-10-18T00:00:00.000Z',
             summary: 'Initial clinical routine extraction',
-            author: 'Viskotu Scientific Board'
+            author: 'TrialN1 Scientific Board'
           }
         ]
       }
@@ -260,7 +260,7 @@ export function toCanonicalRoutine(routine: Routine): Routine {
             version: initialVersion,
             date: new Date().toISOString(),
             summary: 'Initial clinical routine extraction',
-            author: 'Viskotu Extraction Engine'
+            author: 'N1 AI Extraction Engine'
           }
         ];
 

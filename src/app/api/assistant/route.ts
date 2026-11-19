@@ -52,7 +52,7 @@ export async function POST(request: Request) {
         });
       }
 
-      const rejectionInstruction = `You are the TrialN1 Gatekeeper Policy Assistant.
+      const rejectionInstruction = `You are N1 AI, the TrialN1 Gatekeeper Policy Assistant.
 A user uploaded "${rejectedFileName || 'a research paper'}" and it was declined before extraction with the following gatekeeper decision:
 "${trimmedReason}"
 
@@ -109,7 +109,7 @@ Strict Scope Rules:
         })}`
       : '';
 
-    const systemInstruction = `You are a clinical study safety assistant for the research paper routine "${resolvedTitle}".
+    const systemInstruction = `You are N1 AI, a clinical study safety assistant for the research paper routine "${resolvedTitle}".
 Clinical Policy Standard (v${activePolicy.version}):
 - Safety Lockout: If the user reports symptom/pain intensity of ${activePolicy.painEscalationThreshold}/10 or higher, escalation must be paused with a ${activePolicy.loadReductionPercent}% load reduction recommendation.
 Context from the paper:
