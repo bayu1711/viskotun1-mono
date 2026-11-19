@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import type { UserLifestyleProfile, UserProfile } from '../../../../types/auth';
 import type { Routine, RoutineRuntime } from '../../../../types/routine';
 import { saveCanonicalRoutine } from '../../../../server/routineRegistry';
 import { getUserRecord, saveUserRecord, type UserRecord } from '../../../../server/userStorage';
@@ -9,12 +10,14 @@ interface UserSyncPayload {
   activeRoutineId?: string;
   routines?: Routine[];
   runtime: Record<string, RoutineRuntime>;
+  profile?: UserProfile;
+  lifestyleProfile?: UserLifestyleProfile;
 }
 
 export async function POST(request: Request) {
   try {
     const body: UserSyncPayload = await request.json();
-    const { userId, activeRoutineId, routines, runtime } = body;
+    const { userId, activeRoutineId, routines, runtime, profile, lifestyleProfile } = body;
 
     if (!userId) {
       return NextResponse.json({ error: COPY.api.userSync.userIdRequired }, { status: 400 });
@@ -27,6 +30,8 @@ export async function POST(request: Request) {
       activeRoutineId,
       routines: resolvedRoutines,
       runtime: runtime || {},
+      ...(profile ? { profile } : {}),
+      ...(lifestyleProfile ? { lifestyleProfile } : {}),
       updatedAt: Date.now()
     };
 
@@ -73,6 +78,8 @@ export async function GET(request: Request) {
       activeRoutineId: record.activeRoutineId,
       routines: record.routines || [],
       runtime: record.runtime,
+      ...(record.profile ? { profile: record.profile } : {}),
+      ...(record.lifestyleProfile ? { lifestyleProfile: record.lifestyleProfile } : {}),
       updatedAt: record.updatedAt
     });
   } catch (error) {

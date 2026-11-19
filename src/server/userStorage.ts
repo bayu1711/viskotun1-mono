@@ -9,6 +9,7 @@
 import fs from 'fs';
 import path from 'path';
 import { getFirestore } from './guardrailLedger';
+import type { UserLifestyleProfile, UserProfile } from '../types/auth';
 import type { Routine, RoutineRuntime } from '../types/routine';
 import { SEEDED_COMMUNITY_USERS } from './seedUsers';
 
@@ -17,6 +18,8 @@ export interface UserRecord {
   activeRoutineId?: string;
   routines: Routine[];
   runtime: Record<string, RoutineRuntime>;
+  profile?: UserProfile;
+  lifestyleProfile?: UserLifestyleProfile;
   updatedAt: number;
 }
 
@@ -101,6 +104,8 @@ export async function getUserRecord(userId: string): Promise<UserRecord | null> 
             activeRoutineId: data.activeRoutineId,
             routines: data.routines || [],
             runtime: data.runtime || {},
+            ...(data.profile ? { profile: data.profile } : {}),
+            ...(data.lifestyleProfile ? { lifestyleProfile: data.lifestyleProfile } : {}),
             updatedAt: data.updatedAt || Date.now()
           };
           memoryUserStorage.set(userId, resolved);
