@@ -19,6 +19,7 @@ import { SectionHeading } from '../components/ui/SectionHeading';
 import { useAssistant } from '../contexts/AssistantContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocale } from '../contexts/LocaleContext';
+import { useRoutine } from '../contexts/RoutineContext';
 import { ROUTES } from '../data/navigation';
 import type {
   ActivityBaseline,
@@ -29,16 +30,17 @@ import type {
 } from '../types/auth';
 import { cn } from '../utils/cn';
 import {
+  deriveClinicalFocus,
   deriveLifestyleCohort,
   sanitizeAge,
   syncLifestyleActiveTags
 } from '../utils/profile';
 
 const REGION_PRESETS = [
-  { countryCode: 'AE', countryName: 'United Arab Emirates', defaultCity: 'Abu Dhabi', flag: '🇦🇪' },
-  { countryCode: 'SA', countryName: 'Saudi Arabia', defaultCity: 'Riyadh', flag: '🇸🇦' },
-  { countryCode: 'GB', countryName: 'United Kingdom', defaultCity: 'London', flag: '🇬🇧' },
-  { countryCode: 'US', countryName: 'United States', defaultCity: 'New York', flag: '🇺🇸' }
+  { countryCode: 'AE', countryName: 'United Arab Emirates', defaultCity: 'Abu Dhabi' },
+  { countryCode: 'SA', countryName: 'Saudi Arabia', defaultCity: 'Riyadh' },
+  { countryCode: 'GB', countryName: 'United Kingdom', defaultCity: 'London' },
+  { countryCode: 'US', countryName: 'United States', defaultCity: 'New York' }
 ] as const;
 
 const SEX_KEYS: BiologicalSex[] = ['female', 'male', 'other', 'prefer_not_to_say'];
@@ -114,6 +116,7 @@ export function ProfilePage() {
     updateLifestyleProfile
   } = useAuth();
   const { openLifestyleTuning } = useAssistant();
+  const { routine } = useRoutine();
   const { copy, isRtl } = useLocale();
   const t = copy.profile;
 
@@ -122,6 +125,7 @@ export function ProfilePage() {
   const [biologicalSex, setBiologicalSex] = useState<BiologicalSex | undefined>(undefined);
   const [reminderTime, setReminderTime] = useState('09:00');
   const [clinicalGoals, setClinicalGoals] = useState('');
+  const [isGoalsCustom, setIsGoalsCustom] = useState(false);
 
   const [countryCode, setCountryCode] = useState('AE');
   const [countryName, setCountryName] = useState('United Arab Emirates');
@@ -140,7 +144,12 @@ export function ProfilePage() {
     setAgeInput(userProfile.age !== undefined ? String(userProfile.age) : '');
     setBiologicalSex(userProfile.biologicalSex);
     setReminderTime(userProfile.preferredReminderTime || '09:00');
-    setClinicalGoals(userProfile.clinicalGoals || '');
+    if (userProfile.clinicalGoals) {
+      setClinicalGoals(userProfile.clinicalGoals);
+      setIsGoalsCustom(true);
+    } else {
+      setIsGoalsCustom(false);
+    }
   }, [userProfile, user]);
 
   useEffect(() => {
@@ -167,6 +176,11 @@ export function ProfilePage() {
   const previewTags = syncLifestyleActiveTags(draftLifestyle);
   const previewCohort = deriveLifestyleCohort(draftLifestyle);
   const parsedAge = sanitizeAge(ageInput);
+  const generatedFocus = deriveClinicalFocus(draftLifestyle, {
+    age: parsedAge,
+    routineTitle: routine?.shortTitle || routine?.title
+  });
+  const effectiveClinicalGoals = isGoalsCustom ? clinicalGoals : generatedFocus;
 
   const toggleCaution = (item: string) => {
     setCautions((prev) =>
@@ -188,7 +202,7 @@ export function ProfilePage() {
       age: sanitizeAge(ageInput),
       biologicalSex,
       preferredReminderTime: reminderTime || '09:00',
-      clinicalGoals: clinicalGoals.trim() || undefined
+      clinicalGoals: effectiveClinicalGoals.trim() || undefined
     });
 
     const nextTags = syncLifestyleActiveTags({
@@ -327,17 +341,34 @@ export function ProfilePage() {
               </div>
 
               <div>
-                <label htmlFor="profile-goals" className="mb-1.5 block text-xs font-semibold text-ink/80">
-                  {t.goalsLabel}
-                </label>
+                <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+                  <label htmlFor="profile-goals" className="text-xs font-semibold text-ink/80">
+                    {t.goalsLabel}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsGoalsCustom(false);
+                      setClinicalGoals(generatedFocus);
+                    }}
+                    className="inline-flex items-center gap-1 rounded-full border border-ink/15 bg-cream/70 px-2.5 py-0.5 text-2xs font-semibold text-ink hover:bg-cream cursor-pointer"
+                  >
+                    <Icon icon={AutoAwesomeOutlinedIcon} size="xs" />
+                    <span>{t.goalsGenerateBtn}</span>
+                  </button>
+                </div>
                 <input
                   id="profile-goals"
                   type="text"
-                  value={clinicalGoals}
-                  onChange={(e) => setClinicalGoals(e.target.value)}
+                  value={effectiveClinicalGoals}
+                  onChange={(e) => {
+                    setIsGoalsCustom(true);
+                    setClinicalGoals(e.target.value);
+                  }}
                   placeholder={t.goalsPlaceholder}
                   className="w-full rounded-xl border border-ink/15 bg-canvas/60 px-3.5 py-2.5 text-sm text-ink outline-none focus:border-ink"
                 />
+                <p className="mt-1 text-2xs text-ink/60">{t.goalsHint}</p>
               </div>
             </Panel>
 
@@ -362,8 +393,9 @@ export function ProfilePage() {
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-xs font-semibold text-ink/80">{t.regionLabel}</p>
                   {lifestyleProfile.region.confirmed && (
-                    <span className="rounded-full bg-mint px-2.5 py-0.5 text-2xs font-semibold text-ink">
-                      ✓ {t.regionConfirmed}
+                    <span className="inline-flex items-center gap-1 rounded-full bg-mint px-2.5 py-0.5 text-2xs font-semibold text-ink">
+                      <Icon icon={CheckIcon} size="xs" />
+                      <span>{t.regionConfirmed}</span>
                     </span>
                   )}
                 </div>
@@ -382,7 +414,9 @@ export function ProfilePage() {
                             : 'border-ink/15 bg-canvas/70 text-ink hover:border-ink/40'
                         )}
                       >
-                        <span aria-hidden="true">{preset.flag}</span>
+                        <span className="font-mono text-2xs font-semibold opacity-70" aria-hidden="true">
+                          {preset.countryCode}
+                        </span>
                         <span>{preset.countryName}</span>
                       </button>
                     );

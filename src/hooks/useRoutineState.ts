@@ -1649,7 +1649,9 @@ export function useRoutineState() {
             progressionRules: target.progressionRules,
             feedbackMetric: target.feedbackMetric,
             paper: target.paper,
-            missingDataFlags: target.missingDataFlags
+            missingDataFlags: target.missingDataFlags,
+            userProfile: userProfileRef.current,
+            lifestyleProfile: lifestyleProfileRef.current
           })
         });
 
@@ -2036,7 +2038,9 @@ export function useRoutineState() {
             progressionRules: target.progressionRules,
             feedbackMetric: target.feedbackMetric,
             paper: target.paper,
-            missingDataFlags: target.missingDataFlags
+            missingDataFlags: target.missingDataFlags,
+            userProfile: userProfileRef.current,
+            lifestyleProfile: lifestyleProfileRef.current
           })
         });
 
@@ -2216,6 +2220,9 @@ export function useRoutineState() {
           const data = await res.json();
           if (data.profileUpdates && auth?.updateLifestyleProfile) {
             auth.updateLifestyleProfile(data.profileUpdates);
+          }
+          if (data.suggestedFocus && !userProfileRef.current?.clinicalGoals && auth?.updateUserProfile) {
+            auth.updateUserProfile({ clinicalGoals: data.suggestedFocus });
           }
           pushMessages(targetId, {
             role: 'ai',
