@@ -117,4 +117,23 @@ describe('UserProfile and UserLifestyleProfile utilities & wiring', () => {
     });
     expect(defaultFocus.length).toBeGreaterThan(10);
   });
+
+  it('auto-triggers guided 4-question Adaptive Lifestyle interview on workspace for un-onboarded users', () => {
+    const appShellSource = fs.readFileSync(
+      path.resolve(__dirname, '../../components/layout/AppShell.tsx'),
+      'utf-8'
+    );
+    expect(appShellSource).toContain('openLifestyleTuning');
+    expect(appShellSource).toContain('ONBOARDING_DISMISSED_KEY');
+    expect(appShellSource).toContain('if (isPublicPage || pathname === ROUTES.profile) return');
+
+    const tuningViewSource = fs.readFileSync(
+      path.resolve(__dirname, '../../components/assistant/LifestyleTuningView.tsx'),
+      'utf-8'
+    );
+    expect(tuningViewSource).toContain('!lifestyleProfile?.intakeCompleted');
+    expect(tuningViewSource).toContain('t.q1Title');
+    expect(tuningViewSource).toContain('t.q4Title');
+    expect(tuningViewSource).toContain('handleFinishGuidedOnboarding');
+  });
 });
