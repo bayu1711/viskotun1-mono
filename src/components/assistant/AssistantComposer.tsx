@@ -54,11 +54,15 @@ inputRef)
       ? COPY.assistant.inputAsk
       : COPY.assistant.inputUpload;
 
+  const isLifestyle = mode === 'lifestyle';
+
   return (
     <form onSubmit={handleSubmit} className="flex items-center gap-2 rounded-full border border-ink/10 bg-white p-1.5">
-      <CircleButton label={COPY.assistant.attach} onClick={() => fileRef.current?.click()} size={38}>
-        <Icon icon={AttachFileIcon} size="md" />
-      </CircleButton>
+      {!isLifestyle && (
+        <CircleButton label={COPY.assistant.attach} onClick={() => fileRef.current?.click()} size={38}>
+          <Icon icon={AttachFileIcon} size="md" />
+        </CircleButton>
+      )}
       <input
         ref={inputRef}
         type="text"
@@ -66,17 +70,19 @@ inputRef)
         onChange={(event) => setDraft(event.target.value)}
         aria-label={ariaLabel || defaultAriaLabel}
         placeholder={placeholder || defaultPlaceholder}
-        className="min-w-0 flex-1 bg-transparent py-2 text-sm placeholder:text-ink/60 focus:outline-none" />
+        className={`min-w-0 flex-1 bg-transparent py-2 text-base sm:text-sm placeholder:text-ink/60 focus:outline-none ${
+          isLifestyle ? 'pl-3.5' : ''
+        }`} />
       
       <button
         type="submit"
         aria-label={COPY.assistant.send}
         disabled={!canSend}
-        className="flex h-cell w-cell shrink-0 items-center justify-center rounded-full bg-ink text-white transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:opacity-30">
+        className="flex h-cell w-cell shrink-0 items-center justify-center rounded-full bg-ink text-white transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:opacity-30 cursor-pointer">
         
         <Icon icon={ArrowUpwardIcon} size="md" />
       </button>
-      <HiddenPdfInput ref={fileRef} onFile={onFile} />
+      {!isLifestyle && <HiddenPdfInput ref={fileRef} onFile={onFile} />}
     </form>);
 
 });

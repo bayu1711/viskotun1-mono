@@ -3,9 +3,13 @@ import { toast } from 'sonner';
 import { AuthContext } from '../contexts/AuthContext';
 import { DEFAULT_CONFIRMATION_SCORE, FEEDBACK_ESCALATION_THRESHOLD } from '../data/config';
 import { COPY } from '../data/copy';
+import { getLocaleCopy } from '../data/locales';
+import type { AppLocale, LocaleCopy } from '../data/locales/types';
 import { initialQueuedPapers, routines as initialRoutines, sampleRoutines } from '../data/routines';
 import { PRECALIBRATED_SAMPLE_ROUTINES, SAMPLE_PAPERS, type SamplePaper } from '../data/samplePapers';
+import type { RegionalLifestyleTag } from '../types/auth';
 import type {
+  AIEngineType,
   BarrierLog,
   BarrierType,
   ChatMessage,
@@ -26,6 +30,15 @@ import { answerFor } from '../utils/assistant';
 import { stripClinicalDisclaimer } from '../utils/disclaimer';
 import { isEdgeGemmaAvailable, queryEdgeGemma } from '../utils/edgeGemma';
 import { createId } from '../utils/id';
+import {
+  buildConversationalLifestyleReply,
+  buildProfileUpdatesFromParse,
+  computeNextInterviewStage,
+  formatProfileSummary,
+  formatRegionLabel,
+  type LifestyleInterviewStage,
+  parseConversationalLifestyleAnswer
+} from '../utils/lifestyleInterview';
 import { answerForRejection } from '../utils/rejectionAssistant';
 import { clamp, toPercent } from '../utils/math';
 import {
@@ -144,6 +157,28 @@ export function useRoutineState() {
   const [stagingError, setStagingError] = useState<string | null>(null);
   const [unboundMessages, setUnboundMessages] = useState<ChatMessage[]>([]);
   const [isStagingAssistantTyping, setIsStagingAssistantTyping] = useState(false);
+
+  // Dedicated conversational thread for Adaptive Lifestyle onboarding & ongoing tuning
+  const [lifestyleMessages, setLifestyleMessages] = useState<ChatMessage[]>([]);
+  const [isLifestyleTyping, setIsLifestyleTyping] = useState(false);
+  const [lifestyleInterviewStage, setLifestyleInterviewStage] = useState<LifestyleInterviewStage>(
+    () => (auth?.lifestyleProfile?.intakeCompleted ? 'complete' : 'region')
+  );
+  const [answeredLifestyleStages, setAnsweredLifestyleStages] = useState<LifestyleInterviewStage[]>([]);
+  const [lifestyleSuggestions, setLifestyleSuggestions] = useState<RegionalLifestyleTag[]>([]);
+  const lifestyleInterviewStageRef = useRef<LifestyleInterviewStage>(lifestyleInterviewStage);
+  lifestyleInterviewStageRef.current = lifestyleInterviewStage;
+  const answeredLifestyleStagesRef = useRef<LifestyleInterviewStage[]>(answeredLifestyleStages);
+  answeredLifestyleStagesRef.current = answeredLifestyleStages;
+
+  useEffect(() => {
+    setLifestyleMessages([]);
+    setIsLifestyleTyping(false);
+    setAnsweredLifestyleStages([]);
+    setLifestyleInterviewStage(
+      lifestyleProfileRef.current?.intakeCompleted ? 'complete' : 'region'
+    );
+  }, [userId]);
 
   // Dynamic sample research papers pulled from Firebase Firestore
   const [samplePapers, setSamplePapers] = useState<SamplePaper[]>(SAMPLE_PAPERS);
@@ -2192,60 +2227,6 @@ export function useRoutineState() {
     [routine, adherenceRate, userId, closeReviewDrawer]
   );
 
-  const tuneLifestyle = useCallback(
-    async (message: string) => {
-      const currentProf = auth?.lifestyleProfile;
-      const country = currentProf?.region?.countryCode || 'AE';
-      const targetId = routine?.id || '';
-
-      pushMessages(targetId, {
-        role: 'user',
-        kind: 'question',
-        content: message
-      });
-      if (targetId) {
-        updateRuntime(targetId, (prev) => ({ ...prev, assistantTyping: true }));
-      }
-
-      try {
-        const res = await fetch('/api/lifestyle/tune', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message,
-            country,
-            currentProfile: currentProf
-          })
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data.profileUpdates && auth?.updateLifestyleProfile) {
-            auth.updateLifestyleProfile(data.profileUpdates);
-          }
-          if (data.suggestedFocus && !userProfileRef.current?.clinicalGoals && auth?.updateUserProfile) {
-            auth.updateUserProfile({ clinicalGoals: data.suggestedFocus });
-          }
-          pushMessages(targetId, {
-            role: 'ai',
-            kind: 'confirmation',
-            content: data.reply
-          });
-          toast.success(COPY.lifestyleTuning.tagAddedToast(data.extractedTags?.[0] || 'Lifestyle'));
-          return data;
-        }
-      } catch (err) {
-        console.warn('[useRoutineState] Lifestyle tune failed:', err);
-      } finally {
-        if (targetId) {
-          updateRuntime(targetId, (prev) => ({ ...prev, assistantTyping: false }));
-        }
-      }
-      return null;
-    },
-    [auth, routine, pushMessages, updateRuntime]
-  );
-
   const refreshLifestyleAdaptation = useCallback(
     async (overrides?: { routine?: Routine | null }) => {
       const targetRoutine = overrides?.routine !== undefined ? overrides.routine : routine;
@@ -2277,6 +2258,215 @@ export function useRoutineState() {
       return null;
     },
     [routine]
+  );
+
+  const initLifestyleConversation = useCallback((localeCopy: LocaleCopy) => {
+    setLifestyleMessages((prev) => {
+      if (prev.length > 0) return prev;
+      const lp = lifestyleProfileRef.current;
+      const up = userProfileRef.current;
+      const regionLabel = formatRegionLabel(lp?.region);
+      const source = localeCopy.lifestyleTuning.onboarding.answerSource;
+
+      if (!lp?.intakeCompleted) {
+        setLifestyleInterviewStage('region');
+        setAnsweredLifestyleStages([]);
+        return [
+          buildMessage({
+            role: 'ai',
+            kind: 'answer',
+            content: localeCopy.lifestyleTuning.onboarding.greetingRegion(regionLabel),
+            source
+          })
+        ];
+      }
+
+      setLifestyleInterviewStage('complete');
+      setAnsweredLifestyleStages(['region', 'age_time', 'rhythm', 'cautions']);
+      const summary = formatProfileSummary(lp, up, localeCopy);
+      return [
+        buildMessage({
+          role: 'ai',
+          kind: 'answer',
+          content: localeCopy.lifestyleTuning.onboarding.returningGreeting(regionLabel, summary),
+          source
+        })
+      ];
+    });
+  }, []);
+
+  const restartLifestyleInterview = useCallback((localeCopy: LocaleCopy) => {
+    const regionLabel = formatRegionLabel(lifestyleProfileRef.current?.region);
+    setLifestyleInterviewStage('region');
+    setAnsweredLifestyleStages([]);
+    setLifestyleMessages((prev) => [
+      ...prev,
+      buildMessage({
+        role: 'ai',
+        kind: 'answer',
+        content: localeCopy.lifestyleTuning.onboarding.rerunGreeting(regionLabel),
+        source: localeCopy.lifestyleTuning.onboarding.answerSource
+      })
+    ]);
+  }, []);
+
+  const tuneLifestyle = useCallback(
+    async (
+      message: string,
+      options?: { locale?: AppLocale; localeCopy?: LocaleCopy }
+    ) => {
+      const trimmed = message.trim();
+      if (!trimmed) return null;
+
+      const locale: AppLocale = options?.locale === 'ar' ? 'ar' : 'en';
+      const localeCopy = options?.localeCopy ?? getLocaleCopy(locale);
+      const currentProf = lifestyleProfileRef.current;
+      const currentUserProf = userProfileRef.current;
+      const country = currentProf?.region?.countryCode || 'AE';
+      const currentStage = lifestyleInterviewStageRef.current;
+      const answeredStages = answeredLifestyleStagesRef.current;
+      const isInterviewTurn = currentStage !== 'complete';
+
+      setLifestyleMessages((prev) => [
+        ...prev,
+        buildMessage({
+          role: 'user',
+          kind: 'question',
+          content: trimmed
+        })
+      ]);
+      setIsLifestyleTyping(true);
+
+      const applyTurnResult = (payload: {
+        reply: string;
+        engine?: AIEngineType;
+        profileUpdates?: Partial<typeof currentProf>;
+        userProfileUpdates?: Partial<typeof currentUserProf>;
+        extractedTags?: string[];
+        suggestedFocus?: string;
+        suggestions?: RegionalLifestyleTag[];
+        nextStage?: LifestyleInterviewStage;
+        answeredStages?: LifestyleInterviewStage[];
+      }) => {
+        if (payload.profileUpdates && updateLifestyleProfileRef.current) {
+          updateLifestyleProfileRef.current(payload.profileUpdates);
+        }
+        if (payload.userProfileUpdates && Object.keys(payload.userProfileUpdates).length > 0 && updateUserProfileRef.current) {
+          updateUserProfileRef.current(payload.userProfileUpdates);
+        } else if (
+          payload.suggestedFocus &&
+          !userProfileRef.current?.clinicalGoals &&
+          updateUserProfileRef.current
+        ) {
+          updateUserProfileRef.current({ clinicalGoals: payload.suggestedFocus });
+        }
+
+        const resolvedNextStage: LifestyleInterviewStage = payload.nextStage ?? 'complete';
+        setLifestyleInterviewStage(resolvedNextStage);
+        if (Array.isArray(payload.answeredStages)) {
+          setAnsweredLifestyleStages(payload.answeredStages);
+        }
+        if (Array.isArray(payload.suggestions) && payload.suggestions.length > 0) {
+          setLifestyleSuggestions(payload.suggestions);
+        }
+
+        const completedNow = isInterviewTurn && resolvedNextStage === 'complete';
+        setLifestyleMessages((prev) => [
+          ...prev,
+          buildMessage({
+            role: 'ai',
+            kind: completedNow || !isInterviewTurn ? 'confirmation' : 'answer',
+            content: payload.reply,
+            engine: payload.engine,
+            source: localeCopy.lifestyleTuning.onboarding.answerSource
+          })
+        ]);
+
+        if (completedNow) {
+          toast.success(localeCopy.lifestyleTuning.onboarding.completedToast);
+          refreshLifestyleAdaptation();
+        } else if (!isInterviewTurn) {
+          toast.success(
+            localeCopy.lifestyleTuning.tagAddedToast(payload.extractedTags?.[0] || 'Lifestyle')
+          );
+        }
+      };
+
+      try {
+        const res = await fetch('/api/lifestyle/tune', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: trimmed,
+            country,
+            currentProfile: currentProf,
+            userProfile: currentUserProf,
+            interviewStage: currentStage,
+            answeredStages,
+            activeRoutineTitle: routine?.shortTitle || routine?.title,
+            locale
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          applyTurnResult(data);
+          return data;
+        }
+      } catch (err) {
+        console.warn('[useRoutineState] Lifestyle tune failed, using local fallback:', err);
+      } finally {
+        setIsLifestyleTyping(false);
+      }
+
+      // Deterministic offline fallback so the conversation never stalls
+      const currentRegion = currentProf?.region ?? {
+        countryCode: country,
+        countryName: 'United Arab Emirates',
+        detectedBy: 'default_global' as const,
+        confirmed: false
+      };
+      const parsed = parseConversationalLifestyleAnswer(trimmed, currentStage, {
+        currentRegion,
+        currentProfile: currentProf,
+        currentUserProfile: currentUserProf
+      });
+      const { nextStage, updatedAnswered } = computeNextInterviewStage(
+        currentStage,
+        parsed,
+        new Set(answeredStages)
+      );
+      const { profileUpdates, userProfileUpdates, suggestedFocus } = buildProfileUpdatesFromParse(
+        parsed,
+        nextStage,
+        currentProf,
+        currentUserProf,
+        routine?.shortTitle || routine?.title
+      );
+      const resolvedRegionLabel = formatRegionLabel(profileUpdates.region ?? currentRegion);
+      const fallbackReply = buildConversationalLifestyleReply({
+        parsed,
+        nextStage,
+        regionLabel: resolvedRegionLabel,
+        suggestedFocus,
+        copy: localeCopy,
+        locale
+      });
+
+      const fallbackPayload = {
+        reply: fallbackReply,
+        engine: 'local-rules' as const,
+        profileUpdates,
+        userProfileUpdates,
+        extractedTags: parsed.extractedTags,
+        suggestedFocus,
+        nextStage,
+        answeredStages: updatedAnswered
+      };
+      applyTurnResult(fallbackPayload);
+      return fallbackPayload;
+    },
+    [routine, refreshLifestyleAdaptation]
   );
 
   const adaptSignature = useMemo(() => {
@@ -2440,6 +2630,13 @@ export function useRoutineState() {
       refreshLifestyleAdaptation,
       updateLifestyleProfile: auth?.updateLifestyleProfile,
       confirmRegion: auth?.confirmRegion,
+      lifestyleMessages,
+      isLifestyleTyping,
+      lifestyleInterviewStage,
+      lifestyleSuggestions,
+      setLifestyleSuggestions,
+      initLifestyleConversation,
+      restartLifestyleInterview,
       tuneLifestyle,
       resetToDefaults,
       updateGuardrailThreshold,
@@ -2536,6 +2733,12 @@ export function useRoutineState() {
       refreshLifestyleAdaptation,
       auth?.updateLifestyleProfile,
       auth?.confirmRegion,
+      lifestyleMessages,
+      isLifestyleTyping,
+      lifestyleInterviewStage,
+      lifestyleSuggestions,
+      initLifestyleConversation,
+      restartLifestyleInterview,
       tuneLifestyle,
       resetToDefaults,
       updateGuardrailThreshold,

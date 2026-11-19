@@ -6,12 +6,17 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { type AssistantMode, useAssistant } from '../../contexts/AssistantContext';
 import { ONBOARDING_DISMISSED_KEY } from '../../contexts/AuthContext';
+import { useLocale } from '../../contexts/LocaleContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
 import { COPY } from '../../data/copy';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useScrollToLatest } from '../../hooks/useScrollToLatest';
 import { isPdfFile } from '../../utils/files';
+import {
+  getQuickRepliesForStage,
+  getStagePlaceholder
+} from '../../utils/lifestyleInterview';
 import { getDynamicSuggestions } from '../../utils/suggestions';
 import { EmptyState } from '../feedback/EmptyState';
 import { MissingDataBanner } from '../routine/MissingDataBanner';
@@ -27,6 +32,7 @@ import { UploadDropzone } from './UploadDropzone';
 
 export function AssistantSheet() {
   const { isOpen, mode, setMode, closeAssistant } = useAssistant();
+  const { locale, copy } = useLocale();
   const {
     messages,
     routine,
@@ -45,10 +51,14 @@ export function AssistantSheet() {
     toggleStagingExcludeStep,
     lifestyleProfile,
     userProfile,
-    confirmRegion,
     updateLifestyleProfile,
-    updateUserProfile,
-    refreshLifestyleAdaptation,
+    lifestyleMessages,
+    isLifestyleTyping,
+    lifestyleInterviewStage,
+    lifestyleSuggestions,
+    setLifestyleSuggestions,
+    initLifestyleConversation,
+    restartLifestyleInterview,
     tuneLifestyle
   } = useRoutine();
 
@@ -67,14 +77,16 @@ export function AssistantSheet() {
 
   useDialogA11y(panelRef, { open: isOpen, onClose: handleClose, initialFocusRef: inputRef });
 
-  const currentMessageCount =
-    mode === 'ask' || mode === 'lifestyle'
-      ? messages.length + (assistantTyping ? 1 : 0)
-      : stagingMessages.length +
-        (isStagingAssistantTyping ? 1 : 0) +
-        (isExtractingPaper ? 1 : 0);
+  const isAsk = mode === 'ask';
+  const isLifestyle = mode === 'lifestyle';
 
-  const endRef = useScrollToLatest<HTMLDivElement>(isOpen, `${mode}-${currentMessageCount}`);
+  const scrollTrigger = isLifestyle
+    ? `lifestyle-${lifestyleMessages.length}-${isLifestyleTyping ? 'typing' : 'idle'}`
+    : isAsk
+      ? `ask-${messages.length}-${assistantTyping ? 'typing' : 'idle'}`
+      : `upload-${stagingMessages.length}-${isStagingAssistantTyping ? 'typing' : 'idle'}-${isExtractingPaper ? 'extracting' : 'ready'}`;
+
+  const endRef = useScrollToLatest<HTMLDivElement>(isOpen, scrollTrigger);
 
   const handleModeChange = (next: AssistantMode) => {
     setMode(next);
@@ -98,14 +110,37 @@ export function AssistantSheet() {
     setMode('ask');
   };
 
+  const handleLifestyleReply = (input: string) => {
+    if (input === copy.lifestyleTuning.onboarding.quickDone) {
+      closeAssistant();
+      return;
+    }
+    if (input === copy.lifestyleTuning.onboarding.quickUpdateProfile) {
+      restartLifestyleInterview(copy);
+      return;
+    }
+    tuneLifestyle(input, { locale, localeCopy: copy });
+  };
+
   const hasAskConversation = messages.length > 0 || assistantTyping;
-  const isAsk = mode === 'ask';
-  const isLifestyle = mode === 'lifestyle';
-  const activeMessages = isAsk || isLifestyle ? messages : stagingMessages;
+  const activeMessages = isLifestyle ? lifestyleMessages : isAsk ? messages : stagingMessages;
   const lastEngine = useMemo(
     () => [...activeMessages].reverse().find((m) => m.engine)?.engine,
     [activeMessages]
   );
+
+  const lifestyleQuickReplies = useMemo(
+    () =>
+      getQuickRepliesForStage({
+        stage: lifestyleInterviewStage,
+        lifestyleProfile,
+        suggestions: lifestyleSuggestions,
+        copy
+      }),
+    [lifestyleInterviewStage, lifestyleProfile, lifestyleSuggestions, copy]
+  );
+
+  const lifestylePlaceholder = getStagePlaceholder(lifestyleInterviewStage, copy);
 
   const askSuggestions = useMemo(
     () => getDynamicSuggestions(routine, messages),
@@ -162,12 +197,12 @@ export function AssistantSheet() {
               mode={mode}
               routineTitle={routine ? routine.shortTitle : COPY.assistant.noActiveRoutineForAskTitle}
               customTitle={
-                !isAsk && stagingRoutine
+                !isAsk && !isLifestyle && stagingRoutine
                   ? COPY.assistant.stagingTitle
                   : undefined
               }
               customEyebrow={
-                !isAsk && stagingRoutine
+                !isAsk && !isLifestyle && stagingRoutine
                   ? COPY.assistant.stagingEyebrow
                   : undefined
               }
@@ -179,21 +214,17 @@ export function AssistantSheet() {
 
             <div role="log" aria-live="polite" className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
               {isLifestyle ? (
-                /* Lifestyle Tuning & Guided Onboarding Interview */
+                /* Conversational Adaptive Lifestyle Interview & Ongoing Tuning */
                 <LifestyleTuningView
                   lifestyleProfile={lifestyleProfile}
                   userProfile={userProfile}
-                  activeRoutineTitle={routine?.shortTitle || routine?.title}
-                  messages={messages}
-                  isTyping={assistantTyping}
-                  onTune={tuneLifestyle}
-                  onConfirmRegion={confirmRegion}
+                  messages={lifestyleMessages}
+                  isTyping={isLifestyleTyping}
+                  stage={lifestyleInterviewStage}
+                  onInitConversation={initLifestyleConversation}
+                  onRestartInterview={restartLifestyleInterview}
+                  onSuggestionsLoaded={setLifestyleSuggestions}
                   onUpdateProfile={updateLifestyleProfile}
-                  onUpdateUserProfile={updateUserProfile}
-                  onCompleteOnboarding={() => {
-                    closeAssistant();
-                    refreshLifestyleAdaptation();
-                  }}
                   onSkipOnboarding={handleClose}
                 />
               ) : isAsk ? (
@@ -292,15 +323,22 @@ export function AssistantSheet() {
 
             <footer className="shrink-0 space-y-3 border-t border-ink/10 bg-canvas px-5 pb-5 pt-3">
               {isLifestyle ? (
-                <AssistantComposer
-                  ref={inputRef}
-                  mode="lifestyle"
-                  onAsk={tuneLifestyle}
-                  onAddPaper={addPaper}
-                  onFile={handleFile}
-                  placeholder={COPY.lifestyleTuning.customPromptPlaceholder}
-                  ariaLabel={COPY.lifestyleTuning.title}
-                />
+                <>
+                  <FaqSuggestions
+                    suggestions={lifestyleQuickReplies}
+                    onSelect={handleLifestyleReply}
+                    disabled={isLifestyleTyping}
+                  />
+                  <AssistantComposer
+                    ref={inputRef}
+                    mode="lifestyle"
+                    onAsk={handleLifestyleReply}
+                    onAddPaper={addPaper}
+                    onFile={handleFile}
+                    placeholder={lifestylePlaceholder}
+                    ariaLabel={copy.lifestyleTuning.title}
+                  />
+                </>
               ) : isAsk ? (
                 <>
                   <FaqSuggestions
