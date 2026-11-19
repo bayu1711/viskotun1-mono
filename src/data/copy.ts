@@ -38,8 +38,7 @@ export const COPY = {
   common: {
     percentComplete: (percent: number) => `${percent}% complete`,
     opensInNewTab: '(opens in a new tab)',
-    percentSign: '%',
-    warningPrefix: '⚠'
+    percentSign: '%'
   },
   nav: {
     primaryLabel: 'Primary',
@@ -168,7 +167,7 @@ export const COPY = {
       `Marhaban! I detect you're tracking from ${city ? `${city}, ` : ''}${country}. Is that right?`,
     unknownLocationGreeting:
       'Marhaban! Which city or region are you tracking from? Selecting your region allows Viskotu to tailor your daily plan around local climate, fasting hours, and work patterns.',
-    confirmLocationBtn: (cityOrCountry: string) => `✓ Yes, ${cityOrCountry}`,
+    confirmLocationBtn: (cityOrCountry: string) => `Yes, ${cityOrCountry}`,
     changeLocationBtn: 'Change Region',
     customPromptPlaceholder: 'Type or speak: e.g. "I work rotating 12h night shifts and smoke shisha occasionally"...',
     suggestionsEyebrow: (region: string) => `Popular lifestyle factors in ${region}`,
@@ -190,7 +189,7 @@ export const COPY = {
   },
   dayActions: {
     markComplete: 'Mark today complete',
-    dayLogged: (day: number) => `✓ Day ${day} logged`,
+    dayLogged: (day: number) => `Day ${day} logged`,
     logFeedback: (name?: string) => (name ? `Log ${name}` : 'Log feedback'),
     advanceToNextDay: (day: number) => `Advance to Day ${day}`,
     simulatePastDays: (count: number) => `Simulate ${count} past days (Admin)`,
@@ -404,7 +403,9 @@ export const COPY = {
       { label: '20:30 Post-Iftar', value: '20:30' }
     ],
     goalsLabel: 'Primary health / rehab focus',
-    goalsPlaceholder: 'e.g. Return to pain-free 5K running, sleep regularity during night shifts',
+    goalsPlaceholder: 'Auto-synthesized from your Lifestyle Profile — or customize here',
+    goalsGenerateBtn: 'Generate from lifestyle',
+    goalsHint: 'Automatically adapts with your UserLifestyleProfile and is shared directly with TrialN1 AI.',
     lifestyleEyebrow: 'UserLifestyleProfile',
     lifestyleTitle: 'Adaptive Lifestyle Context',
     regionLabel: 'Region & city',
@@ -474,7 +475,7 @@ export const COPY = {
       `1-Page brief of ${title}: trial citation, daily routine, adherence rate, and logs to share with your coach, specialist, or personal records.`,
     export: 'View & print 1-page summary',
     exporting: 'Preparing 1-page summary…',
-    success: '✓ 1-Page summary ready',
+    success: '1-Page summary ready',
     successToast: 'Shareable summary generated',
     error: "We couldn't generate the summary. Check your connection and try again.",
     errorToast: 'Export failed',
@@ -495,8 +496,8 @@ export const COPY = {
     adherenceRate: 'Adherence Rate',
     consistencyStreak: 'Consistency Streak',
     progressionGate: 'Progression Gate',
-    statusPaused: '⚠️ Escalation Paused',
-    statusReady: '✓ Ready to Advance',
+    statusPaused: 'Escalation Paused',
+    statusReady: 'Ready to Advance',
     statusHolding: 'Holding Load',
     conservativeBaseline: 'Conservative baseline',
     progressionRuleHeading: 'Progression Rule',
@@ -683,7 +684,7 @@ export const COPY = {
   badges: {
     rct: 'RCT gold standard',
     pilot: 'Pilot trial',
-    missingParameters: '⚠ Missing parameters'
+    missingParameters: 'Missing parameters'
   },
   assistant: {
     dialogLabel: 'Viskotu',
@@ -765,10 +766,10 @@ export const COPY = {
     emptyBody: 'Ask about dosing, frequency, safety or progression.',
     answerSource: 'Source · Methods section',
     engines: {
-      onDeviceGemma: '⚡ On-Device Gemma',
-      cloudGemini: '☁️ Gemini Flash',
-      serverGemma: '⚡ Gemma 2 Endpoint',
-      localRules: '🔒 Deterministic Matcher',
+      onDeviceGemma: 'On-Device Gemma',
+      cloudGemini: 'Gemini Flash',
+      serverGemma: 'Gemma 2 Endpoint',
+      localRules: 'Deterministic Matcher',
       onDeviceBadge: 'On-device (0ms · private)',
       cloudBadge: 'Cloud AI',
       localBadge: 'Offline matcher',
@@ -1057,7 +1058,7 @@ export const COPY = {
     footerSignIn: 'Sign in',
     footerCreateAccount: 'Create account',
     footerGithub: 'GitHub',
-    uaeEditionLink: '🇦🇪 Abu Dhabi Edition · Challenge 09'
+    uaeEditionLink: 'Abu Dhabi Edition · Challenge 09'
   },
   uaeLanding: {
     meta: {
@@ -1380,7 +1381,7 @@ export const COPY = {
         instructionsLabel: 'Standardized study routine guidelines:',
         previewAlt: 'Milestone clinical assessment photo',
         removePhoto: 'Remove photo',
-        attached: '✓ Photo attached to milestone record',
+        attached: 'Photo attached to milestone record',
         uploadButton: 'Upload file',
         uploading: 'Uploading to Cloud Storage...',
         uploadSuccess: 'Photo uploaded securely to Cloud Storage',
@@ -1458,7 +1459,7 @@ export const COPY = {
       baselineAlt: 'Baseline Day 1 assessment',
       milestoneAlt: (day: number) => `Day ${day} milestone assessment`,
       sliderAria: 'Split slider comparison percentage',
-      dayPill: (day: number, hasLog: boolean) => `Day ${day} ${hasLog ? '✓' : ''}`.trim(),
+      dayPill: (day: number) => `Day ${day}`,
       previewBadge: ' (preview)',
       dayTooltip: (day: number) => `Day ${day}`,
       dayTick: (day: number) => `D${day}`,

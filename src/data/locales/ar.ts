@@ -37,8 +37,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
   common: {
     percentComplete: (percent: number) => `اكتمل بنسبة ${percent}%`,
     opensInNewTab: '(يفتح في علامة تبويب جديدة)',
-    percentSign: '%',
-    warningPrefix: '⚠'
+    percentSign: '%'
   },
   nav: {
     primaryLabel: 'القائمة الرئيسية',
@@ -154,7 +153,9 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       { label: '20:30 بعد الإفطار', value: '20:30' }
     ],
     goalsLabel: 'الهدف الصحي أو التأهيلي الأساسي',
-    goalsPlaceholder: 'مثال: العودة للجري دون ألم، أو تنظيم النوم خلال مناوبات الليل',
+    goalsPlaceholder: 'يُنشأ تلقائياً من ملف نمط الحياة — أو يمكنك تعديله هنا',
+    goalsGenerateBtn: 'توليد من نمط الحياة',
+    goalsHint: 'يتكيف تلقائياً مع ملف نمط الحياة التكيفي ويُرسل مباشرة إلى مساعد TrialN1 الذكي.',
     lifestyleEyebrow: 'UserLifestyleProfile',
     lifestyleTitle: 'سياق نمط الحياة التكيفي',
     regionLabel: 'المنطقة والمدينة',
@@ -286,7 +287,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       `مرحباً بك! نلاحظ أنك تتابع خطتك من ${city ? `${city}، ` : ''}${country}. هل هذا دقيق؟`,
     unknownLocationGreeting:
       'مرحباً بك! من أي مدينة أو منطقة تتابع خطتك؟ يساعدنا تحديد موقعك على مواءمة خطتك مع المناخ، وساعات الصيام، ونمط العمل المحلي.',
-    confirmLocationBtn: (cityOrCountry: string) => `✓ نعم، ${cityOrCountry}`,
+    confirmLocationBtn: (cityOrCountry: string) => `نعم، ${cityOrCountry}`,
     changeLocationBtn: 'تغيير المنطقة',
     customPromptPlaceholder:
       'اكتب أو تحدث: مثال "أعمل بنظام النوبات الليلية في المستشفى وأدخن الشيشة في العطلات"...',
@@ -309,7 +310,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
   },
   dayActions: {
     markComplete: 'تحديد اليوم كمكتمل',
-    dayLogged: (day: number) => `✓ تم تسجيل اليوم ${day}`,
+    dayLogged: (day: number) => `تم تسجيل اليوم ${day}`,
     logFeedback: (name?: string) => (name ? `تسجيل ${name}` : 'تسجيل التقييم الذاتي'),
     advanceToNextDay: (day: number) => `الانتقال إلى اليوم ${day}`,
     simulatePastDays: (count: number) => `محاكاة ${count} أيام سابقة (إشراف)`,
@@ -413,7 +414,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
   badges: {
     rct: 'تجربة معشاة منضبطة (RCT)',
     pilot: 'دراسة أولية / رائدة',
-    missingParameters: '⚠ معايير مستنتجة'
+    missingParameters: 'معايير مستنتجة'
   },
   assistant: {
     dialogLabel: 'المساعد الذكي ڤيسكوتو',
@@ -448,10 +449,10 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     medicalDisclaimerGotIt: 'فهمت ذلك',
     closeDisclaimer: 'إغلاق التنويه',
     engines: {
-      onDeviceGemma: '⚡ نموذج Gemma الداخلي (على الجهاز)',
-      cloudGemini: '☁️ سحابة Gemini Flash',
-      serverGemma: '⚡ خادم Gemma 2',
-      localRules: '🔒 المطابق السريري المحلي',
+      onDeviceGemma: 'نموذج Gemma الداخلي (على الجهاز)',
+      cloudGemini: 'سحابة Gemini Flash',
+      serverGemma: 'خادم Gemma 2',
+      localRules: 'المطابق السريري المحلي',
       onDeviceBadge: 'داخلي (فوري · خصوصية تامة)',
       cloudBadge: 'ذكاء سحابي',
       localBadge: 'مطابق محلي',
@@ -509,7 +510,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     footerSignIn: 'تسجيل الدخول',
     footerCreateAccount: 'إنشاء حساب',
     footerGithub: 'GitHub',
-    uaeEditionLink: '🇦🇪 إصدار أبوظبي والإمارات · التحدي 09'
+    uaeEditionLink: 'إصدار أبوظبي والإمارات · التحدي 09'
   },
   uaeLanding: {
     meta: {

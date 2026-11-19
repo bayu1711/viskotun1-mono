@@ -57,3 +57,61 @@ export function deriveLifestyleCohort(profile?: Partial<UserLifestyleProfile>): 
   if (profile?.workPattern === 'shift_work') return 'shift_work';
   return 'general';
 }
+
+const WORK_FOCUS: Partial<Record<NonNullable<UserLifestyleProfile['workPattern']>, string>> = {
+  shift_work: 'shift-aligned recovery & sleep regularity',
+  desk_sedentary: 'postural mobility & sedentary break adherence',
+  frequent_travel: 'travel-resilient habit continuity'
+};
+
+const SMOKING_FOCUS: Partial<Record<NonNullable<UserLifestyleProfile['smokingStatus']>, string>> = {
+  midwakh_dokha: 'cardiorespiratory & vascular recovery monitoring',
+  shisha_waterpipe: 'aerobic capacity & harm-reduction pacing',
+  cigarettes: 'cardiorespiratory & tissue oxygenation protection',
+  vape: 'vascular recovery pacing'
+};
+
+/**
+ * Synthesizes a concise primary health / rehab focus string directly from
+ * `UserLifestyleProfile` factors (and optional age / active routine context).
+ */
+export function deriveClinicalFocus(
+  profile?: Partial<UserLifestyleProfile>,
+  options?: { age?: number; routineTitle?: string }
+): string {
+  if (!profile) return 'Consistent daily adherence within trial safety boundaries';
+
+  const pillars: string[] = [];
+
+  if (options?.routineTitle) {
+    pillars.push(`safe progression in ${options.routineTitle}`);
+  }
+  if (profile.isRamadanFastingObserver) {
+    pillars.push('fasting-safe hydration & post-Iftar exertion timing');
+  }
+  if (profile.workPattern && WORK_FOCUS[profile.workPattern]) {
+    pillars.push(WORK_FOCUS[profile.workPattern]!);
+  }
+  if (profile.climateSensitivity === 'summer_heat') {
+    pillars.push('heat-mitigated indoor/cooler-window execution');
+  }
+  if (profile.smokingStatus && SMOKING_FOCUS[profile.smokingStatus]) {
+    pillars.push(SMOKING_FOCUS[profile.smokingStatus]!);
+  }
+  if (profile.activityBaseline === 'sedentary' && profile.workPattern !== 'desk_sedentary') {
+    pillars.push('low-friction foundational movement');
+  }
+  if (profile.physicalCautions && profile.physicalCautions.length > 0) {
+    const joined = profile.physicalCautions.slice(0, 2).map((c) => c.toLowerCase()).join(' & ');
+    pillars.push(`joint-protective loading (${joined})`);
+  }
+
+  if (pillars.length === 0) {
+    const ageNote = options?.age && options.age >= 50 ? 'recovery-conscious ' : '';
+    return `${ageNote}evidence-grounded daily adherence & gradual progression`.replace(/^[a-z]/, (c) => c.toUpperCase());
+  }
+
+  const summary = pillars.slice(0, 3).join(', ');
+  return summary.charAt(0).toUpperCase() + summary.slice(1);
+}
+
