@@ -120,7 +120,7 @@ describe('UserProfile and UserLifestyleProfile utilities & wiring', () => {
     expect(defaultFocus.length).toBeGreaterThan(10);
   });
 
-  it('auto-triggers guided 4-question Adaptive Lifestyle interview on workspace for un-onboarded users', () => {
+  it('auto-triggers conversational Adaptive Lifestyle interview on workspace for un-onboarded users', () => {
     const appShellSource = fs.readFileSync(
       path.resolve(__dirname, '../../components/layout/AppShell.tsx'),
       'utf-8'
@@ -134,9 +134,9 @@ describe('UserProfile and UserLifestyleProfile utilities & wiring', () => {
       'utf-8'
     );
     expect(tuningViewSource).toContain('!lifestyleProfile?.intakeCompleted');
-    expect(tuningViewSource).toContain('t.q1Title');
-    expect(tuningViewSource).toContain('t.q4Title');
-    expect(tuningViewSource).toContain('handleFinishGuidedOnboarding');
+    expect(tuningViewSource).toContain('onInitConversation');
+    expect(tuningViewSource).toContain('<AssistantMessage');
+    expect(tuningViewSource).not.toContain('t.badge(');
   });
 
   it('adapts daily reminder time preset chips to the selected region and fasting status', () => {

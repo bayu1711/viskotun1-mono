@@ -1,0 +1,189 @@
+import { describe, expect, it } from 'vitest';
+import { getLocaleCopy } from '../../data/locales';
+import type { RegionContext, UserLifestyleProfile } from '../../types/auth';
+import {
+  buildConversationalLifestyleReply,
+  buildProfileUpdatesFromParse,
+  computeNextInterviewStage,
+  formatRegionLabel,
+  getQuickRepliesForStage,
+  getStagePlaceholder,
+  parseConversationalLifestyleAnswer,
+  type LifestyleInterviewStage
+} from '../lifestyleInterview';
+
+const DEFAULT_REGION: RegionContext = {
+  countryCode: 'AE',
+  countryName: 'United Arab Emirates',
+  city: 'Abu Dhabi',
+  detectedBy: 'client_timezone',
+  confirmed: false
+};
+
+describe('Conversational Adaptive Lifestyle Interview', () => {
+  it('confirms detected region on affirmative replies and switches cleanly for custom cities', () => {
+    const confirmed = parseConversationalLifestyleAnswer('Yes, Abu Dhabi', 'region', {
+      currentRegion: DEFAULT_REGION
+    });
+    expect(confirmed.answeredRegion).toBe(true);
+    expect(confirmed.region?.confirmed).toBe(true);
+    expect(confirmed.region?.city).toBe('Abu Dhabi');
+    expect(confirmed.region?.countryCode).toBe('AE');
+
+    const switched = parseConversationalLifestyleAnswer("Actually I'm in Tokyo, Japan", 'region', {
+      currentRegion: DEFAULT_REGION
+    });
+    expect(switched.answeredRegion).toBe(true);
+    expect(switched.region?.city).toBe('Tokyo');
+    expect(switched.region?.countryCode).toBe('JP');
+    expect(switched.region?.countryName).toBe('Japan');
+
+    const customCity = parseConversationalLifestyleAnswer('Kyoto, Japan', 'region', {
+      currentRegion: DEFAULT_REGION
+    });
+    expect(customCity.region?.city).toBe('Kyoto');
+    expect(customCity.region?.countryCode).toBe('JP');
+  });
+
+  it('extracts age and reminder time without confusing clock digits for age', () => {
+    const both = parseConversationalLifestyleAnswer("I'm 34, mornings around 7:30am", 'age_time', {
+      currentRegion: DEFAULT_REGION
+    });
+    expect(both.age).toBe(34);
+    expect(both.preferredReminderTime).toBe('07:30');
+    expect(both.answeredAgeTime).toBe(true);
+
+    const timeOnly = parseConversationalLifestyleAnswer('Post-Iftar · 20:30', 'age_time', {
+      currentRegion: DEFAULT_REGION
+    });
+    expect(timeOnly.age).toBeUndefined();
+    expect(timeOnly.preferredReminderTime).toBe('20:30');
+    expect(timeOnly.answeredAgeTime).toBe(true);
+
+    const pmTime = parseConversationalLifestyleAnswer('8pm', 'age_time', {
+      currentRegion: DEFAULT_REGION
+    });
+    expect(pmTime.age).toBeUndefined();
+    expect(pmTime.preferredReminderTime).toBe('20:00');
+  });
+
+  it('handles multi-answer turns and skips already-answered interview stages automatically', () => {
+    const parsed = parseConversationalLifestyleAnswer(
+      "I'm 31 in Dubai, prefer 7am, desk job and observe Ramadan fasting",
+      'region',
+      { currentRegion: DEFAULT_REGION }
+    );
+
+    expect(parsed.region?.city).toBe('Dubai');
+    expect(parsed.age).toBe(31);
+    expect(parsed.preferredReminderTime).toBe('07:00');
+    expect(parsed.workPattern).toBe('desk_sedentary');
+    expect(parsed.culturalRhythms).toContain('ramadan_fasting');
+
+    const { nextStage } = computeNextInterviewStage('region', parsed, new Set());
+    expect(nextStage).toBe('cautions');
+  });
+
+  it('parses physical cautions and distinguishes non-smoker from cigarette smoking', () => {
+    const nonSmokerKnee = parseConversationalLifestyleAnswer(
+      'Slight knee pain and lower back stiffness, non-smoker',
+      'cautions',
+      { currentRegion: DEFAULT_REGION }
+    );
+    expect(nonSmokerKnee.smokingStatus).toBe('non_smoker');
+    expect(nonSmokerKnee.physicalCautions).toEqual(
+      expect.arrayContaining(['Knee sensitivity', 'Lower back sensitivity'])
+    );
+
+    const noCautions = parseConversationalLifestyleAnswer(
+      'No cautions · non-smoker',
+      'cautions',
+      { currentRegion: DEFAULT_REGION }
+    );
+    expect(noCautions.answeredCautions).toBe(true);
+    expect(noCautions.smokingStatus).toBe('non_smoker');
+    expect(noCautions.extractedTags).toEqual([]);
+  });
+
+  it('completes a full 4-turn conversation and only marks intakeCompleted on the final turn', () => {
+    const copyEn = getLocaleCopy('en');
+    let stage: LifestyleInterviewStage = 'region';
+    let answered = new Set<LifestyleInterviewStage>();
+    let lifestyle: Partial<UserLifestyleProfile> = {
+      region: DEFAULT_REGION,
+      activeTags: [],
+      intakeCompleted: false
+    };
+
+    const turns = [
+      'Yes, Abu Dhabi',
+      '32, 08:00',
+      'Desk-bound work, Ramadan fasting, summer heat',
+      'No cautions · non-smoker'
+    ];
+
+    turns.forEach((msg, index) => {
+      const parsed = parseConversationalLifestyleAnswer(msg, stage, {
+        currentRegion: lifestyle.region ?? DEFAULT_REGION,
+        currentProfile: lifestyle
+      });
+      const step = computeNextInterviewStage(stage, parsed, answered);
+      const { profileUpdates, suggestedFocus } = buildProfileUpdatesFromParse(
+        parsed,
+        step.nextStage,
+        lifestyle
+      );
+      lifestyle = { ...lifestyle, ...profileUpdates };
+
+      if (index < turns.length - 1) {
+        expect(lifestyle.intakeCompleted).toBe(false);
+      } else {
+        expect(step.nextStage).toBe('complete');
+        expect(lifestyle.intakeCompleted).toBe(true);
+        expect(suggestedFocus.toLowerCase()).toContain('post-iftar');
+        expect(lifestyle.activeTags).toEqual([
+          'Desk-bound Sedentary',
+          'ramadan_fasting',
+          'extreme_heat_summer'
+        ]);
+      }
+
+      const reply = buildConversationalLifestyleReply({
+        parsed,
+        nextStage: step.nextStage,
+        regionLabel: formatRegionLabel(lifestyle.region),
+        suggestedFocus,
+        copy: copyEn,
+        locale: 'en'
+      });
+      expect(reply.length).toBeGreaterThan(20);
+
+      stage = step.nextStage;
+      answered = new Set(step.updatedAnswered);
+    });
+  });
+
+  it('produces contextual quick-reply chips and placeholders for every stage in EN and AR', () => {
+    const copyEn = getLocaleCopy('en');
+    const copyAr = getLocaleCopy('ar');
+
+    for (const stage of ['region', 'age_time', 'rhythm', 'cautions', 'complete'] as const) {
+      const chipsEn = getQuickRepliesForStage({
+        stage,
+        lifestyleProfile: { region: DEFAULT_REGION, activeTags: [] },
+        suggestions: [],
+        copy: copyEn
+      });
+      const chipsAr = getQuickRepliesForStage({
+        stage,
+        lifestyleProfile: { region: DEFAULT_REGION, activeTags: [] },
+        suggestions: [],
+        copy: copyAr
+      });
+      expect(chipsEn.length).toBeGreaterThanOrEqual(2);
+      expect(chipsAr.length).toBeGreaterThanOrEqual(2);
+      expect(getStagePlaceholder(stage, copyEn).length).toBeGreaterThan(10);
+      expect(getStagePlaceholder(stage, copyAr).length).toBeGreaterThan(10);
+    }
+  });
+});
