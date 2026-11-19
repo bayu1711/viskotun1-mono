@@ -8,6 +8,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined';
 import NorthEastIcon from '@mui/icons-material/NorthEast';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import TranslateOutlinedIcon from '@mui/icons-material/TranslateOutlined';
 import TuneIcon from '@mui/icons-material/Tune';
 import { toast } from 'sonner';
 import { PageContainer } from '../components/layout/PageContainer';
@@ -20,10 +21,17 @@ import { useAssistant } from '../contexts/AssistantContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocale } from '../contexts/LocaleContext';
 import { useRoutine } from '../contexts/RoutineContext';
+import {
+  type AppLocale,
+  type SecondaryLanguage,
+  getLocaleMeta,
+  resolveLanguagePair
+} from '../data/locales';
 import { ROUTES } from '../data/navigation';
 import type {
   ActivityBaseline,
   BiologicalSex,
+  CulturalRhythmId,
   SmokingStatus,
   UserLifestyleProfile,
   WorkPattern
@@ -31,9 +39,11 @@ import type {
 import { cn } from '../utils/cn';
 import { resolveCountryCodeFromInput } from '../utils/geo';
 import {
+  CULTURAL_RHYTHM_KEYS,
   deriveClinicalFocus,
   deriveLifestyleCohort,
   getRegionalReminderPresets,
+  resolveCulturalRhythms,
   sanitizeAge,
   syncLifestyleActiveTags
 } from '../utils/profile';
@@ -119,7 +129,7 @@ export function ProfilePage() {
   } = useAuth();
   const { openLifestyleTuning } = useAssistant();
   const { routine } = useRoutine();
-  const { copy, isRtl } = useLocale();
+  const { copy, isRtl, supportedLocales, setLocale } = useLocale();
   const t = copy.profile;
 
   const [displayName, setDisplayName] = useState('');
@@ -128,6 +138,8 @@ export function ProfilePage() {
   const [reminderTime, setReminderTime] = useState('09:00');
   const [clinicalGoals, setClinicalGoals] = useState('');
   const [isGoalsCustom, setIsGoalsCustom] = useState(false);
+  const [primaryLanguage, setPrimaryLanguage] = useState<AppLocale>('en');
+  const [secondaryLanguage, setSecondaryLanguage] = useState<SecondaryLanguage>('ar');
 
   const [countryCode, setCountryCode] = useState('AE');
   const [countryName, setCountryName] = useState('United Arab Emirates');
@@ -137,7 +149,7 @@ export function ProfilePage() {
   const [smokingStatus, setSmokingStatus] = useState<SmokingStatus>('non_smoker');
   const [climateSensitivity, setClimateSensitivity] =
     useState<NonNullable<UserLifestyleProfile['climateSensitivity']>>('moderate');
-  const [isRamadanObserver, setIsRamadanObserver] = useState(false);
+  const [culturalRhythms, setCulturalRhythms] = useState<CulturalRhythmId[]>([]);
   const [cautions, setCautions] = useState<string[]>([]);
 
   // Hydrate form state whenever stored profile loads/updates externally (e.g., via AI tuning or sync)
@@ -152,6 +164,12 @@ export function ProfilePage() {
     } else {
       setIsGoalsCustom(false);
     }
+    const resolvedPair = resolveLanguagePair(
+      userProfile.primaryLanguage,
+      userProfile.secondaryLanguage
+    );
+    setPrimaryLanguage(resolvedPair.primary);
+    setSecondaryLanguage(resolvedPair.secondary ?? 'none');
   }, [userProfile, user]);
 
   useEffect(() => {
@@ -162,16 +180,18 @@ export function ProfilePage() {
     setActivityBaseline(lifestyleProfile.activityBaseline || 'moderate');
     setSmokingStatus(lifestyleProfile.smokingStatus || 'non_smoker');
     setClimateSensitivity(lifestyleProfile.climateSensitivity || 'moderate');
-    setIsRamadanObserver(Boolean(lifestyleProfile.isRamadanFastingObserver));
+    setCulturalRhythms(resolveCulturalRhythms(lifestyleProfile));
     setCautions(lifestyleProfile.physicalCautions || []);
   }, [lifestyleProfile]);
 
+  const isRamadanObserver = culturalRhythms.includes('ramadan_fasting');
   const draftLifestyle: Partial<UserLifestyleProfile> = {
     ...lifestyleProfile,
     workPattern,
     activityBaseline,
     smokingStatus,
     climateSensitivity,
+    culturalRhythms,
     isRamadanFastingObserver: isRamadanObserver,
     physicalCautions: cautions
   };
@@ -187,9 +207,18 @@ export function ProfilePage() {
   const regionalReminderPresets = getRegionalReminderPresets({
     countryCode: resolvedCountryCodeForUi,
     isRamadanFastingObserver: isRamadanObserver,
+    culturalRhythms,
     basePresets: t.reminderPresets,
-    fastingPreset: t.fastingReminderPreset
+    fastingPreset: t.fastingReminderPreset,
+    dawnPreset: t.dawnReminderPreset,
+    lateDinnerPreset: t.lateDinnerReminderPreset
   });
+
+  const toggleCulturalRhythm = (item: CulturalRhythmId) => {
+    setCulturalRhythms((prev) =>
+      prev.includes(item) ? prev.filter((r) => r !== item) : [...prev, item]
+    );
+  };
 
   const toggleCaution = (item: string) => {
     setCautions((prev) =>
@@ -203,16 +232,30 @@ export function ProfilePage() {
     setCity(preset.defaultCity);
   };
 
+  const handlePrimaryLanguageChange = (nextPrimary: AppLocale) => {
+    if (nextPrimary === primaryLanguage) return;
+    if (secondaryLanguage === nextPrimary) {
+      setSecondaryLanguage(primaryLanguage);
+    }
+    setPrimaryLanguage(nextPrimary);
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const normalizedSecondary: SecondaryLanguage =
+      secondaryLanguage === primaryLanguage ? 'none' : secondaryLanguage;
 
     updateUserProfile({
       displayName: displayName.trim() || undefined,
       age: sanitizeAge(ageInput),
       biologicalSex,
       preferredReminderTime: reminderTime || '09:00',
-      clinicalGoals: effectiveClinicalGoals.trim() || undefined
+      clinicalGoals: effectiveClinicalGoals.trim() || undefined,
+      primaryLanguage,
+      secondaryLanguage: normalizedSecondary
     });
+    setLocale(primaryLanguage);
 
     const nextTags = syncLifestyleActiveTags({
       ...lifestyleProfile,
@@ -220,6 +263,7 @@ export function ProfilePage() {
       activityBaseline,
       smokingStatus,
       climateSensitivity,
+      culturalRhythms,
       isRamadanFastingObserver: isRamadanObserver
     });
 
@@ -238,6 +282,7 @@ export function ProfilePage() {
       activityBaseline,
       smokingStatus,
       climateSensitivity,
+      culturalRhythms,
       isRamadanFastingObserver: isRamadanObserver,
       physicalCautions: cautions,
       activeTags: nextTags,
@@ -382,6 +427,81 @@ export function ProfilePage() {
                 />
                 <p className="mt-1 text-2xs text-ink/60">{t.goalsHint}</p>
               </div>
+
+              {/* Language & Header Quick Switcher */}
+              <div id="language" className="border-t border-ink/10 pt-4 space-y-3">
+                <p className="text-xs font-semibold text-ink/80">{t.languageSectionLabel}</p>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <p className="mb-2 text-2xs font-semibold text-ink/70">{t.primaryLanguageLabel}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {supportedLocales.map((loc) => {
+                        const active = primaryLanguage === loc.code;
+                        return (
+                          <button
+                            key={loc.code}
+                            type="button"
+                            onClick={() => handlePrimaryLanguageChange(loc.code)}
+                            aria-pressed={active}
+                            className={cn(
+                              'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+                              active
+                                ? 'border-ink bg-ink text-white'
+                                : 'border-ink/15 bg-canvas/70 text-ink hover:border-ink/40 hover:bg-cream/60'
+                            )}
+                          >
+                            {active && <Icon icon={CheckIcon} size="xs" />}
+                            <span>{loc.nativeLabel}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="mb-2 text-2xs font-semibold text-ink/70">{t.secondaryLanguageLabel}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {supportedLocales
+                        .filter((loc) => loc.code !== primaryLanguage)
+                        .map((loc) => {
+                          const active = secondaryLanguage === loc.code;
+                          return (
+                            <button
+                              key={loc.code}
+                              type="button"
+                              onClick={() => setSecondaryLanguage(loc.code)}
+                              aria-pressed={active}
+                              className={cn(
+                                'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+                                active
+                                  ? 'border-ink bg-ink text-white'
+                                  : 'border-ink/15 bg-canvas/70 text-ink hover:border-ink/40 hover:bg-cream/60'
+                              )}
+                            >
+                              {active && <Icon icon={CheckIcon} size="xs" />}
+                              <span>{loc.nativeLabel}</span>
+                            </button>
+                          );
+                        })}
+                      <button
+                        type="button"
+                        onClick={() => setSecondaryLanguage('none')}
+                        aria-pressed={secondaryLanguage === 'none'}
+                        className={cn(
+                          'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+                          secondaryLanguage === 'none'
+                            ? 'border-ink bg-ink text-white'
+                            : 'border-ink/15 bg-canvas/70 text-ink hover:border-ink/40 hover:bg-cream/60'
+                        )}
+                      >
+                        {secondaryLanguage === 'none' && <Icon icon={CheckIcon} size="xs" />}
+                        <span>{t.secondaryLanguageNone}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-2xs text-ink/60">{t.languageHint}</p>
+              </div>
             </Panel>
 
             {/* Section 2: UserLifestyleProfile */}
@@ -490,31 +610,34 @@ export function ProfilePage() {
                 onChange={setClimateSensitivity}
               />
 
-              {/* Ramadan Toggle */}
-              <div className="flex items-center justify-between gap-4 rounded-2xl border border-ink/10 bg-cream/50 p-4">
+              {/* Cultural & Household Rhythms (Country-Independent) */}
+              <div className="rounded-2xl border border-ink/10 bg-cream/50 p-4 space-y-2.5">
                 <div>
-                  <p className="text-sm font-semibold text-ink">{t.ramadanLabel}</p>
-                  <p className="mt-0.5 text-xs text-ink/65">{t.ramadanDesc}</p>
+                  <p className="text-sm font-semibold text-ink">{t.culturalRhythmsLabel}</p>
+                  <p className="mt-0.5 text-xs text-ink/65">{t.culturalRhythmsHint}</p>
                 </div>
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={isRamadanObserver}
-                  onClick={() => setIsRamadanObserver((prev) => !prev)}
-                  className={cn(
-                    'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border border-ink/20 transition-colors cursor-pointer',
-                    isRamadanObserver ? 'bg-mint' : 'bg-white'
-                  )}
-                >
-                  <span
-                    className={cn(
-                      'inline-block h-5 w-5 transform rounded-full bg-ink transition-transform',
-                      isRamadanObserver
-                        ? isRtl ? '-translate-x-1' : 'translate-x-6'
-                        : isRtl ? '-translate-x-6' : 'translate-x-1'
-                    )}
-                  />
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  {CULTURAL_RHYTHM_KEYS.map((rhythmKey) => {
+                    const active = culturalRhythms.includes(rhythmKey);
+                    return (
+                      <button
+                        key={rhythmKey}
+                        type="button"
+                        onClick={() => toggleCulturalRhythm(rhythmKey)}
+                        aria-pressed={active}
+                        className={cn(
+                          'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
+                          active
+                            ? 'border-ink bg-mint text-ink font-semibold'
+                            : 'border-ink/15 bg-white/80 text-ink hover:border-ink/40'
+                        )}
+                      >
+                        {active && <Icon icon={CheckIcon} size="xs" />}
+                        <span>{t.culturalRhythmOptions[rhythmKey]}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Physical Cautions */}
@@ -609,6 +732,18 @@ export function ProfilePage() {
                       <Icon icon={NorthEastIcon} size="xs" />
                     </Link>
                   </div>
+                </li>
+
+                <li className="flex items-start gap-2.5 rounded-xl bg-white/80 p-3 border border-ink/10">
+                  <Icon icon={TranslateOutlinedIcon} size="sm" className="mt-0.5 shrink-0 text-ink" />
+                  <p>
+                    {t.impactLanguageItem(
+                      getLocaleMeta(primaryLanguage).nativeLabel,
+                      secondaryLanguage !== 'none' && secondaryLanguage !== primaryLanguage
+                        ? getLocaleMeta(secondaryLanguage).nativeLabel
+                        : undefined
+                    )}
+                  </p>
                 </li>
               </ul>
             </Panel>

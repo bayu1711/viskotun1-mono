@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { useLocale } from '../../contexts/LocaleContext';
 import type { ChatMessage } from '../../types/routine';
 import type {
+  CulturalRhythmId,
   RegionalLifestyleTag,
   SmokingStatus,
   UserLifestyleProfile,
@@ -20,8 +21,10 @@ import type {
 } from '../../types/auth';
 import { formatLifestyleTagLabel, getLifestyleTagIcon } from '../../utils/lifestyleTags';
 import {
+  CULTURAL_RHYTHM_KEYS,
   deriveClinicalFocus,
   getRegionalReminderPresets,
+  resolveCulturalRhythms,
   sanitizeAge,
   syncLifestyleActiveTags
 } from '../../utils/profile';
@@ -98,8 +101,8 @@ export function LifestyleTuningView({
   const [climateDraft, setClimateDraft] = useState<
     NonNullable<UserLifestyleProfile['climateSensitivity']>
   >(() => lifestyleProfile?.climateSensitivity || 'moderate');
-  const [ramadanDraft, setRamadanDraft] = useState<boolean>(
-    () => Boolean(lifestyleProfile?.isRamadanFastingObserver)
+  const [culturalDraft, setCulturalDraft] = useState<CulturalRhythmId[]>(
+    () => resolveCulturalRhythms(lifestyleProfile)
   );
   const [smokingDraft, setSmokingDraft] = useState<SmokingStatus>(
     () => lifestyleProfile?.smokingStatus || 'non_smoker'
@@ -126,12 +129,12 @@ export function LifestyleTuningView({
   useEffect(() => {
     if (lifestyleProfile?.workPattern) setWorkDraft(lifestyleProfile.workPattern);
     if (lifestyleProfile?.climateSensitivity) setClimateDraft(lifestyleProfile.climateSensitivity);
-    if (lifestyleProfile?.isRamadanFastingObserver !== undefined) {
-      setRamadanDraft(Boolean(lifestyleProfile.isRamadanFastingObserver));
-    }
+    setCulturalDraft(resolveCulturalRhythms(lifestyleProfile));
     if (lifestyleProfile?.smokingStatus) setSmokingDraft(lifestyleProfile.smokingStatus);
     if (lifestyleProfile?.physicalCautions) setCautionsDraft(lifestyleProfile.physicalCautions);
   }, [lifestyleProfile]);
+
+  const culturalRhythmParam = culturalDraft.slice().sort().join(',');
 
   useEffect(() => {
     let active = true;
@@ -140,6 +143,7 @@ export function LifestyleTuningView({
         const params = new URLSearchParams({ country: countryCode });
         if (countryName) params.set('countryName', countryName);
         if (city) params.set('city', city);
+        if (culturalRhythmParam) params.set('rhythms', culturalRhythmParam);
         const res = await fetch(`/api/lifestyle/tune?${params.toString()}`);
         if (res.ok) {
           const data = await res.json();
@@ -155,7 +159,7 @@ export function LifestyleTuningView({
     return () => {
       active = false;
     };
-  }, [countryCode, countryName, city]);
+  }, [countryCode, countryName, city, culturalRhythmParam]);
 
   const handleConfirmLocation = () => {
     if (onConfirmRegion) {
@@ -219,12 +223,21 @@ export function LifestyleTuningView({
     );
   };
 
+  const toggleDraftCulture = (rhythm: CulturalRhythmId) => {
+    setCulturalDraft((prev) =>
+      prev.includes(rhythm) ? prev.filter((r) => r !== rhythm) : [...prev, rhythm]
+    );
+  };
+
+  const hasRamadanDraft = culturalDraft.includes('ramadan_fasting');
+
   const previewFocus = deriveClinicalFocus(
     {
       ...lifestyleProfile,
       workPattern: workDraft,
       climateSensitivity: climateDraft,
-      isRamadanFastingObserver: ramadanDraft,
+      culturalRhythms: culturalDraft,
+      isRamadanFastingObserver: hasRamadanDraft,
       smokingStatus: smokingDraft,
       physicalCautions: cautionsDraft
     },
@@ -237,7 +250,8 @@ export function LifestyleTuningView({
       ...lifestyleProfile,
       workPattern: workDraft,
       climateSensitivity: climateDraft,
-      isRamadanFastingObserver: ramadanDraft,
+      culturalRhythms: culturalDraft,
+      isRamadanFastingObserver: hasRamadanDraft,
       smokingStatus: smokingDraft,
       activeTags
     });
@@ -258,7 +272,8 @@ export function LifestyleTuningView({
       },
       workPattern: workDraft,
       climateSensitivity: climateDraft,
-      isRamadanFastingObserver: ramadanDraft,
+      culturalRhythms: culturalDraft,
+      isRamadanFastingObserver: hasRamadanDraft,
       smokingStatus: smokingDraft,
       physicalCautions: cautionsDraft,
       activeTags: nextTags,
@@ -274,9 +289,12 @@ export function LifestyleTuningView({
   const pCopy = copy.profile;
   const reminderPresets = getRegionalReminderPresets({
     countryCode,
-    isRamadanFastingObserver: ramadanDraft,
+    isRamadanFastingObserver: hasRamadanDraft,
+    culturalRhythms: culturalDraft,
     basePresets: pCopy.reminderPresets,
-    fastingPreset: pCopy.fastingReminderPreset
+    fastingPreset: pCopy.fastingReminderPreset,
+    dawnPreset: pCopy.dawnReminderPreset,
+    lateDinnerPreset: pCopy.lateDinnerReminderPreset
   });
 
   const renderRegionSelector = () => (
@@ -501,19 +519,30 @@ export function LifestyleTuningView({
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setRamadanDraft((p) => !p)}
-                  aria-pressed={ramadanDraft}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-2xs font-medium cursor-pointer ${
-                    ramadanDraft
-                      ? 'border-ink bg-mint text-ink font-semibold'
-                      : 'border-ink/20 bg-canvas text-ink hover:border-ink/40'
-                  }`}
-                >
-                  {ramadanDraft && <Icon icon={CheckIcon} size="xs" />}
-                  <span>{pCopy.ramadanLabel}</span>
-                </button>
+                <div>
+                  <p className="mb-1 text-2xs font-semibold text-ink/75">{pCopy.culturalRhythmsLabel}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {CULTURAL_RHYTHM_KEYS.map((rhythmKey) => {
+                      const active = culturalDraft.includes(rhythmKey);
+                      return (
+                        <button
+                          key={rhythmKey}
+                          type="button"
+                          onClick={() => toggleDraftCulture(rhythmKey)}
+                          aria-pressed={active}
+                          className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-2xs font-medium cursor-pointer ${
+                            active
+                              ? 'border-ink bg-mint text-ink font-semibold'
+                              : 'border-ink/15 bg-canvas text-ink hover:border-ink/40'
+                          }`}
+                        >
+                          {active && <Icon icon={CheckIcon} size="xs" />}
+                          <span>{pCopy.culturalRhythmOptions[rhythmKey]}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
               {suggestions.length > 0 && (
