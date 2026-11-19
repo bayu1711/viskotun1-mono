@@ -5,6 +5,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { type AssistantMode, useAssistant } from '../../contexts/AssistantContext';
+import { ONBOARDING_DISMISSED_KEY } from '../../contexts/AuthContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
 import { COPY } from '../../data/copy';
@@ -43,16 +44,28 @@ export function AssistantSheet() {
     askStagingQuestion,
     toggleStagingExcludeStep,
     lifestyleProfile,
+    userProfile,
     confirmRegion,
     updateLifestyleProfile,
+    updateUserProfile,
+    refreshLifestyleAdaptation,
     tuneLifestyle
   } = useRoutine();
+
+  const handleClose = () => {
+    if (mode === 'lifestyle' && !lifestyleProfile?.intakeCompleted) {
+      try {
+        window.sessionStorage.setItem(ONBOARDING_DISMISSED_KEY, '1');
+      } catch {}
+    }
+    closeAssistant();
+  };
 
   const panelRef = useRef<HTMLElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const titleId = useId();
 
-  useDialogA11y(panelRef, { open: isOpen, onClose: closeAssistant, initialFocusRef: inputRef });
+  useDialogA11y(panelRef, { open: isOpen, onClose: handleClose, initialFocusRef: inputRef });
 
   const currentMessageCount =
     mode === 'ask' || mode === 'lifestyle'
@@ -128,7 +141,7 @@ export function AssistantSheet() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={closeAssistant}
+            onClick={handleClose}
             aria-hidden="true"
           />
 
@@ -160,20 +173,28 @@ export function AssistantSheet() {
               }
               titleId={titleId}
               onModeChange={handleModeChange}
-              onClose={closeAssistant}
+              onClose={handleClose}
               lastEngine={lastEngine}
             />
 
             <div role="log" aria-live="polite" className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
               {isLifestyle ? (
-                /* Lifestyle Tuning Mode */
+                /* Lifestyle Tuning & Guided Onboarding Interview */
                 <LifestyleTuningView
                   lifestyleProfile={lifestyleProfile}
+                  userProfile={userProfile}
+                  activeRoutineTitle={routine?.shortTitle || routine?.title}
                   messages={messages}
                   isTyping={assistantTyping}
                   onTune={tuneLifestyle}
                   onConfirmRegion={confirmRegion}
                   onUpdateProfile={updateLifestyleProfile}
+                  onUpdateUserProfile={updateUserProfile}
+                  onCompleteOnboarding={() => {
+                    closeAssistant();
+                    refreshLifestyleAdaptation();
+                  }}
+                  onSkipOnboarding={handleClose}
                 />
               ) : isAsk ? (
                 /* Ask Mode: Contextual to Active Routine */

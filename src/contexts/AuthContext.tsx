@@ -19,6 +19,7 @@ import { resolveCountryCodeFromInput, resolveCountryName } from '../utils/geo';
 const STORAGE_KEY = 'viskotun1_auth_user';
 const USER_PROFILE_STORAGE_KEY = 'viskotun1_user_profile';
 const LIFESTYLE_STORAGE_KEY = 'viskotun1_lifestyle_profile';
+export const ONBOARDING_DISMISSED_KEY = 'trialn1_lifestyle_onboarding_dismissed';
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
   preferredReminderTime: '09:00'
@@ -424,13 +425,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role: isTargetAdmin ? 'admin' : 'user',
           createdAt: Date.now()
         };
+        try {
+          window.sessionStorage.removeItem(ONBOARDING_DISMISSED_KEY);
+        } catch {}
+        updateLifestyleProfile({ intakeCompleted: false });
         persistUser(authenticatedUser);
         return;
       } catch (err: unknown) {
         throw formatFirebaseAuthError(err);
       }
     },
-    [persistUser]
+    [persistUser, updateLifestyleProfile]
   );
 
   const logout = useCallback(async () => {
@@ -442,6 +447,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Silently continue
       }
     }
+    try {
+      window.sessionStorage.removeItem(ONBOARDING_DISMISSED_KEY);
+    } catch {}
     persistUser(null);
     router.push(ROUTES.login);
   }, [persistUser, router]);

@@ -1,11 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAssistant } from '../../contexts/AssistantContext';
+import { ONBOARDING_DISMISSED_KEY, useAuth } from '../../contexts/AuthContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
+import { ROUTES } from '../../data/navigation';
 import { useFileDrop } from '../../hooks/useFileDrop';
 import { isPdfFile } from '../../utils/files';
 import { AssistantSheet } from '../assistant/AssistantSheet';
@@ -29,8 +31,11 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
-  const { uploadPaper } = useRoutine();
-  const { openAssistant } = useAssistant();
+  const { uploadPaper, hasHydrated } = useRoutine();
+  const { openAssistant, openLifestyleTuning, isOpen: isAssistantOpen } = useAssistant();
+  const { user, isLoading: isAuthLoading, isAuthenticated, isGuest, lifestyleProfile } = useAuth();
+  const hasPromptedOnboardingRef = useRef(false);
+  const onboardingTimerRef = useRef<number | null>(null);
 
   const isDragging = useFileDrop((file) => {
     if (!isPdfFile(file)) {
@@ -46,6 +51,48 @@ export function AppShell({ children }: AppShellProps) {
     pathname === '/uae' ||
     pathname === '/login' ||
     pathname === '/signup';
+
+  useEffect(() => {
+    if (!user) {
+      hasPromptedOnboardingRef.current = false;
+    }
+  }, [user]);
+
+  // Automatically popup the guided Adaptive Lifestyle interview once for newly registered / un-onboarded workspace users
+  useEffect(() => {
+    if (isPublicPage || pathname === ROUTES.profile) return;
+    if (isAuthLoading || !hasHydrated || isAssistantOpen) return;
+    if (!isAuthenticated && !isGuest) return;
+    if (lifestyleProfile.intakeCompleted || hasPromptedOnboardingRef.current) return;
+
+    try {
+      if (window.sessionStorage.getItem(ONBOARDING_DISMISSED_KEY)) return;
+    } catch {
+      // Fail-safe continue
+    }
+
+    hasPromptedOnboardingRef.current = true;
+    onboardingTimerRef.current = window.setTimeout(() => {
+      openLifestyleTuning();
+    }, 350);
+
+    return () => {
+      if (onboardingTimerRef.current !== null) {
+        window.clearTimeout(onboardingTimerRef.current);
+        onboardingTimerRef.current = null;
+      }
+    };
+  }, [
+    isPublicPage,
+    pathname,
+    isAuthLoading,
+    hasHydrated,
+    isAssistantOpen,
+    isAuthenticated,
+    isGuest,
+    lifestyleProfile.intakeCompleted,
+    openLifestyleTuning
+  ]);
 
   if (isPublicPage) {
     return (
