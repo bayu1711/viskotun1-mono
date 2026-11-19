@@ -314,7 +314,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       nextBtn: 'متابعة',
       backBtn: 'رجوع',
       finishBtn: 'إتمام وتكييف الخطة',
-      rerunBtn: 'إعادة الأسئلة الموجهة',
+      rerunBtn: 'تحديث نمط الحياة',
       completedToast: 'تم تخصيص ملف نمط الحياة التكيفي بنجاح!',
       q1Title: '1. من أي مدينة أو دولة تتابع خطتك؟',
       q1Ask: (regionLabel: string) =>

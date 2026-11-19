@@ -192,7 +192,7 @@ export const COPY = {
       nextBtn: 'Continue',
       backBtn: 'Back',
       finishBtn: 'Finish & Adapt Routine',
-      rerunBtn: 'Restart guided Q&A',
+      rerunBtn: 'Update lifestyle',
       completedToast: 'Adaptive Lifestyle Profile calibrated!',
       q1Title: '1. Where are you joining from?',
       q1Ask: (regionLabel: string) =>
