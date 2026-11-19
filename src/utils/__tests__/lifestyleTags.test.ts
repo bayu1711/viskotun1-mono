@@ -16,6 +16,7 @@ describe('lifestyleTags helper', () => {
     expect(formatLifestyleTagLabel('🌧️ Low Winter Sunlight / Vit D')).toBe('Low Winter Sunlight / Vit D');
     expect(formatLifestyleTagLabel('✈️ Frequent Travel')).toBe('Frequent Travel');
     expect(formatLifestyleTagLabel('12-hour shifts')).toBe('12-hour shifts');
+    expect(formatLifestyleTagLabel('late_family_dinner')).toBe('Late Family Dinner');
   });
 
   it('maps lifestyle tags and categories to consistent MUI icons', () => {

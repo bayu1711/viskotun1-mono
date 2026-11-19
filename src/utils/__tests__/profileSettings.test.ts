@@ -164,5 +164,60 @@ describe('UserProfile and UserLifestyleProfile utilities & wiring', () => {
       fastingPreset: COPY.profile.fastingReminderPreset
     });
     expect(usRamadanPresets.map((p) => p.label)).toContain(COPY.profile.fastingReminderPreset.label);
+
+    const multiculturalUsPresets = getRegionalReminderPresets({
+      countryCode: 'US',
+      culturalRhythms: ['early_dawn_riser', 'late_family_dinner'],
+      basePresets: COPY.profile.reminderPresets,
+      fastingPreset: COPY.profile.fastingReminderPreset,
+      dawnPreset: COPY.profile.dawnReminderPreset,
+      lateDinnerPreset: COPY.profile.lateDinnerReminderPreset
+    });
+    expect(multiculturalUsPresets.map((p) => p.label)).toContain(COPY.profile.dawnReminderPreset.label);
+    expect(multiculturalUsPresets.map((p) => p.label)).toContain(COPY.profile.lateDinnerReminderPreset.label);
+    expect(multiculturalUsPresets.map((p) => p.label)).not.toContain(COPY.profile.fastingReminderPreset.label);
+  });
+
+  it('syncs and synthesizes clinical focus across diverse culturalRhythms regardless of country', () => {
+    const tags = syncLifestyleActiveTags({
+      culturalRhythms: ['late_family_dinner', 'sabbath_weekly_rest'],
+      activeTags: []
+    });
+    expect(tags).toEqual(expect.arrayContaining(['late_family_dinner', 'sabbath_weekly_rest']));
+
+    const focus = deriveClinicalFocus({
+      region: {
+        countryCode: 'US',
+        countryName: 'United States',
+        city: 'Chicago',
+        detectedBy: 'user_selected',
+        confirmed: true
+      },
+      culturalRhythms: ['early_dawn_riser', 'intermittent_fasting'],
+      workPattern: 'desk_sedentary'
+    });
+    expect(focus.toLowerCase()).toContain('dawn');
+    expect(focus.toLowerCase()).toContain('fasted hydration');
+  });
+
+  it('deduplicates header language switchers and wires Profile primary/secondary language settings', () => {
+    const topBarSource = fs.readFileSync(
+      path.resolve(__dirname, '../../components/layout/TopBar.tsx'),
+      'utf-8'
+    );
+    const uaeLandingSource = fs.readFileSync(
+      path.resolve(__dirname, '../../views/UaeLanding.tsx'),
+      'utf-8'
+    );
+    const profileSource = fs.readFileSync(
+      path.resolve(__dirname, '../../views/Profile.tsx'),
+      'utf-8'
+    );
+
+    expect(topBarSource).toContain('<LanguageSwitcher');
+    expect(uaeLandingSource).toContain('<LanguageSwitcher');
+    expect(profileSource).toContain('primaryLanguage');
+    expect(profileSource).toContain('secondaryLanguage');
+    expect(profileSource).toContain('setLocale(primaryLanguage)');
   });
 });

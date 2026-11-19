@@ -134,6 +134,26 @@ describe('Global Geo & Guardrail-Protected Adaptive Lifestyle Engine', () => {
       expect(berlinResult.recommendedDoseMode).toBe('micro');
       expect(berlinResult.bannerGuidance.toLowerCase()).toContain('shift');
       expect(Object.keys(berlinResult.stepTips).length).toBeGreaterThan(0);
+
+      const usLateDinnerResult = await generateLifestyleAdaptation({
+        userProfile: { age: 35, preferredReminderTime: '21:30' },
+        lifestyleProfile: {
+          region: {
+            countryCode: 'US',
+            countryName: 'United States',
+            city: 'New York',
+            detectedBy: 'user_selected',
+            confirmed: true
+          },
+          culturalRhythms: ['late_family_dinner', 'sabbath_weekly_rest'],
+          workPattern: 'standard',
+          intakeCompleted: true
+        },
+        routine: achillesRoutine
+      });
+      expect(usLateDinnerResult.guardrailVerified).toBe(true);
+      expect(usLateDinnerResult.suggestedWindow).toContain('Post-dinner');
+      expect(usLateDinnerResult.bannerGuidance.toLowerCase()).toContain('digestion');
     });
   });
 });
