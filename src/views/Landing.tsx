@@ -735,15 +735,6 @@ export function LandingPage() {
           </Link>
         </div>
       }
-      navExtra={
-        <Link
-          href={ROUTES.uae}
-          className="ml-2 inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-cream/80 px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-cream"
-        >
-          <span>🇦🇪</span>
-          <span>{COPY.landing.uaeEditionLink}</span>
-        </Link>
-      }
       footerExtraLink={
         <Link href={ROUTES.uae} className="inline-flex min-h-11 items-center font-medium text-ink transition-colors hover:underline">
           {COPY.landing.uaeEditionLink}
