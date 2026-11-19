@@ -29,6 +29,8 @@ export async function POST(request: Request) {
       feedbackMetric,
       paper,
       missingDataFlags,
+      userProfile,
+      lifestyleProfile,
       rejectionReason,
       rejectedFileName
     } = body;
@@ -90,6 +92,22 @@ Strict Scope Rules:
     }
 
     const activePolicy = await getEffectiveGuardrails();
+    const participantContext = userProfile || lifestyleProfile
+      ? `\nParticipant Profile & Adaptive Lifestyle Context:\n${JSON.stringify({
+          age: userProfile?.age,
+          biologicalSex: userProfile?.biologicalSex,
+          clinicalGoals: userProfile?.clinicalGoals,
+          preferredReminderTime: userProfile?.preferredReminderTime,
+          region: lifestyleProfile?.region,
+          workPattern: lifestyleProfile?.workPattern,
+          activityBaseline: lifestyleProfile?.activityBaseline,
+          smokingStatus: lifestyleProfile?.smokingStatus,
+          isRamadanFastingObserver: lifestyleProfile?.isRamadanFastingObserver,
+          climateSensitivity: lifestyleProfile?.climateSensitivity,
+          physicalCautions: lifestyleProfile?.physicalCautions,
+          activeTags: lifestyleProfile?.activeTags
+        })}`
+      : '';
 
     const systemInstruction = `You are a clinical study safety assistant for the research paper routine "${resolvedTitle}".
 Clinical Policy Standard (v${activePolicy.version}):
@@ -103,10 +121,10 @@ Contraindications: ${JSON.stringify(contraindications || [])}
 Progression Rules: ${JSON.stringify(progressionRules || [])}
 Biofeedback Metric: ${JSON.stringify(feedbackMetric || {})}
 Paper Citation: ${JSON.stringify(paper || {})}
-Known FAQs: ${JSON.stringify(faqs || [])}
+Known FAQs: ${JSON.stringify(faqs || [])}${participantContext}
 
 Instructions:
-1. For general inquiries, answer concisely in 1-3 sentences citing the Methods & Interventions section.
+1. For general inquiries, answer concisely in 1-3 sentences citing the Methods & Interventions section. Personalize timing/pacing or caution reminders using Participant Profile & Adaptive Lifestyle Context when relevant (e.g., Ramadan fasting hours, shift work, heat, age, or physical cautions), while staying strictly anchored to the trial's safe limits.
 2. If the user asks about a specific task, exercise, or step (e.g., "What is [task] and what is needed to be done?"): Provide a clear, structured breakdown:
    - State the task title once at most as a header (e.g. "### [Task Name]"). Do not repeat the heading.
    - What it is: The physiological/clinical mechanism, target tissue, and purpose from the study's Methods & Interventions section.

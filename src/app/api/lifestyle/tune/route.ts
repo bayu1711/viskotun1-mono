@@ -7,6 +7,7 @@ import {
   recordCrowdsourcedTag
 } from '@/server/regionalRegistry';
 import type { UserLifestyleProfile } from '@/types/auth';
+import { deriveClinicalFocus } from '@/utils/profile';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
     const keys = getGeminiApiKeys();
     if (keys.length > 0) {
       try {
-        const prompt = `You are Viskotu, a clinical habit-formation and research adherence companion.
+        const prompt = `You are TrialN1, a clinical habit-formation and research adherence companion.
 A user tracking an interventional clinical routine in ${country} just provided their daily schedule, habits, or constraints:
 "${message}"
 
@@ -72,11 +73,17 @@ Respond in 2-3 warm, professional sentences (like an expert physiotherapist or c
     }
 
     const updatedSuggestions = getRegionalSuggestions(country);
+    const mergedProfile: Partial<UserLifestyleProfile> = {
+      ...currentProfile,
+      ...deterministicResult.profileUpdates
+    };
+    const suggestedFocus = deriveClinicalFocus(mergedProfile);
 
     return NextResponse.json({
       reply: deterministicResult.reply,
       profileUpdates: deterministicResult.profileUpdates,
       extractedTags: deterministicResult.extractedTags,
+      suggestedFocus,
       suggestions: updatedSuggestions
     });
   } catch (err: unknown) {
