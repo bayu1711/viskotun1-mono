@@ -1,9 +1,20 @@
-import type { UserLifestyleProfile } from '../types/auth';
+import type { CulturalRhythmId, UserLifestyleProfile } from '../types/auth';
 
 export type DerivedLifestyleCohort = 'smoker' | 'ramadan' | 'shift_work' | 'general';
 
-const MANAGED_LIFESTYLE_TAGS = new Set([
+export const CULTURAL_RHYTHM_KEYS: readonly CulturalRhythmId[] = [
   'ramadan_fasting',
+  'intermittent_fasting',
+  'periodic_religious_fasting',
+  'late_family_dinner',
+  'early_dawn_riser',
+  'midday_siesta_rest',
+  'sabbath_weekly_rest',
+  'collectivist_household'
+];
+
+const MANAGED_LIFESTYLE_TAGS = new Set([
+  ...CULTURAL_RHYTHM_KEYS,
   'healthcare_shift_worker',
   'midwakh_dokha',
   'shisha_waterpipe',
@@ -68,23 +79,51 @@ export interface ReminderPresetChip {
   value: string;
 }
 
+/** Keeps `culturalRhythms` and legacy `isRamadanFastingObserver` aligned across callers. */
+export function resolveCulturalRhythms(profile?: Partial<UserLifestyleProfile>): CulturalRhythmId[] {
+  const next = new Set<CulturalRhythmId>(profile?.culturalRhythms ?? []);
+  if (profile?.isRamadanFastingObserver) next.add('ramadan_fasting');
+  return Array.from(next);
+}
+
 /**
- * Computes daily reminder preset chips adapted to the active region and fasting status
- * so non-fasting regions (e.g. US, GB) only receive globally relevant time chips.
+ * Computes daily reminder preset chips adapted to cultural rhythms, fasting status,
+ * and regional defaults so users in any country can access timing windows matching
+ * *their* actual household & cultural schedule without regional stereotyping.
  */
 export function getRegionalReminderPresets(options: {
   countryCode?: string;
   isRamadanFastingObserver?: boolean;
+  culturalRhythms?: readonly CulturalRhythmId[];
   basePresets: readonly ReminderPresetChip[];
   fastingPreset?: ReminderPresetChip;
+  dawnPreset?: ReminderPresetChip;
+  lateDinnerPreset?: ReminderPresetChip;
 }): ReminderPresetChip[] {
-  const presets = options.basePresets.map((p) => ({ label: p.label, value: p.value }));
+  const rhythms = new Set(options.culturalRhythms ?? []);
+  const presets: ReminderPresetChip[] = [];
+
+  if (options.dawnPreset && rhythms.has('early_dawn_riser')) {
+    presets.push({ label: options.dawnPreset.label, value: options.dawnPreset.value });
+  }
+
+  for (const preset of options.basePresets) {
+    presets.push({ label: preset.label, value: preset.value });
+  }
+
   if (
     options.fastingPreset &&
-    (options.isRamadanFastingObserver || isFastingContextRegion(options.countryCode))
+    (options.isRamadanFastingObserver ||
+      rhythms.has('ramadan_fasting') ||
+      isFastingContextRegion(options.countryCode))
   ) {
     presets.push({ label: options.fastingPreset.label, value: options.fastingPreset.value });
   }
+
+  if (options.lateDinnerPreset && rhythms.has('late_family_dinner')) {
+    presets.push({ label: options.lateDinnerPreset.label, value: options.lateDinnerPreset.value });
+  }
+
   return presets;
 }
 
@@ -96,7 +135,9 @@ export function syncLifestyleActiveTags(profile: Partial<UserLifestyleProfile>):
   const customTags = (profile.activeTags ?? []).filter((tag) => !MANAGED_LIFESTYLE_TAGS.has(tag));
   const next = new Set<string>(customTags);
 
-  if (profile.isRamadanFastingObserver) next.add('ramadan_fasting');
+  for (const rhythm of resolveCulturalRhythms(profile)) {
+    next.add(rhythm);
+  }
   if (profile.workPattern === 'shift_work') next.add('healthcare_shift_worker');
   if (profile.smokingStatus === 'midwakh_dokha') next.add('midwakh_dokha');
   if (profile.smokingStatus === 'shisha_waterpipe') next.add('shisha_waterpipe');
@@ -110,7 +151,9 @@ export function deriveLifestyleCohort(profile?: Partial<UserLifestyleProfile>): 
   if (profile?.smokingStatus && profile.smokingStatus !== 'non_smoker' && profile.smokingStatus !== 'former_smoker') {
     return 'smoker';
   }
-  if (profile?.isRamadanFastingObserver) return 'ramadan';
+  if (profile?.isRamadanFastingObserver || profile?.culturalRhythms?.includes('ramadan_fasting')) {
+    return 'ramadan';
+  }
   if (profile?.workPattern === 'shift_work') return 'shift_work';
   return 'general';
 }
@@ -128,6 +171,17 @@ const SMOKING_FOCUS: Partial<Record<NonNullable<UserLifestyleProfile['smokingSta
   vape: 'vascular recovery pacing'
 };
 
+const CULTURAL_FOCUS: Partial<Record<CulturalRhythmId, string>> = {
+  ramadan_fasting: 'fasting-safe hydration & post-Iftar exertion timing',
+  intermittent_fasting: 'fasted hydration & refeed-window pacing',
+  periodic_religious_fasting: 'fasting-day gentle loading & electrolyte recovery',
+  late_family_dinner: 'post-dinner light mobility & evening wind-down spacing',
+  early_dawn_riser: 'dawn circadian anchor & early-day execution',
+  midday_siesta_rest: 'split afternoon-rest & cooler-hour pacing',
+  sabbath_weekly_rest: '6-day active cadence with structured rest-day recovery',
+  collectivist_household: 'compact home-friendly intervals around family schedules'
+};
+
 /**
  * Synthesizes a concise primary health / rehab focus string directly from
  * `UserLifestyleProfile` factors (and optional age / active routine context).
@@ -143,8 +197,8 @@ export function deriveClinicalFocus(
   if (options?.routineTitle) {
     pillars.push(`safe progression in ${options.routineTitle}`);
   }
-  if (profile.isRamadanFastingObserver) {
-    pillars.push('fasting-safe hydration & post-Iftar exertion timing');
+  for (const rhythm of resolveCulturalRhythms(profile)) {
+    if (CULTURAL_FOCUS[rhythm]) pillars.push(CULTURAL_FOCUS[rhythm]!);
   }
   if (profile.workPattern && WORK_FOCUS[profile.workPattern]) {
     pillars.push(WORK_FOCUS[profile.workPattern]!);

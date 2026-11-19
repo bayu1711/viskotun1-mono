@@ -15,14 +15,23 @@ import TrainOutlinedIcon from '@mui/icons-material/TrainOutlined';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import type { RegionalLifestyleTag } from '../types/auth';
 
-/** Strips any legacy leading pictograph/emoji prefix from a lifestyle tag label. */
+/** Strips any legacy leading pictograph/emoji prefix and formats snake_case rhythm IDs cleanly. */
 export function formatLifestyleTagLabel(tag: string): string {
-  return tag.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\uFE0F\u200D\s]+/u, '').trim();
+  const cleaned = tag.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\uFE0F\u200D\s]+/u, '').trim();
+  if (/^[a-z0-9_]+$/.test(cleaned) && cleaned.includes('_')) {
+    return cleaned
+      .split('_')
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  }
+  return cleaned;
 }
 
 const KEYWORD_ICON_RULES: ReadonlyArray<{ keywords: readonly string[]; icon: SvgIconComponent }> = [
   { keywords: ['intermittent'], icon: AccessTimeOutlinedIcon },
-  { keywords: ['ramadan', 'fasting'], icon: NightsStayOutlinedIcon },
+  { keywords: ['ramadan', 'fasting', 'periodic', 'lent', 'ekadashi'], icon: NightsStayOutlinedIcon },
+  { keywords: ['dinner', 'siesta', 'dawn', 'sabbath', 'household', 'family'], icon: ScheduleOutlinedIcon },
   { keywords: ['healthcare', 'shift', 'hospital', 'night'], icon: LocalHospitalOutlinedIcon },
   { keywords: ['desk', 'sedentary', 'screen', 'office'], icon: LaptopMacOutlinedIcon },
   { keywords: ['travel', 'flight'], icon: FlightOutlinedIcon },
