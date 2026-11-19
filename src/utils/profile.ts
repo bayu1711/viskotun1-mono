@@ -31,6 +31,63 @@ export function parseReminderTime(time?: string): { hour: number; minute: number
   };
 }
 
+const FASTING_CONTEXT_COUNTRY_CODES = new Set([
+  'AE',
+  'SA',
+  'QA',
+  'KW',
+  'BH',
+  'OM',
+  'EG',
+  'JO',
+  'LB',
+  'IQ',
+  'SY',
+  'YE',
+  'PS',
+  'MA',
+  'DZ',
+  'TN',
+  'LY',
+  'SD',
+  'PK',
+  'ID',
+  'MY',
+  'TR',
+  'BD'
+]);
+
+/** Returns true when regional defaults commonly include fasting-hour schedule options. */
+export function isFastingContextRegion(countryCode?: string): boolean {
+  if (!countryCode) return false;
+  return FASTING_CONTEXT_COUNTRY_CODES.has(countryCode.trim().toUpperCase());
+}
+
+export interface ReminderPresetChip {
+  label: string;
+  value: string;
+}
+
+/**
+ * Computes daily reminder preset chips adapted to the active region and fasting status
+ * so non-fasting regions (e.g. US, GB) only receive globally relevant time chips.
+ */
+export function getRegionalReminderPresets(options: {
+  countryCode?: string;
+  isRamadanFastingObserver?: boolean;
+  basePresets: readonly ReminderPresetChip[];
+  fastingPreset?: ReminderPresetChip;
+}): ReminderPresetChip[] {
+  const presets = options.basePresets.map((p) => ({ label: p.label, value: p.value }));
+  if (
+    options.fastingPreset &&
+    (options.isRamadanFastingObserver || isFastingContextRegion(options.countryCode))
+  ) {
+    presets.push({ label: options.fastingPreset.label, value: options.fastingPreset.value });
+  }
+  return presets;
+}
+
 /**
  * Synchronizes structured lifestyle attributes into `activeTags` so Health Age
  * and AI Lifestyle Tuning stay aligned with manual changes on /profile.
