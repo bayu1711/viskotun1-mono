@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { executeWithGeminiFailover, getGeminiApiKeys } from '@/server/geminiKeys';
+import { deriveGlobalRegionalSuggestions } from '@/server/lifestyleEngine';
+import { validateRegionalTagsWithGuardrails } from '@/server/lifestyleGuardrails';
 import {
-  getRegionalSuggestions,
   parseLifestyleDeterministically,
   recordCrowdsourcedTag
 } from '@/server/regionalRegistry';
@@ -12,8 +13,15 @@ import { deriveClinicalFocus } from '@/utils/profile';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const country = searchParams.get('country') || 'AE';
-  const suggestions = getRegionalSuggestions(country);
-  return NextResponse.json({ country, suggestions });
+  const countryName = searchParams.get('countryName') || undefined;
+  const city = searchParams.get('city') || undefined;
+
+  const { suggestions, source } = await deriveGlobalRegionalSuggestions({
+    countryCode: country,
+    countryName,
+    city
+  });
+  return NextResponse.json({ country, countryName, city, source, suggestions });
 }
 
 export async function POST(request: Request) {
@@ -67,12 +75,20 @@ Respond in 2-3 warm, professional sentences (like an expert physiotherapist or c
       }
     }
 
-    // Record any novel extracted tags to the regional crowdsourced registry
-    for (const tag of deterministicResult.extractedTags) {
-      recordCrowdsourcedTag(country, tag);
+    // Record validated crowdsourced tags to the regional registry
+    const safeTags = validateRegionalTagsWithGuardrails(
+      deterministicResult.extractedTags.map((label) => ({ label })),
+      country
+    );
+    for (const tag of safeTags) {
+      recordCrowdsourcedTag(country, tag.label, tag.category);
     }
 
-    const updatedSuggestions = getRegionalSuggestions(country);
+    const { suggestions: updatedSuggestions } = await deriveGlobalRegionalSuggestions({
+      countryCode: country,
+      countryName: currentProfile?.region?.countryName,
+      city: currentProfile?.region?.city
+    });
     const mergedProfile: Partial<UserLifestyleProfile> = {
       ...currentProfile,
       ...deterministicResult.profileUpdates
@@ -82,7 +98,7 @@ Respond in 2-3 warm, professional sentences (like an expert physiotherapist or c
     return NextResponse.json({
       reply: deterministicResult.reply,
       profileUpdates: deterministicResult.profileUpdates,
-      extractedTags: deterministicResult.extractedTags,
+      extractedTags: safeTags.map((t) => t.label),
       suggestedFocus,
       suggestions: updatedSuggestions
     });
