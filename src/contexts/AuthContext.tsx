@@ -13,7 +13,8 @@ import { useRouter } from 'next/navigation';
 import { COPY } from '../data/copy';
 import { ROUTES } from '../data/navigation';
 import { getFirebaseAuth } from '../lib/firebase';
-import type { AuthState, User, UserLifestyleProfile, UserProfile } from '../types/auth';
+import type { AuthState, RegionContext, User, UserLifestyleProfile, UserProfile } from '../types/auth';
+import { resolveCountryCodeFromInput, resolveCountryName } from '../utils/geo';
 
 const STORAGE_KEY = 'viskotun1_auth_user';
 const USER_PROFILE_STORAGE_KEY = 'viskotun1_user_profile';
@@ -111,8 +112,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const lifestyleProfileRef = useRef(lifestyleProfile);
   lifestyleProfileRef.current = lifestyleProfile;
 
-  // Safe client hydration from localStorage
+  // Safe client hydration from localStorage + automatic global geo-detection when unconfirmed
   useEffect(() => {
+    let hasConfirmedSavedRegion = false;
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
       if (saved) {
@@ -123,6 +125,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         if (parsed.lifestyleProfile) {
           setLifestyleProfile(parsed.lifestyleProfile);
+          if (parsed.lifestyleProfile?.region?.confirmed) {
+            hasConfirmedSavedRegion = true;
+          }
         }
         window.localStorage.setItem(STORAGE_KEY, saved);
       }
@@ -132,13 +137,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       const savedProfile = window.localStorage.getItem(LIFESTYLE_STORAGE_KEY);
       if (savedProfile) {
-        setLifestyleProfile(JSON.parse(savedProfile));
+        const parsedLp = JSON.parse(savedProfile);
+        setLifestyleProfile(parsedLp);
+        if (parsedLp?.region?.confirmed) {
+          hasConfirmedSavedRegion = true;
+        }
       }
     } catch {
       // Fallback silently if localStorage is restricted
     } finally {
       setIsLoading(false);
     }
+
+    if (hasConfirmedSavedRegion) return;
+
+    let active = true;
+    async function detectGlobalRegion() {
+      try {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        const res = await fetch(`/api/geo?tz=${encodeURIComponent(tz)}`);
+        if (!res.ok || !active) return;
+        const data = await res.json();
+        if (!data?.countryCode || !active) return;
+        if (lifestyleProfileRef.current.region.confirmed) return;
+
+        const detectedRegion: RegionContext = {
+          countryCode: String(data.countryCode).toUpperCase(),
+          countryName: data.countryName || resolveCountryName(String(data.countryCode)),
+          city: data.city,
+          detectedBy:
+            data.source === 'middleware_header' || data.source === 'client_timezone'
+              ? data.source
+              : 'default_uae',
+          confirmed: false
+        };
+        setLifestyleProfile((prev) => ({
+          ...prev,
+          region: prev.region.confirmed ? prev.region : detectedRegion
+        }));
+      } catch {
+        // Offline / restricted fallback stays silently on default region
+      }
+    }
+    detectGlobalRegion();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const updateUserProfile = useCallback((updates: Partial<UserProfile>) => {
@@ -195,17 +240,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const confirmRegion = useCallback((countryName: string, city?: string) => {
-    const isUae =
-      countryName.toLowerCase().includes('emirates') ||
-      countryName.toLowerCase().includes('uae') ||
-      countryName.toLowerCase().includes('abu dhabi') ||
-      countryName.toLowerCase().includes('dubai');
-    const countryCode = isUae ? 'AE' : countryName.slice(0, 2).toUpperCase();
+    const countryCode = resolveCountryCodeFromInput(countryName);
+    const resolvedName = resolveCountryName(countryCode);
+    const isCodeInput = /^[A-Za-z]{2}$/.test(countryName.trim());
     updateLifestyleProfile({
       region: {
         countryCode,
-        countryName,
-        city: city || (isUae ? 'Abu Dhabi' : undefined),
+        countryName: isCodeInput ? resolvedName : countryName.trim() || resolvedName,
+        city: city?.trim() || (countryCode === 'AE' ? 'Abu Dhabi' : undefined),
         detectedBy: 'user_selected',
         confirmed: true
       }

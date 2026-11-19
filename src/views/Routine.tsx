@@ -3,6 +3,7 @@
 import React, { useId } from 'react';
 import NorthEastIcon from '@mui/icons-material/NorthEast';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import { Callout } from '../components/feedback/Callout';
 import { PageContainer } from '../components/layout/PageContainer';
 import { PageHeader } from '../components/layout/PageHeader';
@@ -11,6 +12,7 @@ import { DailyProgressBar } from '../components/routine/DailyProgressBar';
 import { FeedbackLogList } from '../components/routine/FeedbackLogList';
 import { HistoryCalendar } from '../components/routine/HistoryCalendar';
 import { MilestoneBanner } from '../components/routine/MilestoneBanner';
+import { AdaptiveLifestyleBanner } from '../components/routine/AdaptiveLifestyleBanner';
 import { DoseModeSelector } from '../components/routine/DoseModeSelector';
 import { TaskGrid } from '../components/routine/TaskGrid';
 import { VoiceCoachBar } from '../components/routine/VoiceCoachBar';
@@ -105,13 +107,15 @@ export function RoutinePage() {
             />
           </div>
 
-          <DoseModeSelector className="mt-4 mb-3" />
+          <AdaptiveLifestyleBanner className="mt-4" />
+          <DoseModeSelector className="mt-3 mb-3" />
           <TaskGrid steps={routine.steps} />
           <DayActions className="mt-2.5" />
 
           {stopRule && (
-            <p className="mt-4 px-1 text-sm text-ink/60">
-              {COPY.common.warningPrefix} {stopRule.text}
+            <p className="mt-4 flex items-center gap-1.5 px-1 text-sm text-ink/60">
+              <Icon icon={WarningAmberOutlinedIcon} size="xs" className="shrink-0" />
+              <span>{stopRule.text}</span>
             </p>
           )}
         </div>

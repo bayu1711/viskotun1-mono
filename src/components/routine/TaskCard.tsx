@@ -28,10 +28,12 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
     toggleStep,
     isStepComplete,
     isStepExcluded,
-    toggleExcludeStep
+    toggleExcludeStep,
+    activeAdaptation
   } = useRoutine();
   const { askAboutTask } = useAssistant();
   const excluded = isStepExcluded(step.id);
+  const adaptationTip = activeAdaptation?.stepTips?.[step.id];
   const targetSets = targetSetsForStep(step, doseMode);
   const done = Math.min(setsDone[step.id] ?? 0, targetSets);
   const complete = isStepComplete(step.id);
@@ -100,6 +102,12 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
             <span className="mt-1.5 inline-flex items-center rounded-full bg-white/70 px-2 py-0.5 text-3xs font-medium tabular-nums text-ink">
               {COPY.task.tempoBadge(step.tempo)}
             </span>
+          )}
+
+          {adaptationTip && (
+            <p className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-ink/10 bg-cream/85 px-2.5 py-0.5 text-3xs font-medium text-ink/85">
+              <span>{adaptationTip}</span>
+            </p>
           )}
 
           {step.inferred && (

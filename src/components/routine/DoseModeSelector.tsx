@@ -20,16 +20,35 @@ interface DoseOption {
 }
 
 export function DoseModeSelector({ className }: { className?: string }) {
-  const { doseMode, setDoseMode, openReEntryModal, pendingReEntryCheckin } = useRoutine();
+  const { doseMode, setDoseMode, openReEntryModal, pendingReEntryCheckin, activeAdaptation } = useRoutine();
   const { copy, locale } = useLocale();
 
   const options: DoseOption[] = useMemo(
     () => [
       { id: 'standard', label: copy.doseMode.standard, icon: FitnessCenterOutlinedIcon },
-      { id: 'micro', label: copy.doseMode.micro, icon: BoltOutlinedIcon, badge: locale === 'ar' ? 'متكيف' : 'Adaptive' },
-      { id: 'rest', label: copy.doseMode.rest, icon: SpaOutlinedIcon }
+      {
+        id: 'micro',
+        label: copy.doseMode.micro,
+        icon: BoltOutlinedIcon,
+        badge:
+          activeAdaptation?.recommendedDoseMode === 'micro'
+            ? locale === 'ar'
+              ? 'موصى به'
+              : 'Recommended'
+            : locale === 'ar'
+            ? 'متكيف'
+            : 'Adaptive'
+      },
+      {
+        id: 'rest',
+        label: copy.doseMode.rest,
+        icon: SpaOutlinedIcon,
+        ...(activeAdaptation?.recommendedDoseMode === 'rest'
+          ? { badge: locale === 'ar' ? 'موصى به' : 'Recommended' }
+          : {})
+      }
     ],
-    [copy, locale]
+    [copy, locale, activeAdaptation?.recommendedDoseMode]
   );
 
   return (
@@ -94,10 +113,11 @@ export function DoseModeSelector({ className }: { className?: string }) {
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="mt-2.5 rounded-lg bg-mint/30 border border-mint/60 px-3 py-2 text-3xs text-ink/90 flex items-center justify-between"
+          className="mt-2.5 rounded-lg bg-mint/30 border border-mint/60 px-3 py-2 text-3xs text-ink/90 flex items-center justify-between gap-2"
         >
-          <span className="font-medium">
-            ⚡ {copy.doseMode.microNotice}
+          <span className="inline-flex items-center gap-1.5 font-medium">
+            <Icon icon={BoltOutlinedIcon} size="xs" className="shrink-0 text-amber-600" />
+            <span>{copy.doseMode.microNotice}</span>
           </span>
           <span className="shrink-0 text-3xs text-ink/60 hidden sm:inline">
             {locale === 'ar' ? 'حماية وتيرة الالتزام' : 'Preserves habit loop'}
@@ -109,10 +129,11 @@ export function DoseModeSelector({ className }: { className?: string }) {
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="mt-2.5 rounded-lg bg-sky/30 border border-sky/50 px-3 py-2 text-3xs text-ink/90 flex items-center justify-between"
+          className="mt-2.5 rounded-lg bg-sky/30 border border-sky/50 px-3 py-2 text-3xs text-ink/90 flex items-center justify-between gap-2"
         >
-          <span className="font-medium">
-            🌿 {copy.reEntry.doseModes.rest.desc}
+          <span className="inline-flex items-center gap-1.5 font-medium">
+            <Icon icon={SpaOutlinedIcon} size="xs" className="shrink-0 text-ink/75" />
+            <span>{copy.reEntry.doseModes.rest.desc}</span>
           </span>
         </motion.div>
       )}

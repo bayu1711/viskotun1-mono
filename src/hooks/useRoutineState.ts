@@ -113,6 +113,7 @@ export function useRoutineState() {
   const [isBctLedgerOpen, setIsBctLedgerOpen] = useState(false);
   const [isReEntryOpen, setIsReEntryOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isAdaptingLifestyle, setIsAdaptingLifestyle] = useState(false);
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
   const [runtime, setRuntime] = useState<Record<string, RoutineRuntime>>({});
   const [hasHydrated, setHasHydrated] = useState(false);
@@ -132,6 +133,7 @@ export function useRoutineState() {
   updateUserProfileRef.current = auth?.updateUserProfile;
   const updateLifestyleProfileRef = useRef(auth?.updateLifestyleProfile);
   updateLifestyleProfileRef.current = auth?.updateLifestyleProfile;
+  const lastAdaptedSignatureRef = useRef<string | null>(null);
   const rolloverTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Staging candidate paper for pre-confirmation review & discussion
@@ -2244,6 +2246,69 @@ export function useRoutineState() {
     [auth, routine, pushMessages, updateRuntime]
   );
 
+  const refreshLifestyleAdaptation = useCallback(
+    async (overrides?: { routine?: Routine | null }) => {
+      const targetRoutine = overrides?.routine !== undefined ? overrides.routine : routine;
+      if (!targetRoutine) return null;
+
+      setIsAdaptingLifestyle(true);
+      try {
+        const res = await fetch('/api/lifestyle/adapt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userProfile: userProfileRef.current,
+            lifestyleProfile: lifestyleProfileRef.current,
+            routine: targetRoutine
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.adaptation && updateLifestyleProfileRef.current) {
+            updateLifestyleProfileRef.current({ activeAdaptation: data.adaptation });
+            return data.adaptation;
+          }
+        }
+      } catch (err) {
+        console.warn('[useRoutineState] Lifestyle adaptation failed:', err);
+      } finally {
+        setIsAdaptingLifestyle(false);
+      }
+      return null;
+    },
+    [routine]
+  );
+
+  const adaptSignature = useMemo(() => {
+    if (!hasHydrated || !routine) return null;
+    const lp = auth?.lifestyleProfile;
+    const up = auth?.userProfile;
+    return JSON.stringify({
+      routineId: routine.id,
+      country: lp?.region?.countryCode,
+      city: lp?.region?.city,
+      workPattern: lp?.workPattern,
+      smokingStatus: lp?.smokingStatus,
+      activityBaseline: lp?.activityBaseline,
+      ramadan: lp?.isRamadanFastingObserver,
+      climate: lp?.climateSensitivity,
+      cautions: lp?.physicalCautions,
+      tags: lp?.activeTags,
+      age: up?.age,
+      reminder: up?.preferredReminderTime,
+      goals: up?.clinicalGoals
+    });
+  }, [hasHydrated, routine, auth?.lifestyleProfile, auth?.userProfile]);
+
+  useEffect(() => {
+    if (!adaptSignature || adaptSignature === lastAdaptedSignatureRef.current) return;
+    lastAdaptedSignatureRef.current = adaptSignature;
+    const timer = window.setTimeout(() => {
+      refreshLifestyleAdaptation();
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [adaptSignature, refreshLifestyleAdaptation]);
+
   const updateGuardrailThreshold = useCallback(
     (threshold: number, message?: string) => {
       if (!routine || applyGuardrailThreshold(routine, threshold, message) === routine) return;
@@ -2370,6 +2435,9 @@ export function useRoutineState() {
       userProfile: auth?.userProfile,
       updateUserProfile: auth?.updateUserProfile,
       lifestyleProfile: auth?.lifestyleProfile,
+      activeAdaptation: auth?.lifestyleProfile?.activeAdaptation,
+      isAdaptingLifestyle,
+      refreshLifestyleAdaptation,
       updateLifestyleProfile: auth?.updateLifestyleProfile,
       confirmRegion: auth?.confirmRegion,
       tuneLifestyle,
@@ -2464,6 +2532,8 @@ export function useRoutineState() {
       auth?.userProfile,
       auth?.updateUserProfile,
       auth?.lifestyleProfile,
+      isAdaptingLifestyle,
+      refreshLifestyleAdaptation,
       auth?.updateLifestyleProfile,
       auth?.confirmRegion,
       tuneLifestyle,

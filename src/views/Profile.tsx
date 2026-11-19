@@ -29,6 +29,7 @@ import type {
   WorkPattern
 } from '../types/auth';
 import { cn } from '../utils/cn';
+import { resolveCountryCodeFromInput } from '../utils/geo';
 import {
   deriveClinicalFocus,
   deriveLifestyleCohort,
@@ -214,10 +215,13 @@ export function ProfilePage() {
       isRamadanFastingObserver: isRamadanObserver
     });
 
+    const resolvedCountry = countryName.trim() || 'United Arab Emirates';
+    const resolvedCode = resolveCountryCodeFromInput(resolvedCountry);
+
     updateLifestyleProfile({
       region: {
-        countryCode,
-        countryName,
+        countryCode: resolvedCode,
+        countryName: resolvedCountry,
         city: city.trim() || undefined,
         detectedBy: 'user_selected',
         confirmed: true
@@ -422,14 +426,28 @@ export function ProfilePage() {
                     );
                   })}
                 </div>
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder={t.cityPlaceholder}
-                  aria-label={t.cityPlaceholder}
-                  className="w-full rounded-xl border border-ink/15 bg-canvas/60 px-3.5 py-2 text-sm text-ink outline-none focus:border-ink sm:max-w-xs"
-                />
+                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                  <input
+                    type="text"
+                    value={countryName}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCountryName(val);
+                      setCountryCode(resolveCountryCodeFromInput(val));
+                    }}
+                    placeholder="Country (e.g. Japan, Brazil, UAE, Germany)"
+                    aria-label="Country"
+                    className="w-full rounded-xl border border-ink/15 bg-canvas/60 px-3.5 py-2 text-sm text-ink outline-none focus:border-ink"
+                  />
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder={t.cityPlaceholder}
+                    aria-label={t.cityPlaceholder}
+                    className="w-full rounded-xl border border-ink/15 bg-canvas/60 px-3.5 py-2 text-sm text-ink outline-none focus:border-ink"
+                  />
+                </div>
               </div>
 
               <OptionChipGroup

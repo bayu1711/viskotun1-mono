@@ -4,29 +4,32 @@ import React, { useEffect, useState } from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import TuneIcon from '@mui/icons-material/Tune';
+import VerifiedOutlinedIcon from '@mui/icons-material/VerifiedOutlined';
 import { COPY } from '../../data/copy';
 import type { ChatMessage } from '../../types/routine';
 import type { RegionalLifestyleTag, UserLifestyleProfile } from '../../types/auth';
+import { formatLifestyleTagLabel, getLifestyleTagIcon } from '../../utils/lifestyleTags';
 import { AssistantMessage } from './AssistantMessage';
 import { TypingIndicator } from './TypingIndicator';
 import { Icon } from '../ui/Icon';
 
 const PRESET_REGIONS = [
-  { countryCode: 'AE', countryName: 'United Arab Emirates', city: 'Abu Dhabi', flag: '🇦🇪' },
-  { countryCode: 'AE', countryName: 'United Arab Emirates', city: 'Dubai', flag: '🇦🇪' },
-  { countryCode: 'SA', countryName: 'Saudi Arabia', city: 'Riyadh', flag: '🇸🇦' },
-  { countryCode: 'GB', countryName: 'United Kingdom', city: 'London', flag: '🇬🇧' },
-  { countryCode: 'US', countryName: 'United States', city: 'New York', flag: '🇺🇸' }
+  { countryCode: 'AE', countryName: 'United Arab Emirates', city: 'Abu Dhabi' },
+  { countryCode: 'AE', countryName: 'United Arab Emirates', city: 'Dubai' },
+  { countryCode: 'SA', countryName: 'Saudi Arabia', city: 'Riyadh' },
+  { countryCode: 'GB', countryName: 'United Kingdom', city: 'London' },
+  { countryCode: 'US', countryName: 'United States', city: 'New York' }
 ];
 
 const DEFAULT_AE_SUGGESTIONS: RegionalLifestyleTag[] = [
-  { id: 'tag-ramadan', label: '🌙 Ramadan Fasting Observer', category: 'culture', countryCode: 'AE', popularityCount: 980 },
-  { id: 'tag-midwakh', label: '💨 Midwakh / Dokha Tobacco', category: 'substance', countryCode: 'AE', popularityCount: 840 },
-  { id: 'tag-shisha', label: '💨 Shisha / Waterpipe', category: 'substance', countryCode: 'AE', popularityCount: 790 },
-  { id: 'tag-shift', label: '🏥 Healthcare Shift Work', category: 'schedule', countryCode: 'AE', popularityCount: 710 },
-  { id: 'tag-sedentary', label: '💻 Desk-bound Sedentary (>8 hrs)', category: 'schedule', countryCode: 'AE', popularityCount: 650 },
-  { id: 'tag-heat', label: '🔥 Gulf Summer Heat Adaptation', category: 'environment', countryCode: 'AE', popularityCount: 590 }
+  { id: 'tag-ramadan', label: 'Ramadan Fasting Observer', category: 'culture', countryCode: 'AE', popularityCount: 980 },
+  { id: 'tag-midwakh', label: 'Midwakh / Dokha Tobacco', category: 'substance', countryCode: 'AE', popularityCount: 840 },
+  { id: 'tag-shisha', label: 'Shisha / Waterpipe', category: 'substance', countryCode: 'AE', popularityCount: 790 },
+  { id: 'tag-shift', label: 'Healthcare Shift Work', category: 'schedule', countryCode: 'AE', popularityCount: 710 },
+  { id: 'tag-sedentary', label: 'Desk-bound Sedentary (>8 hrs)', category: 'schedule', countryCode: 'AE', popularityCount: 650 },
+  { id: 'tag-heat', label: 'Gulf Summer Heat Adaptation', category: 'environment', countryCode: 'AE', popularityCount: 590 }
 ];
 
 interface LifestyleTuningViewProps {
@@ -57,23 +60,15 @@ export function LifestyleTuningView({
   const isConfirmed = region?.confirmed ?? false;
   const activeTags = lifestyleProfile?.activeTags || [];
 
-  const flagEmoji =
-    countryCode === 'AE'
-      ? '🇦🇪'
-      : countryCode === 'SA'
-      ? '🇸🇦'
-      : countryCode === 'GB'
-      ? '🇬🇧'
-      : countryCode === 'US'
-      ? '🇺🇸'
-      : '🌐';
-
   // Fetch popular regional suggestions for the selected country
   useEffect(() => {
     let active = true;
     async function loadSuggestions() {
       try {
-        const res = await fetch(`/api/lifestyle/tune?country=${encodeURIComponent(countryCode)}`);
+        const params = new URLSearchParams({ country: countryCode });
+        if (countryName) params.set('countryName', countryName);
+        if (city) params.set('city', city);
+        const res = await fetch(`/api/lifestyle/tune?${params.toString()}`);
         if (res.ok) {
           const data = await res.json();
           if (active && Array.isArray(data.suggestions) && data.suggestions.length > 0) {
@@ -88,7 +83,7 @@ export function LifestyleTuningView({
     return () => {
       active = false;
     };
-  }, [countryCode]);
+  }, [countryCode, countryName, city]);
 
   const handleConfirmLocation = () => {
     if (onConfirmRegion) {
@@ -106,8 +101,16 @@ export function LifestyleTuningView({
 
   const handleCustomRegionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customCity.trim() || !onConfirmRegion) return;
-    onConfirmRegion(customCity.trim(), customCity.trim());
+    const raw = customCity.trim();
+    if (!raw || !onConfirmRegion) return;
+    if (raw.includes(',')) {
+      const [cityPart, ...countryParts] = raw.split(',');
+      const parsedCity = cityPart.trim();
+      const parsedCountry = countryParts.join(',').trim();
+      onConfirmRegion(parsedCountry || parsedCity, parsedCity || undefined);
+    } else {
+      onConfirmRegion(raw, raw);
+    }
     setCustomCity('');
     setIsChangingRegion(false);
   };
@@ -119,8 +122,9 @@ export function LifestyleTuningView({
   };
 
   const handleChipClick = (tagLabel: string) => {
-    if (activeTags.includes(tagLabel)) {
-      handleRemoveTag(tagLabel);
+    const matchingExisting = activeTags.find((t) => formatLifestyleTagLabel(t) === tagLabel);
+    if (matchingExisting) {
+      handleRemoveTag(matchingExisting);
     } else {
       onTune(tagLabel);
     }
@@ -131,20 +135,32 @@ export function LifestyleTuningView({
       {/* Geolocation Card */}
       <div className="rounded-card border border-ink/10 bg-white p-4 shadow-2xs">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xl" aria-hidden="true">
-              {flagEmoji}
+          <div className="flex items-center gap-2.5">
+            <span
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-cream text-ink/80"
+              aria-hidden="true"
+            >
+              <Icon icon={countryCode ? LocationOnOutlinedIcon : PublicOutlinedIcon} size="sm" />
             </span>
             <div>
               <div className="flex items-center gap-1.5">
-                <Icon icon={LocationOnOutlinedIcon} size="xs" className="text-ink/60" />
                 <h3 className="text-sm font-semibold text-ink">
                   {city ? `${city}, ` : ''}
                   {countryName}
                 </h3>
+                <span className="rounded bg-ink/5 px-1.5 py-0.5 font-mono text-3xs font-semibold uppercase text-ink/70">
+                  {countryCode}
+                </span>
               </div>
-              <p className="text-3xs text-ink/60">
-                {isConfirmed ? '✓ Confirmed Regional Context' : 'Detected via network / timezone'}
+              <p className="mt-0.5 flex items-center gap-1 text-3xs text-ink/60">
+                {isConfirmed ? (
+                  <>
+                    <Icon icon={VerifiedOutlinedIcon} size="xs" className="text-ink/70" />
+                    <span>Confirmed Regional Context</span>
+                  </>
+                ) : (
+                  <span>Detected via network / timezone</span>
+                )}
               </p>
             </div>
           </div>
@@ -192,13 +208,13 @@ export function LifestyleTuningView({
                   key={`${preset.countryCode}-${preset.city}`}
                   type="button"
                   onClick={() => handleSelectPresetRegion(preset)}
-                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-2xs font-medium transition-colors cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-2xs font-medium transition-colors cursor-pointer ${
                     preset.city === city
                       ? 'border-ink bg-ink text-white'
                       : 'border-ink/20 bg-canvas text-ink hover:border-ink'
                   }`}
                 >
-                  <span>{preset.flag}</span>
+                  <span className="font-mono text-3xs font-semibold opacity-70">{preset.countryCode}</span>
                   <span>{preset.city}</span>
                 </button>
               ))}
@@ -209,7 +225,7 @@ export function LifestyleTuningView({
                 type="text"
                 value={customCity}
                 onChange={(e) => setCustomCity(e.target.value)}
-                placeholder="Or type city / region (e.g. Al Ain, Sharjah, Doha)..."
+                placeholder="Type any city, country (e.g. Tokyo, Japan · Berlin, Germany · Doha, Qatar)..."
                 className="flex-1 rounded-full border border-ink/20 bg-canvas px-3 py-1 text-2xs text-ink placeholder:text-ink/50 focus:border-ink focus:outline-none"
               />
               <button
@@ -238,22 +254,27 @@ export function LifestyleTuningView({
 
         {activeTags.length > 0 ? (
           <div className="flex flex-wrap gap-1.5">
-            {activeTags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center gap-1.5 rounded-full border border-mint bg-mint/20 px-2.5 py-1 text-2xs font-medium text-ink"
-              >
-                <span>{tag}</span>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveTag(tag)}
-                  className="rounded-full p-0.5 hover:bg-ink/10 transition-colors cursor-pointer"
-                  aria-label={`Remove ${tag}`}
+            {activeTags.map((tag) => {
+              const displayLabel = formatLifestyleTagLabel(tag);
+              const TagIcon = getLifestyleTagIcon(tag);
+              return (
+                <span
+                  key={tag}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-mint bg-mint/20 px-2.5 py-1 text-2xs font-medium text-ink"
                 >
-                  <Icon icon={CloseIcon} size="xs" />
-                </button>
-              </span>
-            ))}
+                  <Icon icon={TagIcon} size="xs" className="text-ink/75" />
+                  <span>{displayLabel}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTag(tag)}
+                    className="rounded-full p-0.5 hover:bg-ink/10 transition-colors cursor-pointer"
+                    aria-label={`Remove ${displayLabel}`}
+                  >
+                    <Icon icon={CloseIcon} size="xs" />
+                  </button>
+                </span>
+              );
+            })}
           </div>
         ) : (
           <p className="text-xs text-ink/70 leading-relaxed">
@@ -269,20 +290,22 @@ export function LifestyleTuningView({
         </h4>
         <div className="flex flex-wrap gap-1.5">
           {suggestions.map((suggestion) => {
-            const isSelected = activeTags.includes(suggestion.label);
+            const displayLabel = formatLifestyleTagLabel(suggestion.label);
+            const isSelected = activeTags.some((t) => formatLifestyleTagLabel(t) === displayLabel);
+            const TagIcon = getLifestyleTagIcon(displayLabel, suggestion.category);
             return (
               <button
                 key={suggestion.id}
                 type="button"
-                onClick={() => handleChipClick(suggestion.label)}
-                className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-2xs font-medium transition-all cursor-pointer ${
+                onClick={() => handleChipClick(displayLabel)}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-2xs font-medium transition-all cursor-pointer ${
                   isSelected
                     ? 'border-mint bg-mint text-ink font-semibold shadow-2xs'
                     : 'border-ink/20 bg-canvas text-ink hover:border-ink hover:bg-cream'
                 }`}
               >
-                {isSelected && <Icon icon={CheckIcon} size="xs" />}
-                <span>{suggestion.label}</span>
+                <Icon icon={isSelected ? CheckIcon : TagIcon} size="xs" className={isSelected ? 'text-ink' : 'text-ink/70'} />
+                <span>{displayLabel}</span>
               </button>
             );
           })}
