@@ -10,6 +10,7 @@ import { PillButton } from '../ui/PillButton';
 import { Spinner } from '../feedback/Spinner';
 import type { ReviewOutcome } from '../../types/routine';
 import { cn } from '../../utils/cn';
+import { deriveLifestyleCohort } from '../../utils/profile';
 
 interface CommunityReviewDrawerProps {
   open?: boolean;
@@ -46,14 +47,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
 
     setIsSubmitting(true);
     try {
-      const lifestyleCohort =
-        lifestyleProfile?.smokingStatus && lifestyleProfile.smokingStatus !== 'non_smoker'
-          ? 'smoker'
-          : lifestyleProfile?.isRamadanFastingObserver
-          ? 'ramadan'
-          : lifestyleProfile?.workPattern === 'shift_work'
-          ? 'shift_work'
-          : 'general';
+      const lifestyleCohort = deriveLifestyleCohort(lifestyleProfile);
 
       await submitCommunityReview({
         outcome,

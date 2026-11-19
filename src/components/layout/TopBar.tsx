@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import AddIcon from '@mui/icons-material/Add';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import LocalFireDepartmentOutlinedIcon from '@mui/icons-material/LocalFireDepartmentOutlined';
@@ -20,6 +21,7 @@ import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 
 export function TopBar() {
+  const pathname = usePathname();
   const { streak, resetToDefaults, openHowTo, lifestyleProfile } = useRoutine();
   const { openAssistant, openLifestyleTuning } = useAssistant();
   const { user, isGuest, isAdmin, logout } = useAuth();
@@ -64,25 +66,34 @@ export function TopBar() {
             className="h-7 w-7 object-contain"
           />
         </Link>
-        <Avatar initials={displayInitials} />
-        <div className="min-w-0 leading-tight">
-          <p className="hidden text-xs text-ink/60 sm:block">{greetingText ?? ' '}</p>
-          <div className="flex flex-wrap items-center gap-x-2">
-            <p className="truncate text-sm font-medium">{displayName}</p>
-            {isGuest ? (
-              <Link
-                href={ROUTES.login}
-                className="inline-flex min-h-11 items-center whitespace-nowrap text-2xs font-semibold text-ink underline underline-offset-2 transition-colors hover:text-ink/80"
-              >
-                {copy.auth.signInToSyncBadge}
-              </Link>
-            ) : isAdmin ? (
-              <span className="flex items-center gap-1 rounded-full border border-ink/20 bg-cream px-2 py-0.5 text-2xs font-semibold lowercase text-ink">
-                <span className="h-1.5 w-1.5 rounded-full bg-ink" />
-                {copy.auth.adminBadge}
-              </span>
-            ) : null}
-          </div>
+        <div className="flex min-w-0 items-center gap-3">
+          <Link
+            href={ROUTES.profile}
+            aria-label={copy.shell.openProfile}
+            title={copy.shell.openProfile}
+            className={`group flex min-w-0 items-center gap-2.5 rounded-full pr-1 transition-opacity hover:opacity-85 ${
+              pathname === ROUTES.profile ? 'ring-2 ring-ink ring-offset-2 ring-offset-canvas' : ''
+            }`}
+          >
+            <Avatar initials={displayInitials} />
+            <div className="min-w-0 leading-tight">
+              <p className="hidden text-xs text-ink/60 sm:block">{greetingText ?? '\u00a0'}</p>
+              <p className="truncate text-sm font-medium group-hover:underline">{displayName}</p>
+            </div>
+          </Link>
+          {isGuest ? (
+            <Link
+              href={ROUTES.login}
+              className="inline-flex min-h-11 items-center whitespace-nowrap text-2xs font-semibold text-ink underline underline-offset-2 transition-colors hover:text-ink/80"
+            >
+              {copy.auth.signInToSyncBadge}
+            </Link>
+          ) : isAdmin ? (
+            <span className="flex items-center gap-1 rounded-full border border-ink/20 bg-cream px-2 py-0.5 text-2xs font-semibold lowercase text-ink">
+              <span className="h-1.5 w-1.5 rounded-full bg-ink" />
+              {copy.auth.adminBadge}
+            </span>
+          ) : null}
         </div>
 
         <div className="ml-auto flex items-center gap-2">

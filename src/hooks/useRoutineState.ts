@@ -124,6 +124,14 @@ export function useRoutineState() {
   routineListRef.current = routineList;
   const runtimeRef = useRef(runtime);
   runtimeRef.current = runtime;
+  const userProfileRef = useRef(auth?.userProfile);
+  userProfileRef.current = auth?.userProfile;
+  const lifestyleProfileRef = useRef(auth?.lifestyleProfile);
+  lifestyleProfileRef.current = auth?.lifestyleProfile;
+  const updateUserProfileRef = useRef(auth?.updateUserProfile);
+  updateUserProfileRef.current = auth?.updateUserProfile;
+  const updateLifestyleProfileRef = useRef(auth?.updateLifestyleProfile);
+  updateLifestyleProfileRef.current = auth?.updateLifestyleProfile;
   const rolloverTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Staging candidate paper for pre-confirmation review & discussion
@@ -330,6 +338,14 @@ export function useRoutineState() {
         if (res.ok) {
           const data = await res.json();
           if (isMounted) {
+            if (data.found) {
+              if (data.profile && typeof data.profile === 'object') {
+                updateUserProfileRef.current?.(data.profile);
+              }
+              if (data.lifestyleProfile && typeof data.lifestyleProfile === 'object') {
+                updateLifestyleProfileRef.current?.(data.lifestyleProfile);
+              }
+            }
             if (data.found && Array.isArray(data.routines) && data.routines.length > 0) {
               // Sanitize legacy auto-synced default papers if user never made active progress on them
               const isLegacyAutoSynced =
@@ -446,7 +462,9 @@ export function useRoutineState() {
                       userId,
                       activeRoutineId: activeRoutineIdRef.current,
                       routines: currentLocal,
-                      runtime: runtimeRef.current
+                      runtime: runtimeRef.current,
+                      profile: userProfileRef.current,
+                      lifestyleProfile: lifestyleProfileRef.current
                     })
                   }).catch(() => {});
                   return currentLocal;
@@ -484,7 +502,9 @@ export function useRoutineState() {
           userId,
           activeRoutineId,
           routines: routineList,
-          runtime
+          runtime,
+          profile: auth?.userProfile,
+          lifestyleProfile: auth?.lifestyleProfile
         })
       }).catch((err) => {
         console.error('[useRoutineState] Cloud sync error:', err);
@@ -492,7 +512,18 @@ export function useRoutineState() {
     }, 1000);
 
     return () => window.clearTimeout(timer);
-  }, [routineList, activeRoutineId, runtime, hasHydrated, isAuthLoading, isAuthenticated, userId, hasRemoteHydrated]);
+  }, [
+    routineList,
+    activeRoutineId,
+    runtime,
+    auth?.userProfile,
+    auth?.lifestyleProfile,
+    hasHydrated,
+    isAuthLoading,
+    isAuthenticated,
+    userId,
+    hasRemoteHydrated
+  ]);
 
   const resetToDefaults = useCallback(() => {
     if (!isAdmin) {
@@ -2329,6 +2360,8 @@ export function useRoutineState() {
       askStagingQuestion,
       toggleStagingExcludeStep,
       addRoutine,
+      userProfile: auth?.userProfile,
+      updateUserProfile: auth?.updateUserProfile,
       lifestyleProfile: auth?.lifestyleProfile,
       updateLifestyleProfile: auth?.updateLifestyleProfile,
       confirmRegion: auth?.confirmRegion,
@@ -2421,6 +2454,8 @@ export function useRoutineState() {
       askStagingQuestion,
       toggleStagingExcludeStep,
       addRoutine,
+      auth?.userProfile,
+      auth?.updateUserProfile,
       auth?.lifestyleProfile,
       auth?.updateLifestyleProfile,
       auth?.confirmRegion,

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import FitnessCenterOutlinedIcon from '@mui/icons-material/FitnessCenterOutlined';
 import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined';
@@ -10,6 +11,7 @@ import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 
 import { useLocale } from '../../contexts/LocaleContext';
 import { useRoutine } from '../../contexts/RoutineContext';
+import { ROUTES } from '../../data/navigation';
 import { calculateHealthAgeProjection } from '../../utils/healthAgeEngine';
 import { Icon } from '../ui/Icon';
 import { cn } from '../../utils/cn';
@@ -20,6 +22,7 @@ export function HealthAgeCard() {
     streak,
     currentDay,
     totalDays,
+    userProfile,
     lifestyleProfile,
     openBctLedger
   } = useRoutine();
@@ -35,7 +38,7 @@ export function HealthAgeCard() {
     microDoseCount: streak > 0 ? Math.min(streak, 4) : 0,
     barrierCount: 4,
     activeTags: lifestyleProfile?.activeTags ?? ['extreme_heat_summer', 'healthcare_shift_worker'],
-    chronologicalAge: 38
+    chronologicalAge: userProfile?.age ?? 38
   });
 
   return (
@@ -82,6 +85,14 @@ export function HealthAgeCard() {
           </div>
           <span className="mt-2 text-2xs font-medium text-ink/50">
             {t.baselineAgeLabel(projection.chronologicalAge)} · Based on {projection.sustainedStreak} day sustained habit loop
+            {!userProfile?.age && (
+              <>
+                {' · '}
+                <Link href={ROUTES.profile} className="font-semibold text-ink underline underline-offset-2 hover:text-ink/80">
+                  {t.setAgeLink}
+                </Link>
+              </>
+            )}
           </span>
         </div>
 

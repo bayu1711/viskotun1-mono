@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
@@ -13,10 +13,15 @@ import { useRouter } from 'next/navigation';
 import { COPY } from '../data/copy';
 import { ROUTES } from '../data/navigation';
 import { getFirebaseAuth } from '../lib/firebase';
-import type { AuthState, RegionContext, User, UserLifestyleProfile } from '../types/auth';
+import type { AuthState, User, UserLifestyleProfile, UserProfile } from '../types/auth';
 
 const STORAGE_KEY = 'viskotun1_auth_user';
+const USER_PROFILE_STORAGE_KEY = 'viskotun1_user_profile';
 const LIFESTYLE_STORAGE_KEY = 'viskotun1_lifestyle_profile';
+
+export const DEFAULT_USER_PROFILE: UserProfile = {
+  preferredReminderTime: '09:00'
+};
 
 export const DEFAULT_LIFESTYLE_PROFILE: UserLifestyleProfile = {
   region: {
@@ -97,8 +102,14 @@ export const AuthContext = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile>(DEFAULT_USER_PROFILE);
   const [lifestyleProfile, setLifestyleProfile] = useState<UserLifestyleProfile>(DEFAULT_LIFESTYLE_PROFILE);
   const [isLoading, setIsLoading] = useState(true);
+
+  const userProfileRef = useRef(userProfile);
+  userProfileRef.current = userProfile;
+  const lifestyleProfileRef = useRef(lifestyleProfile);
+  lifestyleProfileRef.current = lifestyleProfile;
 
   // Safe client hydration from localStorage
   useEffect(() => {
@@ -107,10 +118,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (saved) {
         const parsed = JSON.parse(saved);
         setUser(parsed);
+        if (parsed.profile) {
+          setUserProfile({ ...DEFAULT_USER_PROFILE, ...parsed.profile });
+        }
         if (parsed.lifestyleProfile) {
           setLifestyleProfile(parsed.lifestyleProfile);
         }
         window.localStorage.setItem(STORAGE_KEY, saved);
+      }
+      const savedUserProfile = window.localStorage.getItem(USER_PROFILE_STORAGE_KEY);
+      if (savedUserProfile) {
+        setUserProfile({ ...DEFAULT_USER_PROFILE, ...JSON.parse(savedUserProfile) });
       }
       const savedProfile = window.localStorage.getItem(LIFESTYLE_STORAGE_KEY);
       if (savedProfile) {
@@ -123,21 +141,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const updateLifestyleProfile = useCallback((updates: Partial<UserLifestyleProfile>) => {
-    setLifestyleProfile((prev) => {
-      const next = { ...prev, ...updates, lastTunedAt: new Date().toISOString() };
+  const updateUserProfile = useCallback((updates: Partial<UserProfile>) => {
+    const next: UserProfile = {
+      ...userProfileRef.current,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    userProfileRef.current = next;
+    setUserProfile(next);
+
+    try {
+      window.localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(next));
+    } catch {}
+
+    setUser((current) => {
+      if (!current) return current;
+      const customName = updates.displayName?.trim();
+      const resolvedName = customName || current.name;
+      const updated: User = {
+        ...current,
+        name: resolvedName,
+        initials: customName ? deriveInitials(resolvedName, current.initials) : current.initials,
+        profile: next
+      };
       try {
-        window.localStorage.setItem(LIFESTYLE_STORAGE_KEY, JSON.stringify(next));
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       } catch {}
-      setUser((current) => {
-        if (!current) return current;
-        const updated = { ...current, lifestyleProfile: next };
-        try {
-          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-        } catch {}
-        return updated;
-      });
-      return next;
+      return updated;
+    });
+  }, []);
+
+  const updateLifestyleProfile = useCallback((updates: Partial<UserLifestyleProfile>) => {
+    const next: UserLifestyleProfile = {
+      ...lifestyleProfileRef.current,
+      ...updates,
+      lastTunedAt: new Date().toISOString()
+    };
+    lifestyleProfileRef.current = next;
+    setLifestyleProfile(next);
+
+    try {
+      window.localStorage.setItem(LIFESTYLE_STORAGE_KEY, JSON.stringify(next));
+    } catch {}
+
+    setUser((current) => {
+      if (!current) return current;
+      const updated = { ...current, lifestyleProfile: next };
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      } catch {}
+      return updated;
     });
   }, []);
 
@@ -160,23 +213,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [updateLifestyleProfile]);
 
   const persistUser = useCallback((nextUser: User | null) => {
+    const resolvedUser: User | null = nextUser
+      ? (() => {
+          const savedName = userProfileRef.current.displayName?.trim();
+          const finalName = savedName || nextUser.name;
+          return {
+            ...nextUser,
+            name: finalName,
+            initials: savedName ? deriveInitials(finalName, nextUser.initials) : nextUser.initials,
+            profile: nextUser.profile ?? userProfileRef.current,
+            lifestyleProfile: nextUser.lifestyleProfile ?? lifestyleProfileRef.current
+          };
+        })()
+      : null;
+
     setUser((prev) => {
       if (
         prev &&
-        nextUser &&
-        prev.id === nextUser.id &&
-        prev.name === nextUser.name &&
-        prev.email === nextUser.email &&
-        prev.isGuest === nextUser.isGuest &&
-        prev.role === nextUser.role
+        resolvedUser &&
+        prev.id === resolvedUser.id &&
+        prev.name === resolvedUser.name &&
+        prev.email === resolvedUser.email &&
+        prev.isGuest === resolvedUser.isGuest &&
+        prev.role === resolvedUser.role
       ) {
         return prev;
       }
-      return nextUser;
+      return resolvedUser;
     });
     try {
-      if (nextUser) {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextUser));
+      if (resolvedUser) {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(resolvedUser));
       } else {
         window.localStorage.removeItem(STORAGE_KEY);
       }
@@ -350,6 +417,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated: Boolean(user && !user.isGuest),
       isGuest: Boolean(user?.isGuest),
       isAdmin,
+      userProfile,
+      updateUserProfile,
       lifestyleProfile,
       updateLifestyleProfile,
       confirmRegion,
@@ -364,6 +433,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       isLoading,
       isAdmin,
+      userProfile,
+      updateUserProfile,
       lifestyleProfile,
       updateLifestyleProfile,
       confirmRegion,
