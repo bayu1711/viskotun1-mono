@@ -166,7 +166,7 @@ export const COPY = {
     detectedLocationGreeting: (country: string, city?: string) =>
       `Marhaban! I detect you're tracking from ${city ? `${city}, ` : ''}${country}. Is that right?`,
     unknownLocationGreeting:
-      'Marhaban! Which city or region are you tracking from? Selecting your region allows Viskotu to tailor your daily plan around local climate, fasting hours, and work patterns.',
+      'Welcome! Which city or region are you tracking from? Selecting your region lets TrialN1 tailor your daily plan around local climate, fasting hours, and work patterns.',
     confirmLocationBtn: (cityOrCountry: string) => `Yes, ${cityOrCountry}`,
     changeLocationBtn: 'Change Region',
     customPromptPlaceholder: 'Type or speak: e.g. "I work rotating 12h night shifts and smoke shisha occasionally"...',
@@ -185,7 +185,29 @@ export const COPY = {
     filterSmokers: 'Smokers / Shisha Cohort',
     filterNonSmokers: 'Non-Smokers',
     filterRamadan: 'Ramadan Fasting Cohort',
-    filterShiftWork: 'Shift Workers'
+    filterShiftWork: 'Shift Workers',
+    onboarding: {
+      badge: (step: number, total: number) => `Guided setup · ${step} of ${total}`,
+      skipBtn: 'Skip for now',
+      nextBtn: 'Continue',
+      backBtn: 'Back',
+      finishBtn: 'Finish & Adapt Routine',
+      rerunBtn: 'Restart guided Q&A',
+      completedToast: 'Adaptive Lifestyle Profile calibrated!',
+      q1Title: '1. Where are you joining from?',
+      q1Ask: (regionLabel: string) =>
+        `I detected ${regionLabel}. Confirm this region or type your city & country so I can fetch locally relevant factors and climate guidance.`,
+      q2Title: '2. Your age & preferred daily time',
+      q2Ask:
+        'How old are you, and what time works best for your daily routine? Your age calibrates Biological Health Age projections on Dashboard.',
+      q3Title: '3. Daily rhythm, climate & local factors',
+      q3Ask: (regionLabel: string) =>
+        `How does a typical day look in ${regionLabel}? Tap any schedule, climate, fasting, or regional options that fit you:`,
+      q4Title: '4. Physical cautions & daily habits',
+      q4Ask:
+        'Any joint sensitivities or smoking/tobacco habits I should adapt pacing around safely? You can also type anything else below.',
+      autoFocusLabel: 'Derived focus for TrialN1 AI:'
+    }
   },
   dayActions: {
     markComplete: 'Mark today complete',
