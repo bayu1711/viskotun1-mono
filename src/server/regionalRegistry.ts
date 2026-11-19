@@ -1,11 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import type {
-  ActivityBaseline,
+  CulturalRhythmId,
   RegionalLifestyleTag,
-  SmokingStatus,
-  UserLifestyleProfile,
-  WorkPattern
+  UserLifestyleProfile
 } from '../types/auth';
 
 const IS_TEST = process.env.NODE_ENV === 'test' || Boolean(process.env.VITEST);
@@ -15,42 +13,42 @@ export const PREPOPULATED_REGIONAL_TAGS: Record<string, RegionalLifestyleTag[]> 
   AE: [
     {
       id: 'tag-ae-ramadan',
-      label: '🌙 Ramadan Fasting Observer',
+      label: 'Ramadan Fasting Observer',
       category: 'culture',
       countryCode: 'AE',
       popularityCount: 980
     },
     {
       id: 'tag-ae-midwakh',
-      label: '💨 Midwakh / Dokha Tobacco',
+      label: 'Midwakh / Dokha Tobacco',
       category: 'substance',
       countryCode: 'AE',
       popularityCount: 840
     },
     {
       id: 'tag-ae-shisha',
-      label: '💨 Shisha / Waterpipe',
+      label: 'Shisha / Waterpipe',
       category: 'substance',
       countryCode: 'AE',
       popularityCount: 790
     },
     {
       id: 'tag-ae-shiftwork',
-      label: '🏥 Healthcare Shift Work',
+      label: 'Healthcare Shift Work',
       category: 'schedule',
       countryCode: 'AE',
       popularityCount: 710
     },
     {
       id: 'tag-ae-desksedentary',
-      label: '💻 Desk-bound Sedentary (>8 hrs)',
+      label: 'Desk-bound Sedentary (>8 hrs)',
       category: 'schedule',
       countryCode: 'AE',
       popularityCount: 650
     },
     {
       id: 'tag-ae-gulfheat',
-      label: '🔥 Gulf Summer Heat Adaptation',
+      label: 'Gulf Summer Heat Adaptation',
       category: 'environment',
       countryCode: 'AE',
       popularityCount: 590
@@ -59,28 +57,28 @@ export const PREPOPULATED_REGIONAL_TAGS: Record<string, RegionalLifestyleTag[]> 
   SA: [
     {
       id: 'tag-sa-ramadan',
-      label: '🌙 Ramadan Fasting Observer',
+      label: 'Ramadan Fasting Observer',
       category: 'culture',
       countryCode: 'SA',
       popularityCount: 950
     },
     {
       id: 'tag-sa-shisha',
-      label: '💨 Shisha / Moassel',
+      label: 'Shisha / Moassel',
       category: 'substance',
       countryCode: 'SA',
       popularityCount: 780
     },
     {
       id: 'tag-sa-desksedentary',
-      label: '💻 Desk-bound Work',
+      label: 'Desk-bound Work',
       category: 'schedule',
       countryCode: 'SA',
       popularityCount: 620
     },
     {
       id: 'tag-sa-summerheat',
-      label: '🔥 Extreme Summer Heat',
+      label: 'Extreme Summer Heat',
       category: 'environment',
       countryCode: 'SA',
       popularityCount: 570
@@ -89,72 +87,123 @@ export const PREPOPULATED_REGIONAL_TAGS: Record<string, RegionalLifestyleTag[]> 
   GB: [
     {
       id: 'tag-gb-sunlight',
-      label: '🌧️ Low Winter Sunlight / Vit D',
+      label: 'Low Winter Sunlight / Vit D',
       category: 'environment',
       countryCode: 'GB',
       popularityCount: 820
     },
     {
       id: 'tag-gb-commute',
-      label: '🚂 Long Daily Commute',
+      label: 'Long Daily Commute',
       category: 'schedule',
       countryCode: 'GB',
       popularityCount: 760
     },
     {
       id: 'tag-gb-caffeine',
-      label: '☕ High Caffeine Dependency',
+      label: 'High Caffeine Dependency',
       category: 'substance',
       countryCode: 'GB',
       popularityCount: 690
     },
     {
       id: 'tag-gb-shiftwork',
-      label: '🌙 Shift Work',
+      label: 'Shift Work',
       category: 'schedule',
       countryCode: 'GB',
       popularityCount: 610
     },
     {
       id: 'tag-gb-desksedentary',
-      label: '💻 Desk-bound Sedentary',
+      label: 'Desk-bound Sedentary',
       category: 'schedule',
       countryCode: 'GB',
       popularityCount: 580
     }
   ],
+  US: [
+    {
+      id: 'tag-us-commute',
+      label: 'Long Commute / Remote Work Mix',
+      category: 'schedule',
+      countryCode: 'US',
+      popularityCount: 860
+    },
+    {
+      id: 'tag-us-if',
+      label: 'Intermittent Fasting (16:8)',
+      category: 'culture',
+      countryCode: 'US',
+      popularityCount: 810
+    },
+    {
+      id: 'tag-us-ramadan',
+      label: 'Ramadan / Periodic Fasting Observer',
+      category: 'culture',
+      countryCode: 'US',
+      popularityCount: 740
+    },
+    {
+      id: 'tag-us-shiftwork',
+      label: 'Hospital / Service Shift Work',
+      category: 'schedule',
+      countryCode: 'US',
+      popularityCount: 720
+    },
+    {
+      id: 'tag-us-latedinner',
+      label: 'Late Family Dinner (21:00+)',
+      category: 'culture',
+      countryCode: 'US',
+      popularityCount: 650
+    }
+  ],
   GLOBAL: [
     {
       id: 'tag-gl-fasting',
-      label: '⏰ Intermittent Fasting (16:8)',
+      label: 'Intermittent Fasting (16:8)',
       category: 'culture',
       countryCode: 'GLOBAL',
       popularityCount: 920
     },
     {
+      id: 'tag-gl-platedinner',
+      label: 'Late Family Dinner (21:00+)',
+      category: 'culture',
+      countryCode: 'GLOBAL',
+      popularityCount: 840
+    },
+    {
       id: 'tag-gl-shiftwork',
-      label: '🌙 Rotating Night Shifts',
+      label: 'Rotating Night Shifts',
       category: 'schedule',
       countryCode: 'GLOBAL',
       popularityCount: 810
     },
     {
       id: 'tag-gl-desksedentary',
-      label: '💻 Desk-bound Sedentary',
+      label: 'Desk-bound Sedentary',
       category: 'schedule',
       countryCode: 'GLOBAL',
       popularityCount: 790
     },
     {
+      id: 'tag-gl-dawn',
+      label: 'Early Dawn Riser',
+      category: 'culture',
+      countryCode: 'GLOBAL',
+      popularityCount: 730
+    },
+    {
       id: 'tag-gl-joint',
-      label: '🩹 Joint / Mobility Sensitivity',
+      label: 'Joint / Mobility Sensitivity',
       category: 'physical',
       countryCode: 'GLOBAL',
       popularityCount: 680
     },
     {
       id: 'tag-gl-tobacco',
-      label: '🚭 Tobacco Tapering',
+      label: 'Tobacco Tapering',
       category: 'substance',
       countryCode: 'GLOBAL',
       popularityCount: 540
@@ -277,52 +326,92 @@ export function parseLifestyleDeterministically(
   // 1. Shift work / night shift
   if (text.includes('shift') || text.includes('night') || text.includes('rotating') || text.includes('icu') || text.includes('hospital')) {
     profileUpdates.workPattern = 'shift_work';
-    extractedTags.push('🏥 Shift Work / Night Shifts');
+    extractedTags.push('Shift Work / Night Shifts');
     explanations.push('Routine notifications & session pacing shifted to your waking window');
   } else if (text.includes('desk') || text.includes('sitting') || text.includes('sedentary') || text.includes('office') || text.includes('screen')) {
     profileUpdates.workPattern = 'desk_sedentary';
-    extractedTags.push('💻 Desk-bound Sedentary');
+    extractedTags.push('Desk-bound Sedentary');
     explanations.push('Integrated 90-second postural micro-breaks during working hours');
   } else if (text.includes('travel') || text.includes('flight') || text.includes('commute')) {
     profileUpdates.workPattern = 'frequent_travel';
-    extractedTags.push('✈️ Frequent Travel');
+    extractedTags.push('Frequent Travel');
     explanations.push('Hotel-friendly bodyweight variations enabled');
   }
 
   // 2. Tobacco / Nicotine
   if (text.includes('dokha') || text.includes('midwakh') || text.includes('medwakh')) {
     profileUpdates.smokingStatus = 'midwakh_dokha';
-    extractedTags.push('💨 Midwakh / Dokha Tobacco');
+    extractedTags.push('Midwakh / Dokha Tobacco');
     explanations.push('Cardiorespiratory recovery parameters adjusted for episodic nicotine elevation');
   } else if (text.includes('shisha') || text.includes('hookah') || text.includes('waterpipe') || text.includes('nargile') || text.includes('moassel')) {
     profileUpdates.smokingStatus = 'shisha_waterpipe';
-    extractedTags.push('💨 Shisha / Waterpipe');
+    extractedTags.push('Shisha / Waterpipe');
     explanations.push('Aerobic capacity recovery baseline calibrated for waterpipe tobacco use');
   } else if (text.includes('cig') || text.includes('smoke') || text.includes('smoking')) {
     profileUpdates.smokingStatus = 'cigarettes';
-    extractedTags.push('🚬 Cigarettes');
+    extractedTags.push('Cigarettes');
     explanations.push('Tissue oxygenation trajectory adjusted for smoking cohort telemetry');
   } else if (text.includes('vape') || text.includes('e-cig') || text.includes('juul')) {
     profileUpdates.smokingStatus = 'vape';
-    extractedTags.push('💨 Vape / E-cigarette');
+    extractedTags.push('Vape / E-cigarette');
     explanations.push('Vascular tone recovery metrics calibrated');
   } else if (text.includes('non-smoker') || text.includes("don't smoke") || text.includes('never smoke')) {
     profileUpdates.smokingStatus = 'non_smoker';
-    extractedTags.push('🚭 Non-Smoker');
+    extractedTags.push('Non-Smoker');
     explanations.push('Standard non-smoker tissue healing velocity applied');
   }
 
-  // 3. Ramadan Fasting / Intermittent Fasting
-  if (text.includes('ramadan') || text.includes('suhoor') || text.includes('iftar') || text.includes('fasting')) {
+  // 3. Diverse cultural, fasting & household meal rhythms (country-independent)
+  const detectedRhythms = new Set<CulturalRhythmId>(currentProfile?.culturalRhythms ?? []);
+  if (text.includes('ramadan') || text.includes('suhoor') || text.includes('iftar')) {
     profileUpdates.isRamadanFastingObserver = true;
-    extractedTags.push('🌙 Ramadan Fasting Observer');
+    detectedRhythms.add('ramadan_fasting');
+    extractedTags.push('Ramadan Fasting Observer');
     explanations.push('Nutrition and hydration steps shifted to post-Iftar hours');
+  } else if (text.includes('intermittent') || text.includes('16:8') || text.includes('omad')) {
+    detectedRhythms.add('intermittent_fasting');
+    extractedTags.push('Intermittent Fasting (16:8)');
+    explanations.push('Electrolyte hydration paired smoothly with your eating window');
+  } else if (text.includes('lent') || text.includes('ekadashi') || text.includes('fasting')) {
+    detectedRhythms.add('periodic_religious_fasting');
+    extractedTags.push('Periodic Fasting');
+    explanations.push('Gentle load pacing and hydration adjusted for fasting periods');
+  }
+
+  if (text.includes('late dinner') || text.includes('late meal') || text.includes('21:00') || text.includes('22:00')) {
+    detectedRhythms.add('late_family_dinner');
+    extractedTags.push('Late Family Dinner (21:00+)');
+    explanations.push('Movement and sleep wind-down spaced comfortably around late evening meals');
+  }
+  if (text.includes('dawn') || text.includes('fajr') || text.includes('5 am') || text.includes('early riser')) {
+    detectedRhythms.add('early_dawn_riser');
+    extractedTags.push('Early Dawn Riser');
+    explanations.push('Primary routine window anchored smoothly after early morning waking');
+  }
+  if (text.includes('siesta') || text.includes('midday rest') || text.includes('afternoon nap')) {
+    detectedRhythms.add('midday_siesta_rest');
+    extractedTags.push('Midday Rest / Siesta');
+    explanations.push('Pacing split cleanly before or after your midday rest window');
+  }
+  if (text.includes('sabbath') || text.includes('shabbat') || text.includes('sunday rest')) {
+    detectedRhythms.add('sabbath_weekly_rest');
+    extractedTags.push('Weekly Rest / Sabbath');
+    explanations.push('Weekly recovery day preserved cleanly inside overall trial adherence');
+  }
+  if (text.includes('multi-generational') || text.includes('shared household') || text.includes('extended family')) {
+    detectedRhythms.add('collectivist_household');
+    extractedTags.push('Shared Household Schedule');
+    explanations.push('Compact home-friendly intervals tailored for busy shared households');
+  }
+
+  if (detectedRhythms.size > 0) {
+    profileUpdates.culturalRhythms = Array.from(detectedRhythms);
   }
 
   // 4. Summer heat / Climate
   if (text.includes('heat') || text.includes('summer') || text.includes('sun') || text.includes('hot')) {
     profileUpdates.climateSensitivity = 'summer_heat';
-    extractedTags.push('🔥 Summer Heat Adaptation');
+    extractedTags.push('Summer Heat Adaptation');
     explanations.push('Indoor climate-controlled execution recommended for high temperature days');
   }
 
@@ -330,14 +419,14 @@ export function parseLifestyleDeterministically(
   if (text.includes('knee') || text.includes('back') || text.includes('joint') || text.includes('ache') || text.includes('pain') || text.includes('sore')) {
     const caution = text.includes('knee') ? 'Knee sensitivity' : text.includes('back') ? 'Lower back sensitivity' : 'Joint caution';
     profileUpdates.physicalCautions = [caution];
-    extractedTags.push(`🩹 ${caution}`);
+    extractedTags.push(caution);
     explanations.push(`Progression ramp-up cushioned for ${caution.toLowerCase()}`);
   }
 
   // Fallback if no specific keyword matched
   if (extractedTags.length === 0) {
     const customTag = message.trim();
-    extractedTags.push(`📍 ${customTag}`);
+    extractedTags.push(customTag);
     explanations.push('Context noted and saved to personal participant profile');
   }
 

@@ -1,11 +1,13 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import type {
+  CulturalRhythmId,
   LifestyleAdaptationSpec,
   RegionalLifestyleTag,
   UserLifestyleProfile,
   UserProfile
 } from '../types/auth';
 import type { Routine } from '../types/routine';
+import { resolveCulturalRhythms } from '../utils/profile';
 import { executeWithGeminiFailover, getGeminiApiKeys } from './geminiKeys';
 import { getEffectiveGuardrails } from './guardrailLedger';
 import {
@@ -29,7 +31,7 @@ function stripJsonCodeFences(raw: string): string {
 }
 
 /**
- * Dynamically derives regionally relevant lifestyle/climate/work adherence tags
+ * Dynamically derives culturally diverse, locally grounded lifestyle/climate/work tags
  * for ANY country or city worldwide using Gemini AI + safety guardrails,
  * merging with verified crowdsourced registry tags and zero-downtime offline fallbacks.
  */
@@ -37,11 +39,13 @@ export async function deriveGlobalRegionalSuggestions(params: {
   countryCode: string;
   countryName?: string;
   city?: string;
+  culturalRhythms?: readonly CulturalRhythmId[];
 }): Promise<{ suggestions: RegionalLifestyleTag[]; source: 'gemini-global-ai' | 'registry-fallback' }> {
   const code = params.countryCode.trim().toUpperCase() || 'GLOBAL';
   const city = params.city?.trim() || '';
   const countryName = params.countryName?.trim() || code;
-  const cacheKey = `${code}:${city.toLowerCase()}`;
+  const rhythmKey = (params.culturalRhythms ?? []).slice().sort().join(',');
+  const cacheKey = `${code}:${city.toLowerCase()}:${rhythmKey}`;
 
   const existingRegistry = getRegionalSuggestions(code);
 
@@ -56,10 +60,19 @@ export async function deriveGlobalRegionalSuggestions(params: {
   }
 
   try {
-    const prompt = `You are TrialN1's Global Clinical Context Engine.
-Location: ${city ? `${city}, ` : ''}${countryName} (ISO: ${code}).
+    const rhythmHint =
+      params.culturalRhythms && params.culturalRhythms.length > 0
+        ? `Participant's chosen cultural/household rhythms: ${params.culturalRhythms.join(', ')}.`
+        : 'Do NOT assume a single cultural, dietary, or religious archetype from country alone.';
 
-Generate 5 distinct, practical, respectful lifestyle/environmental factors common to adults living in this location that affect adherence to clinical rehab, sleep, nutrition, or habit routines (e.g., climate extremes, daylight hours, commute patterns, local dietary/fasting traditions, occupational schedules, or common tobacco/caffeine habits).
+    const prompt = `You are TrialN1's Multicultural Global Clinical Context Engine.
+Location: ${city ? `${city}, ` : ''}${countryName} (ISO: ${code}).
+${rhythmHint}
+
+Every city contains many different cultures, households, and work lives (locals, diaspora communities, varied dietary/fasting habits, shift schedules, family meal timings).
+Generate 6 distinct, inclusive lifestyle factors spanning:
+- Local environmental/climate realities (e.g., heat, winter low-UV, air quality, commute distance)
+- Diverse cultural & household timings relevant across communities there (e.g., fasting traditions, late family dinners, early dawn risers, multi-generational homes, shift work, common caffeine/nicotine patterns).
 
 Output ONLY a raw JSON array of objects matching:
 [
@@ -70,6 +83,7 @@ Output ONLY a raw JSON array of objects matching:
   }
 ]
 Rules:
+- Never assume all residents of a country share one culture or diet.
 - Never include unsafe medical claims or advice to double dosages/ignore pain.
 - Keep labels clean, inclusive, and clinically neutral.`;
 
@@ -122,15 +136,38 @@ export function buildDeterministicAdaptation(params: {
   const regionLabel = regionCity ? `${regionCity}, ${regionCountry}` : regionCountry;
 
   const notes: string[] = [];
+  const rhythms = resolveCulturalRhythms(lp);
+  const hasRamadan = rhythms.includes('ramadan_fasting');
+  const hasOtherFasting =
+    rhythms.includes('intermittent_fasting') || rhythms.includes('periodic_religious_fasting');
   let suggestedWindow = up?.preferredReminderTime ? `Scheduled around ${up.preferredReminderTime}` : 'Standard waking hours';
   let recommendedDoseMode: 'standard' | 'micro' | 'rest' = 'standard';
 
-  if (lp?.isRamadanFastingObserver) {
+  if (hasRamadan) {
     suggestedWindow = `Post-Iftar (${up?.preferredReminderTime || '20:30'}) & Pre-Suhoor`;
     notes.push('Exertion and hydration steps paced into non-fasting hours');
+  } else if (rhythms.includes('early_dawn_riser')) {
+    suggestedWindow = `Early dawn window (${up?.preferredReminderTime || '06:00'})`;
+    notes.push('Core movement anchored in calm early-morning hours');
+  } else if (rhythms.includes('late_family_dinner')) {
+    suggestedWindow = `Post-dinner recovery (${up?.preferredReminderTime || '21:30'}) or pre-dinner`;
+    notes.push('Evening digestion gap and sleep wind-down protected');
+  } else if (hasOtherFasting) {
+    notes.push('Hydration and exertion paced around your fasting & refeed window');
   }
+
+  if (rhythms.includes('midday_siesta_rest')) {
+    notes.push('Session split away from midday rest window');
+  }
+  if (rhythms.includes('sabbath_weekly_rest')) {
+    notes.push('Weekly rest day preserved cleanly within trial adherence targets');
+  }
+  if (rhythms.includes('collectivist_household')) {
+    notes.push('Compact home-friendly sessions fitted around shared family hours');
+  }
+
   if (lp?.workPattern === 'shift_work') {
-    if (!lp?.isRamadanFastingObserver) suggestedWindow = 'Post-shift waking window';
+    if (!hasRamadan) suggestedWindow = 'Post-shift waking window';
     notes.push('Intervals aligned to shift rotation to protect sleep debt');
     recommendedDoseMode = 'micro';
   } else if (lp?.workPattern === 'desk_sedentary') {
@@ -152,8 +189,14 @@ export function buildDeterministicAdaptation(params: {
 
   const stepTips: Record<string, string> = {};
   for (const step of params.routine?.steps ?? []) {
-    if (lp?.isRamadanFastingObserver) {
+    if (hasRamadan) {
       stepTips[step.id] = 'Best completed after Iftar hydration';
+    } else if (rhythms.includes('late_family_dinner')) {
+      stepTips[step.id] = 'Time 45 min after dinner or pre-meal';
+    } else if (rhythms.includes('early_dawn_riser')) {
+      stepTips[step.id] = 'Anchor gently after dawn waking';
+    } else if (hasOtherFasting) {
+      stepTips[step.id] = 'Pair with electrolytes during refeed hours';
     } else if (lp?.climateSensitivity === 'summer_heat') {
       stepTips[step.id] = 'Prefer AC/indoor space during peak afternoon heat';
     } else if (lp?.climateSensitivity === 'cold_climate') {
@@ -216,7 +259,7 @@ export async function generateLifestyleAdaptation(params: {
     }));
 
     const prompt = `You are TrialN1's Guardrail-Protected Adaptive Lifestyle Engine.
-Adapt the presentation, timing window, and step execution hints for this routine based strictly on the participant's global location, climate, work schedule, and profile.
+Adapt the presentation, timing window, and step execution hints for this routine based on BOTH the participant's chosen cultural/household rhythms (e.g. fasting, meal timing, dawn schedule, weekly rest) AND their physical location/climate/work schedule — without ever stereotyping by country.
 
 Participant UserProfile: ${JSON.stringify(params.userProfile || {})}
 Participant UserLifestyleProfile: ${JSON.stringify(params.lifestyleProfile || {})}
@@ -227,9 +270,9 @@ Clinical Policy Limits: Pause escalation and reduce load ${activePolicy.loadRedu
 Output ONLY raw JSON matching:
 {
   "bannerTitle": "Concise 4-7 word adaptive headline referencing city/region or key factor",
-  "bannerGuidance": "1-2 sentences tailoring scheduling, environment (AC/indoor/sunlight), and recovery to their life in their region",
+  "bannerGuidance": "1-2 sentences tailoring scheduling, environment (AC/indoor/sunlight), and recovery to their chosen cultural & daily life",
   "recommendedDoseMode": "standard" | "micro" | "rest",
-  "suggestedWindow": "Best daily execution window (e.g. 'Post-Iftar 20:30' or 'Evening indoor cool-down')",
+  "suggestedWindow": "Best daily execution window matching their chosen rhythms (e.g. 'Post-Iftar 20:30', '06:00 Dawn', 'Post-dinner 21:30', or 'Evening cool-down')",
   "stepTips": {
     "<stepId>": "Short 4-8 word practical lifestyle tip for that step"
   }
@@ -238,7 +281,8 @@ Output ONLY raw JSON matching:
 STRICT SAFETY GUARDRAILS:
 1. NEVER inflate sets, reps, duration, or medication dosage beyond the paper's standard dose.
 2. You may only shift timing, suggest safer environmental conditions, or scale DOWN to 'micro' / 'rest'.
-3. NEVER give medical diagnoses or advise ignoring sharp pain or stopping prescribed medications.`;
+3. NEVER assume a participant's religion/diet from their country unless selected in culturalRhythms/activeTags; adapt strictly around physiological timing, hydration, sleep, and heat/cold safety.
+4. NEVER give medical diagnoses or advise ignoring sharp pain or stopping prescribed medications.`;
 
     const rawText = await executeWithGeminiFailover(async (apiKey) => {
       const genAI = new GoogleGenerativeAI(apiKey);

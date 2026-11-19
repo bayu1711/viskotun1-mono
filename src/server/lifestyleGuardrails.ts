@@ -78,7 +78,13 @@ export function validateRegionalTagsWithGuardrails(
 function hasCompoundingFriction(profile?: Partial<UserLifestyleProfile>): boolean {
   if (!profile) return false;
   let score = 0;
-  if (profile.isRamadanFastingObserver) score += 1;
+  const rhythms = profile.culturalRhythms ?? [];
+  const isFasting =
+    Boolean(profile.isRamadanFastingObserver) ||
+    rhythms.includes('ramadan_fasting') ||
+    rhythms.includes('periodic_religious_fasting') ||
+    rhythms.includes('intermittent_fasting');
+  if (isFasting) score += 1;
   if (profile.workPattern === 'shift_work') score += 1;
   if (profile.climateSensitivity === 'summer_heat') score += 1;
   if ((profile.physicalCautions?.length ?? 0) > 0) score += 1;

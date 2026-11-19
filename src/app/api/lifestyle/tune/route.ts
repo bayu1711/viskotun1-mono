@@ -7,19 +7,32 @@ import {
   parseLifestyleDeterministically,
   recordCrowdsourcedTag
 } from '@/server/regionalRegistry';
-import type { UserLifestyleProfile } from '@/types/auth';
-import { deriveClinicalFocus } from '@/utils/profile';
+import type { CulturalRhythmId, UserLifestyleProfile } from '@/types/auth';
+import { CULTURAL_RHYTHM_KEYS, deriveClinicalFocus } from '@/utils/profile';
+
+const VALID_RHYTHMS = new Set<string>(CULTURAL_RHYTHM_KEYS);
+
+function parseRhythmsParam(raw: string | null): CulturalRhythmId[] | undefined {
+  if (!raw) return undefined;
+  const list = raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s): s is CulturalRhythmId => VALID_RHYTHMS.has(s));
+  return list.length > 0 ? list : undefined;
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const country = searchParams.get('country') || 'AE';
   const countryName = searchParams.get('countryName') || undefined;
   const city = searchParams.get('city') || undefined;
+  const culturalRhythms = parseRhythmsParam(searchParams.get('rhythms'));
 
   const { suggestions, source } = await deriveGlobalRegionalSuggestions({
     countryCode: country,
     countryName,
-    city
+    city,
+    culturalRhythms
   });
   return NextResponse.json({ country, countryName, city, source, suggestions });
 }
@@ -87,7 +100,8 @@ Respond in 2-3 warm, professional sentences (like an expert physiotherapist or c
     const { suggestions: updatedSuggestions } = await deriveGlobalRegionalSuggestions({
       countryCode: country,
       countryName: currentProfile?.region?.countryName,
-      city: currentProfile?.region?.city
+      city: currentProfile?.region?.city,
+      culturalRhythms: deterministicResult.profileUpdates.culturalRhythms ?? currentProfile?.culturalRhythms
     });
     const mergedProfile: Partial<UserLifestyleProfile> = {
       ...currentProfile,
