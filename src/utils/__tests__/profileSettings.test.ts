@@ -1,10 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
 import {
   deriveClinicalFocus,
   deriveLifestyleCohort,
+  getRegionalReminderPresets,
   parseReminderTime,
   sanitizeAge,
   syncLifestyleActiveTags
@@ -135,5 +137,32 @@ describe('UserProfile and UserLifestyleProfile utilities & wiring', () => {
     expect(tuningViewSource).toContain('t.q1Title');
     expect(tuningViewSource).toContain('t.q4Title');
     expect(tuningViewSource).toContain('handleFinishGuidedOnboarding');
+  });
+
+  it('adapts daily reminder time preset chips to the selected region and fasting status', () => {
+    const usPresets = getRegionalReminderPresets({
+      countryCode: 'US',
+      isRamadanFastingObserver: false,
+      basePresets: COPY.profile.reminderPresets,
+      fastingPreset: COPY.profile.fastingReminderPreset
+    });
+    expect(usPresets.map((p) => p.label)).not.toContain(COPY.profile.fastingReminderPreset.label);
+    expect(usPresets.some((p) => p.value === '18:00')).toBe(true);
+
+    const uaePresets = getRegionalReminderPresets({
+      countryCode: 'AE',
+      isRamadanFastingObserver: false,
+      basePresets: COPY.profile.reminderPresets,
+      fastingPreset: COPY.profile.fastingReminderPreset
+    });
+    expect(uaePresets.map((p) => p.label)).toContain(COPY.profile.fastingReminderPreset.label);
+
+    const usRamadanPresets = getRegionalReminderPresets({
+      countryCode: 'US',
+      isRamadanFastingObserver: true,
+      basePresets: COPY.profile.reminderPresets,
+      fastingPreset: COPY.profile.fastingReminderPreset
+    });
+    expect(usRamadanPresets.map((p) => p.label)).toContain(COPY.profile.fastingReminderPreset.label);
   });
 });
