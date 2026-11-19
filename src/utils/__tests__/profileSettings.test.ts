@@ -3,6 +3,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { ROUTES } from '../../data/navigation';
 import {
+  deriveClinicalFocus,
   deriveLifestyleCohort,
   parseReminderTime,
   sanitizeAge,
@@ -87,5 +88,33 @@ describe('UserProfile and UserLifestyleProfile utilities & wiring', () => {
       'utf-8'
     );
     expect(healthAgeSource).toContain('userProfile?.age ?? 38');
+
+    const assistantRouteSource = fs.readFileSync(
+      path.resolve(__dirname, '../../app/api/assistant/route.ts'),
+      'utf-8'
+    );
+    expect(assistantRouteSource).toContain('Participant Profile & Adaptive Lifestyle Context');
+  });
+
+  it('synthesizes Primary Health / Rehab Focus from UserLifestyleProfile factors', () => {
+    const focus = deriveClinicalFocus(
+      {
+        isRamadanFastingObserver: true,
+        workPattern: 'shift_work',
+        climateSensitivity: 'summer_heat',
+        physicalCautions: ['Knee sensitivity']
+      },
+      { routineTitle: 'achilles rehab' }
+    );
+    expect(focus).toContain('achilles rehab');
+    expect(focus).toContain('post-Iftar');
+    expect(focus).toContain('shift-aligned');
+
+    const defaultFocus = deriveClinicalFocus({
+      workPattern: 'standard',
+      smokingStatus: 'non_smoker',
+      isRamadanFastingObserver: false
+    });
+    expect(defaultFocus.length).toBeGreaterThan(10);
   });
 });
