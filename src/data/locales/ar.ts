@@ -150,8 +150,9 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     reminderPresets: [
       { label: '08:00 صباحاً', value: '08:00' },
       { label: '09:00 قياسي', value: '09:00' },
-      { label: '20:30 بعد الإفطار', value: '20:30' }
+      { label: '18:00 مساءً', value: '18:00' }
     ],
+    fastingReminderPreset: { label: '20:30 بعد الإفطار', value: '20:30' },
     goalsLabel: 'الهدف الصحي أو التأهيلي الأساسي',
     goalsPlaceholder: 'يُنشأ تلقائياً من ملف نمط الحياة — أو يمكنك تعديله هنا',
     goalsGenerateBtn: 'توليد من نمط الحياة',

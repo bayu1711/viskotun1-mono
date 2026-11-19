@@ -422,8 +422,9 @@ export const COPY = {
     reminderPresets: [
       { label: '08:00 Morning', value: '08:00' },
       { label: '09:00 Standard', value: '09:00' },
-      { label: '20:30 Post-Iftar', value: '20:30' }
+      { label: '18:00 Evening', value: '18:00' }
     ],
+    fastingReminderPreset: { label: '20:30 Post-Iftar', value: '20:30' },
     goalsLabel: 'Primary health / rehab focus',
     goalsPlaceholder: 'Auto-synthesized from your Lifestyle Profile — or customize here',
     goalsGenerateBtn: 'Generate from lifestyle',
