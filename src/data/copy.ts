@@ -195,6 +195,31 @@ export const COPY = {
       finishBtn: 'Finish & Adapt Routine',
       rerunBtn: 'Update lifestyle',
       completedToast: 'Adaptive Lifestyle Profile calibrated!',
+      answerSource: 'Adaptive Lifestyle',
+      greetingRegion: (regionLabel: string) =>
+        `Hi! I'd like to tailor your routine around how your days actually run. I detected you're in ${regionLabel} — is that right, or are you following your routine from somewhere else?`,
+      askAgeTime:
+        'How old are you, and what time of day usually works best for your daily routine? Age calibrates your Biological Health Age projection, or you can skip it.',
+      askRhythm: (regionLabel: string) =>
+        `How does a typical day look for you in ${regionLabel}? Mention your work hours, local climate, or any cultural and household rhythms — like shift work, desk hours, fasting, early mornings, or late dinners.`,
+      askCautions:
+        'Last question: are there any joint sensitivities (like knees, lower back, or shoulders) or smoking/tobacco habits I should pace around safely?',
+      completionSummary: (focus: string) =>
+        `All set — your adaptive lifestyle profile is calibrated. I've tailored your routine focus around: ${focus}. Message me anytime if your schedule, location, or habits change.`,
+      returningGreeting: (regionLabel: string, summary: string) =>
+        `You're tuned for ${regionLabel}${summary ? ` (${summary})` : ''}. Tell me anytime if your location, schedule, or habits change and I'll adapt your routine right away.`,
+      rerunGreeting: (regionLabel: string) =>
+        `Sure, let's refresh your lifestyle profile. Are you still following your routine from ${regionLabel}, or somewhere else?`,
+      placeholderRegion: 'Reply yes, or type your city & country (e.g. Tokyo, Japan)...',
+      placeholderAgeTime: 'e.g. 34, mornings around 7:30am (or just a time)...',
+      placeholderRhythm: 'e.g. Desk job, Ramadan fasting, summer heat...',
+      placeholderCautions: 'e.g. Slight knee stiffness, non-smoker (or none)...',
+      placeholderComplete: 'Tell me any schedule, location, or habit change...',
+      quickSkipAge: 'Skip age · 09:00',
+      quickStandardRhythm: 'Standard 9–5 · none of these',
+      quickNoCautions: 'No cautions · non-smoker',
+      quickDone: 'Done — back to routine',
+      quickUpdateProfile: 'Update my full profile',
       q1Title: '1. Where are you joining from?',
       q1Ask: (regionLabel: string) =>
         `I detected ${regionLabel}. Confirm this region or type your city & country so I can fetch locally relevant factors and climate guidance.`,
