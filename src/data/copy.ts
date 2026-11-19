@@ -60,7 +60,8 @@ export const COPY = {
     dayOfTotal: (day: number, total: number) => `Day ${day} / ${total}`,
     dropTitle: 'Drop to extract',
     dropSubtitle: "We'll isolate the methods & build a routine",
-    dropScope: 'Interventional human research · clinical trials, RCTs & behavioral routines'
+    dropScope: 'Interventional human research · clinical trials, RCTs & behavioral routines',
+    switchLanguageTo: (label: string) => `Switch language to ${label}`
   },
   switcher: {
     heading: 'Your papers',
@@ -164,17 +165,17 @@ export const COPY = {
     topBarPill: (region: string, tagCount: number) =>
       tagCount > 0 ? `${region} · ${tagCount} lifestyle active` : `${region} · Tune profile`,
     detectedLocationGreeting: (country: string, city?: string) =>
-      `Marhaban! I detect you're tracking from ${city ? `${city}, ` : ''}${country}. Is that right?`,
+      `Hello! I detect you're tracking from ${city ? `${city}, ` : ''}${country}. Is that right?`,
     unknownLocationGreeting:
       'Welcome! Which city or region are you tracking from? Selecting your region lets TrialN1 tailor your daily plan around local climate, fasting hours, and work patterns.',
     confirmLocationBtn: (cityOrCountry: string) => `Yes, ${cityOrCountry}`,
     changeLocationBtn: 'Change Region',
     customPromptPlaceholder: 'Type or speak: e.g. "I work rotating 12h night shifts and smoke shisha occasionally"...',
-    suggestionsEyebrow: (region: string) => `Popular lifestyle factors in ${region}`,
+    suggestionsEyebrow: (region: string) => `Diverse lifestyle & cultural factors in ${region}`,
     tagAddedToast: (tag: string) => `Added "${tag}" to lifestyle profile`,
     tagRemovedToast: (tag: string) => `Removed "${tag}" from lifestyle profile`,
     lifestyleIntro: (region: string) =>
-      `Here are the most common lifestyle patterns in ${region}. Tap any that apply to your day, or describe your schedule and habits in your own words:`,
+      `Here is a diverse mix of cultural, climate, and schedule patterns in ${region}. Select any that reflect how your day actually works, or describe your habits in your own words:`,
     tagAddedConfirmation: (tag: string) =>
       `Added "${tag}" to your lifestyle profile. I've adjusted your daily routine parameters and will monitor corresponding outcome indicators.`,
     crowdsourcedTagNotice: (tag: string, country: string) =>
@@ -200,9 +201,9 @@ export const COPY = {
       q2Title: '2. Your age & preferred daily time',
       q2Ask:
         'How old are you, and what time works best for your daily routine? Your age calibrates Biological Health Age projections on Dashboard.',
-      q3Title: '3. Daily rhythm, climate & local factors',
+      q3Title: '3. Daily rhythm, culture & local environment',
       q3Ask: (regionLabel: string) =>
-        `How does a typical day look in ${regionLabel}? Tap any schedule, climate, fasting, or regional options that fit you:`,
+        `People in ${regionLabel} follow many different cultural & daily rhythms. Select how your day actually works:`,
       q4Title: '4. Physical cautions & daily habits',
       q4Ask:
         'Any joint sensitivities or smoking/tobacco habits I should adapt pacing around safely? You can also type anything else below.',
@@ -425,10 +426,17 @@ export const COPY = {
       { label: '18:00 Evening', value: '18:00' }
     ],
     fastingReminderPreset: { label: '20:30 Post-Iftar', value: '20:30' },
+    dawnReminderPreset: { label: '06:00 Dawn', value: '06:00' },
+    lateDinnerReminderPreset: { label: '21:30 Post-Dinner', value: '21:30' },
     goalsLabel: 'Primary health / rehab focus',
     goalsPlaceholder: 'Auto-synthesized from your Lifestyle Profile — or customize here',
     goalsGenerateBtn: 'Generate from lifestyle',
     goalsHint: 'Automatically adapts with your UserLifestyleProfile and is shared directly with TrialN1 AI.',
+    languageSectionLabel: 'App language & header switcher',
+    primaryLanguageLabel: 'Primary language',
+    secondaryLanguageLabel: 'Secondary language',
+    secondaryLanguageNone: 'None (single language)',
+    languageHint: 'The top header toggles quickly between your primary and secondary languages. Choose None for a single-language header.',
     lifestyleEyebrow: 'UserLifestyleProfile',
     lifestyleTitle: 'Adaptive Lifestyle Context',
     regionLabel: 'Region & city',
@@ -467,6 +475,18 @@ export const COPY = {
     },
     ramadanLabel: 'Ramadan fasting observer',
     ramadanDesc: 'Shifts exertion windows, hydration pacing, and circadian guidance safely during fasting hours.',
+    culturalRhythmsLabel: 'Cultural & household rhythms (any country)',
+    culturalRhythmsHint: 'Culture and daily habits vary across households in every country — select all rhythms that fit your week.',
+    culturalRhythmOptions: {
+      ramadan_fasting: 'Ramadan fasting (Suhoor / Iftar)',
+      intermittent_fasting: 'Intermittent fasting (16:8 / TRE)',
+      periodic_religious_fasting: 'Periodic fasting (Lent / Ekadashi / weekly)',
+      late_family_dinner: 'Late family dinner (21:00+)',
+      early_dawn_riser: 'Early dawn / prayer riser',
+      midday_siesta_rest: 'Midday rest / siesta window',
+      sabbath_weekly_rest: 'Weekly rest / Sabbath rhythm',
+      collectivist_household: 'Multi-generational household'
+    },
     cautionsLabel: 'Physical cautions',
     cautionPresets: ['Morning stiffness', 'Knee sensitivity', 'Lower back caution', 'Heat fatigue'],
     activeTagsLabel: 'Active adaptation tags',
@@ -479,6 +499,10 @@ export const COPY = {
       `Calendar exports (.ics & Google) schedule daily reminders at ${time}.`,
     impactCohortItem: (cohort: string) =>
       `Community reviews tag your cohort as "${cohort}".`,
+    impactLanguageItem: (primaryLabel: string, secondaryLabel?: string) =>
+      secondaryLabel
+        ? `Top header quick-switches between ${primaryLabel} and ${secondaryLabel}.`
+        : `Interface uses ${primaryLabel} only (header switcher hidden).`,
     accountCardTitle: 'Account & Cloud Sync',
     guestNotice: 'You are exploring as a guest. Preferences save locally on this device — sign in to sync across devices.',
     signedInNotice: (email: string) => `Signed in as ${email}. Routine progress and profile settings sync automatically.`,

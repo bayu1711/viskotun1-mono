@@ -66,7 +66,8 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     dayOfTotal: (day: number, total: number) => `اليوم ${day} / ${total}`,
     dropTitle: 'اسحب للاستخراج الفوري',
     dropSubtitle: 'سنعزل منهجية الدراسة ونبني خطتك الصحية',
-    dropScope: 'أبحاث سريرية بشرية تداخلية · تجارب منضبطة وخطط سلوكية'
+    dropScope: 'أبحاث سريرية بشرية تداخلية · تجارب منضبطة وخطط سلوكية',
+    switchLanguageTo: (label: string) => `التحويل إلى ${label}`
   },
   switcher: {
     heading: 'أوراقك البحثية',
@@ -153,10 +154,17 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       { label: '18:00 مساءً', value: '18:00' }
     ],
     fastingReminderPreset: { label: '20:30 بعد الإفطار', value: '20:30' },
+    dawnReminderPreset: { label: '06:00 الفجر', value: '06:00' },
+    lateDinnerReminderPreset: { label: '21:30 بعد العشاء', value: '21:30' },
     goalsLabel: 'الهدف الصحي أو التأهيلي الأساسي',
     goalsPlaceholder: 'يُنشأ تلقائياً من ملف نمط الحياة — أو يمكنك تعديله هنا',
     goalsGenerateBtn: 'توليد من نمط الحياة',
     goalsHint: 'يتكيف تلقائياً مع ملف نمط الحياة التكيفي ويُرسل مباشرة إلى مساعد TrialN1 الذكي.',
+    languageSectionLabel: 'لغة التطبيق ومبدّل الشريط العلوي',
+    primaryLanguageLabel: 'اللغة الأساسية',
+    secondaryLanguageLabel: 'اللغة الثانوية',
+    secondaryLanguageNone: 'بدون (لغة واحدة)',
+    languageHint: 'يتيح الشريط العلوي التبديل السريع بين لغتك الأساسية والثانوية. اختر «بدون» لاستخدام لغة واحدة فقط.',
     lifestyleEyebrow: 'UserLifestyleProfile',
     lifestyleTitle: 'سياق نمط الحياة التكيفي',
     regionLabel: 'المنطقة والمدينة',
@@ -195,6 +203,18 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     },
     ramadanLabel: 'صيام شهر رمضان المبارك',
     ramadanDesc: 'يعيد جدولة الجهد البدني والترطيب والإرشاد اليومي بما يتناسب بأمان مع ساعات الصيام.',
+    culturalRhythmsLabel: 'الإيقاعات الثقافية والأسرية (في أي دولة)',
+    culturalRhythmsHint: 'تختلف الثقافات والعادات اليومية بين الأسر في كل بلد — اختر كل ما يناسب روتينك الأسبوعي.',
+    culturalRhythmOptions: {
+      ramadan_fasting: 'صيام رمضان (السحور / الإفطار)',
+      intermittent_fasting: 'صيام متقطع (16:8)',
+      periodic_religious_fasting: 'صيام دوري أو تقليدي (أسبوعي / مواسم)',
+      late_family_dinner: 'عشاء عائلي متأخر (+21:00)',
+      early_dawn_riser: 'استيقاظ مبكر وقت الفجر',
+      midday_siesta_rest: 'قيلولة أو راحة منتصف اليوم',
+      sabbath_weekly_rest: 'يوم راحة أسبوعي مخصص',
+      collectivist_household: 'أسرة ممتدة / جدول عائلي مشترك'
+    },
     cautionsLabel: 'ملاحظات واحتياطات بدنية',
     cautionPresets: ['تيبس صباحي', 'حساسية الركبة', 'حذر أسفل الظهر', 'إجهاد حراري'],
     activeTagsLabel: 'الوسوم التكيفية النشطة',
@@ -207,6 +227,10 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       `تُجدول تنبيهات التقويم (.ics وGoogle) يومياً عند الساعة ${time}.`,
     impactCohortItem: (cohort: string) =>
       `تُصنف مراجعات المجتمع ضمن فئة "${cohort}".`,
+    impactLanguageItem: (primaryLabel: string, secondaryLabel?: string) =>
+      secondaryLabel
+        ? `يتيح الشريط العلوي التبديل السريع بين ${primaryLabel} و${secondaryLabel}.`
+        : `تستخدم الواجهة ${primaryLabel} فقط (مبدّل الشريط العلوي مخفي).`,
     accountCardTitle: 'الحساب والمزامنة السحابية',
     guestNotice: 'أنت تتصفح كضيف. تُحفظ التفضيلات محلياً — سجل الدخول للمزامنة عبر أجهزتك.',
     signedInNotice: (email: string) => `تم تسجيل الدخول عبر ${email}. تتم مزامنة خططك وملفك تلقائياً.`,
@@ -292,7 +316,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     changeLocationBtn: 'تغيير المنطقة',
     customPromptPlaceholder:
       'اكتب أو تحدث: مثال "أعمل بنظام النوبات الليلية في المستشفى وأدخن الشيشة في العطلات"...',
-    suggestionsEyebrow: (region: string) => `عوامل نمط الحياة الشائعة في ${region}`,
+    suggestionsEyebrow: (region: string) => `عوامل ثقافية ومجتمعية متنوعة في ${region}`,
     tagAddedToast: (tag: string) => `تمت إضافة "${tag}" إلى ملفك الصحي`,
     tagRemovedToast: (tag: string) => `تمت إزالة "${tag}" من ملفك الصحي`,
     lifestyleIntro: (region: string) =>
@@ -322,9 +346,9 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       q2Title: '2. العمر ووقت التذكير اليومي المفضل',
       q2Ask:
         'كم عمرك، وما هو أفضل وقت يومي لتنفيذ خطتك؟ يُستخدم عمرك لتخصيص توقع العمر الصحي في لوحة المؤشرات.',
-      q3Title: '3. جدول العمل، المناخ، والعوامل الإقليمية',
+      q3Title: '3. الإيقاع اليومي، الثقافة، والبيئة المحلية',
       q3Ask: (regionLabel: string) =>
-        `كيف يبدو يومك المعتاد في ${regionLabel}؟ اختر ما ينطبق على جدولك والمناخ والصيام:`,
+        `يتبع المقيمون في ${regionLabel} أنماطاً ثقافية ومعيشية متعددة. اختر ما يعبر عن يومك الفعلي:`,
       q4Title: '4. الاحتياطات البدنية والعادات اليومية',
       q4Ask:
         'هل لديك أي حساسية مفاصل أو عادات تدخين أحتاج لمراعاتها بأمان؟ يمكنك أيضاً كتابة أي تفاصيل إضافية أدناه.',
