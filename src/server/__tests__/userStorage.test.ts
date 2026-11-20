@@ -1,56 +1,65 @@
 import { describe, expect, it } from 'vitest';
 import {
-  getUserRecord,
-  saveUserRecord,
+  computeRoutineUserStats,
+  deleteUserAccount,
   getAllUserRecords,
   getLiveUserStats,
+  LEGACY_SAMPLE_USER_IDS,
   memoryUserStorage,
+  saveUserRecord,
   type UserRecord
 } from '../userStorage';
-import { SEEDED_COMMUNITY_USERS } from '../seedUsers';
 
 describe('userStorage and live community telemetry', () => {
-  it('pre-seeds memory cache with 10 authentic simulated trial cohort participants', async () => {
-    const allUsers = await getAllUserRecords();
-    expect(allUsers.length).toBeGreaterThanOrEqual(10);
+  it('never counts example participants as real users', async () => {
+    const sampleId = Array.from(LEGACY_SAMPLE_USER_IDS)[0];
+    memoryUserStorage.set(sampleId, {
+      userId: sampleId,
+      activeRoutineId: 'achilles',
+      routines: [],
+      runtime: {},
+      updatedAt: Date.now()
+    });
 
-    for (const seeded of SEEDED_COMMUNITY_USERS) {
-      const user = await getUserRecord(seeded.userId);
-      expect(user).toBeDefined();
-      expect(user?.userId).toBe(seeded.userId);
-    }
+    const allUsers = await getAllUserRecords();
+    expect(allUsers.some((u) => LEGACY_SAMPLE_USER_IDS.has(u.userId))).toBe(false);
+    memoryUserStorage.delete(sampleId);
   });
 
-  it('computes genuine baseline telemetry for seeded papers', async () => {
-    const achillesStats = await getLiveUserStats('achilles');
-    expect(achillesStats.activeTrackersCount).toBe(4);
-    expect(achillesStats.userLogsCount).toBe(30);
+  it('aggregates trackers and logs per routine in one pass, merging routine aliases', () => {
+    const users: UserRecord[] = [
+      {
+        userId: 'a',
+        activeRoutineId: 'achilles',
+        routines: [],
+        runtime: {
+          achilles: {
+            setsDone: { s1: 3, s2: 3 },
+            feedbackLogs: [{ id: 'l1', day: 1, score: 2, note: '', loggedAt: 'Day 1' }],
+            messages: [],
+            escalationPaused: false
+          }
+        },
+        updatedAt: 1
+      },
+      {
+        userId: 'b',
+        activeRoutineId: 'achilles-rehab',
+        routines: [],
+        runtime: {},
+        updatedAt: 1
+      }
+    ];
 
-    const hairLossStats = await getLiveUserStats('hair-loss');
-    expect(hairLossStats.activeTrackersCount).toBe(4);
-    expect(hairLossStats.userLogsCount).toBe(21);
-
-    const creatineStats = await getLiveUserStats('creatine-sleep');
-    expect(creatineStats.activeTrackersCount).toBe(2);
-    expect(creatineStats.userLogsCount).toBe(12);
-
-    // Unseeded ground-truth papers have 0 trackers and 0 logs
-    const fastingStats = await getLiveUserStats('time-restricted-eating');
-    expect(fastingStats.activeTrackersCount).toBe(0);
-    expect(fastingStats.userLogsCount).toBe(0);
-
-    const lightStats = await getLiveUserStats('light-circadian');
-    expect(lightStats.activeTrackersCount).toBe(0);
-    expect(lightStats.userLogsCount).toBe(0);
+    const stats = computeRoutineUserStats(users);
+    expect(stats.get('achilles')).toEqual({ activeTrackersCount: 2, userLogsCount: 3 });
   });
 
   it('increments active trackers and logs live when a real user starts tracking and logging', async () => {
     const initialStats = await getLiveUserStats('achilles');
-    const initialTrackers = initialStats.activeTrackersCount;
-    const initialLogs = initialStats.userLogsCount;
 
     const testUser: UserRecord = {
-      userId: 'test-real-user-live-sync@domain.com',
+      userId: 'test-real-user-live-sync',
       activeRoutineId: 'achilles',
       routines: [],
       runtime: {
@@ -70,14 +79,12 @@ describe('userStorage and live community telemetry', () => {
     await saveUserRecord(testUser);
 
     const updatedStats = await getLiveUserStats('achilles');
-    expect(updatedStats.activeTrackersCount).toBe(initialTrackers + 1);
+    expect(updatedStats.activeTrackersCount).toBe(initialStats.activeTrackersCount + 1);
     // 2 sets + 1 feedback log = 3 additional logs
-    expect(updatedStats.userLogsCount).toBe(initialLogs + 3);
+    expect(updatedStats.userLogsCount).toBe(initialStats.userLogsCount + 3);
 
-    // Cleanup test user from memory
-    memoryUserStorage.delete(testUser.userId);
+    await deleteUserAccount(testUser.userId);
     const cleanedStats = await getLiveUserStats('achilles');
-    expect(cleanedStats.activeTrackersCount).toBe(initialTrackers);
-    expect(cleanedStats.userLogsCount).toBe(initialLogs);
+    expect(cleanedStats).toEqual(initialStats);
   });
 });

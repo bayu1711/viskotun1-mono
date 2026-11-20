@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { authHeaders, installTestAuth } from './authTestUtils';
 import { DELETE, POST } from '../../app/api/user/account/route';
 import {
   getUserRecord,
@@ -48,6 +49,10 @@ const SAMPLE_RUNTIME: Record<string, RoutineRuntime> = {
 };
 
 describe('User Account Lifecycle API & Data Utilities', () => {
+  beforeAll(() => {
+    installTestAuth();
+  });
+
   it('clears all user data via POST /api/user/account while keeping account active', async () => {
     await saveUserRecord({
       userId: TEST_USER_ID,
@@ -65,7 +70,7 @@ describe('User Account Lifecycle API & Data Utilities', () => {
 
     const req = new Request('http://localhost/api/user/account', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders(TEST_USER_ID) },
       body: JSON.stringify({ action: 'clear_data', userId: TEST_USER_ID })
     });
     const res = await POST(req);
@@ -91,7 +96,7 @@ describe('User Account Lifecycle API & Data Utilities', () => {
     const deactivateRes = await POST(
       new Request('http://localhost/api/user/account', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders(TEST_USER_ID) },
         body: JSON.stringify({ action: 'deactivate', userId: TEST_USER_ID })
       })
     );
@@ -104,7 +109,7 @@ describe('User Account Lifecycle API & Data Utilities', () => {
     const reactivateRes = await POST(
       new Request('http://localhost/api/user/account', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders(TEST_USER_ID) },
         body: JSON.stringify({ action: 'reactivate', userId: TEST_USER_ID })
       })
     );
@@ -128,7 +133,7 @@ describe('User Account Lifecycle API & Data Utilities', () => {
     const deleteRes = await DELETE(
       new Request('http://localhost/api/user/account', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders(TEST_USER_ID) },
         body: JSON.stringify({ userId: TEST_USER_ID })
       })
     );
@@ -138,20 +143,20 @@ describe('User Account Lifecycle API & Data Utilities', () => {
     expect(memoryUserStorage.has(TEST_USER_ID)).toBe(false);
   });
 
-  it('rejects invalid requests cleanly with HTTP 400', async () => {
-    const missingUser = await POST(
+  it('rejects unauthenticated requests with 401 and invalid actions with 400', async () => {
+    const missingToken = await POST(
       new Request('http://localhost/api/user/account', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'clear_data' })
+        body: JSON.stringify({ action: 'clear_data', userId: TEST_USER_ID })
       })
     );
-    expect(missingUser.status).toBe(400);
+    expect(missingToken.status).toBe(401);
 
     const invalidAction = await POST(
       new Request('http://localhost/api/user/account', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders(TEST_USER_ID) },
         body: JSON.stringify({ action: 'unknown', userId: TEST_USER_ID })
       })
     );
@@ -238,9 +243,10 @@ describe('User Account Lifecycle API & Data Utilities', () => {
     expect(authSource).toContain('router.replace(ROUTES.landing)');
   });
 
-  it('supports deleting a user account via query param without a JSON body', async () => {
+  it('deletes only the token owner, ignoring a userId in the query string', async () => {
+    const victimId = `${TEST_USER_ID}-victim`;
     await saveUserRecord({
-      userId: `${TEST_USER_ID}-query`,
+      userId: victimId,
       activeRoutineId: 'achilles-test',
       routines: [SAMPLE_ROUTINE],
       runtime: SAMPLE_RUNTIME,
@@ -248,13 +254,19 @@ describe('User Account Lifecycle API & Data Utilities', () => {
     });
 
     const deleteRes = await DELETE(
-      new Request(`http://localhost/api/user/account?userId=${encodeURIComponent(`${TEST_USER_ID}-query`)}`, {
-        method: 'DELETE'
+      new Request(`http://localhost/api/user/account?userId=${encodeURIComponent(victimId)}`, {
+        method: 'DELETE',
+        headers: authHeaders(`${TEST_USER_ID}-attacker`)
       })
     );
     expect(deleteRes.status).toBe(200);
-    const body = await deleteRes.json();
-    expect(body.deleted).toBe(true);
-    expect(memoryUserStorage.has(`${TEST_USER_ID}-query`)).toBe(false);
+    expect(memoryUserStorage.has(victimId)).toBe(true);
+
+    const unauthenticated = await DELETE(
+      new Request(`http://localhost/api/user/account?userId=${encodeURIComponent(victimId)}`, { method: 'DELETE' })
+    );
+    expect(unauthenticated.status).toBe(401);
+    expect(memoryUserStorage.has(victimId)).toBe(true);
+    memoryUserStorage.delete(victimId);
   });
 });
