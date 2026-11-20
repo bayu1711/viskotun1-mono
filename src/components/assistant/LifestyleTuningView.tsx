@@ -29,7 +29,6 @@ interface LifestyleTuningViewProps {
   onRestartInterview: (copy: LocaleCopy) => void;
   onSuggestionsLoaded?: (suggestions: RegionalLifestyleTag[]) => void;
   onUpdateProfile?: (updates: Partial<UserLifestyleProfile>) => void;
-  onSkipOnboarding?: () => void;
 }
 
 export function LifestyleTuningView({
@@ -41,8 +40,7 @@ export function LifestyleTuningView({
   onInitConversation,
   onRestartInterview,
   onSuggestionsLoaded,
-  onUpdateProfile,
-  onSkipOnboarding
+  onUpdateProfile
 }: LifestyleTuningViewProps) {
   const { copy } = useLocale();
 
@@ -141,15 +139,7 @@ export function LifestyleTuningView({
           })}
         </div>
 
-        {needsOnboarding && onSkipOnboarding ? (
-          <button
-            type="button"
-            onClick={onSkipOnboarding}
-            className="shrink-0 py-1 text-2xs font-medium text-ink/65 underline underline-offset-4 hover:text-ink transition-colors cursor-pointer"
-          >
-            {t.skipBtn}
-          </button>
-        ) : stage === 'complete' ? (
+        {!needsOnboarding && stage === 'complete' && (
           <button
             type="button"
             onClick={() => onRestartInterview(copy)}
@@ -157,7 +147,7 @@ export function LifestyleTuningView({
           >
             {t.rerunBtn}
           </button>
-        ) : null}
+        )}
       </div>
 
       {/* Natural AI ↔ User conversation stream, matching Ask paper */}

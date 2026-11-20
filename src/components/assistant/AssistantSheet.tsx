@@ -225,7 +225,6 @@ export function AssistantSheet() {
                   onRestartInterview={restartLifestyleInterview}
                   onSuggestionsLoaded={setLifestyleSuggestions}
                   onUpdateProfile={updateLifestyleProfile}
-                  onSkipOnboarding={handleClose}
                 />
               ) : isAsk ? (
                 /* Ask Mode: Contextual to Active Routine */
