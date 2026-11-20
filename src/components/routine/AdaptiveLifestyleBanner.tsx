@@ -5,7 +5,6 @@ import Link from 'next/link';
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined';
-import VerifiedUserOutlinedIcon from '@mui/icons-material/VerifiedUserOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useLocale } from '../../contexts/LocaleContext';
@@ -125,18 +124,6 @@ export function AdaptiveLifestyleBanner({ className }: { className?: string }) {
                   : scheduleSummaryPill || activeAdaptation?.suggestedWindow}
             </span>
           </button>
-
-          {activeAdaptation?.guardrailVerified && (
-            <span
-              title={activeAdaptation.safetyGuardrailNote}
-              className="inline-flex items-center gap-1 rounded-full border border-ink/15 bg-white/80 px-2 py-0.5 text-3xs font-medium text-ink/75"
-            >
-              <Icon icon={VerifiedUserOutlinedIcon} size="xs" />
-              <span>
-                {locale === 'ar' ? 'موثق بضوابط السلامة' : 'Guardrail verified'}
-              </span>
-            </span>
-          )}
         </div>
 
         <div className="flex items-center gap-1.5">
