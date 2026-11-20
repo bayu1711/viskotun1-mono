@@ -1,7 +1,11 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { AuthContext } from '../contexts/AuthContext';
-import { DEFAULT_CONFIRMATION_SCORE, FEEDBACK_ESCALATION_THRESHOLD } from '../data/config';
+import {
+  DEFAULT_CONFIRMATION_SCORE,
+  EXTRACTION_CLIENT_TIMEOUT_MS,
+  FEEDBACK_ESCALATION_THRESHOLD
+} from '../data/config';
 import { COPY } from '../data/copy';
 import { getLocaleCopy } from '../data/locales';
 import { useLocale } from '../contexts/LocaleContext';
@@ -1935,7 +1939,7 @@ export function useRoutineState() {
         const res = await fetch('/api/extract', {
           method: 'POST',
           body: formData,
-          signal: AbortSignal.timeout(45000)
+          signal: AbortSignal.timeout(EXTRACTION_CLIENT_TIMEOUT_MS)
         });
 
         if (!res.ok) {

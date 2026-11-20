@@ -1172,6 +1172,8 @@ export const COPY = {
     ],
     ready:
       "Draft ready for review. It'll appear in your papers once you confirm the extracted parameters."
+,
+    slowHint: 'Still reading. Long papers can take up to a minute; keep this open and the draft will appear here.'
   },
   upload: {
     title: 'Drop a research PDF',
@@ -1205,7 +1207,7 @@ export const COPY = {
     fullTextUnavailable:
       'This paper is not open access, so its methods cannot be read from the link. Upload the PDF to extract the routine.',
     paperLookupFailed: 'Could not reach Europe PMC to fetch this paper. Try again or upload the PDF.',
-    modelUnavailable: 'The paper was found, but the extraction model is busy right now. Try again in a minute.',
+    modelUnavailable: 'Your paper arrived, but the extraction model is busy right now, so nothing was extracted. Try again in a minute.',
     matchedBannedKeyword: (keyword: string, version: string) =>
       `Paper declined: Matched restricted non-human / theoretical policy criterion ("${keyword}"). TrialN1 enforces interventional human science only per clinical policy v${version}.`,
     declinedAnimalReason:
