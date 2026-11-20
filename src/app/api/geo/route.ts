@@ -35,10 +35,10 @@ export async function GET(request: NextRequest) {
 
   // Global neutral fallback when neither CDN geo headers nor timezone resolved
   return NextResponse.json({
-    countryCode: 'AE',
-    countryName: 'United Arab Emirates',
-    city: 'Abu Dhabi',
-    source: 'default_uae',
+    countryCode: '',
+    countryName: '',
+    city: undefined,
+    source: 'default_global',
     confirmed: false
   });
 }

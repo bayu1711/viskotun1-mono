@@ -30,14 +30,15 @@ export function HealthAgeCard() {
 
   const t = copy.healthAge;
 
+  const activeTags = lifestyleProfile?.activeTags ?? [];
   const projection = calculateHealthAgeProjection({
     adherenceRate,
     streak,
     currentDay,
     totalDays,
     microDoseCount: streak > 0 ? Math.min(streak, 4) : 0,
-    barrierCount: 4,
-    activeTags: lifestyleProfile?.activeTags ?? ['extreme_heat_summer', 'healthcare_shift_worker'],
+    barrierCount: activeTags.length,
+    activeTags,
     chronologicalAge: userProfile?.age ?? 38
   });
 

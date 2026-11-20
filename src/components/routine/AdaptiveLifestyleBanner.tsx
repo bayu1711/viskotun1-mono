@@ -14,7 +14,6 @@ import { ROUTES } from '../../data/navigation';
 import type { AvailableTimeWindow, RoutineScheduleMode } from '../../types/schedule';
 import { cn } from '../../utils/cn';
 import {
-  DEFAULT_AVAILABLE_WINDOWS,
   evaluateRoutineScheduleCompatibility,
   formatAvailabilitySummary,
   normalizeAvailableWindows,
@@ -62,9 +61,7 @@ export function AdaptiveLifestyleBanner({ className }: { className?: string }) {
   const customWindows: AvailableTimeWindow[] =
     routineSchedule?.customWindows && routineSchedule.customWindows.length > 0
       ? routineSchedule.customWindows
-      : profileAvail.windows.length > 0
-        ? profileAvail.windows
-        : [...DEFAULT_AVAILABLE_WINDOWS];
+      : profileAvail.windows;
 
   const handleModeSelect = (mode: RoutineScheduleMode) => {
     if (mode === 'custom_windows') {

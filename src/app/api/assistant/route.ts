@@ -92,22 +92,36 @@ Strict Scope Rules:
     }
 
     const activePolicy = await getEffectiveGuardrails();
-    const participantContext = userProfile || lifestyleProfile
-      ? `\nParticipant Profile & Adaptive Lifestyle Context:\n${JSON.stringify({
-          age: userProfile?.age,
-          biologicalSex: userProfile?.biologicalSex,
-          clinicalGoals: userProfile?.clinicalGoals,
-          availabilityMode: userProfile?.availabilityMode,
-          availableWindows: userProfile?.availableWindows,
-          region: lifestyleProfile?.region,
-          workPattern: lifestyleProfile?.workPattern,
-          activityBaseline: lifestyleProfile?.activityBaseline,
-          smokingStatus: lifestyleProfile?.smokingStatus,
-          isRamadanFastingObserver: lifestyleProfile?.isRamadanFastingObserver,
-          climateSensitivity: lifestyleProfile?.climateSensitivity,
-          physicalCautions: lifestyleProfile?.physicalCautions,
-          activeTags: lifestyleProfile?.activeTags
-        })}`
+    const hasRegionContext = Boolean(
+      lifestyleProfile?.region?.countryCode || lifestyleProfile?.region?.countryName
+    );
+    const contextPayload = {
+      age: userProfile?.age,
+      biologicalSex: userProfile?.biologicalSex,
+      clinicalGoals: userProfile?.clinicalGoals,
+      availabilityMode: userProfile?.availabilityMode,
+      availableWindows:
+        userProfile?.availableWindows && userProfile.availableWindows.length > 0
+          ? userProfile.availableWindows
+          : undefined,
+      region: hasRegionContext ? lifestyleProfile?.region : undefined,
+      workPattern: lifestyleProfile?.workPattern,
+      activityBaseline: lifestyleProfile?.activityBaseline,
+      smokingStatus: lifestyleProfile?.smokingStatus,
+      isRamadanFastingObserver: lifestyleProfile?.isRamadanFastingObserver || undefined,
+      climateSensitivity: lifestyleProfile?.climateSensitivity,
+      physicalCautions:
+        lifestyleProfile?.physicalCautions && lifestyleProfile.physicalCautions.length > 0
+          ? lifestyleProfile.physicalCautions
+          : undefined,
+      activeTags:
+        lifestyleProfile?.activeTags && lifestyleProfile.activeTags.length > 0
+          ? lifestyleProfile.activeTags
+          : undefined
+    };
+    const hasParticipantContext = Object.values(contextPayload).some((v) => v !== undefined);
+    const participantContext = hasParticipantContext
+      ? `\nParticipant Profile & Adaptive Lifestyle Context:\n${JSON.stringify(contextPayload)}`
       : '';
 
     const systemInstruction = `You are N1 AI, a clinical study safety assistant for the research paper routine "${resolvedTitle}".

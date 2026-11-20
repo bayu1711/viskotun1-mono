@@ -31,7 +31,12 @@ export function calculateHealthAgeProjection(input: HealthAgeEngineInput): Healt
 
   // 1. Habit Resilience Score (0–100%)
   // Combines pure adherence with ability to convert severe friction into micro-doses
-  const conversionRate = barrierCount > 0 ? microDoseCount / barrierCount : 1.0;
+  const hasActivity = adherence > 0 || streak > 0;
+  const conversionRate = !hasActivity
+    ? 0
+    : barrierCount > 0
+      ? Math.min(1, microDoseCount / barrierCount)
+      : adherence / 100;
   const baseScore = adherence * 0.6;
   const conversionScore = Math.min(25, conversionRate * 25);
   const streakBonus = Math.min(15, streak * 0.75);
@@ -59,8 +64,9 @@ export function calculateHealthAgeProjection(input: HealthAgeEngineInput): Healt
   const totalYearsReduction = Number(
     (physicalMovementYears + circadianSleepYears + substanceHarmReductionYears).toFixed(1)
   );
-  // Total reduction expressed as a negative delta (e.g. -3.4 years)
-  const healthAgeDelta = -Math.max(0.4, Math.min(4.8, totalYearsReduction));
+  // Total reduction expressed as a negative delta (e.g. -3.4 years); 0 when no activity yet
+  const healthAgeDelta =
+    totalYearsReduction > 0 ? -Math.max(0.1, Math.min(4.8, totalYearsReduction)) : 0;
   const projectedHealthAge = Number((chronoAge + healthAgeDelta).toFixed(1));
 
   // 3. Chronic Disease Relative Risk Reduction (%)

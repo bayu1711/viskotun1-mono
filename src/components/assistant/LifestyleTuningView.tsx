@@ -46,8 +46,8 @@ export function LifestyleTuningView({
   const { copy, locale } = useLocale();
 
   const region = lifestyleProfile?.region;
-  const countryCode = region?.countryCode || 'AE';
-  const countryName = region?.countryName || 'United Arab Emirates';
+  const countryCode = region?.countryCode || '';
+  const countryName = region?.countryName || '';
   const city = region?.city || '';
   const regionLabel = formatRegionLabel(region);
   const activeTags = lifestyleProfile?.activeTags || [];
@@ -63,6 +63,7 @@ export function LifestyleTuningView({
 
   // Keep footer quick-reply suggestions synced with the user's region & cultural rhythms
   useEffect(() => {
+    if (!countryCode) return;
     let active = true;
     async function loadSuggestions() {
       try {
@@ -93,69 +94,75 @@ export function LifestyleTuningView({
   };
 
   const t = copy.lifestyleTuning.onboarding;
+  const hasConfirmedRegion = Boolean(region?.confirmed && regionLabel);
   const hasAvailability =
     Boolean(userProfile?.availabilityMode) ||
     Boolean(userProfile?.availableWindows && userProfile.availableWindows.length > 0);
   const availabilityLabel = hasAvailability
     ? formatAvailabilitySummary(userProfile, undefined, locale)
     : null;
+  const showRerunButton = !needsOnboarding && stage === 'complete';
   const hasContextChips =
-    Boolean(region?.confirmed) ||
+    hasConfirmedRegion ||
     Boolean(availabilityLabel) ||
     activeTags.length > 0;
 
   return (
     <div className="space-y-4">
       {/* Quiet, flat context strip — shows captured context live without form scaffolding */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink/10 pb-3">
-        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-          <span className="inline-flex items-center gap-1 rounded-full bg-cream/80 px-2.5 py-1 text-2xs font-medium text-ink">
-            <Icon icon={LocationOnOutlinedIcon} size="xs" className="text-ink/70" />
-            <span className="truncate">{regionLabel}</span>
-          </span>
-
-          {hasContextChips && availabilityLabel && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-cream/80 px-2.5 py-1 text-2xs font-medium text-ink/85 tabular-nums">
-              <Icon icon={ScheduleOutlinedIcon} size="xs" className="text-ink/65" />
-              <span>{availabilityLabel}</span>
-            </span>
-          )}
-
-          {activeTags.map((tag) => {
-            const displayLabel = formatLifestyleTagLabel(tag);
-            const TagIcon = getLifestyleTagIcon(tag);
-            return (
-              <span
-                key={tag}
-                className="inline-flex items-center gap-1 rounded-full border border-mint bg-mint/35 pl-2.5 pr-1.5 py-1 text-2xs font-medium text-ink"
-              >
-                <Icon icon={TagIcon} size="xs" className="text-ink/75" />
-                <span>{displayLabel}</span>
-                {onUpdateProfile && (
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(tag)}
-                    className="rounded-full p-0.5 text-ink/70 hover:bg-ink/10 hover:text-ink transition-colors cursor-pointer"
-                    aria-label={`Remove ${displayLabel}`}
-                  >
-                    <Icon icon={CloseIcon} size="xs" />
-                  </button>
-                )}
+      {(hasContextChips || showRerunButton) && (
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink/10 pb-3">
+          <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+            {hasConfirmedRegion && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-cream/80 px-2.5 py-1 text-2xs font-medium text-ink">
+                <Icon icon={LocationOnOutlinedIcon} size="xs" className="text-ink/70" />
+                <span className="truncate">{regionLabel}</span>
               </span>
-            );
-          })}
-        </div>
+            )}
 
-        {!needsOnboarding && stage === 'complete' && (
-          <button
-            type="button"
-            onClick={() => onRestartInterview(copy)}
-            className="shrink-0 py-1 text-2xs font-medium text-ink/70 underline underline-offset-4 hover:text-ink transition-colors cursor-pointer"
-          >
-            {t.rerunBtn}
-          </button>
-        )}
-      </div>
+            {availabilityLabel && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-cream/80 px-2.5 py-1 text-2xs font-medium text-ink/85 tabular-nums">
+                <Icon icon={ScheduleOutlinedIcon} size="xs" className="text-ink/65" />
+                <span>{availabilityLabel}</span>
+              </span>
+            )}
+
+            {activeTags.map((tag) => {
+              const displayLabel = formatLifestyleTagLabel(tag);
+              const TagIcon = getLifestyleTagIcon(tag);
+              return (
+                <span
+                  key={tag}
+                  className="inline-flex items-center gap-1 rounded-full border border-mint bg-mint/35 pl-2.5 pr-1.5 py-1 text-2xs font-medium text-ink"
+                >
+                  <Icon icon={TagIcon} size="xs" className="text-ink/75" />
+                  <span>{displayLabel}</span>
+                  {onUpdateProfile && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTag(tag)}
+                      className="rounded-full p-0.5 text-ink/70 hover:bg-ink/10 hover:text-ink transition-colors cursor-pointer"
+                      aria-label={`Remove ${displayLabel}`}
+                    >
+                      <Icon icon={CloseIcon} size="xs" />
+                    </button>
+                  )}
+                </span>
+              );
+            })}
+          </div>
+
+          {showRerunButton && (
+            <button
+              type="button"
+              onClick={() => onRestartInterview(copy)}
+              className="shrink-0 py-1 text-2xs font-medium text-ink/70 underline underline-offset-4 hover:text-ink transition-colors cursor-pointer"
+            >
+              {t.rerunBtn}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Natural AI ↔ User conversation stream, matching Ask paper */}
       <div className="space-y-3">

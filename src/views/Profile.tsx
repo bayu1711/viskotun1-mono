@@ -185,9 +185,9 @@ export function ProfilePage() {
     }
   };
 
-  const [countryCode, setCountryCode] = useState('AE');
-  const [countryName, setCountryName] = useState('United Arab Emirates');
-  const [city, setCity] = useState('Abu Dhabi');
+  const [countryCode, setCountryCode] = useState('');
+  const [countryName, setCountryName] = useState('');
+  const [city, setCity] = useState('');
   const [workPattern, setWorkPattern] = useState<WorkPattern>('standard');
   const [activityBaseline, setActivityBaseline] = useState<ActivityBaseline>('moderate');
   const [smokingStatus, setSmokingStatus] = useState<SmokingStatus>('non_smoker');
@@ -221,8 +221,8 @@ export function ProfilePage() {
   }, [userProfile, user]);
 
   useEffect(() => {
-    setCountryCode(lifestyleProfile.region.countryCode || 'AE');
-    setCountryName(lifestyleProfile.region.countryName || 'United Arab Emirates');
+    setCountryCode(lifestyleProfile.region.countryCode || '');
+    setCountryName(lifestyleProfile.region.countryName || '');
     setCity(lifestyleProfile.region.city || '');
     setWorkPattern(lifestyleProfile.workPattern || 'standard');
     setActivityBaseline(lifestyleProfile.activityBaseline || 'moderate');
@@ -361,17 +361,19 @@ export function ProfilePage() {
       isRamadanFastingObserver: isRamadanObserver
     });
 
-    const resolvedCountry = countryName.trim() || 'United Arab Emirates';
-    const resolvedCode = resolveCountryCodeFromInput(resolvedCountry);
+    const trimmedCountry = countryName.trim();
+    const resolvedRegion = trimmedCountry
+      ? {
+          countryCode: resolveCountryCodeFromInput(trimmedCountry),
+          countryName: trimmedCountry,
+          city: city.trim() || undefined,
+          detectedBy: 'user_selected' as const,
+          confirmed: true
+        }
+      : lifestyleProfile.region;
 
     updateLifestyleProfile({
-      region: {
-        countryCode: resolvedCode,
-        countryName: resolvedCountry,
-        city: city.trim() || undefined,
-        detectedBy: 'user_selected',
-        confirmed: true
-      },
+      region: resolvedRegion,
       workPattern,
       activityBaseline,
       smokingStatus,

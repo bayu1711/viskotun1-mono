@@ -32,11 +32,11 @@ const SAMPLE_RUNTIME: Record<string, RoutineRuntime> = {
     setsDone: { s1: 2 },
     excludedStepIds: [],
     feedbackLogs: [
-      { id: 'f1', day: 1, date: '2026-11-18', score: 2, notes: 'Mild stiffness', escalated: false }
+      { id: 'f1', day: 1, loggedAt: '2026-11-18', score: 2, note: 'Mild stiffness' }
     ],
     morphingLogs: [],
     barrierLogs: [
-      { id: 'b1', day: 2, date: '2026-11-19', barrier: 'time_crunch', recommendedMode: 'micro' }
+      { id: 'b1', day: 2, loggedAt: '2026-11-19', barrier: 'time_crunch', barrierLabel: 'Time crunch', selectedDoseMode: 'micro' }
     ],
     doseMode: 'standard',
     pendingReEntryCheckin: false,

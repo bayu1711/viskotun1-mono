@@ -22,7 +22,7 @@ import {
   LEGACY_LIFESTYLE_PROFILE_KEY,
   LEGACY_USER_PROFILE_KEY
 } from '../utils/accountData';
-import { resolveCountryCodeFromInput, resolveCountryName } from '../utils/geo';
+import { resolveCountryCodeFromInput, resolveCountryName, resolveRegionFromTimezone } from '../utils/geo';
 
 const STORAGE_KEY = 'viskotun1_auth_user';
 export const ONBOARDING_DISMISSED_KEY = 'trialn1_lifestyle_onboarding_dismissed';
@@ -36,18 +36,12 @@ export const DEFAULT_USER_PROFILE: UserProfile = {
 
 export const DEFAULT_LIFESTYLE_PROFILE: UserLifestyleProfile = {
   region: {
-    countryCode: 'AE',
-    countryName: 'United Arab Emirates',
-    city: 'Abu Dhabi',
-    detectedBy: 'default_uae',
+    countryCode: '',
+    countryName: '',
+    detectedBy: 'default_global',
     confirmed: false
   },
-  workPattern: 'standard',
-  smokingStatus: 'non_smoker',
-  activityBaseline: 'moderate',
   culturalRhythms: [],
-  isRamadanFastingObserver: false,
-  climateSensitivity: 'moderate',
   physicalCautions: [],
   activeTags: [],
   intakeCompleted: false
@@ -217,6 +211,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (hasConfirmedSavedRegion) return;
 
     let active = true;
+    // Resolve browser timezone immediately so region detection has zero async flash
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      const tzRegion = resolveRegionFromTimezone(tz);
+      if (tzRegion && !lifestyleProfileRef.current.region.confirmed) {
+        const immediateRegion: RegionContext = {
+          countryCode: tzRegion.countryCode,
+          countryName: tzRegion.countryName,
+          city: tzRegion.city,
+          detectedBy: 'client_timezone',
+          confirmed: false
+        };
+        detectedRegionRef.current = immediateRegion;
+        setLifestyleProfile((prev) => {
+          const next = {
+            ...prev,
+            region: prev.region.confirmed ? prev.region : immediateRegion
+          };
+          lifestyleProfileRef.current = next;
+          return next;
+        });
+      }
+    } catch {
+      // Ignore timezone resolution errors
+    }
+
     async function detectGlobalRegion() {
       try {
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
@@ -232,7 +252,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           detectedBy:
             data.source === 'middleware_header' || data.source === 'client_timezone'
               ? data.source
-              : 'default_uae',
+              : 'default_global',
           confirmed: false
         };
         detectedRegionRef.current = detectedRegion;

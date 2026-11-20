@@ -18,7 +18,6 @@ import type {
 import { cn } from '../../../utils/cn';
 import { isRandomizedTrial, stopRuleOf } from '../../../utils/routineMetrics';
 import {
-  DEFAULT_AVAILABLE_WINDOWS,
   evaluateRoutineScheduleCompatibility,
   normalizeAvailableWindows,
   resolveProfileAvailability,
@@ -68,7 +67,7 @@ export function CandidateRoutineCard({
     profileAvail.mode === 'anytime' ? 'anytime' : 'profile_windows'
   );
   const [customWindows, setCustomWindows] = useState<AvailableTimeWindow[]>(() =>
-    profileAvail.windows.length > 0 ? profileAvail.windows : [...DEFAULT_AVAILABLE_WINDOWS]
+    profileAvail.windows
   );
 
   const draftSchedule: RoutineSchedulePreference = useMemo(
