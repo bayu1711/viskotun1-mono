@@ -1,15 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { COPY } from '../../../data/copy';
+import { getRequestUser } from '../../../server/auth';
+import { enforceRateLimit } from '../../../server/rateLimit';
+import { logError } from '../../../server/log';
+
+export const dynamic = 'force-dynamic';
+
+/** Google Cloud TTS language per app language, with a default voice for each. */
+const TTS_LANGUAGES = {
+  en: { languageCode: 'en-US', defaultVoice: 'en-US-Journey-F' },
+  ar: { languageCode: 'ar-XA', defaultVoice: 'ar-XA-Wavenet-A' }
+} as const;
+
+type TtsLanguage = keyof typeof TTS_LANGUAGES;
+
+/**
+ * Accepts only a Google voice name for the requested language (for example en-US-Journey-F).
+ * Browser voice names such as "Google UK English Female" are not Cloud TTS voices and are ignored.
+ */
+function resolveVoice(language: TtsLanguage, requested: unknown): string {
+  const { languageCode, defaultVoice } = TTS_LANGUAGES[language];
+  if (typeof requested === 'string' && requested.startsWith(`${languageCode}-`) && /^[A-Za-z0-9-]{5,60}$/.test(requested)) {
+    return requested;
+  }
+  return defaultVoice;
+}
 
 interface TTSRequestBody {
   text?: string;
   speed?: number;
   voice?: string;
+  /** App language of `text`. Defaults to English. */
+  language?: string;
 }
 
 const MAX_TEXT_LENGTH = 1200;
 
 export async function POST(req: NextRequest) {
+  const user = await getRequestUser(req);
+  const limited = enforceRateLimit('tts', req, user);
+  if (limited) return limited;
+
   try {
     let body: TTSRequestBody;
     try {
@@ -21,7 +52,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { text, speed = 1.0, voice } = body;
+    const { text, speed: rawSpeed = 1.0 } = body;
+    const language: TtsLanguage = body.language === 'ar' ? 'ar' : 'en';
+    const voice = resolveVoice(language, body.voice);
+    const speed = typeof rawSpeed === 'number' && Number.isFinite(rawSpeed) ? rawSpeed : 1.0;
 
     if (!text || typeof text !== 'string' || text.trim().length === 0) {
       return NextResponse.json(
@@ -46,14 +80,15 @@ export async function POST(req: NextRequest) {
     const googleTtsKey = process.env.GOOGLE_TTS_API_KEY;
     if (googleTtsKey) {
       try {
-        const response = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${googleTtsKey}`, {
+        const response = await fetch('https://texttospeech.googleapis.com/v1/text:synthesize', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          // Key in a header, not the URL, so it never lands in proxy or access logs
+          headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': googleTtsKey },
           body: JSON.stringify({
             input: { text: sanitized },
             voice: {
-              languageCode: 'en-US',
-              name: voice || 'en-US-Journey-F'
+              languageCode: TTS_LANGUAGES[language].languageCode,
+              name: voice
             },
             audioConfig: {
               audioEncoding: 'MP3',
@@ -72,7 +107,8 @@ export async function POST(req: NextRequest) {
                 audioContent: data.audioContent,
                 text: sanitized,
                 speed: clampedSpeed,
-                voice: voice || 'en-US-Journey-F',
+                voice,
+                language,
                 estimatedDurationSec: durationSeconds,
                 wordCount,
                 mode: 'cloud-tts',
@@ -97,7 +133,8 @@ export async function POST(req: NextRequest) {
         success: true,
         text: sanitized,
         speed: clampedSpeed,
-        voice: voice || 'en-US-Standard-C',
+        voice,
+        language,
         estimatedDurationSec: durationSeconds,
         wordCount,
         mode: 'synthesized-coach-cue',
@@ -110,7 +147,7 @@ export async function POST(req: NextRequest) {
       }
     );
   } catch (error) {
-    console.error('[/api/tts] Speech synthesis error:', error);
+    logError('TtsRoute.POST', error);
     return NextResponse.json(
       { error: COPY.api.tts.synthesisFailed },
       { status: 500 }

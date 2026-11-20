@@ -6,6 +6,13 @@ import {
 } from '../../../../server/routineRegistry';
 import { COPY } from '../../../../data/copy';
 import type { ReviewOutcome } from '../../../../types/routine';
+import { requireUser } from '../../../../server/auth';
+import { enforceRateLimit } from '../../../../server/rateLimit';
+import { cleanText, errorResponse, readJsonBody } from '../../../../server/http';
+
+const MAX_REVIEW_LENGTH = 1_000;
+const MAX_HANDLE_LENGTH = 40;
+const MAX_TAGS = 10;
 
 export const dynamic = 'force-dynamic';
 
@@ -41,45 +48,60 @@ export async function GET(request: Request) {
 
 const VALID_OUTCOMES: Set<ReviewOutcome> = new Set(['improved', 'adjusted', 'paused']);
 
+/**
+ * POST: Add or replace the signed-in user's review for a routine.
+ * The author is taken from the ID token, so a review cannot be posted as someone else,
+ * and each user has one review per routine.
+ */
 export async function POST(request: Request) {
+  const auth = await requireUser(request);
+  if (auth instanceof Response) return auth;
+
+  const limited = enforceRateLimit('reviews', request, auth);
+  if (limited) return limited;
+
   try {
-    const body = await request.json();
-    const routineId = body.routineId;
-    const { handle, outcome, day, adherence, text, userId, lifestyleCohort, tags } = body;
+    const body = await readJsonBody<Record<string, unknown>>(request);
+    if (!body) {
+      return NextResponse.json({ error: COPY.api.assistant.invalidJson }, { status: 400 });
+    }
 
+    const routineId = cleanText(body.routineId, 200);
     if (!routineId) {
-      return NextResponse.json(
-        { error: COPY.api.community.routineIdRequired },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: COPY.api.community.routineIdRequired }, { status: 400 });
     }
 
-    if (!outcome || !VALID_OUTCOMES.has(outcome as ReviewOutcome)) {
-      return NextResponse.json(
-        { error: COPY.api.community.invalidOutcome },
-        { status: 400 }
-      );
+    const outcome = body.outcome as ReviewOutcome;
+    if (!outcome || !VALID_OUTCOMES.has(outcome)) {
+      return NextResponse.json({ error: COPY.api.community.invalidOutcome }, { status: 400 });
     }
 
-    if (!text || typeof text !== 'string' || text.trim().length === 0) {
-      return NextResponse.json(
-        { error: COPY.api.community.textRequired },
-        { status: 400 }
-      );
+    if (typeof body.text !== 'string' || body.text.trim().length === 0) {
+      return NextResponse.json({ error: COPY.api.community.textRequired }, { status: 400 });
     }
+    if (body.text.length > MAX_REVIEW_LENGTH) {
+      return NextResponse.json({ error: COPY.api.community.textTooLong(MAX_REVIEW_LENGTH) }, { status: 400 });
+    }
+
+    const day = Math.min(Math.max(Math.round(Number(body.day) || 1), 1), 3650);
+    const adherence = Math.min(Math.max(Math.round(Number(body.adherence) || 0), 0), 100);
+    const tags = Array.isArray(body.tags)
+      ? body.tags.filter((t): t is string => typeof t === 'string').map((t) => t.slice(0, 40)).slice(0, MAX_TAGS)
+      : undefined;
+    const lifestyleCohort = cleanText(body.lifestyleCohort, 80) || undefined;
 
     const review = await addCommunityReview(
       routineId,
       {
-        handle: handle || undefined,
-        outcome: outcome as ReviewOutcome,
-        day: Number(day) || 1,
-        adherence: Number(adherence) || 100,
-        text,
-        lifestyleCohort,
-        tags
-      },
-      userId
+        handle: cleanText(body.handle, MAX_HANDLE_LENGTH) || undefined,
+        outcome,
+        day,
+        adherence,
+        text: body.text.trim(),
+        ...(lifestyleCohort ? { lifestyleCohort } : {}),
+        ...(tags ? { tags } : {})
+      } as Parameters<typeof addCommunityReview>[1],
+      auth.uid
     );
 
     const metrics = await getCommunityMetrics(routineId);
@@ -91,10 +113,6 @@ export async function POST(request: Request) {
       metrics
     });
   } catch (error) {
-    console.error('[CommunityReviewsRoute] POST error:', error);
-    return NextResponse.json(
-      { error: COPY.api.community.saveError },
-      { status: 500 }
-    );
+    return errorResponse('CommunityReviewsRoute.POST', error, COPY.api.community.saveError);
   }
 }

@@ -16,10 +16,11 @@ export function middleware(request: NextRequest) {
     '';
 
   if (countryCode) {
-    requestHeaders.set('x-detected-country', countryCode.toUpperCase());
+    requestHeaders.set('x-detected-country', countryCode.toUpperCase().slice(0, 3));
   }
   if (city) {
-    requestHeaders.set('x-detected-city', decodeURIComponent(city));
+    // Keep the value percent-encoded: a decoded non-Latin-1 city name is not a valid header value
+    requestHeaders.set('x-detected-city', city.slice(0, 300));
   }
 
   return NextResponse.next({

@@ -6,35 +6,35 @@ import {
   deleteUserAccount,
   reactivateUserAccount
 } from '../../../../server/userStorage';
+import { requireUser } from '../../../../server/auth';
+import { errorResponse, readJsonBody } from '../../../../server/http';
+
+export const dynamic = 'force-dynamic';
 
 type AccountAction = 'clear_data' | 'deactivate' | 'reactivate';
 
 const VALID_ACTIONS = new Set<AccountAction>(['clear_data', 'deactivate', 'reactivate']);
 
+/** POST: Account actions for the signed-in user only (taken from the verified ID token). */
 export async function POST(request: Request) {
+  const auth = await requireUser(request);
+  if (auth instanceof Response) return auth;
+
   try {
-    const body = await request.json().catch(() => null);
-    const userId = typeof body?.userId === 'string' ? body.userId.trim() : '';
+    const body = await readJsonBody<{ action?: string }>(request);
     const action = body?.action as AccountAction | undefined;
 
-    if (!userId) {
-      return NextResponse.json({ error: COPY.api.userSync.userIdRequired }, { status: 400 });
-    }
     if (!action || !VALID_ACTIONS.has(action)) {
-      return NextResponse.json({ error: 'Valid account action is required' }, { status: 400 });
+      return NextResponse.json({ error: COPY.api.userSync.invalidAction }, { status: 400 });
     }
 
     if (action === 'clear_data') {
-      const record = await clearUserData(userId);
-      return NextResponse.json({
-        success: true,
-        action,
-        updatedAt: record.updatedAt
-      });
+      const record = await clearUserData(auth.uid);
+      return NextResponse.json({ success: true, action, updatedAt: record.updatedAt });
     }
 
     if (action === 'deactivate') {
-      const record = await deactivateUserAccount(userId);
+      const record = await deactivateUserAccount(auth.uid);
       return NextResponse.json({
         success: true,
         action,
@@ -43,38 +43,26 @@ export async function POST(request: Request) {
       });
     }
 
-    const reactivated = await reactivateUserAccount(userId);
+    const reactivated = await reactivateUserAccount(auth.uid);
     return NextResponse.json({
       success: true,
       action,
       accountStatus: reactivated?.accountStatus ?? 'active'
     });
   } catch (error) {
-    console.error('[AccountAPI] POST error:', error);
-    return NextResponse.json({ error: COPY.api.userSync.internalError }, { status: 500 });
+    return errorResponse('AccountRoute.POST', error, COPY.api.userSync.internalError);
   }
 }
 
+/** DELETE: Permanently delete the signed-in user's stored record. */
 export async function DELETE(request: Request) {
+  const auth = await requireUser(request);
+  if (auth instanceof Response) return auth;
+
   try {
-    const { searchParams } = new URL(request.url);
-    const body = await request.json().catch(() => null);
-    const rawUserId =
-      (typeof body?.userId === 'string' && body.userId) || searchParams.get('userId') || '';
-    const userId = rawUserId.trim();
-
-    if (!userId) {
-      return NextResponse.json({ error: COPY.api.userSync.userIdRequired }, { status: 400 });
-    }
-
-    const deleted = await deleteUserAccount(userId);
-    return NextResponse.json({
-      success: true,
-      deleted,
-      deletedAt: Date.now()
-    });
+    const deleted = await deleteUserAccount(auth.uid);
+    return NextResponse.json({ success: true, deleted, deletedAt: Date.now() });
   } catch (error) {
-    console.error('[AccountAPI] DELETE error:', error);
-    return NextResponse.json({ error: COPY.api.userSync.internalError }, { status: 500 });
+    return errorResponse('AccountRoute.DELETE', error, COPY.api.userSync.internalError);
   }
 }

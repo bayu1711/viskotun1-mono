@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { resolveCountryName, resolveRegionFromTimezone } from '../../../utils/geo';
+import { safeDecodeHeader } from '../../../utils/headers';
 
 export async function GET(request: NextRequest) {
   const headerCountry =
@@ -13,11 +14,11 @@ export async function GET(request: NextRequest) {
     '';
 
   if (headerCountry && headerCountry.toUpperCase() !== 'XX') {
-    const code = headerCountry.trim().toUpperCase();
+    const code = headerCountry.trim().toUpperCase().slice(0, 3);
     return NextResponse.json({
       countryCode: code,
       countryName: resolveCountryName(code),
-      city: headerCity ? decodeURIComponent(headerCity) : undefined,
+      city: headerCity ? safeDecodeHeader(headerCity).slice(0, 100) : undefined,
       source: 'middleware_header',
       confirmed: false
     });

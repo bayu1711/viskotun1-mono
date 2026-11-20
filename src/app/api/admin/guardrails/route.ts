@@ -6,8 +6,15 @@ import {
 } from '../../../../server/guardrailLedger';
 import type { GuardrailUpdateRequest } from '../../../../types/guardrails';
 import { COPY } from '../../../../data/copy';
+import { requireAdmin } from '../../../../server/auth';
+import { errorResponse, readJsonBody } from '../../../../server/http';
 
-/** GET: Inspect live guardrail policy and Cloud Firestore ledger status */
+export const dynamic = 'force-dynamic';
+
+/**
+ * GET: Inspect the live guardrail policy. Public on purpose: every client applies the
+ * active pain threshold, and the policy holds no personal data.
+ */
 export async function GET() {
   try {
     const status = await getGuardrailLedgerStatus();
@@ -21,10 +28,16 @@ export async function GET() {
   }
 }
 
-/** POST: Dynamically update safety thresholds and gatekeeper rules */
+/** POST: Update safety thresholds and gatekeeper rules (admin only) */
 export async function POST(request: Request) {
+  const auth = await requireAdmin(request);
+  if (auth instanceof Response) return auth;
+
   try {
-    const body: GuardrailUpdateRequest = await request.json();
+    const body = await readJsonBody<GuardrailUpdateRequest>(request);
+    if (!body) {
+      return NextResponse.json({ error: COPY.api.assistant.invalidJson }, { status: 400 });
+    }
 
     if (body.painEscalationThreshold !== undefined) {
       if (
@@ -52,7 +65,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const updated = await updateGuardrailPolicy(body);
+    const updated = await updateGuardrailPolicy(body, auth.email || auth.uid);
     const status = await getGuardrailLedgerStatus();
 
     return NextResponse.json({
@@ -63,16 +76,15 @@ export async function POST(request: Request) {
       firestoreStatus: status.firestoreStatus
     });
   } catch (error) {
-    console.error('[AdminGuardrailsRoute] POST error:', error);
-    return NextResponse.json(
-      { error: COPY.api.guardrails.updateError },
-      { status: 500 }
-    );
+    return errorResponse('AdminGuardrailsRoute.POST', error, COPY.api.guardrails.updateError);
   }
 }
 
-/** DELETE: Reset policy ledger to baseline clinical standards */
-export async function DELETE() {
+/** DELETE: Reset policy ledger to baseline clinical standards (admin only) */
+export async function DELETE(request: Request) {
+  const auth = await requireAdmin(request);
+  if (auth instanceof Response) return auth;
+
   try {
     const reset = await resetGuardrailPolicy();
     const status = await getGuardrailLedgerStatus();
@@ -85,10 +97,6 @@ export async function DELETE() {
       firestoreStatus: status.firestoreStatus
     });
   } catch (error) {
-    console.error('[AdminGuardrailsRoute] DELETE error:', error);
-    return NextResponse.json(
-      { error: COPY.api.guardrails.resetError },
-      { status: 500 }
-    );
+    return errorResponse('AdminGuardrailsRoute.DELETE', error, COPY.api.guardrails.resetError);
   }
 }
