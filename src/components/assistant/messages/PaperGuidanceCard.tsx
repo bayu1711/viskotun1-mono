@@ -177,14 +177,14 @@ export function PaperGuidanceCard({ content }: PaperGuidanceCardProps) {
             value={searchDraft}
             onChange={(e) => setSearchDraft(e.target.value)}
             placeholder={t.customSearchPlaceholder}
-            className="w-full rounded-full border border-ink/15 bg-white py-2 pl-9 pr-8 text-xs text-ink placeholder:text-ink/50 focus:border-ink/40 focus:outline-none"
+            className="w-full rounded-full border border-ink/15 bg-white py-2 pl-9 pr-8 text-xs text-ink placeholder:text-ink/60 focus:border-ink/40 focus:outline-none"
           />
-          <SearchOutlinedIcon className="pointer-events-none absolute left-2.5 h-4 w-4 text-ink/50" />
+          <SearchOutlinedIcon className="pointer-events-none absolute left-2.5 h-4 w-4 text-ink/70" />
           {searchDraft && (
             <button
               type="button"
               onClick={handleClearSearch}
-              className="absolute right-2.5 text-ink/40 hover:text-ink"
+              className="absolute right-2.5 text-ink/65 hover:text-ink"
               aria-label={t.clearSearch}
             >
               <CloseOutlinedIcon className="h-4 w-4" />
@@ -293,7 +293,7 @@ export function PaperGuidanceCard({ content }: PaperGuidanceCardProps) {
             className="flex items-center justify-between rounded-tile border border-ink/10 bg-canvas p-2.5 text-xs font-medium text-ink transition-colors hover:border-ink/30 hover:bg-white"
           >
             <span>{t.pubmedSearch}</span>
-            <LaunchOutlinedIcon className="h-3.5 w-3.5 text-ink/50" />
+            <LaunchOutlinedIcon className="h-3.5 w-3.5 text-ink/70" />
           </a>
           <a
             href={externalLinks.europePmc}
@@ -302,7 +302,7 @@ export function PaperGuidanceCard({ content }: PaperGuidanceCardProps) {
             className="flex items-center justify-between rounded-tile border border-ink/10 bg-canvas p-2.5 text-xs font-medium text-ink transition-colors hover:border-ink/30 hover:bg-white"
           >
             <span>{t.europePmcSearch}</span>
-            <LaunchOutlinedIcon className="h-3.5 w-3.5 text-ink/50" />
+            <LaunchOutlinedIcon className="h-3.5 w-3.5 text-ink/70" />
           </a>
           <a
             href={externalLinks.googleScholar}
@@ -311,13 +311,13 @@ export function PaperGuidanceCard({ content }: PaperGuidanceCardProps) {
             className="flex items-center justify-between rounded-tile border border-ink/10 bg-canvas p-2.5 text-xs font-medium text-ink transition-colors hover:border-ink/30 hover:bg-white"
           >
             <span>{t.googleScholarSearch}</span>
-            <LaunchOutlinedIcon className="h-3.5 w-3.5 text-ink/50" />
+            <LaunchOutlinedIcon className="h-3.5 w-3.5 text-ink/70" />
           </a>
         </div>
 
         {/* Live Europe PMC Search Results (if available) */}
         {isSearchingLive && (
-          <p className="text-2xs text-ink/50 italic py-1">{t.searchingEuropePmc}</p>
+          <p className="text-2xs text-ink/70 italic py-1">{t.searchingEuropePmc}</p>
         )}
 
         {liveResults.length > 0 && (

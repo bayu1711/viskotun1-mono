@@ -133,7 +133,7 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
 
           {step.inferred && (
             <div className="mt-1 flex flex-wrap items-center gap-1.5 text-2xs">
-              <span className="text-3xs text-ink/60">
+              <span className="text-3xs text-ink/80">
                 {step.inferredProvenance?.tier === 'lineage'
                   ? COPY.task.lineageBadge(step.inferredProvenance.source)
                   : COPY.task.inferredBadge(step.inferredProvenance?.source)}
@@ -142,7 +142,7 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
               <button
                 type="button"
                 onClick={() => toggleExcludeStep(step.id)}
-                className="inline-flex min-h-11 items-center text-3xs text-ink/60 underline decoration-dotted transition-colors hover:text-ink hover:opacity-100"
+                className="inline-flex min-h-11 items-center text-3xs text-ink/80 underline decoration-dotted transition-colors hover:text-ink hover:opacity-100"
                 title={COPY.task.excludedNote}
               >
                 {COPY.task.excludeStep}
@@ -184,7 +184,7 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
             <button
               type="button"
               onClick={() => incrementSet(step.id)}
-              className="inline-flex min-h-9 items-center gap-1 rounded-full bg-ink px-3.5 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
+              className="inline-flex min-h-11 items-center gap-1 rounded-full bg-ink px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
             >
               <Icon icon={AddIcon} size="xs" />
               <span>{sCopy.onDemandLogBtn.replace(/^\+\s*/, '')}</span>
@@ -193,8 +193,8 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
               <button
                 type="button"
                 onClick={() => decrementSet(step.id)}
-                aria-label={`Decrease logged count for ${step.action}`}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-ink/20 bg-white/80 text-ink hover:border-ink cursor-pointer"
+                aria-label={COPY.task.decrease(step.action)}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-ink/20 bg-white/80 text-ink hover:border-ink cursor-pointer"
               >
                 <Icon icon={RemoveIcon} size="xs" />
               </button>
@@ -215,7 +215,7 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
             </span>
             {doseMode === 'micro' && (
               <span className="ml-2 inline-flex items-center rounded bg-mint px-1.5 py-0.5 text-3xs font-semibold text-ink">
-                Micro
+                {COPY.task.microBadge}
               </span>
             )}
           </p>

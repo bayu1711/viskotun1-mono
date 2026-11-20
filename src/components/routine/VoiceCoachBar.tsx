@@ -64,7 +64,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete, isDayComplete
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <div
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors ${
-                isPlaying ? 'bg-orange text-white' : 'bg-orange/15 text-orange'
+                isPlaying ? 'bg-orange text-ink' : 'bg-orange/15 text-orange'
               }`}
             >
               <Icon icon={GraphicEqIcon} size="md" className={isPlaying ? 'animate-pulse' : ''} />
@@ -125,7 +125,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete, isDayComplete
                 type="button"
                 onClick={resumeCoach}
                 aria-label={COPY.voiceCoach.resume}
-                className="flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-orange px-3 sm:px-3.5 text-xs font-medium text-white shadow-sm transition-all hover:bg-orange/90 active:scale-95"
+                className="flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-orange px-3 sm:px-3.5 text-xs font-medium text-ink shadow-sm transition-all hover:bg-orange/90 active:scale-95"
               >
                 <Icon icon={PlayArrowRoundedIcon} size="sm" />
                 <span>{COPY.voiceCoach.resumeShort}</span>
@@ -135,7 +135,7 @@ export function VoiceCoachBar({ steps, safetyRule, onStepComplete, isDayComplete
                 type="button"
                 onClick={startCoach}
                 aria-label={COPY.voiceCoach.play}
-                className="flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-orange px-3 sm:px-3.5 text-xs font-medium text-white shadow-sm transition-all hover:bg-orange/90 active:scale-95"
+                className="flex h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-orange px-3 sm:px-3.5 text-xs font-medium text-ink shadow-sm transition-all hover:bg-orange/90 active:scale-95"
               >
                 <Icon icon={PlayArrowRoundedIcon} size="sm" />
                 <span>{COPY.voiceCoach.playShort}</span>

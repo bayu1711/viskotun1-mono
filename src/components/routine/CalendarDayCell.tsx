@@ -34,7 +34,7 @@ function renderVisual({ day, completion, status }: CalendarDay) {
           size={38}
           tone="light-bare"
           decorative
-          className="rounded-full bg-orange text-xs font-semibold text-white shadow-sm ring-2 ring-orange/30"
+          className="rounded-full bg-orange text-xs font-semibold text-ink shadow-sm ring-2 ring-orange/30"
         >
           {day}
         </ProgressRing>

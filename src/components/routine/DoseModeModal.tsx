@@ -174,7 +174,7 @@ export function DoseModeModal() {
                       <Icon
                         icon={isSelected ? CheckCircleIcon : RadioButtonUncheckedIcon}
                         size="sm"
-                        className={isSelected ? 'text-ink' : 'text-ink/30'}
+                        className={isSelected ? 'text-ink' : 'text-ink/50'}
                       />
                     </div>
 
@@ -183,7 +183,7 @@ export function DoseModeModal() {
                         <Icon icon={IconComp} size="xs" className={opt.iconColor} />
                         <span className="text-sm font-semibold text-ink">{opt.label}</span>
                         {opt.badge && (
-                          <span className="rounded bg-mint/50 px-1.5 py-0.2 text-3xs font-semibold text-ink">
+                          <span className="rounded bg-mint/50 px-1.5 py-0.5 text-3xs font-semibold text-ink">
                             {opt.badge}
                           </span>
                         )}
@@ -234,7 +234,7 @@ export function DoseModeModal() {
                 <Icon icon={HelpOutlineOutlinedIcon} size="xs" />
                 <span>{copy.doseMode.reEntryPrompt}</span>
                 {pendingReEntryCheckin && (
-                  <span className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
+                  <span className="h-2 w-2 rounded-full bg-orange animate-pulse" />
                 )}
               </button>
 

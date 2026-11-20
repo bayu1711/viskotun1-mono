@@ -59,7 +59,7 @@ export function DoseModeSelector({ className }: { className?: string }) {
             {copy.doseMode.label}
           </span>
           {pendingReEntryCheckin && (
-            <span className="flex h-2 w-2 rounded-full bg-orange-500 animate-pulse" title="Lapse check-in waiting" />
+            <span className="flex h-2 w-2 rounded-full bg-orange animate-pulse" title={copy.task.pendingCheckinTitle} aria-label={copy.task.pendingCheckinTitle} role="img" />
           )}
         </div>
 
@@ -99,7 +99,7 @@ export function DoseModeSelector({ className }: { className?: string }) {
               <Icon icon={IconComp} size="xs" className={cn(isActive && opt.id === 'micro' ? 'text-amber-600' : '')} />
               <span className="truncate">{opt.label}</span>
               {opt.badge && !isActive && (
-                <span className="hidden sm:inline-block rounded bg-mint/50 px-1 py-0.2 text-3xs font-semibold text-ink">
+                <span className="hidden sm:inline-block rounded bg-mint/50 px-1 py-0.5 text-3xs font-semibold text-ink">
                   {opt.badge}
                 </span>
               )}

@@ -247,7 +247,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                         <div className="flex items-center gap-2">
                           <p className="font-semibold text-ink">{step.action}</p>
                           {step.inferred && (
-                            <span className="rounded bg-cream px-1.5 py-0.2 text-3xs font-medium text-ink">
+                            <span className="rounded bg-cream px-1.5 py-0.5 text-3xs font-medium text-ink">
                               {COPY.shareableSummary.conservativeBaseline}
                             </span>
                           )}

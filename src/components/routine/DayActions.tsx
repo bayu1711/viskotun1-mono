@@ -56,7 +56,7 @@ export function DayActions({ onLogFeedback, size = 'lg', className }: DayActions
 
       {isAdmin && (
         <div className="rounded-xl border border-ink/10 bg-cream/30 p-3 text-xs">
-          <div className="flex items-center justify-between font-mono text-[11px] font-medium uppercase tracking-wider text-ink/50">
+          <div className="flex items-center justify-between font-mono text-[11px] font-medium uppercase tracking-wider text-ink/70">
             <span>{COPY.dayActions.adminControlEyebrow}</span>
             <span className="rounded bg-ink/5 px-1.5 py-0.5">Admin Only</span>
           </div>

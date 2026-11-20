@@ -90,7 +90,7 @@ export function BctLedgerDrawer() {
 
             {/* Filter Pills */}
             <div className="flex flex-wrap items-center gap-2 border-b border-ink/10 bg-cream/30 px-5 py-3 sm:px-6">
-              <span className="flex items-center gap-1 text-2xs font-bold uppercase tracking-wider text-ink/50">
+              <span className="flex items-center gap-1 text-2xs font-bold uppercase tracking-wider text-ink/70">
                 <Icon icon={FilterListIcon} size="xs" />
                 <span>Filter:</span>
               </span>

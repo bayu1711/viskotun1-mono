@@ -17,7 +17,7 @@ export function UserFileBubble({ message }: UserFileBubbleProps) {
         </IconTile>
         <div className="min-w-0">
           <p className="truncate text-sm">{message.content}</p>
-          <p className="text-xs text-white/45">{message.timestamp}</p>
+          <p className="text-xs text-white/65">{message.timestamp}</p>
         </div>
       </div>
     </div>);

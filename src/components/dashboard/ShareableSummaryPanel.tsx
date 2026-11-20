@@ -18,7 +18,7 @@ export function ShareableSummaryPanel() {
   return (
     <>
       <Panel tone="ink" aria-labelledby={headingId}>
-        <p className="text-sm leading-none text-white/45">
+        <p className="text-sm leading-none text-white/65">
           {COPY.shareableSummary.eyebrow}
         </p>
         <h2 id={headingId} className="mt-1 text-2xl">

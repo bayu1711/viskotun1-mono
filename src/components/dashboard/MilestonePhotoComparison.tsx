@@ -106,7 +106,7 @@ export function MilestonePhotoComparison() {
           <span className="font-medium">
             {COPY.morphing.milestone.bannerTitle(routine.currentDay)}
           </span>
-          <span className="rounded-full bg-orange px-2.5 py-0.5 text-3xs font-semibold uppercase tracking-wider text-white shadow-2xs">
+          <span className="rounded-full bg-orange px-2.5 py-0.5 text-3xs font-semibold uppercase tracking-wider text-ink shadow-2xs">
             {COPY.morphing.dashboard.scheduledTodayBadge}
           </span>
         </div>
@@ -131,7 +131,7 @@ export function MilestonePhotoComparison() {
               onClick={() => setSelectedMilestoneDay(day)}
               className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs transition-colors ${
                 isSelected
-                  ? 'bg-orange font-medium text-white shadow-2xs'
+                  ? 'bg-orange font-medium text-ink shadow-2xs'
                   : 'bg-canvas text-ink/70 hover:bg-ink/10'
               }`}
             >
@@ -154,11 +154,11 @@ export function MilestonePhotoComparison() {
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-canvas px-6 text-center">
-            <Icon icon={CameraAltOutlinedIcon} size="md" className="text-ink/40" />
+            <Icon icon={CameraAltOutlinedIcon} size="md" className="text-ink/65" />
             <p className="mt-2 text-xs font-medium text-ink/75">
               {COPY.morphing.dashboard.missingMilestonePhoto(activeMilestoneDay)}
             </p>
-            <p className="mt-1 max-w-xs text-[11px] text-ink/55">
+            <p className="mt-1 max-w-xs text-[11px] text-ink/70">
               {COPY.morphing.dashboard.uploadPhotoPrompt}
             </p>
           </div>
@@ -179,11 +179,11 @@ export function MilestonePhotoComparison() {
             />
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/90 px-6 text-center">
-              <Icon icon={CameraAltOutlinedIcon} size="md" className="text-ink/40" />
+              <Icon icon={CameraAltOutlinedIcon} size="md" className="text-ink/65" />
               <p className="mt-2 text-xs font-medium text-ink/75">
                 {COPY.morphing.dashboard.missingBaselinePhoto}
               </p>
-              <p className="mt-1 max-w-xs text-[11px] text-ink/55">
+              <p className="mt-1 max-w-xs text-[11px] text-ink/70">
                 {COPY.morphing.dashboard.uploadPhotoPrompt}
               </p>
             </div>
@@ -215,7 +215,7 @@ export function MilestonePhotoComparison() {
           className="pointer-events-none absolute top-0 bottom-0 w-0.5 bg-orange shadow-lg"
           style={{ left: `${sliderPos}%` }}
         >
-          <div className="absolute top-1/2 left-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-orange text-white shadow-md">
+          <div className="absolute top-1/2 left-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-orange text-ink shadow-md">
             <Icon icon={CompareArrowsOutlinedIcon} size="xs" />
           </div>
         </div>

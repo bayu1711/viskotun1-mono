@@ -176,7 +176,7 @@ export function ShareRoutineModal() {
                 className="h-52 w-52 rounded-xl object-contain"
               />
             ) : (
-              <div className="flex flex-col items-center text-ink/40">
+              <div className="flex flex-col items-center text-ink/65">
                 <Icon icon={QrCode2OutlinedIcon} size="xl" />
                 <p className="mt-2 text-xs">QR Code</p>
               </div>

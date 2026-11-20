@@ -112,7 +112,7 @@ export function TimerWidget({ field, value, onChange }: TimerWidgetProps) {
               onClick={startTimer}
               disabled={isCountdown && remaining === 0}
               size={40}
-              className="bg-orange text-white hover:bg-orange/90 shadow-2xs"
+              className="bg-orange text-ink hover:bg-orange/90 shadow-2xs"
             >
               <Icon icon={PlayArrowIcon} size="md" />
             </CircleButton>

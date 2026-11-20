@@ -31,7 +31,7 @@ export function RoutineStepRow({ step }: RoutineStepRowProps) {
         <p className="mt-0.5 text-xs text-ink/60">
           {display.summary} · {step.frequency}
           {step.inferred && (
-            <span className="ml-1 text-3xs text-ink/50">
+            <span className="ml-1 text-3xs text-ink/70">
               · {step.inferredProvenance?.tier === 'lineage'
                 ? COPY.task.lineageBadge(step.inferredProvenance.source)
                 : COPY.task.inferredBadge(step.inferredProvenance?.source)}

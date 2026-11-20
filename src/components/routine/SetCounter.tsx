@@ -8,7 +8,7 @@ import { toneStyles } from '../../utils/tones';
 import { Icon } from '../ui/Icon';
 
 const STEP_BUTTON =
-'relative flex h-8 w-8 items-center justify-center rounded-full transition-colors before:absolute before:-inset-1.5 disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-current';
+'relative flex h-11 w-11 items-center justify-center rounded-full transition-[color,background-color,transform] duration-150 active:scale-95 disabled:opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-current';
 
 interface SetCounterProps {
   action: string;

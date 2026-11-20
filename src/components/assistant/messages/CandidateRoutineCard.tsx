@@ -217,7 +217,7 @@ export function CandidateRoutineCard({
                           {step.action}
                         </p>
                         {isExcluded && (
-                          <span className="rounded bg-ink/10 px-1 py-0.2 text-3xs text-ink/60">
+                          <span className="rounded bg-ink/10 px-1 py-0.5 text-3xs text-ink/60">
                             {COPY.task.excludedBadge}
                           </span>
                         )}

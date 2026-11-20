@@ -102,7 +102,7 @@ export function VersionHistoryModal({
                       </span>
                     )}
                   </div>
-                  <span className="text-3xs text-ink/50">
+                  <span className="text-3xs text-ink/70">
                     {new Date(entry.date).toLocaleDateString(undefined, {
                       year: 'numeric',
                       month: 'short',
@@ -142,7 +142,7 @@ export function VersionHistoryModal({
                 )}
 
                 {entry.author && (
-                  <div className="flex items-center gap-1 text-3xs text-ink/50 pt-1">
+                  <div className="flex items-center gap-1 text-3xs text-ink/70 pt-1">
                     <AIIcon size="xs" />
                     <span>{COPY.community.versionAuthorLabel(entry.author)}</span>
                   </div>

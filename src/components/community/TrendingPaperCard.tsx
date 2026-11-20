@@ -191,7 +191,7 @@ export function TrendingPaperCard({
               <button
                 type="button"
                 onClick={() => onViewVersionHistory(paper)}
-                className="rounded-full bg-cream border border-ink/15 px-2 py-0.5 text-3xs font-semibold text-ink hover:bg-mint/40 hover:border-ink transition-colors"
+                className="relative rounded-full bg-cream border border-ink/15 px-2 py-0.5 text-3xs font-semibold text-ink hover:bg-mint/40 hover:border-ink transition-colors before:absolute before:-inset-y-3 before:inset-x-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
                 title={COPY.community.versionHistoryTitle}
               >
                 {COPY.community.versionPill(paper.version || '1.0')}

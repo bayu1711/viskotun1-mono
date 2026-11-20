@@ -129,7 +129,7 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
                 className={cn(
                   'rounded-full px-3 py-1 text-2xs font-medium whitespace-nowrap transition-colors',
                   isSelected
-                    ? 'bg-orange text-white shadow-2xs font-semibold'
+                    ? 'bg-orange text-ink shadow-2xs font-semibold'
                     : 'bg-white text-ink/65 border border-ink/15 hover:bg-ink/5'
                 )}
               >

@@ -7,14 +7,14 @@ export type StatTone = 'ink' | 'cream' | 'mint' | 'white' | 'orange' | 'yellow' 
 
 const TONES: Record<StatTone, {card: string;muted: string;}> = {
   ink: { card: 'bg-ink text-white', muted: 'text-white/60' },
-  orange: { card: 'bg-orange text-white', muted: 'text-white/80' },
-  yellow: { card: 'bg-yellow text-ink', muted: 'text-ink/65' },
-  sky: { card: 'bg-sky text-ink', muted: 'text-ink/65' },
-  lavender: { card: 'bg-lavender text-ink', muted: 'text-ink/65' },
-  peach: { card: 'bg-peach text-ink', muted: 'text-ink/65' },
-  cream: { card: 'bg-cream text-ink', muted: 'text-ink/60' },
-  mint: { card: 'bg-mint text-ink', muted: 'text-ink/60' },
-  white: { card: 'bg-white text-ink border border-ink/10', muted: 'text-ink/60' }
+  orange: { card: 'bg-orange text-ink', muted: 'text-ink/80' },
+  yellow: { card: 'bg-yellow text-ink', muted: 'text-ink/80' },
+  sky: { card: 'bg-sky text-ink', muted: 'text-ink/80' },
+  lavender: { card: 'bg-lavender text-ink', muted: 'text-ink/80' },
+  peach: { card: 'bg-peach text-ink', muted: 'text-ink/80' },
+  cream: { card: 'bg-cream text-ink', muted: 'text-ink/80' },
+  mint: { card: 'bg-mint text-ink', muted: 'text-ink/80' },
+  white: { card: 'bg-white text-ink border border-ink/10', muted: 'text-ink/80' }
 };
 
 export interface StatCardProps {
