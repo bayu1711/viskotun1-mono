@@ -195,10 +195,16 @@ describe('User Account Lifecycle API & Data Utilities', () => {
     expect(profileSource.indexOf('<SegmentedTabs')).toBeLessThan(
       profileSource.indexOf('t.backToRoutine')
     );
+    // Third tab: Data & Account Controls
+    expect(profileSource).toContain("'data' as const");
+    expect(profileSource).toContain('t.tabs.data');
     expect(profileSource).toContain('<AccountControlsPanel />');
     expect(profileSource.indexOf('</form>')).toBeLessThan(
       profileSource.indexOf('<AccountControlsPanel />')
     );
+    // AccountControlsPanel must only render on the 'data' tab, not the 'account' tab
+    expect(profileSource).toContain("activeTab === 'data'");
+    expect(profileSource).not.toContain("activeTab === 'account' && <AccountControlsPanel");
 
     const controlsSource = fs.readFileSync(
       path.resolve(__dirname, '../../components/profile/AccountControlsPanel.tsx'),

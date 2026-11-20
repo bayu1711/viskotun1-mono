@@ -162,13 +162,13 @@ export function ProfilePage() {
   const [reminderNotificationsEnabled, setReminderNotificationsEnabled] = useState(true);
   const [communityCohortOptIn, setCommunityCohortOptIn] = useState(true);
   const [isSendingReset, setIsSendingReset] = useState(false);
-  const [activeTab, setActiveTab] = useState<'account' | 'lifestyle'>('account');
+  const [activeTab, setActiveTab] = useState<'account' | 'lifestyle' | 'data'>('account');
 
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
       const tabParam = params.get('tab');
-      if (tabParam === 'lifestyle' || tabParam === 'account') {
+      if (tabParam === 'lifestyle' || tabParam === 'account' || tabParam === 'data') {
         setActiveTab(tabParam);
       }
     } catch {
@@ -176,7 +176,7 @@ export function ProfilePage() {
     }
   }, []);
 
-  const handleTabChange = (next: 'account' | 'lifestyle') => {
+  const handleTabChange = (next: 'account' | 'lifestyle' | 'data') => {
     setActiveTab(next);
     try {
       const url = new URL(window.location.href);
@@ -434,7 +434,8 @@ export function ProfilePage() {
                 variant="pills"
                 options={[
                   { id: 'account' as const, label: t.tabs.account },
-                  { id: 'lifestyle' as const, label: t.tabs.lifestyle }
+                  { id: 'lifestyle' as const, label: t.tabs.lifestyle },
+                  { id: 'data' as const, label: t.tabs.data }
                 ]}
                 value={activeTab}
                 onChange={handleTabChange}
@@ -454,8 +455,9 @@ export function ProfilePage() {
         </PageHeader>
 
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-main-aside lg:gap-10">
-          {/* Main Column: Account Management OR Adaptive Lifestyle Management */}
+          {/* Main Column: Account, Adaptive Lifestyle, OR Data & Account Controls */}
           <div className="space-y-6">
+            {activeTab !== 'data' && (
             <form onSubmit={handleSave} className="space-y-6">
             {/* Tab 1: Account & Physiological Baseline */}
             {activeTab === 'account' && (
@@ -907,9 +909,10 @@ export function ProfilePage() {
               </PillButton>
             </div>
             </form>
+            )}
 
-            {/* Data Export, Clear All Data, Deactivate & Delete Account (Account Tab) */}
-            {activeTab === 'account' && <AccountControlsPanel />}
+            {/* Tab 3: Data & Account Controls */}
+            {activeTab === 'data' && <AccountControlsPanel />}
           </div>
 
           {/* Right / Aside Column: Live Connections & Account */}
