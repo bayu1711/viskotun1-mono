@@ -228,6 +228,7 @@ export async function reactivateUserAccount(userId: string): Promise<UserRecord 
  * Permanently deletes a user record from memory cache, local ledger, and Cloud Firestore.
  */
 export async function deleteUserAccount(userId: string): Promise<boolean> {
+  loadLocalUserLedger();
   const existed = memoryUserStorage.delete(userId);
   persistLocalUserLedger();
 
