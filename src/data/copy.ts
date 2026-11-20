@@ -430,7 +430,14 @@ export const COPY = {
     title: 'Profile & Adaptive Lifestyle',
     subtitle: 'Your physiological baseline and daily schedule shape Health Age projections, calendar reminders, and routine adaptations.',
     backToRoutine: 'Back to today’s routine',
+    tabs: {
+      ariaLabel: 'Profile sections',
+      account: 'Account',
+      lifestyle: 'Lifestyle'
+    },
     saveButton: 'Save profile',
+    saveAccountButton: 'Save account',
+    saveLifestyleButton: 'Save lifestyle',
     savedToast: 'Profile & adaptive lifestyle saved',
     tuneWithAi: 'Tune with N1 AI',
     userProfileEyebrow: 'UserProfile',

@@ -133,7 +133,14 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     title: 'الملف الشخصي ونمط الحياة التكيفي',
     subtitle: 'تساعد بياناتك الأساسية وجدولك اليومي في تخصيص توقع العمر الصحي وتنبيهات التقويم وتكييف الخطط العلاجية.',
     backToRoutine: 'العودة إلى خطة اليوم',
+    tabs: {
+      ariaLabel: 'أقسام الملف الشخصي',
+      account: 'الحساب',
+      lifestyle: 'نمط الحياة'
+    },
     saveButton: 'حفظ الملف الشخصي',
+    saveAccountButton: 'حفظ إعدادات الحساب',
+    saveLifestyleButton: 'حفظ نمط الحياة',
     savedToast: 'تم حفظ الملف الشخصي ونمط الحياة بنجاح',
     tuneWithAi: 'التخصيص عبر N1 AI',
     userProfileEyebrow: 'UserProfile',
