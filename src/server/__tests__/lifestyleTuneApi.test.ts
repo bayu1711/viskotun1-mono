@@ -125,7 +125,8 @@ describe('POST /api/lifestyle/tune', () => {
             city: 'Abu Dhabi',
             confirmed: true
           },
-          activeTags: []
+          physicalCautions: ['Shoulder mobility limit'],
+          activeTags: ['Shoulder mobility limit', 'Cigarettes']
         },
         interviewStage: 'complete'
       })
@@ -140,7 +141,22 @@ describe('POST /api/lifestyle/tune', () => {
     expect(data.profileUpdates.region?.countryCode).toBe('LK');
     expect(data.userProfileUpdates?.age).toBe(32);
     expect(data.profileUpdates?.workPattern).toBe('desk_sedentary');
-    expect(data.profileUpdates?.physicalCautions).toContain('Knee sensitivity');
+    // Earlier cautions stay; new ones join in canonical form.
+    expect(data.profileUpdates?.physicalCautions).toEqual([
+      'Shoulder mobility limit',
+      'Knee sensitivity'
+    ]);
+    // Off-enum AI values map onto values the /profile chips can show.
+    expect(data.profileUpdates?.climateSensitivity).toBe('summer_heat');
+    expect(data.userProfileUpdates?.availableWindows).toEqual([
+      expect.objectContaining({ start: '06:00', end: '07:00' })
+    ]);
+    // Tags are recomputed: managed ids in, caution and stale label copies out.
+    expect(data.profileUpdates?.activeTags).toEqual(
+      expect.arrayContaining(['desk_bound_worker', 'extreme_heat_summer'])
+    );
+    expect(data.profileUpdates?.activeTags).not.toContain('Shoulder mobility limit');
+    expect(data.profileUpdates?.activeTags).not.toContain('Cigarettes');
     expect(data.extractedTags).not.toContain(
       'change my region to colombo sri lanka, I am 32 with a desk job and mild knee pain'
     );

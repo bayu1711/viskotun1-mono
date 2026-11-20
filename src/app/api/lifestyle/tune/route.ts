@@ -22,7 +22,16 @@ import {
   type LifestyleInterviewStage,
   parseConversationalLifestyleAnswer
 } from '../../../../utils/lifestyleInterview';
-import { CULTURAL_RHYTHM_KEYS, deriveClinicalFocus } from '../../../../utils/profile';
+import {
+  CULTURAL_RHYTHM_KEYS,
+  coerceAvailableWindows,
+  deriveClinicalFocus,
+  normalizePhysicalCautions,
+  sanitizeAge,
+  sanitizeLifestyleFields,
+  syncLifestyleActiveTags
+} from '../../../../utils/profile';
+import { normalizeAvailableWindows } from '../../../../utils/schedule';
 
 const VALID_RHYTHMS = new Set<string>(CULTURAL_RHYTHM_KEYS);
 const INTERVIEW_STAGES = new Set<LifestyleInterviewStage>([
@@ -173,7 +182,8 @@ ${
 Rules:
 1. Keep it concise: 1-2 short sentences, plain prose, no bullet lists, no headers, no hype, no medical disclaimers.
 2. Briefly acknowledge what the participant just shared without judgment.
-3. ${
+3. Only say the app adapts timing, pacing, rest and safety cautions. Never claim it measures heart rate, sets medication or dosage, diagnoses, or treats anything.
+4. ${
             nextStage === 'complete'
               ? 'Warmly confirm their adaptive profile is ready, state their derived focus in plain language, and recommend exploring routines tailored to their focus.'
               : 'Naturally ask the next question above so the conversation flows smoothly.'
@@ -235,11 +245,20 @@ Rules:
 
     const mergedProfileUpdates: Partial<UserLifestyleProfile> = {
       ...deterministicResult.profileUpdates,
-      ...(conversationalExtra.region ? { region: conversationalExtra.region } : {}),
-      ...(conversationalExtra.physicalCautions
-        ? { physicalCautions: conversationalExtra.physicalCautions }
-        : {})
+      ...(conversationalExtra.region ? { region: conversationalExtra.region } : {})
     };
+    // Cautions accumulate; a new message never silently drops an earlier caution.
+    const existingCautions = currentProfile?.physicalCautions ?? [];
+    const turnCautions = [
+      ...(deterministicResult.profileUpdates.physicalCautions ?? []),
+      ...(conversationalExtra.physicalCautions ?? [])
+    ];
+    if (turnCautions.length > 0) {
+      mergedProfileUpdates.physicalCautions = normalizePhysicalCautions([
+        ...existingCautions,
+        ...turnCautions
+      ]);
+    }
 
     const userProfileUpdates: Partial<UserProfile> = {
       ...(conversationalExtra.age !== undefined ? { age: conversationalExtra.age } : {}),
@@ -254,7 +273,7 @@ Rules:
     // If deterministic parsing updated the region, formulate a concise acknowledgment
     if (conversationalExtra.region) {
       const regionLabel = formatRegionLabel(conversationalExtra.region);
-      deterministicResult.reply = `Region updated to ${regionLabel}. Your daily routine and pacing now adapt to your local climate and regional patterns.`;
+      deterministicResult.reply = localeCopy.lifestyleTuning.regionUpdatedReply(regionLabel);
     }
 
     let resolvedCountry = mergedProfileUpdates.region?.countryCode || country;
@@ -290,12 +309,13 @@ Output strictly JSON matching this schema:
   } | null,
   "age": number | null,
   "availabilityMode": "windows" | "anytime" | null,
-  "availableWindows": [{"start": number, "end": number}] | null,
-  "workPattern": "shift_work" | "desk_sedentary" | "frequent_travel" | "standard" | null,
-  "climateSensitivity": "summer_heat" | "high_humidity" | "winter_cold" | "moderate" | null,
-  "smokingStatus": "non_smoker" | "former_smoker" | "cigarettes" | "midwakh_dokha" | "shisha_waterpipe" | "vape" | null,
+  "availableWindows": [{"start": "HH:mm", "end": "HH:mm"}] | null,
+  "workPattern": "standard" | "shift_work" | "desk_sedentary" | "frequent_travel" | "flexible" | null,
+  "activityBaseline": "sedentary" | "light" | "moderate" | "active" | null,
+  "climateSensitivity": "summer_heat" | "moderate" | "cold_climate" | null,
+  "smokingStatus": "non_smoker" | "former_smoker" | "cigarettes" | "midwakh_dokha" | "shisha_waterpipe" | "vape" | "other" | null,
   "isRamadanFastingObserver": boolean | null,
-  "culturalRhythms": string[] | null,
+  "culturalRhythms": (${CULTURAL_RHYTHM_KEYS.map((k) => `"${k}"`).join(' | ')})[] | null,
   "physicalCautions": string[] | null,
   "lifestyleTags": string[] | null,
   "reply": string
@@ -303,10 +323,11 @@ Output strictly JSON matching this schema:
 
 Guidelines:
 1. If the user asks to change, set, or update their region/location (e.g. "change my region to colombo sri lanka"), extract city, countryName, and countryCode into "region".
-2. If the user mentions age or available schedule windows, extract them.
-3. If the user mentions work pattern, smoking, climate sensitivity, or injuries/cautions, extract them.
-4. "lifestyleTags": ONLY include specific personal daily habits (e.g. "Early Dawn Riser"), NEVER action commands or questions.
-5. In "reply", write a natural 1-2 sentence response explaining how their routine adapts without judgment. ${languageInstruction}`;
+2. If the user mentions age or available schedule windows, extract them. Times are 24-hour "HH:mm".
+3. If the user mentions work pattern, activity level, smoking, climate, or injuries/cautions, extract them. Use only the listed enum values.
+4. "physicalCautions": short labels for NEW cautions only. Prefer these exact labels when they fit: "Morning stiffness", "Knee sensitivity", "Lower back sensitivity", "Shoulder mobility limit", "Ankle / Achilles tenderness", "Hip stiffness", "Neck tension", "Wrist sensitivity", "Joint sensitivity", "Heat fatigue".
+5. "lifestyleTags": ONLY specific personal habits that no field above covers (e.g. "Gym after work"). NEVER repeat work, smoking, climate, rhythm or caution values, and NEVER include commands or questions.
+6. In "reply", write a natural 1-2 sentence response explaining how their routine adapts without judgment. Only say the app adapts timing, pacing, rest and safety cautions; never claim it measures vitals, sets medication or dosage, or diagnoses. ${languageInstruction}`;
 
         const geminiJson = await executeWithGeminiFailover(async (apiKey) => {
           const genAI = new GoogleGenerativeAI(apiKey);
@@ -336,27 +357,29 @@ Guidelines:
               };
               resolvedCountry = countryCode;
             }
-            if (typeof parsed.age === 'number' && Number.isFinite(parsed.age) && parsed.age >= 10 && parsed.age <= 120) {
-              userProfileUpdates.age = parsed.age;
+            // Same age bounds as the /profile age field.
+            const geminiAge = sanitizeAge(typeof parsed.age === 'number' ? parsed.age : undefined);
+            if (geminiAge !== undefined) {
+              userProfileUpdates.age = geminiAge;
             }
             if (parsed.availabilityMode === 'windows' || parsed.availabilityMode === 'anytime') {
               userProfileUpdates.availabilityMode = parsed.availabilityMode;
             }
-            if (Array.isArray(parsed.availableWindows) && parsed.availableWindows.length > 0) {
-              userProfileUpdates.availableWindows = parsed.availableWindows;
+            const geminiWindows = normalizeAvailableWindows(
+              coerceAvailableWindows(parsed.availableWindows)
+            );
+            if (geminiWindows.length > 0) {
+              userProfileUpdates.availableWindows = geminiWindows;
               userProfileUpdates.availabilityMode = 'windows';
             }
-            if (parsed.workPattern) mergedProfileUpdates.workPattern = parsed.workPattern;
-            if (parsed.climateSensitivity) mergedProfileUpdates.climateSensitivity = parsed.climateSensitivity;
-            if (parsed.smokingStatus) mergedProfileUpdates.smokingStatus = parsed.smokingStatus;
-            if (typeof parsed.isRamadanFastingObserver === 'boolean') {
-              mergedProfileUpdates.isRamadanFastingObserver = parsed.isRamadanFastingObserver;
-            }
-            if (Array.isArray(parsed.culturalRhythms) && parsed.culturalRhythms.length > 0) {
-              mergedProfileUpdates.culturalRhythms = parsed.culturalRhythms;
-            }
-            if (Array.isArray(parsed.physicalCautions) && parsed.physicalCautions.length > 0) {
-              mergedProfileUpdates.physicalCautions = parsed.physicalCautions;
+            // Drop any enum value the /profile form cannot display.
+            const { physicalCautions: geminiCautions, ...geminiFields } = sanitizeLifestyleFields(parsed);
+            Object.assign(mergedProfileUpdates, geminiFields);
+            if (geminiCautions && geminiCautions.length > 0) {
+              mergedProfileUpdates.physicalCautions = normalizePhysicalCautions([
+                ...(mergedProfileUpdates.physicalCautions ?? existingCautions),
+                ...geminiCautions
+              ]);
             }
             if (Array.isArray(parsed.lifestyleTags) && parsed.lifestyleTags.length > 0) {
               const safeCustom = parsed.lifestyleTags.filter(
@@ -393,6 +416,12 @@ Guidelines:
       countryName: mergedProfileUpdates.region?.countryName ?? currentProfile?.region?.countryName,
       city: mergedProfileUpdates.region?.city ?? currentProfile?.region?.city,
       culturalRhythms: mergedProfileUpdates.culturalRhythms ?? currentProfile?.culturalRhythms
+    });
+    // Recompute tags from the merged fields so chips match /profile and stale copies drop.
+    mergedProfileUpdates.activeTags = syncLifestyleActiveTags({
+      ...currentProfile,
+      ...mergedProfileUpdates,
+      activeTags: mergedProfileUpdates.activeTags ?? currentProfile?.activeTags
     });
     const mergedProfile: Partial<UserLifestyleProfile> = {
       ...currentProfile,
