@@ -5,9 +5,7 @@ import { usePathname } from 'next/navigation';
 import AddIcon from '@mui/icons-material/Add';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import LocalFireDepartmentOutlinedIcon from '@mui/icons-material/LocalFireDepartmentOutlined';
-import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
-import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
@@ -25,19 +23,14 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 
 export function TopBar() {
   const pathname = usePathname();
-  const { streak, resetToDefaults, openHowTo, lifestyleProfile } = useRoutine();
-  const { openAssistant, openLifestyleTuning } = useAssistant();
+  const { streak, resetToDefaults, openHowTo } = useRoutine();
+  const { openAssistant } = useAssistant();
   const { user, isGuest, isAdmin, logout } = useAuth();
   const { openPolicyDrawer, isLiveFirestore } = usePolicyLedger();
   const { locale, copy } = useLocale();
 
   const displayName = user?.name || copy.auth.defaultGuestName;
   const displayInitials = user?.initials || copy.brand.initials;
-
-  const countryCode = lifestyleProfile?.region?.countryCode || 'AE';
-  const regionLabel =
-    lifestyleProfile?.region?.city || lifestyleProfile?.region?.countryName || 'Abu Dhabi';
-  const tagCount = lifestyleProfile?.activeTags?.length ?? 0;
 
   // The server clock is not in the viewer's timezone, so the greeting is only computed in the browser
   const [greetingText, setGreetingText] = useState<string | null>(null);
@@ -91,29 +84,6 @@ export function TopBar() {
 
         <div className="ml-auto flex items-center gap-2">
           <LanguageSwitcher variant="topbar" />
-
-          <button
-            type="button"
-            onClick={openLifestyleTuning}
-            className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-ink/20 bg-cream/70 hover:bg-cream px-2.5 py-1 text-xs font-medium text-ink transition-colors cursor-pointer"
-            title={copy.lifestyleTuning.tuneButton}
-            aria-label={copy.lifestyleTuning.tuneButton}
-          >
-            <Icon
-              icon={lifestyleProfile?.region?.countryCode ? LocationOnOutlinedIcon : PublicOutlinedIcon}
-              size="xs"
-              className="text-ink/70"
-            />
-            <span className="font-mono text-3xs font-semibold uppercase sm:hidden">
-              {countryCode}
-            </span>
-            <span className="hidden sm:inline font-semibold">
-              {regionLabel}
-            </span>
-            <span className="text-2xs text-ink/65">
-              · {tagCount > 0 ? `${tagCount} active` : 'Tune'}
-            </span>
-          </button>
 
           {streak > 0 && (
             <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-orange/15 px-3 py-1 text-xs font-semibold text-ink">
