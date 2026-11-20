@@ -178,7 +178,7 @@ describe('Conversational Adaptive Lifestyle Interview', () => {
     const copyEn = getLocaleCopy('en');
     const copyAr = getLocaleCopy('ar');
 
-    for (const stage of ['region', 'age_time', 'rhythm', 'cautions', 'complete'] as const) {
+    for (const stage of ['region', 'age', 'availability', 'age_time', 'rhythm', 'cautions', 'complete'] as const) {
       const chipsEn = getQuickRepliesForStage({
         stage,
         lifestyleProfile: { region: DEFAULT_REGION, activeTags: [] },
@@ -330,5 +330,59 @@ describe('Conversational Adaptive Lifestyle Interview', () => {
     expect(skipped.answeredAgeTime).toBe(true);
     expect(skipped.availabilityMode).toBe('anytime');
     expect(skipped.availableWindows).toBeUndefined();
+  });
+
+  it('separates age and availability into distinct stages and supports multi-slot availability selection', () => {
+    // Stage 1: region -> answers region -> next is age
+    const regionAnswer = parseConversationalLifestyleAnswer('Colombo', 'region', {
+      currentRegion: DEFAULT_REGION
+    });
+    const step1 = computeNextInterviewStage('region', regionAnswer, new Set());
+    expect(step1.nextStage).toBe('age');
+
+    // Stage 2: age -> answers age by typing -> next is availability
+    const ageAnswer = parseConversationalLifestyleAnswer('29', 'age', {
+      currentRegion: regionAnswer.region ?? DEFAULT_REGION
+    });
+    expect(ageAnswer.age).toBe(29);
+    expect(ageAnswer.answeredAge).toBe(true);
+    const step2 = computeNextInterviewStage('age', ageAnswer, new Set(step1.updatedAnswered));
+    expect(step2.nextStage).toBe('availability');
+
+    // Stage 3: availability -> user selects 2 slots (multi-select chip combination)
+    const multiSlotAnswer = parseConversationalLifestyleAnswer(
+      'Morning 07:30–09:00, Evening 19:00–21:00',
+      'availability',
+      { currentRegion: regionAnswer.region ?? DEFAULT_REGION }
+    );
+    expect(multiSlotAnswer.answeredAvailability).toBe(true);
+    expect(multiSlotAnswer.availabilityMode).toBe('windows');
+    expect(multiSlotAnswer.availableWindows).toHaveLength(2);
+    expect(multiSlotAnswer.availableWindows?.[0]).toMatchObject({ start: '07:30', end: '09:00' });
+    expect(multiSlotAnswer.availableWindows?.[1]).toMatchObject({ start: '19:00', end: '21:00' });
+
+    const step3 = computeNextInterviewStage('availability', multiSlotAnswer, new Set(step2.updatedAnswered));
+    expect(step3.nextStage).toBe('rhythm');
+  });
+
+  it('allows skipping age and selecting flexible anytime availability separately', () => {
+    const skipAge = parseConversationalLifestyleAnswer('Prefer not to say · Skip', 'age', {
+      currentRegion: DEFAULT_REGION
+    });
+    expect(skipAge.answeredAge).toBe(true);
+    expect(skipAge.age).toBeUndefined();
+
+    const step = computeNextInterviewStage('age', skipAge, new Set(['region']));
+    expect(step.nextStage).toBe('availability');
+
+    const anytimeAnswer = parseConversationalLifestyleAnswer('Flexible · Anytime', 'availability', {
+      currentRegion: DEFAULT_REGION
+    });
+    expect(anytimeAnswer.answeredAvailability).toBe(true);
+    expect(anytimeAnswer.availabilityMode).toBe('anytime');
+    expect(anytimeAnswer.availableWindows).toBeUndefined();
+
+    const nextStep = computeNextInterviewStage('availability', anytimeAnswer, new Set(step.updatedAnswered));
+    expect(nextStep.nextStage).toBe('rhythm');
   });
 });
