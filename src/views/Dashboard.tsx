@@ -40,7 +40,7 @@ export function DashboardPage() {
     <PageContainer>
       <PageHeader eyebrow={COPY.dashboard.eyebrow} title={COPY.dashboard.title} />
       <KeyMetrics />
-      <div className="mt-2.5 grid grid-cols-1 gap-2.5 lg:grid-cols-main-aside">
+      <div className="mt-2.5 grid grid-cols-1 gap-2.5 xl:grid-cols-main-aside">
         <div className="space-y-2.5">
           <HealthAgeCard />
           {hasBiomarkerField && <BiomarkerTrendChart />}

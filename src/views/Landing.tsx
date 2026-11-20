@@ -630,7 +630,7 @@ export function LandingShowcase({
                 <button
                   type="button"
                   onClick={logout}
-                  className="inline-flex min-h-11 items-center transition-colors hover:text-ink"
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 transition-colors hover:text-ink"
                 >
                   {content.ctaSignOut}
                 </button>
