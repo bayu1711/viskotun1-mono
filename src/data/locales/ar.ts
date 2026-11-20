@@ -142,6 +142,8 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     saveButton: 'حفظ الملف الشخصي',
     saveAccountButton: 'حفظ إعدادات الحساب',
     saveLifestyleButton: 'حفظ نمط الحياة',
+    unsavedChanges: 'تغييرات غير محفوظة',
+    allChangesSaved: 'تم حفظ كل التغييرات',
     savedToast: 'تم حفظ الملف الشخصي ونمط الحياة بنجاح',
     tuneWithAi: 'التخصيص عبر N1 AI',
     userProfileEyebrow: 'UserProfile',
@@ -537,7 +539,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     routineOverrideTitle: 'جدول هذه الخطة',
     customWindowHint: 'يُطبّق على هذه الخطة فقط — وتحتفظ خططك الأخرى بجداولها المستقلة.',
     lifestyleButton: 'نمط الحياة والموقع',
-    modalTitle: 'التكييف مع نمط الحياة والموقع',
+    modalTitle: 'ملف نمط الحياة التكيفي',
     modalSubtitle: 'خطة مخصصة لموقعك ومناخك وعاداتك اليومية ونوافذك الزمنية المتاحة.'
   },
   dayActions: {
@@ -837,7 +839,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     backToGlobal: 'الإصدار العالمي',
     heroTrustPoints: [
       'دون انقطاع عقابي · متكيف مع حرارة 48° وشهر رمضان',
-      '100% تجارب سريرية بشرية محكمة',
+      'مبني فقط على تجارب تدخلية بشرية',
       'دعم كامل للغة العربية واتجاه RTL'
     ],
     interactivePreview: {

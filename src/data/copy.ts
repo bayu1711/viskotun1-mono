@@ -290,7 +290,7 @@ export const COPY = {
     routineOverrideTitle: 'Schedule for this routine',
     customWindowHint: 'Applies only to this routine — your other routines keep their own schedules.',
     lifestyleButton: 'Lifestyle & Location',
-    modalTitle: 'Adaptive Lifestyle Context',
+    modalTitle: 'Adaptive Lifestyle Profile',
     modalSubtitle:
       'Tailored to your geographic location, climate conditions, cultural rhythms, and daily schedule availability.'
   },
@@ -386,6 +386,8 @@ export const COPY = {
     excludeStep: 'Exclude step',
     restoreStep: 'Restore step',
     excludedBadge: 'Excluded',
+    microBadge: 'Micro',
+    pendingCheckinTitle: 'Lapse check-in waiting',
     excludedNote: 'Excluded from daily routine — does not affect progress ring or streak',
     defaultSetLabel: 'Sets',
     holdStatLabel: 'Hold:',
@@ -494,6 +496,8 @@ export const COPY = {
     saveButton: 'Save profile',
     saveAccountButton: 'Save account',
     saveLifestyleButton: 'Save lifestyle',
+    unsavedChanges: 'Unsaved changes',
+    allChangesSaved: 'All changes saved',
     savedToast: 'Profile & adaptive lifestyle saved',
     tuneWithAi: 'Tune with N1 AI',
     userProfileEyebrow: 'UserProfile',
@@ -772,6 +776,7 @@ export const COPY = {
     downloadedIcsToast: 'Calendar event file (.ics) downloaded',
     deepLinkToast: (title: string) => `Loaded shared routine: ${title}`,
     openShareButton: 'Share',
+    openShareTitle: 'Share routine and QR code',
     addToCalendarButton: 'Calendar',
     scanQrLabel: 'Scan with mobile camera to load routine',
     closeButton: 'Close'
@@ -1209,13 +1214,13 @@ export const COPY = {
     heroEyebrow: 'Evidence into action',
     heroTitle: 'Live healthier with daily routines from real human science.',
     heroSubtitle:
-      'TrialN1 converts dense, peer-reviewed human clinical research into simple, colorful daily habits with voice coaching, parameter auditing, and zero guesswork.',
+      'TrialN1 converts dense, peer-reviewed human clinical research into simple daily habits with voice coaching and a clear note wherever the paper left a parameter out.',
     heroCtaPrimary: 'Start your routine — Free',
     heroCtaSecondary: 'See health domains',
     heroTrustPoints: [
       'Instant guest demo · No card required',
-      '100% human interventional trials',
-      'Zero AI hallucinations'
+      'Built only from human interventional trials',
+      'Answers quote the paper, not guesses'
     ],
     heroImageAlt: 'Participant performing focused daily rehabilitation and mobility routine',
     interactivePreview: {
@@ -1365,7 +1370,7 @@ export const COPY = {
     backToGlobal: 'Global Edition',
     heroTrustPoints: [
       'Zero streak shame · 48°C & Ramadan adaptive',
-      '100% human interventional trials',
+      'Built only from human interventional trials',
       'Bilingual English & Arabic RTL support'
     ],
     interactivePreview: {
@@ -1984,9 +1989,9 @@ export const COPY = {
     samplesTitle: 'Trending Clinical Research Papers',
     trendingTitle: 'Trending Clinical Research Papers',
     samplesSubtitle:
-      'Explore top-ranked clinical research papers in our database with real-time community participants, compliance tracking, and verified biofeedback telemetry.',
+      'Explore top-ranked clinical research papers in our database and see how many people follow each one and how often they log.',
     trendingSubtitle:
-      'Explore top-ranked clinical research papers in our database with real-time community participants, compliance tracking, and verified biofeedback telemetry.',
+      'Explore top-ranked clinical research papers in our database and see how many people follow each one and how often they log.',
     firestoreSyncLive: 'Firebase Firestore live',
     firestoreSyncLocal: 'Local verified catalog',
     filterByTopic: 'Filtered by:',
