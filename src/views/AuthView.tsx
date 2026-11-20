@@ -59,10 +59,10 @@ export function AuthView({ mode }: AuthViewProps) {
     try {
       if (isLogin) {
         await loginWithEmail(email, password);
-        toast.success(email.toLowerCase().includes('admin') ? copy.auth.toastAdminEntered : copy.auth.toastWelcomeBack);
+        toast.success(copy.auth.toastWelcomeBack);
       } else {
         await signupWithEmail(name, email, password);
-        toast.success(email.toLowerCase().includes('admin') ? copy.auth.toastAdminEntered : copy.auth.toastAccountCreated);
+        toast.success(copy.auth.toastAccountCreated);
       }
       router.push(ROUTES.routine);
     } catch (err: unknown) {

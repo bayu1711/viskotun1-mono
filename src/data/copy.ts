@@ -1608,9 +1608,6 @@ export const COPY = {
     googleButton: 'Continue with Google',
     guestButton: 'Continue as guest (no sign-up required)',
     guestNotice: 'Guest mode stores routines locally in your browser. Sign in anytime to sync to the cloud.',
-    adminButton: 'Continue as clinical administrator',
-    adminLifecycleNotice:
-      'Note: Clinical admin controls are temporarily surfaced for Google AI Builder Cup evaluation and will be sealed off post-competition.',
     haveAccount: 'Already have an account? Sign in',
     needAccount: "Don't have an account? Create one",
     signOut: 'Sign out',
@@ -1620,7 +1617,6 @@ export const COPY = {
     signInToSyncBadge: 'Sign in to sync',
     cloudSyncedBadge: 'Cloud synced',
     defaultGuestName: 'Guest Explorer',
-    defaultAdminName: 'Dr. Evelyn Vance',
     defaultClinicalUser: 'Verified Clinical User',
     defaultGoogleUser: 'Google User',
     googleResearcher: 'Google Researcher',
@@ -1652,8 +1648,7 @@ export const COPY = {
     toastAuthFailed: 'Authentication failed. Please try again.',
     toastGoogleSuccess: 'Signed in with Google!',
     toastGoogleFailed: 'Google sign-in failed.',
-    toastGuestEntered: 'Entered as guest explorer',
-    toastAdminEntered: 'Signed in as Clinical Administrator'
+    toastGuestEntered: 'Entered as guest explorer'
   },
   errors: {
     boundaryTitle: 'Something went wrong',
