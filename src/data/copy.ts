@@ -202,6 +202,10 @@ export const COPY = {
       answerSource: 'Adaptive Lifestyle',
       greetingRegion: (regionLabel: string) =>
         `Hi! I'd like to tailor your routine around how your days actually run. I detected you're in ${regionLabel} — is that right, or are you following your routine from somewhere else?`,
+      askAge:
+        'How old are you? TrialN1 calibrates safety parameters, heart rate ranges, and dosage baselines to your age bracket.',
+      askAvailability:
+        'When are you usually available during the day? Select 1–2 open time windows (like 7:30–9am & 7–9pm) or say "anytime" — TrialN1 checks each paper’s timing rules against your availability.',
       askAgeTime:
         'How old are you, and when are you usually available during the day? Share 1–2 open time windows (like 7:30–9am & 7–9pm) or say "anytime" — TrialN1 checks each paper’s timing rules against your availability.',
       askRhythm: (regionLabel: string) =>
@@ -215,11 +219,14 @@ export const COPY = {
       rerunGreeting: (regionLabel: string) =>
         `Sure, let's refresh your lifestyle profile. Are you still following your routine from ${regionLabel}, or somewhere else?`,
       placeholderRegion: 'Reply yes, or type your city & country (e.g. Tokyo, Japan)...',
+      placeholderAge: 'Type your age (e.g. 32) or tap skip...',
+      placeholderAvailability: 'Select slots above or type custom windows (e.g. 7:30–9am & 7–9pm)...',
       placeholderAgeTime: 'e.g. 34, free 7:30–9am & 7–9pm (or "anytime")...',
       placeholderRhythm: 'e.g. Desk job, Ramadan fasting, summer heat...',
       placeholderCautions: 'e.g. Slight knee stiffness, non-smoker (or none)...',
       placeholderComplete: 'Tell me any schedule, location, or habit change...',
-      quickSkipAge: 'Flexible · Anytime',
+      quickSkipAge: 'Prefer not to say · Skip',
+      quickAnytime: 'Flexible · Anytime',
       quickStandardRhythm: 'Standard 9–5 · none of these',
       quickNoCautions: 'No cautions · non-smoker',
       quickDone: 'Done — back to routine',
