@@ -151,6 +151,37 @@ export function formatRegionLabel(region?: Partial<RegionContext>): string {
   return city || countryName;
 }
 
+/**
+ * Detects if user input is an imperative command or question rather than a personal habit/descriptor.
+ * Prevents action instructions (e.g. "change my region to colombo") from leaking into activeTags chips.
+ */
+export function isLifestyleCommandOrQuestion(text: string): boolean {
+  const norm = text.toLowerCase().trim();
+  if (!norm) return false;
+  if (
+    norm.endsWith('?') ||
+    norm.startsWith('what') ||
+    norm.startsWith('how') ||
+    norm.startsWith('why') ||
+    norm.startsWith('can i') ||
+    norm.startsWith('could i') ||
+    norm.startsWith('هل') ||
+    norm.startsWith('كيف') ||
+    norm.startsWith('ماذا') ||
+    norm.startsWith('لماذا')
+  ) {
+    return true;
+  }
+  if (
+    /^(?:change|set|switch|update|reset|clear|remove|delete|my region|my location|my age|my schedule|my time|i'm in|i am in|im in|live in|moved to|based in)\b/i.test(
+      norm
+    )
+  ) {
+    return true;
+  }
+  return /^(?:تغيير|غير|مسح|حذف|منطقتي|موقعي|عمري|أعيش في|أنا في)(?:\s|$)/i.test(norm);
+}
+
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -401,7 +432,7 @@ function extractRegionFromMessage(
 
   // Check known cities at region stage OR when preceded by explicit location phrasing at any stage
   const hasExplicitLocationLead =
-    /(?:i'm in|i am in|im in|live in|based in|from|moved to|located in|joining from|tracking from|in\s+[a-z]|أنا في|أعيش في|من\s+)/i.test(
+    /(?:i'm in|i am in|im in|live in|based in|from|moved to|located in|joining from|tracking from|in\s+[a-z]|change\s+(?:my\s+)?(?:region|location|city|country)\s+to|set\s+(?:my\s+)?(?:region|location|city|country)\s+to|switch\s+(?:my\s+)?(?:region|location|city|country)\s+to|update\s+(?:my\s+)?(?:region|location|city|country)\s+to|(?:my\s+)?(?:region|location)\s+(?:is|to)|أنا في|أعيش في|من\s+|(?:تغيير|غير)\s+(?:المنطقة|منطقتي|الموقع|موقعي)\s*(?:إلى)?|منطقتي\s+هي)/i.test(
       trimmed
     );
 
@@ -425,14 +456,21 @@ function extractRegionFromMessage(
     }
   }
 
-  // Free-form "City, Country" or single location on the region stage
-  if (stage === 'region') {
+  // Free-form "City, Country" or single location on the region stage OR when preceded by explicit location phrasing
+  if (stage === 'region' || hasExplicitLocationLead) {
     const cleanedLocation = trimmed
       .replace(
         /^(?:no,?\s*|actually,?\s*|not quite,?\s*)?(?:i'm|i am|im|we are|currently|i live|i'm based|based|joining|tracking|moved|located)?\s*(?:in|from|at|to)?\s*/i,
         ''
       )
+      .replace(
+        /^(?:change|set|switch|update)\s+(?:my\s+)?(?:region|location|city|country)?\s*(?:to|is)?\s*/i,
+        ''
+      )
+      .replace(/^(?:my\s+)?(?:region|location|city|country)\s+(?:is|to)\s*/i, '')
       .replace(/^(?:لا،?\s*)?(?:أنا\s*في|أعيش\s*في|من)\s*/i, '')
+      .replace(/^(?:تغيير|غير)\s+(?:المنطقة|منطقتي|الموقع|موقعي)\s*(?:إلى)?\s*/i, '')
+      .replace(/^(?:منطقتي|موقعي)\s*هي\s*/i, '')
       .replace(/[.!?]+$/, '')
       .trim();
 
@@ -739,7 +777,13 @@ export function parseConversationalLifestyleAnswer(
     if (result.acknowledgments.length === 0) {
       result.acknowledgments.push('standard daily schedule');
     }
-  } else if (stage === 'rhythm' && !result.answeredRhythm && trimmed.length >= 2) {
+  } else if (
+    stage === 'rhythm' &&
+    !result.answeredRhythm &&
+    !result.answeredRegion &&
+    trimmed.length >= 2 &&
+    !isLifestyleCommandOrQuestion(trimmed)
+  ) {
     // Capture custom rhythm/schedule note cleanly on rhythm turn
     result.extractedTags.push(trimmed);
     result.customTags.push(trimmed);

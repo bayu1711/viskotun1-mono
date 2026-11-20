@@ -8,6 +8,7 @@ import {
   formatRegionLabel,
   getQuickRepliesForStage,
   getStagePlaceholder,
+  isLifestyleCommandOrQuestion,
   parseConversationalLifestyleAnswer,
   type LifestyleInterviewStage
 } from '../lifestyleInterview';
@@ -441,5 +442,53 @@ describe('Conversational Adaptive Lifestyle Interview', () => {
     });
     expect(yesOnUnknown.answeredRegion).toBe(false);
     expect(yesOnUnknown.region).toBeUndefined();
+  });
+
+  it('parses imperative region change commands and updates region without creating tags', () => {
+    const res = parseConversationalLifestyleAnswer(
+      'change my region to colombo sri lanka',
+      'complete',
+      { currentRegion: DEFAULT_REGION }
+    );
+    expect(res.answeredRegion).toBe(true);
+    expect(res.region?.city).toBe('Colombo');
+    expect(res.region?.countryCode).toBe('LK');
+    expect(res.region?.countryName).toBe('Sri Lanka');
+    expect(res.region?.confirmed).toBe(true);
+    expect(res.extractedTags).not.toContain('change my region to colombo sri lanka');
+    expect(res.customTags).not.toContain('change my region to colombo sri lanka');
+
+    // Also verify free-form location change at complete stage
+    const freeform = parseConversationalLifestyleAnswer(
+      'set my location to Geneva, Switzerland',
+      'complete',
+      { currentRegion: DEFAULT_REGION }
+    );
+    expect(freeform.answeredRegion).toBe(true);
+    expect(freeform.region?.city).toBe('Geneva');
+    expect(freeform.region?.countryCode).toBe('CH');
+    expect(freeform.region?.confirmed).toBe(true);
+
+    // Verify Arabic imperative region change
+    const arabic = parseConversationalLifestyleAnswer(
+      'تغيير منطقتي إلى دبي',
+      'complete',
+      { currentRegion: DEFAULT_REGION }
+    );
+    expect(arabic.answeredRegion).toBe(true);
+    expect(arabic.region?.city).toBe('Dubai');
+    expect(arabic.region?.countryCode).toBe('AE');
+  });
+
+  it('correctly identifies commands and questions vs actual lifestyle habits', () => {
+    expect(isLifestyleCommandOrQuestion('change my region to colombo sri lanka')).toBe(true);
+    expect(isLifestyleCommandOrQuestion('set location to London')).toBe(true);
+    expect(isLifestyleCommandOrQuestion('what is my current schedule?')).toBe(true);
+    expect(isLifestyleCommandOrQuestion('can I change this later?')).toBe(true);
+    expect(isLifestyleCommandOrQuestion('غير موقعي إلى أبوظبي')).toBe(true);
+
+    expect(isLifestyleCommandOrQuestion('Early Dawn Riser')).toBe(false);
+    expect(isLifestyleCommandOrQuestion('Tea / Caffeine Routine')).toBe(false);
+    expect(isLifestyleCommandOrQuestion('Desk-bound sedentary')).toBe(false);
   });
 });

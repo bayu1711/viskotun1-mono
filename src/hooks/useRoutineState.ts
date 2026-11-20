@@ -2521,9 +2521,13 @@ export function useRoutineState() {
           toast.success(localeCopy.lifestyleTuning.onboarding.completedToast);
           refreshLifestyleAdaptation();
         } else if (!isInterviewTurn) {
-          toast.success(
-            localeCopy.lifestyleTuning.tagAddedToast(payload.extractedTags?.[0] || 'Lifestyle')
-          );
+          if (payload.extractedTags && payload.extractedTags.length > 0) {
+            toast.success(
+              localeCopy.lifestyleTuning.tagAddedToast(payload.extractedTags[0])
+            );
+          } else {
+            toast.success(localeCopy.profile.savedToast);
+          }
         }
       };
 

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { isLifestyleCommandOrQuestion } from '../utils/lifestyleInterview';
 import type {
   CulturalRhythmId,
   RegionalLifestyleTag,
@@ -476,7 +477,12 @@ export function parseLifestyleDeterministically(
   }
 
   // 4. Summer heat / Climate
-  if (text.includes('heat') || text.includes('summer') || text.includes('sun') || text.includes('hot')) {
+  if (
+    text.includes('heat') ||
+    text.includes('summer') ||
+    (text.includes('sun') && !text.includes('sunset') && !text.includes('sunday')) ||
+    (text.includes('hot') && !text.includes('hotel') && !text.includes('photo'))
+  ) {
     profileUpdates.climateSensitivity = 'summer_heat';
     extractedTags.push('Summer Heat Adaptation');
     explanations.push('Indoor climate-controlled execution recommended for high temperature days');
@@ -504,17 +510,23 @@ export function parseLifestyleDeterministically(
     explanations.push('Routine calibrated to gentle micro-dosing to protect recovery and keep adherence effortless');
   }
 
-  // Fallback if no specific keyword matched
+  // Fallback if no specific keyword matched — only capture as custom tag if it looks like a personal habit
   if (extractedTags.length === 0) {
-    const customTag = message.trim();
-    extractedTags.push(customTag);
-    explanations.push('Context noted and saved to personal participant profile');
+    const isCommand = isLifestyleCommandOrQuestion(message);
+    if (!isCommand && message.trim().length <= 48) {
+      const customTag = message.trim();
+      extractedTags.push(customTag);
+      explanations.push('Context noted and saved to personal participant profile');
+    }
   }
 
   const combinedTags = Array.from(new Set([...(currentProfile?.activeTags || []), ...extractedTags]));
   profileUpdates.activeTags = combinedTags;
 
-  const reply = `Noted! ${explanations.join('. ')}. Your daily routine is tailored to your real-world circumstances.`;
+  const reply =
+    explanations.length > 0
+      ? `Noted! ${explanations.join('. ')}. Your daily routine is tailored to your real-world circumstances.`
+      : 'Noted! Your profile preferences have been updated.';
 
   return {
     reply,
