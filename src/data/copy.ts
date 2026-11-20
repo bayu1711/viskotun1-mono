@@ -397,7 +397,7 @@ export const COPY = {
   },
   dashboard: {
     eyebrow: 'Track',
-    title: 'Your experiments',
+    title: 'Your N1 Progress',
     metricsLabel: 'Key metrics',
     activeRoutine: 'Active routine',
     adherence: 'Adherence',
