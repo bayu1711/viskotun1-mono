@@ -7,7 +7,13 @@ import {
   memoryUserStorage,
   saveUserRecord
 } from '../userStorage';
-import { buildUserDataExport, countStoredUserLogs } from '../../utils/accountData';
+import {
+  buildUserDataExport,
+  countStoredUserLogs,
+  getProfileStorageKeys,
+  LEGACY_LIFESTYLE_PROFILE_KEY,
+  LEGACY_USER_PROFILE_KEY
+} from '../../utils/accountData';
 import type { Routine, RoutineRuntime } from '../../types/routine';
 
 const TEST_USER_ID = 'usr-account-lifecycle-test';
@@ -203,5 +209,25 @@ describe('User Account Lifecycle API & Data Utilities', () => {
     expect(controlsSource).toContain('handleDeactivateAccount');
     expect(controlsSource).toContain('handleDeleteAccount');
     expect(controlsSource).toContain('deleteConfirmKeyword');
+  });
+
+  it('isolates profile and lifestyle localStorage keys per account so new sign-ins never inherit prior users', () => {
+    const guestKeys = getProfileStorageKeys(undefined);
+    const userAKeys = getProfileStorageKeys('uid-alice');
+    const userBKeys = getProfileStorageKeys('uid-bob');
+
+    expect(guestKeys.userProfile).not.toBe(LEGACY_USER_PROFILE_KEY);
+    expect(guestKeys.lifestyleProfile).not.toBe(LEGACY_LIFESTYLE_PROFILE_KEY);
+    expect(userAKeys.userProfile).not.toBe(userBKeys.userProfile);
+    expect(userAKeys.lifestyleProfile).not.toBe(userBKeys.lifestyleProfile);
+    expect(userAKeys.lifestyleProfile).not.toBe(guestKeys.lifestyleProfile);
+
+    const authSource = fs.readFileSync(
+      path.resolve(__dirname, '../../contexts/AuthContext.tsx'),
+      'utf-8'
+    );
+    expect(authSource).toContain('getProfileStorageKeys');
+    expect(authSource).toContain('loadScopedProfilesForUser');
+    expect(authSource).toContain('freshAccount: true');
   });
 });
