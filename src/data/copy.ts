@@ -951,7 +951,7 @@ export const COPY = {
     answerSource: 'Source · Methods section',
     engines: {
       onDeviceGemma: 'On-Device Gemma',
-      cloudGemini: 'Gemini Flash',
+      cloudGemini: 'Cloud AI',
       serverGemma: 'Gemma 2 Endpoint',
       localRules: 'Deterministic Matcher',
       onDeviceBadge: 'On-device (0ms · private)',

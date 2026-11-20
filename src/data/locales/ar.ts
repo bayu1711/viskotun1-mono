@@ -634,7 +634,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     closeDisclaimer: 'إغلاق التنويه',
     engines: {
       onDeviceGemma: 'نموذج Gemma الداخلي (على الجهاز)',
-      cloudGemini: 'سحابة Gemini Flash',
+      cloudGemini: 'ذكاء سحابي',
       serverGemma: 'خادم Gemma 2',
       localRules: 'المطابق السريري المحلي',
       onDeviceBadge: 'داخلي (فوري · خصوصية تامة)',
