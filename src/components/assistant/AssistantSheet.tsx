@@ -8,6 +8,7 @@ import { type AssistantMode, useAssistant } from '../../contexts/AssistantContex
 import { ONBOARDING_DISMISSED_KEY } from '../../contexts/AuthContext';
 import { useLocale } from '../../contexts/LocaleContext';
 import { useRoutine } from '../../contexts/RoutineContext';
+import type { RoutineSchedulePreference } from '../../types/schedule';
 import { MOTION } from '../../data/config';
 import { COPY } from '../../data/copy';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
@@ -105,8 +106,8 @@ export function AssistantSheet() {
     addPaper(file);
   };
 
-  const handleConfirmCandidate = () => {
-    confirmStagingRoutine();
+  const handleConfirmCandidate = (scheduleOverride?: RoutineSchedulePreference) => {
+    confirmStagingRoutine(scheduleOverride);
     setMode('ask');
   };
 
@@ -271,6 +272,7 @@ export function AssistantSheet() {
                     <div className="space-y-4">
                       <CandidateRoutineCard
                         routine={stagingRoutine}
+                        userProfile={userProfile}
                         onConfirm={handleConfirmCandidate}
                         onDiscard={discardStagingRoutine}
                         onToggleExcludeStep={toggleStagingExcludeStep}

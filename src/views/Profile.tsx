@@ -17,6 +17,7 @@ import { PageContainer } from '../components/layout/PageContainer';
 import { PageHeader } from '../components/layout/PageHeader';
 import { AccountControlsPanel } from '../components/profile/AccountControlsPanel';
 import { Avatar } from '../components/ui/Avatar';
+import { AvailableWindowsEditor } from '../components/ui/AvailableWindowsEditor';
 import { Icon } from '../components/ui/Icon';
 import { Panel } from '../components/ui/Panel';
 import { PillButton, pillClassName } from '../components/ui/PillButton';
@@ -41,17 +42,23 @@ import type {
   UserLifestyleProfile,
   WorkPattern
 } from '../types/auth';
+import type { AvailabilityMode, AvailableTimeWindow } from '../types/schedule';
 import { cn } from '../utils/cn';
 import { resolveCountryCodeFromInput } from '../utils/geo';
 import {
   CULTURAL_RHYTHM_KEYS,
   deriveClinicalFocus,
   deriveLifestyleCohort,
-  getRegionalReminderPresets,
+  getRegionalAvailabilityPresets,
   resolveCulturalRhythms,
   sanitizeAge,
   syncLifestyleActiveTags
 } from '../utils/profile';
+import {
+  DEFAULT_AVAILABLE_WINDOWS,
+  formatAvailabilitySummary,
+  normalizeAvailableWindows
+} from '../utils/schedule';
 
 const REGION_PRESETS = [
   { countryCode: 'AE', countryName: 'United Arab Emirates', defaultCity: 'Abu Dhabi' },
@@ -142,7 +149,10 @@ export function ProfilePage() {
   const [displayName, setDisplayName] = useState('');
   const [ageInput, setAgeInput] = useState('');
   const [biologicalSex, setBiologicalSex] = useState<BiologicalSex | undefined>(undefined);
-  const [reminderTime, setReminderTime] = useState('09:00');
+  const [availabilityMode, setAvailabilityMode] = useState<AvailabilityMode>('windows');
+  const [availableWindows, setAvailableWindows] = useState<AvailableTimeWindow[]>([
+    ...DEFAULT_AVAILABLE_WINDOWS
+  ]);
   const [clinicalGoals, setClinicalGoals] = useState('');
   const [isGoalsCustom, setIsGoalsCustom] = useState(false);
   const [primaryLanguage, setPrimaryLanguage] = useState<AppLocale>('en');
@@ -191,7 +201,11 @@ export function ProfilePage() {
     setDisplayName(userProfile.displayName || (user && !user.isGuest ? user.name : '') || '');
     setAgeInput(userProfile.age !== undefined ? String(userProfile.age) : '');
     setBiologicalSex(userProfile.biologicalSex);
-    setReminderTime(userProfile.preferredReminderTime || '09:00');
+    setAvailabilityMode(userProfile.availabilityMode === 'anytime' ? 'anytime' : 'windows');
+    const hydratedWindows = normalizeAvailableWindows(userProfile.availableWindows);
+    setAvailableWindows(
+      hydratedWindows.length > 0 ? hydratedWindows : [...DEFAULT_AVAILABLE_WINDOWS]
+    );
     if (userProfile.clinicalGoals) {
       setClinicalGoals(userProfile.clinicalGoals);
       setIsGoalsCustom(true);
@@ -240,15 +254,20 @@ export function ProfilePage() {
   });
   const effectiveClinicalGoals = isGoalsCustom ? clinicalGoals : generatedFocus;
   const resolvedCountryCodeForUi = resolveCountryCodeFromInput(countryName || countryCode);
-  const regionalReminderPresets = getRegionalReminderPresets({
+  const regionalAvailabilityPresets = getRegionalAvailabilityPresets({
     countryCode: resolvedCountryCodeForUi,
     isRamadanFastingObserver: isRamadanObserver,
     culturalRhythms,
-    basePresets: t.reminderPresets,
-    fastingPreset: t.fastingReminderPreset,
-    dawnPreset: t.dawnReminderPreset,
-    lateDinnerPreset: t.lateDinnerReminderPreset
+    basePresets: t.availabilityPresets,
+    fastingPreset: t.fastingAvailabilityPreset,
+    dawnPreset: t.dawnAvailabilityPreset,
+    lateDinnerPreset: t.lateDinnerAvailabilityPreset
   });
+  const availabilitySummaryPreview = formatAvailabilitySummary(
+    { availabilityMode, availableWindows },
+    undefined,
+    locale
+  );
 
   const toggleCulturalRhythm = (item: CulturalRhythmId) => {
     setCulturalRhythms((prev) =>
@@ -282,11 +301,18 @@ export function ProfilePage() {
     const normalizedSecondary: SecondaryLanguage =
       secondaryLanguage === primaryLanguage ? 'none' : secondaryLanguage;
 
+    const normalizedWindows = normalizeAvailableWindows(availableWindows);
     updateUserProfile({
       displayName: displayName.trim() || undefined,
       age: sanitizeAge(ageInput),
       biologicalSex,
-      preferredReminderTime: reminderTime || '09:00',
+      availabilityMode,
+      availableWindows:
+        availabilityMode === 'anytime'
+          ? normalizedWindows
+          : normalizedWindows.length > 0
+            ? normalizedWindows
+            : [...DEFAULT_AVAILABLE_WINDOWS],
       clinicalGoals: effectiveClinicalGoals.trim() || undefined,
       primaryLanguage,
       secondaryLanguage: normalizedSecondary,
@@ -366,9 +392,11 @@ export function ProfilePage() {
         <PageHeader
           eyebrow={t.eyebrow}
           title={t.title}
+          hideRoutineSwitcher
           switcherExtra={
             <div className="flex flex-wrap items-center gap-2.5">
               <SegmentedTabs
+                variant="pills"
                 options={[
                   { id: 'account' as const, label: t.tabs.account },
                   { id: 'lifestyle' as const, label: t.tabs.lifestyle }
@@ -377,7 +405,10 @@ export function ProfilePage() {
                 onChange={handleTabChange}
                 ariaLabel={t.tabs.ariaLabel}
               />
-              <Link href={ROUTES.routine} className={pillClassName('outline', 'sm')}>
+              <Link
+                href={ROUTES.routine}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3.5 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
+              >
                 <span>{t.backToRoutine}</span>
                 <Icon icon={NorthEastIcon} size="xs" />
               </Link>
@@ -437,35 +468,44 @@ export function ProfilePage() {
                 onChange={setBiologicalSex}
               />
 
-              <div>
-                <label htmlFor="profile-reminder-time" className="mb-1.5 block text-xs font-semibold text-ink/80">
-                  {t.reminderTimeLabel}
-                </label>
-                <div className="flex flex-wrap items-center gap-2">
-                  <input
-                    id="profile-reminder-time"
-                    type="time"
-                    value={reminderTime}
-                    onChange={(e) => setReminderTime(e.target.value)}
-                    className="rounded-xl border border-ink/15 bg-canvas/60 px-3.5 py-2 text-sm text-ink outline-none focus:border-ink"
-                  />
-                  {regionalReminderPresets.map((preset) => (
-                    <button
-                      key={preset.value}
-                      type="button"
-                      onClick={() => setReminderTime(preset.value)}
-                      className={cn(
-                        'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer',
-                        reminderTime === preset.value
-                          ? 'border-ink bg-mint text-ink font-semibold'
-                          : 'border-ink/15 bg-canvas/60 text-ink/80 hover:border-ink/40'
-                      )}
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-semibold text-ink/80">{t.availabilityLabel}</p>
+                  <div className="inline-flex rounded-full border border-ink/15 bg-canvas p-0.5">
+                    {(['windows', 'anytime'] as const).map((modeOption) => (
+                      <button
+                        key={modeOption}
+                        type="button"
+                        onClick={() => setAvailabilityMode(modeOption)}
+                        className={cn(
+                          'rounded-full px-3 py-1 text-2xs font-medium transition-colors cursor-pointer',
+                          availabilityMode === modeOption
+                            ? 'bg-ink text-white'
+                            : 'text-ink/70 hover:text-ink'
+                        )}
+                      >
+                        {t.availabilityModes[modeOption]}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <p className="mt-1 text-2xs text-ink/60">{t.reminderTimeHint}</p>
+
+                {availabilityMode === 'anytime' ? (
+                  <p className="rounded-xl border border-ink/10 bg-canvas/60 p-3 text-xs leading-relaxed text-ink/75">
+                    {t.availabilityAnytimeDesc}
+                  </p>
+                ) : (
+                  <AvailableWindowsEditor
+                    windows={availableWindows}
+                    onChange={setAvailableWindows}
+                    presets={regionalAvailabilityPresets}
+                    addLabel={t.addWindowBtn}
+                    labelPlaceholder={t.windowLabelPlaceholder}
+                    presetsHeading={t.windowPresetsHeading}
+                    removeAria={t.removeWindowAria}
+                  />
+                )}
+                <p className="text-2xs text-ink/60">{t.availabilityHint}</p>
               </div>
 
               <div>
@@ -859,7 +899,7 @@ export function ProfilePage() {
 
                 <li className="flex items-start gap-2.5 rounded-xl bg-white/80 p-3 border border-ink/10">
                   <Icon icon={CalendarTodayOutlinedIcon} size="sm" className="mt-0.5 shrink-0 text-ink" />
-                  <p>{t.impactReminderItem(reminderTime || '09:00')}</p>
+                  <p>{t.impactAvailabilityItem(availabilitySummaryPreview)}</p>
                 </li>
 
                 <li className="flex items-start gap-2.5 rounded-xl bg-white/80 p-3 border border-ink/10">

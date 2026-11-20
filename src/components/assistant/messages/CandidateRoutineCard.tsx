@@ -1,24 +1,41 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
+import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
+import { useLocale } from '../../../contexts/LocaleContext';
 import { COPY } from '../../../data/copy';
+import type { UserProfile } from '../../../types/auth';
 import type { Routine, RoutineStep } from '../../../types/routine';
+import type {
+  AvailableTimeWindow,
+  RoutineScheduleMode,
+  RoutineSchedulePreference
+} from '../../../types/schedule';
 import { cn } from '../../../utils/cn';
 import { isRandomizedTrial, stopRuleOf } from '../../../utils/routineMetrics';
+import {
+  DEFAULT_AVAILABLE_WINDOWS,
+  evaluateRoutineScheduleCompatibility,
+  normalizeAvailableWindows,
+  resolveProfileAvailability,
+  resolveStepTiming
+} from '../../../utils/schedule';
 import { Callout } from '../../feedback/Callout';
 import { MissingDataBanner } from '../../routine/MissingDataBanner';
+import { AIIcon } from '../../ui/AIIcon';
+import { AvailableWindowsEditor } from '../../ui/AvailableWindowsEditor';
 import { EvidenceBadgeChip } from '../../ui/EvidenceBadgeChip';
 import { Icon } from '../../ui/Icon';
-import { AIIcon } from '../../ui/AIIcon';
 import { MetaItem } from './MetaItem';
 
 interface CandidateRoutineCardProps {
   routine: Routine;
-  onConfirm: () => void;
+  userProfile?: UserProfile;
+  onConfirm: (scheduleOverride?: RoutineSchedulePreference) => void;
   onDiscard: () => void;
   onToggleExcludeStep?: (stepId: string) => void;
   onAskAboutStep?: (step: RoutineStep) => void;
@@ -26,16 +43,53 @@ interface CandidateRoutineCardProps {
 
 export function CandidateRoutineCard({
   routine,
+  userProfile,
   onConfirm,
   onDiscard,
   onToggleExcludeStep,
   onAskAboutStep
 }: CandidateRoutineCardProps) {
+  const { copy } = useLocale();
+  const sCopy = copy.schedule;
+  const pCopy = copy.profile;
+
   const targetRoutine = routine;
   const paper = targetRoutine.paper;
   const stopRule = stopRuleOf(targetRoutine);
   const progressionRule = targetRoutine.progressionRules?.[0];
-  const excludedIds = targetRoutine.initialExcludedStepIds ?? [];
+  const excludedIds = useMemo(
+    () => targetRoutine.initialExcludedStepIds ?? [],
+    [targetRoutine.initialExcludedStepIds]
+  );
+
+  const profileAvail = useMemo(() => resolveProfileAvailability(userProfile), [userProfile]);
+
+  const [scheduleMode, setScheduleMode] = useState<RoutineScheduleMode>(() =>
+    profileAvail.mode === 'anytime' ? 'anytime' : 'profile_windows'
+  );
+  const [customWindows, setCustomWindows] = useState<AvailableTimeWindow[]>(() =>
+    profileAvail.windows.length > 0 ? profileAvail.windows : [...DEFAULT_AVAILABLE_WINDOWS]
+  );
+
+  const draftSchedule: RoutineSchedulePreference = useMemo(
+    () => ({
+      mode: scheduleMode,
+      ...(scheduleMode === 'custom_windows'
+        ? { customWindows: normalizeAvailableWindows(customWindows) }
+        : {})
+    }),
+    [scheduleMode, customWindows]
+  );
+
+  const compatibility = useMemo(
+    () => evaluateRoutineScheduleCompatibility(targetRoutine, userProfile, draftSchedule, excludedIds),
+    [targetRoutine, userProfile, draftSchedule, excludedIds]
+  );
+
+  const assignmentByStepId = useMemo(
+    () => new Map(compatibility.stepAssignments.map((a) => [a.stepId, a])),
+    [compatibility.stepAssignments]
+  );
 
   const meta = [
     { label: COPY.assistant.meta.sample, value: COPY.assistant.meta.sampleValue(paper.sampleSize) },
@@ -45,6 +99,21 @@ export function CandidateRoutineCard({
     },
     { label: COPY.assistant.meta.year, value: String(paper.year) }
   ];
+
+  const handleConfirmClick = () => {
+    const finalSchedule: RoutineSchedulePreference = {
+      ...draftSchedule,
+      ...(compatibility.status === 'conflict' ? { acknowledgedConflict: true } : {})
+    };
+    onConfirm(finalSchedule);
+  };
+
+  const statusToneClass =
+    compatibility.status === 'conflict'
+      ? 'border-orange/40 bg-orange/15 text-ink'
+      : compatibility.status === 'tight'
+        ? 'border-ink/20 bg-cream text-ink'
+        : 'border-mint bg-mint/45 text-ink';
 
   return (
     <article className="rounded-card border border-ink/10 bg-white p-5 space-y-4">
@@ -124,6 +193,8 @@ export function CandidateRoutineCard({
           <ul className="space-y-2.5">
             {targetRoutine.steps.map((step, idx) => {
               const isExcluded = excludedIds.includes(step.id);
+              const timing = resolveStepTiming(step);
+              const assignment = assignmentByStepId.get(step.id);
               return (
                 <li
                   key={step.id || idx}
@@ -139,10 +210,10 @@ export function CandidateRoutineCard({
                         isExcluded ? 'bg-ink/5 text-ink/60' : 'bg-ink/10 text-ink'
                       )}
                     >
-                      {step.sets}×
+                      {timing.type === 'on_demand' ? 'PRN' : `${step.sets}×`}
                     </span>
                     <div className="min-w-0 flex-1 text-xs">
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
                         <p className={cn('font-medium text-ink', isExcluded && 'line-through text-ink/60')}>
                           {step.action}
                         </p>
@@ -153,6 +224,26 @@ export function CandidateRoutineCard({
                         )}
                       </div>
                       {step.detail && <p className="mt-0.5 text-2xs text-ink/60">{step.detail}</p>}
+                      {!isExcluded && (
+                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                          <span
+                            className={cn(
+                              'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-3xs font-medium',
+                              assignment?.status === 'conflict'
+                                ? 'border-orange/50 bg-orange/15 text-ink'
+                                : timing.type === 'on_demand'
+                                  ? 'border-ink/15 bg-mint/45 text-ink'
+                                  : 'border-ink/10 bg-white text-ink/75'
+                            )}
+                          >
+                            <Icon icon={ScheduleOutlinedIcon} size="xs" />
+                            <span>{sCopy.archetypeLabels[timing.type]}</span>
+                            {assignment?.assignedLabel && (
+                              <span className="text-ink/60">· {assignment.assignedLabel}</span>
+                            )}
+                          </span>
+                        </div>
+                      )}
                       {step.inferred && (
                         <p className="mt-1 text-3xs text-ink/60">
                           {step.inferredProvenance?.tier === 'lineage'
@@ -193,6 +284,57 @@ export function CandidateRoutineCard({
         </div>
       )}
 
+      {/* Pre-Start Schedule Compatibility Gate & Per-Routine Mode Picker */}
+      <div className={cn('rounded-tile border p-3.5 space-y-2.5', statusToneClass)}>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-ink">
+            <Icon
+              icon={compatibility.status === 'conflict' ? WarningAmberOutlinedIcon : ScheduleOutlinedIcon}
+              size="xs"
+            />
+            <span>{sCopy.statusBadges[compatibility.status]}</span>
+          </div>
+          <span className="text-3xs font-medium uppercase tracking-wider text-ink/60">
+            {sCopy.eyebrow}
+          </span>
+        </div>
+
+        <p className="text-2xs leading-relaxed text-ink/80">{compatibility.explanation}</p>
+
+        <div className="flex flex-wrap gap-1.5 pt-0.5">
+          {(['profile_windows', 'anytime', 'custom_windows'] as const).map((modeOption) => (
+            <button
+              key={modeOption}
+              type="button"
+              onClick={() => setScheduleMode(modeOption)}
+              className={cn(
+                'rounded-full border px-2.5 py-1 text-3xs font-medium transition-colors cursor-pointer',
+                scheduleMode === modeOption
+                  ? 'border-ink bg-ink text-white'
+                  : 'border-ink/20 bg-white/90 text-ink/80 hover:border-ink'
+              )}
+            >
+              {sCopy.modeLabels[modeOption]}
+            </button>
+          ))}
+        </div>
+
+        {scheduleMode === 'custom_windows' && (
+          <div className="space-y-1.5 pt-1">
+            <AvailableWindowsEditor
+              windows={customWindows}
+              onChange={setCustomWindows}
+              presets={pCopy.availabilityPresets}
+              addLabel={pCopy.addWindowBtn}
+              labelPlaceholder={pCopy.windowLabelPlaceholder}
+              removeAria={pCopy.removeWindowAria}
+              compact
+            />
+            <p className="text-3xs text-ink/65">{sCopy.customWindowHint}</p>
+          </div>
+        )}
+      </div>
+
       {stopRule && (
         <Callout
           tone="cream"
@@ -214,16 +356,22 @@ export function CandidateRoutineCard({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={onConfirm}
-            className="flex flex-1 items-center justify-center gap-2 rounded-full bg-ink px-4 py-2.5 text-xs font-medium text-white transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+            onClick={handleConfirmClick}
+            className="flex flex-1 items-center justify-center gap-2 rounded-full bg-ink px-4 py-2.5 text-xs font-medium text-white transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink cursor-pointer"
           >
             <Icon icon={CheckIcon} size="xs" />
-            <span>{targetRoutine.isCanonical ? COPY.assistant.adoptExistingRoutine : COPY.assistant.confirmAddPaper}</span>
+            <span>
+              {compatibility.status === 'conflict'
+                ? sCopy.conflictProceedBtn
+                : targetRoutine.isCanonical
+                  ? COPY.assistant.adoptExistingRoutine
+                  : COPY.assistant.confirmAddPaper}
+            </span>
           </button>
           <button
             type="button"
             onClick={onDiscard}
-            className="flex items-center gap-1 rounded-full border border-ink/20 px-3 py-2.5 text-xs font-medium text-ink/65 hover:bg-ink/5 hover:text-ink transition-colors focus:outline-none"
+            className="flex items-center gap-1 rounded-full border border-ink/20 px-3 py-2.5 text-xs font-medium text-ink/65 hover:bg-ink/5 hover:text-ink transition-colors focus:outline-none cursor-pointer"
           >
             <Icon icon={CloseIcon} size="xs" />
             <span>{COPY.assistant.discardCandidate}</span>

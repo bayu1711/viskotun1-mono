@@ -15,6 +15,7 @@ import type { ChatMessage } from '../../types/routine';
 import { formatRegionLabel, type LifestyleInterviewStage } from '../../utils/lifestyleInterview';
 import { formatLifestyleTagLabel, getLifestyleTagIcon } from '../../utils/lifestyleTags';
 import { resolveCulturalRhythms } from '../../utils/profile';
+import { formatAvailabilitySummary } from '../../utils/schedule';
 import { Icon } from '../ui/Icon';
 import { AssistantMessage } from './AssistantMessage';
 import { TypingIndicator } from './TypingIndicator';
@@ -42,7 +43,7 @@ export function LifestyleTuningView({
   onSuggestionsLoaded,
   onUpdateProfile
 }: LifestyleTuningViewProps) {
-  const { copy } = useLocale();
+  const { copy, locale } = useLocale();
 
   const region = lifestyleProfile?.region;
   const countryCode = region?.countryCode || 'AE';
@@ -92,9 +93,15 @@ export function LifestyleTuningView({
   };
 
   const t = copy.lifestyleTuning.onboarding;
+  const hasAvailability =
+    Boolean(userProfile?.availabilityMode) ||
+    Boolean(userProfile?.availableWindows && userProfile.availableWindows.length > 0);
+  const availabilityLabel = hasAvailability
+    ? formatAvailabilitySummary(userProfile, undefined, locale)
+    : null;
   const hasContextChips =
     Boolean(region?.confirmed) ||
-    Boolean(userProfile?.preferredReminderTime) ||
+    Boolean(availabilityLabel) ||
     activeTags.length > 0;
 
   return (
@@ -107,10 +114,10 @@ export function LifestyleTuningView({
             <span className="truncate">{regionLabel}</span>
           </span>
 
-          {hasContextChips && userProfile?.preferredReminderTime && (
+          {hasContextChips && availabilityLabel && (
             <span className="inline-flex items-center gap-1 rounded-full bg-cream/80 px-2.5 py-1 text-2xs font-medium text-ink/85 tabular-nums">
               <Icon icon={ScheduleOutlinedIcon} size="xs" className="text-ink/65" />
-              <span>{userProfile.preferredReminderTime}</span>
+              <span>{availabilityLabel}</span>
             </span>
           )}
 

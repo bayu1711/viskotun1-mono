@@ -25,6 +25,7 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
   const {
     stagingRoutine,
     routine,
+    userProfile,
     confirmStagingRoutine,
     discardStagingRoutine,
     toggleStagingExcludeStep
@@ -44,6 +45,7 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
         return (
           <CandidateRoutineCard
             routine={target}
+            userProfile={userProfile}
             onConfirm={confirmStagingRoutine}
             onDiscard={discardStagingRoutine}
             onToggleExcludeStep={toggleStagingExcludeStep}

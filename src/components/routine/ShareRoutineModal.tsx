@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { downloadIcsFile, getGoogleCalendarUrl } from '../../utils/calendar';
-import { parseReminderTime } from '../../utils/profile';
+import { buildCalendarBlocksForRoutine } from '../../utils/schedule';
 import {
   canNativeShare,
   generateQrCodeDataUrl,
@@ -27,7 +27,7 @@ import {
 import { Icon } from '../ui/Icon';
 
 export function ShareRoutineModal() {
-  const { routine, userProfile, isShareModalOpen, closeShareModal } = useRoutine();
+  const { routine, routineSchedule, userProfile, isShareModalOpen, closeShareModal } = useRoutine();
   const titleId = useId();
   const descId = useId();
 
@@ -44,13 +44,16 @@ export function ShareRoutineModal() {
     () => (routine ? getSocialShareUrls(shareUrl, displayTitle, routine.phase) : null),
     [routine, shareUrl, displayTitle]
   );
-  const reminderTime = useMemo(
-    () => parseReminderTime(userProfile?.preferredReminderTime),
-    [userProfile?.preferredReminderTime]
+  const calendarPlan = useMemo(
+    () =>
+      routine
+        ? buildCalendarBlocksForRoutine(routine, userProfile, routineSchedule)
+        : { blocks: [], isCheckInFallback: false },
+    [routine, userProfile, routineSchedule]
   );
   const googleCalUrl = useMemo(
-    () => (routine ? getGoogleCalendarUrl(routine, reminderTime) : ''),
-    [routine, reminderTime]
+    () => (routine ? getGoogleCalendarUrl(routine, { blocks: calendarPlan.blocks }) : ''),
+    [routine, calendarPlan]
   );
 
   // Generate QR Code data URL when modal opens
@@ -113,7 +116,7 @@ export function ShareRoutineModal() {
   };
 
   const handleDownloadIcs = () => {
-    const ok = downloadIcsFile(routine, reminderTime);
+    const ok = downloadIcsFile(routine, { blocks: calendarPlan.blocks });
     if (ok) {
       toast.success(COPY.shareModal.downloadedIcsToast);
     }

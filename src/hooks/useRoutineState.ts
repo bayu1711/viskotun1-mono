@@ -26,6 +26,7 @@ import type {
   RoutineSummary,
   QueuedPaper
 } from '../types/routine';
+import type { RoutineSchedulePreference } from '../types/schedule';
 import { answerFor } from '../utils/assistant';
 import {
   clearBrowserStorageForAccount,
@@ -61,6 +62,7 @@ import {
   resolveMilestoneDays,
   targetSetsForStep
 } from '../utils/routineMetrics';
+import { isOnDemandStep } from '../utils/schedule';
 import { getDaysDifference, getLocalTodayDateString, getMsUntilNextLocalMidnight, nowLabel } from '../utils/time';
 
 function createInitialRuntime(items: Routine[]): Record<string, RoutineRuntime> {
@@ -79,6 +81,7 @@ function createInitialRuntime(items: Routine[]): Record<string, RoutineRuntime> 
           morphingLogs: morphLogs,
           barrierLogs,
           doseMode: item.initialDoseMode ?? 'standard',
+          schedule: item.initialSchedule,
           pendingReEntryCheckin: false,
           messages: item.initialMessages,
           escalationPaused: false,
@@ -952,6 +955,9 @@ export function useRoutineState() {
       if ((state.excludedStepIds ?? []).includes(stepId)) return false;
       const step = routine.steps.find((s) => s.id === stepId);
       if (!step) return false;
+      if (isOnDemandStep(step)) {
+        return (state.setsDone[stepId] ?? 0) > 0;
+      }
       const target = targetSetsForStep(step, currentDoseMode);
       return (state.setsDone[stepId] ?? 0) >= target;
     },
@@ -963,32 +969,54 @@ export function useRoutineState() {
       if (!routine) return;
       const step = routine.steps.find((s) => s.id === stepId);
       if (!step) return;
-      const target = targetSetsForStep(step, currentDoseMode);
+      const maxCount = isOnDemandStep(step) ? 20 : targetSetsForStep(step, currentDoseMode);
       updateRuntime(routine.id, (prev) => ({
         ...prev,
         setsDone: {
           ...prev.setsDone,
-          [stepId]: clamp(next(prev.setsDone[stepId] ?? 0, target), 0, target)
+          [stepId]: clamp(next(prev.setsDone[stepId] ?? 0, maxCount), 0, maxCount)
         }
       }));
     },
     [routine, updateRuntime, currentDoseMode]
   );
 
-  const incrementSet = useCallback((stepId: string) => updateSetCount(stepId, (current, max) => current + 1), [updateSetCount]);
+  const incrementSet = useCallback((stepId: string) => updateSetCount(stepId, (current) => current + 1), [updateSetCount]);
   const decrementSet = useCallback((stepId: string) => updateSetCount(stepId, (current) => current - 1), [updateSetCount]);
   const toggleStep = useCallback(
-    (stepId: string) => updateSetCount(stepId, (current, max) => (current >= max ? 0 : max)),
-    [updateSetCount]
+    (stepId: string) =>
+      updateSetCount(stepId, (current, max) => {
+        const step = routine?.steps.find((s) => s.id === stepId);
+        if (step && isOnDemandStep(step)) {
+          return current > 0 ? 0 : 1;
+        }
+        return current >= max ? 0 : max;
+      }),
+    [updateSetCount, routine]
+  );
+
+  const setRoutineSchedule = useCallback(
+    (schedule: RoutineSchedulePreference) => {
+      if (!routine) return;
+      updateRuntime(routine.id, (prev) => ({
+        ...prev,
+        schedule
+      }));
+    },
+    [routine, updateRuntime]
   );
 
   const markTodayComplete = useCallback(() => {
     if (!routine) return;
     const nonExcludedSteps = routine.steps.filter(
-      (step) => !(state.excludedStepIds ?? []).includes(step.id)
+      (step) => !(state.excludedStepIds ?? []).includes(step.id) && !isOnDemandStep(step)
     );
+    const stepsToComplete =
+      nonExcludedSteps.length > 0
+        ? nonExcludedSteps
+        : routine.steps.filter((step) => !(state.excludedStepIds ?? []).includes(step.id));
     const allSetsDone = Object.fromEntries(
-      nonExcludedSteps.map((step) => [step.id, targetSetsForStep(step, currentDoseMode)])
+      stepsToComplete.map((step) => [step.id, targetSetsForStep(step, currentDoseMode)])
     );
     updateRuntime(routine.id, (prev) => ({
       ...prev,
@@ -1795,6 +1823,7 @@ export function useRoutineState() {
       setsDone: { ...(newRoutine.initialSetsDone ?? {}) },
       excludedStepIds: newRoutine.initialExcludedStepIds ?? [],
       feedbackLogs: newRoutine.initialFeedbackLogs ?? [],
+      schedule: newRoutine.initialSchedule,
       messages: stampSeedMessages(newRoutine.initialMessages ?? []),
       escalationPaused: false,
       assistantTyping: false
@@ -1949,9 +1978,11 @@ export function useRoutineState() {
     }
   }, [stagingRoutine]);
 
-  const confirmStagingRoutine = useCallback(() => {
+  const confirmStagingRoutine = useCallback((scheduleOverride?: RoutineSchedulePreference) => {
     if (!stagingRoutine) return;
-    const target = stagingRoutine;
+    const target: Routine = scheduleOverride
+      ? { ...stagingRoutine, initialSchedule: scheduleOverride }
+      : stagingRoutine;
     addRoutine(target);
 
     // Persist uploaded paper to unified Firebase papers collection
@@ -2266,9 +2297,11 @@ export function useRoutineState() {
   );
 
   const refreshLifestyleAdaptation = useCallback(
-    async (overrides?: { routine?: Routine | null }) => {
+    async (overrides?: { routine?: Routine | null; routineSchedule?: RoutineSchedulePreference }) => {
       const targetRoutine = overrides?.routine !== undefined ? overrides.routine : routine;
       if (!targetRoutine) return null;
+      const targetSchedule =
+        overrides?.routineSchedule !== undefined ? overrides.routineSchedule : state.schedule;
 
       setIsAdaptingLifestyle(true);
       try {
@@ -2278,7 +2311,8 @@ export function useRoutineState() {
           body: JSON.stringify({
             userProfile: userProfileRef.current,
             lifestyleProfile: lifestyleProfileRef.current,
-            routine: targetRoutine
+            routine: targetRoutine,
+            routineSchedule: targetSchedule
           })
         });
         if (res.ok) {
@@ -2295,7 +2329,7 @@ export function useRoutineState() {
       }
       return null;
     },
-    [routine]
+    [routine, state.schedule]
   );
 
   const initLifestyleConversation = useCallback((localeCopy: LocaleCopy) => {
@@ -2523,10 +2557,12 @@ export function useRoutineState() {
       cautions: lp?.physicalCautions,
       tags: lp?.activeTags,
       age: up?.age,
-      reminder: up?.preferredReminderTime,
+      availabilityMode: up?.availabilityMode,
+      availableWindows: up?.availableWindows,
+      routineSchedule: state.schedule,
       goals: up?.clinicalGoals
     });
-  }, [hasHydrated, routine, auth?.lifestyleProfile, auth?.userProfile]);
+  }, [hasHydrated, routine, auth?.lifestyleProfile, auth?.userProfile, state.schedule]);
 
   useEffect(() => {
     if (!adaptSignature || adaptSignature === lastAdaptedSignatureRef.current) return;
@@ -2638,6 +2674,8 @@ export function useRoutineState() {
       incrementSet,
       decrementSet,
       toggleStep,
+      routineSchedule: state.schedule,
+      setRoutineSchedule,
       markTodayComplete,
       advanceToNextDay,
       simulatePastDays,
@@ -2745,6 +2783,8 @@ export function useRoutineState() {
       incrementSet,
       decrementSet,
       toggleStep,
+      state.schedule,
+      setRoutineSchedule,
       markTodayComplete,
       advanceToNextDay,
       simulatePastDays,
