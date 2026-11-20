@@ -83,7 +83,7 @@ export function AdaptiveLifestyleBanner({ className }: { className?: string }) {
           </button>
 
           <Link
-            href={ROUTES.profile}
+            href={`${ROUTES.profile}?tab=lifestyle`}
             className="inline-flex items-center rounded-full border border-ink/15 bg-white px-2.5 py-1 text-3xs font-semibold text-ink hover:border-ink"
           >
             {locale === 'ar' ? 'الملف' : 'Profile'}

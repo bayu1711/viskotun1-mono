@@ -21,6 +21,7 @@ import { Icon } from '../components/ui/Icon';
 import { Panel } from '../components/ui/Panel';
 import { PillButton, pillClassName } from '../components/ui/PillButton';
 import { SectionHeading } from '../components/ui/SectionHeading';
+import { SegmentedTabs } from '../components/ui/SegmentedTabs';
 import { useAssistant } from '../contexts/AssistantContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocale } from '../contexts/LocaleContext';
@@ -149,6 +150,30 @@ export function ProfilePage() {
   const [reminderNotificationsEnabled, setReminderNotificationsEnabled] = useState(true);
   const [communityCohortOptIn, setCommunityCohortOptIn] = useState(true);
   const [isSendingReset, setIsSendingReset] = useState(false);
+  const [activeTab, setActiveTab] = useState<'account' | 'lifestyle'>('account');
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam === 'lifestyle' || tabParam === 'account') {
+        setActiveTab(tabParam);
+      }
+    } catch {
+      // Ignore URL parsing errors
+    }
+  }, []);
+
+  const handleTabChange = (next: 'account' | 'lifestyle') => {
+    setActiveTab(next);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', next);
+      window.history.replaceState(null, '', url.toString());
+    } catch {
+      // Ignore history errors
+    }
+  };
 
   const [countryCode, setCountryCode] = useState('AE');
   const [countryName, setCountryName] = useState('United Arab Emirates');
@@ -342,20 +367,32 @@ export function ProfilePage() {
           eyebrow={t.eyebrow}
           title={t.title}
           switcherExtra={
-            <Link href={ROUTES.routine} className={pillClassName('outline', 'sm')}>
-              <span>{t.backToRoutine}</span>
-              <Icon icon={NorthEastIcon} size="xs" />
-            </Link>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <SegmentedTabs
+                options={[
+                  { id: 'account' as const, label: t.tabs.account },
+                  { id: 'lifestyle' as const, label: t.tabs.lifestyle }
+                ]}
+                value={activeTab}
+                onChange={handleTabChange}
+                ariaLabel={t.tabs.ariaLabel}
+              />
+              <Link href={ROUTES.routine} className={pillClassName('outline', 'sm')}>
+                <span>{t.backToRoutine}</span>
+                <Icon icon={NorthEastIcon} size="xs" />
+              </Link>
+            </div>
           }
         >
           <p className="mt-2 max-w-2xl text-sm text-ink/70">{t.subtitle}</p>
         </PageHeader>
 
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-main-aside lg:gap-10">
-          {/* Main Column: Editable Profile Form + Account & Data Controls */}
+          {/* Main Column: Account Management OR Adaptive Lifestyle Management */}
           <div className="space-y-6">
             <form onSubmit={handleSave} className="space-y-6">
-            {/* Section 1: UserProfile */}
+            {/* Tab 1: Account & Physiological Baseline */}
+            {activeTab === 'account' && (
             <Panel tone="white" className="space-y-5">
               <SectionHeading eyebrow={t.userProfileEyebrow} title={t.userProfileTitle} />
 
@@ -601,8 +638,10 @@ export function ProfilePage() {
                 </div>
               </div>
             </Panel>
+            )}
 
-            {/* Section 2: UserLifestyleProfile */}
+            {/* Tab 2: Adaptive Lifestyle Context */}
+            {activeTab === 'lifestyle' && (
             <Panel tone="white" className="space-y-5">
               <SectionHeading
                 eyebrow={t.lifestyleEyebrow}
@@ -785,16 +824,17 @@ export function ProfilePage() {
                 )}
               </div>
             </Panel>
+            )}
 
             <div className="flex justify-end">
               <PillButton type="submit" variant="primary" size="lg">
-                {t.saveButton}
+                {activeTab === 'account' ? t.saveAccountButton : t.saveLifestyleButton}
               </PillButton>
             </div>
             </form>
 
-            {/* Section 3: Data Export, Clear All Data, Deactivate & Delete Account */}
-            <AccountControlsPanel />
+            {/* Data Export, Clear All Data, Deactivate & Delete Account (Account Tab) */}
+            {activeTab === 'account' && <AccountControlsPanel />}
           </div>
 
           {/* Right / Aside Column: Live Connections & Account */}
