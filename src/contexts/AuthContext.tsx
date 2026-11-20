@@ -23,14 +23,11 @@ import {
   LEGACY_USER_PROFILE_KEY
 } from '../utils/accountData';
 import { resolveCountryCodeFromInput, resolveCountryName } from '../utils/geo';
-import { DEFAULT_AVAILABLE_WINDOWS } from '../utils/schedule';
 
 const STORAGE_KEY = 'viskotun1_auth_user';
 export const ONBOARDING_DISMISSED_KEY = 'trialn1_lifestyle_onboarding_dismissed';
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
-  availabilityMode: 'windows',
-  availableWindows: [...DEFAULT_AVAILABLE_WINDOWS],
   primaryLanguage: 'en',
   secondaryLanguage: 'ar',
   reminderNotificationsEnabled: true,

@@ -56,9 +56,9 @@ import {
   syncLifestyleActiveTags
 } from '../utils/profile';
 import {
-  DEFAULT_AVAILABLE_WINDOWS,
   formatAvailabilitySummary,
-  normalizeAvailableWindows
+  normalizeAvailableWindows,
+  resolveProfileAvailability
 } from '../utils/schedule';
 import { formatRoutineTitle } from '../utils/text';
 
@@ -151,10 +151,8 @@ export function ProfilePage() {
   const [displayName, setDisplayName] = useState('');
   const [ageInput, setAgeInput] = useState('');
   const [biologicalSex, setBiologicalSex] = useState<BiologicalSex | undefined>(undefined);
-  const [availabilityMode, setAvailabilityMode] = useState<AvailabilityMode>('windows');
-  const [availableWindows, setAvailableWindows] = useState<AvailableTimeWindow[]>([
-    ...DEFAULT_AVAILABLE_WINDOWS
-  ]);
+  const [availabilityMode, setAvailabilityMode] = useState<AvailabilityMode>('anytime');
+  const [availableWindows, setAvailableWindows] = useState<AvailableTimeWindow[]>([]);
   const [clinicalGoals, setClinicalGoals] = useState('');
   const [isGoalsCustom, setIsGoalsCustom] = useState(false);
   const [primaryLanguage, setPrimaryLanguage] = useState<AppLocale>('en');
@@ -203,11 +201,9 @@ export function ProfilePage() {
     setDisplayName(userProfile.displayName || (user && !user.isGuest ? user.name : '') || '');
     setAgeInput(userProfile.age !== undefined ? String(userProfile.age) : '');
     setBiologicalSex(userProfile.biologicalSex);
-    setAvailabilityMode(userProfile.availabilityMode === 'anytime' ? 'anytime' : 'windows');
-    const hydratedWindows = normalizeAvailableWindows(userProfile.availableWindows);
-    setAvailableWindows(
-      hydratedWindows.length > 0 ? hydratedWindows : [...DEFAULT_AVAILABLE_WINDOWS]
-    );
+    const resolvedAvailability = resolveProfileAvailability(userProfile);
+    setAvailabilityMode(resolvedAvailability.mode);
+    setAvailableWindows(resolvedAvailability.windows);
     if (userProfile.clinicalGoals) {
       setClinicalGoals(userProfile.clinicalGoals);
       setIsGoalsCustom(true);
@@ -337,17 +333,16 @@ export function ProfilePage() {
       secondaryLanguage === primaryLanguage ? 'none' : secondaryLanguage;
 
     const normalizedWindows = normalizeAvailableWindows(availableWindows);
+    const effectiveAvailabilityMode: AvailabilityMode =
+      availabilityMode === 'windows' && normalizedWindows.length === 0
+        ? 'anytime'
+        : availabilityMode;
     updateUserProfile({
       displayName: displayName.trim() || undefined,
       age: sanitizeAge(ageInput),
       biologicalSex,
-      availabilityMode,
-      availableWindows:
-        availabilityMode === 'anytime'
-          ? normalizedWindows
-          : normalizedWindows.length > 0
-            ? normalizedWindows
-            : [...DEFAULT_AVAILABLE_WINDOWS],
+      availabilityMode: effectiveAvailabilityMode,
+      availableWindows: normalizedWindows,
       clinicalGoals: effectiveClinicalGoals.trim() || undefined,
       primaryLanguage,
       secondaryLanguage: normalizedSecondary,
