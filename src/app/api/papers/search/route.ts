@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { SAMPLE_PAPERS } from '../../../../data/samplePapers';
 import { buildExternalSearchLinks, matchCommunityPapers } from '../../../../utils/paperQuery';
+import { getRequestUser } from '../../../../server/auth';
+import { enforceRateLimit } from '../../../../server/rateLimit';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -18,10 +20,16 @@ interface EuropePmcSearchItem {
   pmid?: string;
 }
 
+const MAX_QUERY_LENGTH = 300;
+
 export async function GET(request: Request) {
+  const user = await getRequestUser(request);
+  const limited = enforceRateLimit('search', request, user);
+  if (limited) return limited;
+
   try {
     const { searchParams } = new URL(request.url);
-    const query = (searchParams.get('q') || searchParams.get('query') || '').trim();
+    const query = (searchParams.get('q') || searchParams.get('query') || '').trim().slice(0, MAX_QUERY_LENGTH);
 
     // 1. Community papers (instant matching)
     const communityPapers = matchCommunityPapers(query, SAMPLE_PAPERS);

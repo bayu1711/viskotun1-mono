@@ -1,89 +1,110 @@
 import { NextResponse } from 'next/server';
 import type { UserLifestyleProfile, UserProfile } from '../../../../types/auth';
 import type { Routine, RoutineRuntime } from '../../../../types/routine';
-import { saveCanonicalRoutine } from '../../../../server/routineRegistry';
 import { getUserRecord, saveUserRecord, type UserRecord } from '../../../../server/userStorage';
+import { requireUser } from '../../../../server/auth';
+import { errorResponse, readJsonBody } from '../../../../server/http';
 import { COPY } from '../../../../data/copy';
 
+export const dynamic = 'force-dynamic';
+
+const MAX_ROUTINES = 50;
+
 interface UserSyncPayload {
-  userId: string;
   activeRoutineId?: string;
   routines?: Routine[];
-  runtime: Record<string, RoutineRuntime>;
+  runtime?: Record<string, RoutineRuntime>;
   profile?: UserProfile;
   lifestyleProfile?: UserLifestyleProfile;
+  /**
+   * The `updatedAt` of the server record this client last saw. When the server copy is
+   * newer, the write is rejected with 409 so the client can merge instead of overwriting.
+   * Omit it only for an intentional reset.
+   */
+  baseUpdatedAt?: number;
 }
 
-export async function POST(request: Request) {
-  try {
-    const body: UserSyncPayload = await request.json();
-    const { userId, activeRoutineId, routines, runtime, profile, lifestyleProfile } = body;
+function toClientRecord(record: UserRecord) {
+  return {
+    activeRoutineId: record.activeRoutineId,
+    routines: record.routines || [],
+    runtime: record.runtime || {},
+    ...(record.profile ? { profile: record.profile } : {}),
+    ...(record.lifestyleProfile ? { lifestyleProfile: record.lifestyleProfile } : {}),
+    updatedAt: record.updatedAt
+  };
+}
 
-    if (!userId) {
-      return NextResponse.json({ error: COPY.api.userSync.userIdRequired }, { status: 400 });
+/**
+ * POST: Save the signed-in user's routines, runtime and profile.
+ * The user is taken from the verified ID token; a `userId` in the body is ignored.
+ * Routines saved here stay private to this user and never become shared canonical routines.
+ */
+export async function POST(request: Request) {
+  const auth = await requireUser(request);
+  if (auth instanceof Response) return auth;
+
+  try {
+    const body = await readJsonBody<UserSyncPayload>(request);
+    if (!body) {
+      return NextResponse.json({ error: COPY.api.assistant.invalidJson }, { status: 400 });
     }
 
-    const resolvedRoutines = routines || [];
+    const routines = Array.isArray(body.routines) ? body.routines.slice(0, MAX_ROUTINES) : [];
+    const runtime = body.runtime && typeof body.runtime === 'object' ? body.runtime : {};
 
-    const payload: UserRecord = {
-      userId,
-      activeRoutineId,
-      routines: resolvedRoutines,
-      runtime: runtime || {},
+    const existing = await getUserRecord(auth.uid);
+    if (
+      existing &&
+      typeof body.baseUpdatedAt === 'number' &&
+      existing.updatedAt > body.baseUpdatedAt
+    ) {
+      return NextResponse.json(
+        { error: COPY.api.userSync.conflict, code: 'conflict', current: toClientRecord(existing) },
+        { status: 409 }
+      );
+    }
+
+    const updatedAt = Math.max(Date.now(), (existing?.updatedAt ?? 0) + 1);
+    const profile = body.profile ?? existing?.profile;
+    const lifestyleProfile = body.lifestyleProfile ?? existing?.lifestyleProfile;
+    const record: UserRecord = {
+      userId: auth.uid,
+      activeRoutineId: typeof body.activeRoutineId === 'string' ? body.activeRoutineId : '',
+      routines,
+      runtime,
       ...(profile ? { profile } : {}),
       ...(lifestyleProfile ? { lifestyleProfile } : {}),
-      updatedAt: Date.now()
+      accountStatus: existing?.accountStatus ?? 'active',
+      ...(existing?.deactivatedAt ? { deactivatedAt: existing.deactivatedAt } : {}),
+      updatedAt
     };
 
-    await saveUserRecord(payload);
-
-    // Ensure each routine is registered canonically in Firestore
-    if (resolvedRoutines.length > 0) {
-      for (const routine of resolvedRoutines) {
-        await saveCanonicalRoutine(routine).catch(() => {});
-      }
-    }
+    await saveUserRecord(record);
 
     return NextResponse.json({
       success: true,
-      syncedAt: Date.now(),
-      routineCount: resolvedRoutines.length
+      syncedAt: updatedAt,
+      updatedAt,
+      routineCount: routines.length
     });
   } catch (error) {
-    console.error('User sync error:', error);
-    return NextResponse.json({ error: COPY.api.userSync.internalError }, { status: 500 });
+    return errorResponse('UserSyncRoute.POST', error, COPY.api.userSync.internalError);
   }
 }
 
+/** GET: Load the signed-in user's saved state. */
 export async function GET(request: Request) {
+  const auth = await requireUser(request);
+  if (auth instanceof Response) return auth;
+
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
-      return NextResponse.json({ error: COPY.api.userSync.userIdRequired }, { status: 400 });
-    }
-
-    const record = await getUserRecord(userId);
+    const record = await getUserRecord(auth.uid);
     if (!record) {
-      return NextResponse.json({
-        found: false,
-        routines: [],
-        runtime: {}
-      });
+      return NextResponse.json({ found: false, routines: [], runtime: {}, updatedAt: 0 });
     }
-
-    return NextResponse.json({
-      found: true,
-      activeRoutineId: record.activeRoutineId,
-      routines: record.routines || [],
-      runtime: record.runtime,
-      ...(record.profile ? { profile: record.profile } : {}),
-      ...(record.lifestyleProfile ? { lifestyleProfile: record.lifestyleProfile } : {}),
-      updatedAt: record.updatedAt
-    });
+    return NextResponse.json({ found: true, ...toClientRecord(record) });
   } catch (error) {
-    console.error('User sync fetch error:', error);
-    return NextResponse.json({ error: COPY.api.userSync.fetchError }, { status: 500 });
+    return errorResponse('UserSyncRoute.GET', error, COPY.api.userSync.fetchError);
   }
 }

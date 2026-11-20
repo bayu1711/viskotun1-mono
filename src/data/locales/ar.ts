@@ -644,7 +644,8 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     submitReview: 'نشر إلى سجل المجتمع',
     cancel: 'إلغاء',
     reviewSuccessToast: 'تم نشر نتيجتك بنجاح إلى سجل المجتمع السريري',
-    reviewErrorToast: 'تعذر حفظ النتيجة. يرجى المحاولة مرة أخرى.'
+    reviewErrorToast: 'تعذر حفظ النتيجة. يرجى المحاولة مرة أخرى.',
+    reviewSignInToast: 'سجّل الدخول لمشاركة نتيجتك مع المجتمع.'
   },
   badges: {
     rct: 'تجربة معشاة منضبطة (RCT)',

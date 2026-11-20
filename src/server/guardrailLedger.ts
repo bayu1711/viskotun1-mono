@@ -22,6 +22,7 @@ import {
   PROGRESSION_MAX_SCORE
 } from '../data/config';
 import { COPY } from '../data/copy';
+import { assertDurableWrite } from './persistence';
 
 const POLICY_COLLECTION = 'policies';
 const POLICY_DOC_ID = 'clinical_guardrails';
@@ -130,6 +131,12 @@ export function getFirestore(): Firestore | null {
     process.env.FIRESTORE_DATABASE_ID ||
     process.env.GOOGLE_CLOUD_FIRESTORE_DATABASE;
 
+  // Unit tests never touch a real database; they may opt in to the local emulator only
+  if (process.env.VITEST && !process.env.FIRESTORE_EMULATOR_HOST) {
+    firestoreStatus = 'unconfigured';
+    return null;
+  }
+
   // If no GCP project ID is specified and not in an emulator, treat as unconfigured local dev
   if (!projectId && !process.env.FIRESTORE_EMULATOR_HOST) {
     firestoreStatus = 'unconfigured';
@@ -233,35 +240,75 @@ export async function getEffectiveGuardrails(): Promise<GuardrailPolicy> {
  * Update the active guardrail policy dynamically without redeploying code.
  * Persists directly to Cloud Firestore and updates local cache.
  */
+function pickPolicyUpdates(updates: GuardrailUpdateRequest): GuardrailUpdateRequest {
+  const picked: GuardrailUpdateRequest = {};
+  const numberFields = [
+    'painEscalationThreshold',
+    'loadReductionPercent',
+    'progressionWindowLogs',
+    'progressionMaxPainScore'
+  ] as const;
+  for (const key of numberFields) {
+    const value = updates[key];
+    if (typeof value === 'number' && Number.isFinite(value)) picked[key] = value;
+  }
+  if (Array.isArray(updates.bannedKeywords)) {
+    picked.bannedKeywords = updates.bannedKeywords
+      .filter((k): k is string => typeof k === 'string')
+      .map((k) => k.trim().slice(0, 80))
+      .filter(Boolean)
+      .slice(0, 200);
+  }
+  for (const key of ['clinicalDisclaimer', 'escalationAlertMessage', 'version'] as const) {
+    const value = updates[key];
+    if (typeof value === 'string' && value.trim()) picked[key] = value.trim().slice(0, 2000);
+  }
+  return picked;
+}
+
+/**
+ * Update the active guardrail policy without redeploying code.
+ * Only known policy fields are accepted. Persists to Cloud Firestore; in production a
+ * failed write throws instead of leaving the change in this instance's memory only.
+ */
 export async function updateGuardrailPolicy(
-  updates: GuardrailUpdateRequest
+  updates: GuardrailUpdateRequest,
+  updatedBy?: string
 ): Promise<GuardrailPolicy> {
   const now = new Date().toISOString();
   const db = getFirestore();
+  const safeUpdates = pickPolicyUpdates(updates);
 
-  const newPolicy: GuardrailPolicy = {
+  const newPolicy: GuardrailPolicy & { updatedBy?: string } = {
     ...cachedPolicy,
-    ...updates,
-    version: updates.version || `dynamic-${Date.now().toString(36)}`,
+    ...safeUpdates,
+    version: safeUpdates.version || `dynamic-${Date.now().toString(36)}`,
     updatedAt: now,
-    source: db ? 'firestore-live' : 'memory-cache'
+    source: db ? 'firestore-live' : 'memory-cache',
+    ...(updatedBy ? { updatedBy } : {})
   };
 
-  cachedPolicy = newPolicy;
-  lastCacheSync = Date.now();
-
-  if (db) {
+  if (!db) {
+    assertDurableWrite('Firestore policy ledger');
+  } else {
     try {
       const docRef = db.collection(POLICY_COLLECTION).doc(POLICY_DOC_ID);
       await docRef.set(newPolicy, { merge: true });
       firestoreStatus = 'connected';
-    } catch (err: any) {
-      console.warn('[GuardrailLedger] Failed to persist update to Firestore, falling back to memory cache:', err?.message || err);
+    } catch (err: unknown) {
       firestoreStatus = 'error';
       firestoreInstance = null;
+      assertDurableWrite('Firestore policy ledger', err);
+      console.warn(
+        '[GuardrailLedger] Failed to persist update to Firestore, falling back to memory cache:',
+        err instanceof Error ? err.message : err
+      );
+      newPolicy.source = 'memory-cache';
     }
   }
 
+  cachedPolicy = newPolicy;
+  lastCacheSync = Date.now();
   return cachedPolicy;
 }
 

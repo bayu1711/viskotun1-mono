@@ -1,17 +1,20 @@
 /**
- * Google Cloud Firestore Users Storage Ledger & Real-Time Telemetry
- * 
- * Manages user workspaces, active routine assignments, and runtime telemetry
- * (feedback logs, morphing logs, day history, completed sets).
- * Provides live aggregate statistics for routines without dummy or simulated multipliers.
+ * Google Cloud Firestore user storage and live community telemetry.
+ *
+ * Holds each user's routines, runtime logs and profile. Community counts are computed
+ * from real user records only: example participants are never counted.
+ *
+ * Memory and local-file fallbacks exist for local development. In production a failed
+ * write throws (see persistence.ts) instead of silently living in one instance's memory.
  */
 
 import fs from 'fs';
 import path from 'path';
 import { getFirestore } from './guardrailLedger';
+import { assertDurableWrite, isMemoryFallbackAllowed } from './persistence';
+import { logWarning } from './log';
 import type { UserLifestyleProfile, UserProfile } from '../types/auth';
 import type { Routine, RoutineRuntime } from '../types/routine';
-import { SEEDED_COMMUNITY_USERS } from './seedUsers';
 
 export interface UserRecord {
   userId: string;
@@ -25,123 +28,137 @@ export interface UserRecord {
   updatedAt: number;
 }
 
+const USERS_COLLECTION = 'users';
+
+/**
+ * Example participants that earlier builds seeded into memory and Firestore.
+ * They are not real people, so they are excluded from every community count.
+ */
+export const LEGACY_SAMPLE_USER_IDS = new Set([
+  'user-ach-runner-41m',
+  'user-ach-desk-33f',
+  'user-ach-bball-29m',
+  'user-ach-hiker-52f',
+  'user-hair-norwood-31m',
+  'user-hair-diffuse-44m',
+  'user-hair-temples-27m',
+  'user-hair-female-38f',
+  'user-cr-shift-28m',
+  'user-cr-clin-34f'
+]);
+
 const IS_TEST = process.env.NODE_ENV === 'test' || Boolean(process.env.VITEST);
 const LOCAL_STORAGE_FILE = path.join(process.cwd(), '.viskotun1_users.local.json');
+const STATS_CACHE_TTL_MS = 60_000;
 
-// In-memory server-side user store with fail-safe fallback
+/** Local-development store. Never the source of truth in production. */
 export const memoryUserStorage = new Map<string, UserRecord>();
 
-// Pre-seed memory cache with authentic simulated trial cohort participants
-for (const user of SEEDED_COMMUNITY_USERS) {
-  memoryUserStorage.set(user.userId, user);
+function canUseLocalLedger(): boolean {
+  return !IS_TEST && process.env.NODE_ENV !== 'production';
 }
 
 function loadLocalUserLedger(): void {
-  if (IS_TEST) return;
+  if (!canUseLocalLedger()) return;
   try {
     if (fs.existsSync(LOCAL_STORAGE_FILE)) {
-      const raw = fs.readFileSync(LOCAL_STORAGE_FILE, 'utf-8');
-      const records = JSON.parse(raw);
+      const records = JSON.parse(fs.readFileSync(LOCAL_STORAGE_FILE, 'utf-8'));
       if (Array.isArray(records)) {
         for (const record of records) {
-          if (record && record.userId) {
+          if (record?.userId && !LEGACY_SAMPLE_USER_IDS.has(record.userId)) {
             memoryUserStorage.set(record.userId, record);
           }
         }
       }
     }
   } catch {
-    // Fail-safe silent continue
+    // A corrupt local ledger only affects local development
   }
 }
 
 function persistLocalUserLedger(): void {
-  if (IS_TEST) return;
+  if (!canUseLocalLedger()) return;
   try {
-    const records = Array.from(memoryUserStorage.values());
-    fs.writeFileSync(LOCAL_STORAGE_FILE, JSON.stringify(records, null, 2), 'utf-8');
+    fs.writeFileSync(LOCAL_STORAGE_FILE, JSON.stringify(Array.from(memoryUserStorage.values()), null, 2), 'utf-8');
   } catch {
-    // Fail-safe silent continue in read-only environments
+    // Read-only file systems are fine in development
   }
 }
 
-// Hydrate from local ledger on startup
 loadLocalUserLedger();
 
-let hasAttemptedUserSeed = false;
+function errorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
 
-async function seedUsersIfEmpty(): Promise<void> {
-  const db = getFirestore();
-  if (!db || hasAttemptedUserSeed) return;
-  hasAttemptedUserSeed = true;
+function rememberLocally(record: UserRecord): void {
+  if (!isMemoryFallbackAllowed()) return;
+  memoryUserStorage.set(record.userId, record);
+  persistLocalUserLedger();
+}
 
-  try {
-    const snapshot = await db.collection('users').limit(1).get();
-    if (snapshot.empty) {
-      const batch = db.batch();
-      for (const user of SEEDED_COMMUNITY_USERS) {
-        const docRef = db.collection('users').doc(user.userId);
-        batch.set(docRef, user, { merge: true });
-      }
-      await batch.commit();
-    }
-  } catch (err: any) {
-    console.warn('[UserStorage] Firestore initial user seeding skipped/failed:', err?.message || err);
-  }
+function forgetLocally(userId: string): boolean {
+  const existed = memoryUserStorage.delete(userId);
+  persistLocalUserLedger();
+  return existed;
+}
+
+function normalizeRecord(userId: string, data: Partial<UserRecord>): UserRecord {
+  return {
+    userId,
+    activeRoutineId: data.activeRoutineId,
+    routines: data.routines || [],
+    runtime: data.runtime || {},
+    ...(data.profile ? { profile: data.profile } : {}),
+    ...(data.lifestyleProfile ? { lifestyleProfile: data.lifestyleProfile } : {}),
+    ...(data.accountStatus ? { accountStatus: data.accountStatus } : {}),
+    ...(data.deactivatedAt ? { deactivatedAt: data.deactivatedAt } : {}),
+    updatedAt: data.updatedAt || 0
+  };
 }
 
 /**
- * Retrieve a user record by ID from live Cloud Firestore or fallback memory cache.
+ * Retrieve a user record by ID from Cloud Firestore, or the local-development store.
  */
 export async function getUserRecord(userId: string): Promise<UserRecord | null> {
   const db = getFirestore();
   if (db) {
     try {
-      const doc = await db.collection('users').doc(userId).get();
-      if (doc.exists) {
-        const data = doc.data() as UserRecord;
-        if (data) {
-          const resolved: UserRecord = {
-            userId,
-            activeRoutineId: data.activeRoutineId,
-            routines: data.routines || [],
-            runtime: data.runtime || {},
-            ...(data.profile ? { profile: data.profile } : {}),
-            ...(data.lifestyleProfile ? { lifestyleProfile: data.lifestyleProfile } : {}),
-            updatedAt: data.updatedAt || Date.now()
-          };
-          memoryUserStorage.set(userId, resolved);
-          persistLocalUserLedger();
-          return resolved;
-        }
-      }
-    } catch (err: any) {
-      console.warn('[UserStorage] Firestore read failed, falling back to memory:', err?.message || err);
+      const doc = await db.collection(USERS_COLLECTION).doc(userId).get();
+      if (!doc.exists) return null;
+      return normalizeRecord(userId, (doc.data() as UserRecord) || {});
+    } catch (err) {
+      if (!isMemoryFallbackAllowed()) throw err;
+      logWarning('[UserStorage] Firestore read failed, using local store', { error: errorMessage(err) });
     }
   }
 
-  if (memoryUserStorage.has(userId)) {
-    return memoryUserStorage.get(userId) || null;
-  }
-
-  loadLocalUserLedger();
+  if (!isMemoryFallbackAllowed()) return null;
   return memoryUserStorage.get(userId) || null;
 }
 
+async function writeRecord(record: UserRecord, merge: boolean): Promise<void> {
+  rememberLocally(record);
+  invalidateUserStatsCache();
+
+  const db = getFirestore();
+  if (!db) {
+    assertDurableWrite('Firestore');
+    return;
+  }
+  try {
+    await db.collection(USERS_COLLECTION).doc(record.userId).set(record, { merge });
+  } catch (err) {
+    assertDurableWrite('Firestore', err);
+    logWarning('[UserStorage] Firestore write failed, kept in local store', { error: errorMessage(err) });
+  }
+}
+
 /**
- * Persist a user record to both memory cache and Cloud Firestore.
+ * Persist a full user record (routines and runtime are replaced, not merged).
  */
 export async function saveUserRecord(record: UserRecord): Promise<void> {
-  memoryUserStorage.set(record.userId, record);
-  persistLocalUserLedger();
-  const db = getFirestore();
-  if (db) {
-    try {
-      await db.collection('users').doc(record.userId).set(record, { merge: true });
-    } catch (err: any) {
-      console.warn('[UserStorage] Firestore save failed, stored in memory cache:', err?.message || err);
-    }
-  }
+  await writeRecord(record, false);
 }
 
 /**
@@ -158,19 +175,7 @@ export async function clearUserData(userId: string): Promise<UserRecord> {
     accountStatus: existing?.accountStatus ?? 'active',
     updatedAt: Date.now()
   };
-
-  memoryUserStorage.set(userId, cleared);
-  persistLocalUserLedger();
-
-  const db = getFirestore();
-  if (db) {
-    try {
-      await db.collection('users').doc(userId).set(cleared, { merge: false });
-    } catch (err: any) {
-      console.warn('[UserStorage] Firestore clear failed, cleared memory cache:', err?.message || err);
-    }
-  }
-
+  await writeRecord(cleared, false);
   return cleared;
 }
 
@@ -180,18 +185,12 @@ export async function clearUserData(userId: string): Promise<UserRecord> {
 export async function deactivateUserAccount(userId: string): Promise<UserRecord> {
   const existing = await getUserRecord(userId);
   const deactivated: UserRecord = {
-    userId,
-    activeRoutineId: existing?.activeRoutineId ?? '',
-    routines: existing?.routines ?? [],
-    runtime: existing?.runtime ?? {},
-    ...(existing?.profile ? { profile: existing.profile } : {}),
-    ...(existing?.lifestyleProfile ? { lifestyleProfile: existing.lifestyleProfile } : {}),
+    ...normalizeRecord(userId, existing ?? {}),
     accountStatus: 'deactivated',
     deactivatedAt: Date.now(),
     updatedAt: Date.now()
   };
-
-  await saveUserRecord(deactivated);
+  await writeRecord(deactivated, false);
   return deactivated;
 }
 
@@ -201,153 +200,153 @@ export async function deactivateUserAccount(userId: string): Promise<UserRecord>
 export async function reactivateUserAccount(userId: string): Promise<UserRecord | null> {
   const existing = await getUserRecord(userId);
   if (!existing) return null;
+  if (existing.accountStatus !== 'deactivated') return existing;
 
-  const reactivated: UserRecord = {
-    ...existing,
-    accountStatus: 'active',
-    updatedAt: Date.now()
-  };
+  const reactivated: UserRecord = { ...existing, accountStatus: 'active', updatedAt: Date.now() };
   delete reactivated.deactivatedAt;
-
-  memoryUserStorage.set(userId, reactivated);
-  persistLocalUserLedger();
-
-  const db = getFirestore();
-  if (db) {
-    try {
-      await db.collection('users').doc(userId).set(reactivated, { merge: false });
-    } catch (err: any) {
-      console.warn('[UserStorage] Firestore reactivate failed:', err?.message || err);
-    }
-  }
-
+  await writeRecord(reactivated, false);
   return reactivated;
 }
 
 /**
- * Permanently deletes a user record from memory cache, local ledger, and Cloud Firestore.
+ * Permanently deletes a user record from Cloud Firestore and the local-development store.
  */
 export async function deleteUserAccount(userId: string): Promise<boolean> {
-  loadLocalUserLedger();
-  const existed = memoryUserStorage.delete(userId);
-  persistLocalUserLedger();
+  const existedLocally = forgetLocally(userId);
+  invalidateUserStatsCache();
 
   const db = getFirestore();
-  if (db) {
-    try {
-      await db.collection('users').doc(userId).delete();
-    } catch (err: any) {
-      console.warn('[UserStorage] Firestore delete failed, removed from memory cache:', err?.message || err);
-    }
+  if (!db) {
+    assertDurableWrite('Firestore');
+    return existedLocally;
   }
-
-  return existed;
+  try {
+    const ref = db.collection(USERS_COLLECTION).doc(userId);
+    const snapshot = await ref.get();
+    await ref.delete();
+    return snapshot.exists || existedLocally;
+  } catch (err) {
+    assertDurableWrite('Firestore', err);
+    logWarning('[UserStorage] Firestore delete failed, removed from local store', { error: errorMessage(err) });
+    return existedLocally;
+  }
 }
 
 /**
- * Fetch all registered users across in-memory cache and Firestore.
+ * Fetch all real user records (example participants excluded).
  */
 export async function getAllUserRecords(): Promise<UserRecord[]> {
-  loadLocalUserLedger();
   const recordsMap = new Map<string, UserRecord>();
 
-  // 1. Fast in-memory hot cache
-  for (const [id, record] of memoryUserStorage.entries()) {
-    recordsMap.set(id, record);
-  }
-
-  // 2. Fetch from Firestore if available
-  const db = getFirestore();
-  if (db) {
-    try {
-      if (!hasAttemptedUserSeed) {
-        await seedUsersIfEmpty();
-      }
-
-      const snapshot = await db.collection('users').get();
-      if (!snapshot.empty) {
-        snapshot.forEach((doc) => {
-          const data = doc.data() as UserRecord;
-          const uid = data.userId || doc.id;
-          if (uid) {
-            const resolved: UserRecord = {
-              userId: uid,
-              activeRoutineId: data.activeRoutineId,
-              routines: data.routines || [],
-              runtime: data.runtime || {},
-              updatedAt: data.updatedAt || Date.now()
-            };
-            recordsMap.set(uid, resolved);
-            memoryUserStorage.set(uid, resolved);
-          }
-        });
-      }
-    } catch (err: any) {
-      console.warn('[UserStorage] Firestore fetch all failed, using memory cache:', err?.message || err);
+  if (isMemoryFallbackAllowed()) {
+    loadLocalUserLedger();
+    for (const [id, record] of memoryUserStorage.entries()) {
+      recordsMap.set(id, record);
     }
   }
 
+  const db = getFirestore();
+  if (db) {
+    try {
+      const snapshot = await db.collection(USERS_COLLECTION).get();
+      snapshot.forEach((doc) => {
+        const data = doc.data() as UserRecord;
+        const uid = data.userId || doc.id;
+        if (uid) recordsMap.set(uid, normalizeRecord(uid, data));
+      });
+    } catch (err) {
+      logWarning('[UserStorage] Firestore fetch all failed', { error: errorMessage(err) });
+    }
+  }
+
+  for (const sampleId of LEGACY_SAMPLE_USER_IDS) {
+    recordsMap.delete(sampleId);
+  }
   return Array.from(recordsMap.values());
 }
 
-function matchesRoutine(candidateId: string | undefined, targetId: string): boolean {
-  if (!candidateId) return false;
-  if (candidateId === targetId) return true;
-  if ((candidateId === 'achilles-rehab' && targetId === 'achilles') || (candidateId === 'achilles' && targetId === 'achilles-rehab')) return true;
-  if ((candidateId === 'hair-regrowth' && targetId === 'hair-loss') || (candidateId === 'hair-loss' && targetId === 'hair-regrowth')) return true;
-  return false;
+const ROUTINE_ALIASES: Record<string, string> = {
+  'achilles-rehab': 'achilles',
+  'hair-regrowth': 'hair-loss'
+};
+
+function canonicalStatsId(routineId: string): string {
+  return ROUTINE_ALIASES[routineId] || routineId;
 }
 
-/**
- * Computes live user telemetry for a specific routine:
- * - activeTrackersCount: number of distinct users actively tracking or having this routine in their list
- * - userLogsCount: sum of all feedbackLogs, morphingLogs, dayHistory entries, and completed sets
- */
-export async function getLiveUserStats(routineId: string): Promise<{
+export interface RoutineUserStats {
   activeTrackersCount: number;
   userLogsCount: number;
-}> {
-  const users = await getAllUserRecords();
-  let activeTrackersCount = 0;
-  let userLogsCount = 0;
+}
+
+function countRuntimeLogs(runtime: RoutineRuntime | undefined): number {
+  if (!runtime) return 0;
+  let count = 0;
+  if (Array.isArray(runtime.feedbackLogs)) count += runtime.feedbackLogs.length;
+  if (Array.isArray(runtime.morphingLogs)) count += runtime.morphingLogs.length;
+  const dayHistory = (runtime as { dayHistory?: unknown }).dayHistory;
+  if (Array.isArray(dayHistory)) count += dayHistory.length;
+  if (runtime.setsDone && typeof runtime.setsDone === 'object') count += Object.keys(runtime.setsDone).length;
+  return count;
+}
+
+/** Aggregates tracker and log counts for every routine in one pass over the user records. */
+export function computeRoutineUserStats(users: UserRecord[]): Map<string, RoutineUserStats> {
+  const stats = new Map<string, RoutineUserStats>();
 
   for (const user of users) {
-    const isActivelyTracking = matchesRoutine(user.activeRoutineId, routineId);
-
-    const hasInRoutines =
-      Array.isArray(user.routines) && user.routines.some((r) => matchesRoutine(r.id, routineId));
-
-    const userRuntime =
-      user.runtime?.[routineId] ||
-      (routineId === 'achilles' ? user.runtime?.['achilles-rehab'] : undefined) ||
-      (routineId === 'achilles-rehab' ? user.runtime?.['achilles'] : undefined) ||
-      (routineId === 'hair-loss' ? user.runtime?.['hair-regrowth'] : undefined) ||
-      (routineId === 'hair-regrowth' ? user.runtime?.['hair-loss'] : undefined);
-
-    const hasRuntime = Boolean(userRuntime);
-
-    if (isActivelyTracking || hasInRoutines || hasRuntime) {
-      activeTrackersCount += 1;
+    const routineIds = new Set<string>();
+    if (user.activeRoutineId) routineIds.add(canonicalStatsId(user.activeRoutineId));
+    for (const routine of Array.isArray(user.routines) ? user.routines : []) {
+      if (routine?.id) routineIds.add(canonicalStatsId(routine.id));
     }
 
-    if (userRuntime) {
-      if (Array.isArray(userRuntime.feedbackLogs)) {
-        userLogsCount += userRuntime.feedbackLogs.length;
-      }
-      if (Array.isArray(userRuntime.morphingLogs)) {
-        userLogsCount += userRuntime.morphingLogs.length;
-      }
-      if (Array.isArray((userRuntime as Record<string, any>).dayHistory)) {
-        userLogsCount += (userRuntime as Record<string, any>).dayHistory.length;
-      }
-      if (userRuntime.setsDone && typeof userRuntime.setsDone === 'object') {
-        userLogsCount += Object.keys(userRuntime.setsDone).length;
-      }
+    const logsByRoutine = new Map<string, number>();
+    for (const [routineId, runtime] of Object.entries(user.runtime || {})) {
+      const id = canonicalStatsId(routineId);
+      routineIds.add(id);
+      logsByRoutine.set(id, (logsByRoutine.get(id) ?? 0) + countRuntimeLogs(runtime));
+    }
+
+    for (const id of routineIds) {
+      const entry = stats.get(id) ?? { activeTrackersCount: 0, userLogsCount: 0 };
+      entry.activeTrackersCount += 1;
+      entry.userLogsCount += logsByRoutine.get(id) ?? 0;
+      stats.set(id, entry);
     }
   }
 
-  return {
-    activeTrackersCount,
-    userLogsCount
-  };
+  return stats;
+}
+
+let statsCache: { expiresAt: number; stats: Map<string, RoutineUserStats> } | null = null;
+let statsInFlight: Promise<Map<string, RoutineUserStats>> | null = null;
+
+export function invalidateUserStatsCache(): void {
+  statsCache = null;
+}
+
+async function getAllRoutineStats(): Promise<Map<string, RoutineUserStats>> {
+  if (statsCache && statsCache.expiresAt > Date.now()) return statsCache.stats;
+  if (statsInFlight) return statsInFlight;
+
+  statsInFlight = getAllUserRecords()
+    .then((users) => {
+      const stats = computeRoutineUserStats(users);
+      statsCache = { expiresAt: Date.now() + STATS_CACHE_TTL_MS, stats };
+      return stats;
+    })
+    .finally(() => {
+      statsInFlight = null;
+    });
+  return statsInFlight;
+}
+
+/**
+ * Live user telemetry for a routine, from a cached aggregate refreshed at most once a minute
+ * per instance (instead of reading every user document on every request).
+ */
+export async function getLiveUserStats(routineId: string): Promise<RoutineUserStats> {
+  const stats = await getAllRoutineStats();
+  return stats.get(canonicalStatsId(routineId)) ?? { activeTrackersCount: 0, userLogsCount: 0 };
 }

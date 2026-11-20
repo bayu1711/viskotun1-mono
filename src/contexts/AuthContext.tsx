@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import { COPY } from '../data/copy';
 import { ROUTES } from '../data/navigation';
 import { getFirebaseAuth } from '../lib/firebase';
+import { apiFetch, apiPostJson } from '../lib/apiClient';
 import type { AuthState, RegionContext, User, UserLifestyleProfile, UserProfile } from '../types/auth';
 import {
   clearBrowserStorageForAccount,
@@ -151,15 +152,27 @@ const GUEST_USER: User = {
   createdAt: Date.now()
 };
 
-const ADMIN_USER: User = {
-  id: 'usr-admin-evelyn',
-  name: COPY.auth.defaultAdminName,
-  email: 'admin@viskotun1.internal',
-  initials: COPY.auth.initials.admin,
-  isGuest: false,
-  role: 'admin',
-  createdAt: Date.now()
-};
+/** The shared demo-admin identity from earlier builds. A stored copy is discarded on load. */
+const RETIRED_DEMO_ADMIN_ID = 'usr-admin-evelyn';
+
+/**
+ * Asks the server whether the signed-in user is an admin. The role is never derived from
+ * the email address or chosen on the client; admin routes check it again on every call.
+ */
+async function fetchServerRole(): Promise<'admin' | 'user'> {
+  try {
+    const res = await apiFetch('/api/me');
+    if (!res.ok) return 'user';
+    const data = await res.json();
+    return data?.isAdmin === true ? 'admin' : 'user';
+  } catch {
+    return 'user';
+  }
+}
+
+function reactivateOnServer(): void {
+  apiPostJson('/api/user/account', { action: 'reactivate' }).catch(() => {});
+}
 
 export const AuthContext = createContext<AuthState | null>(null);
 
@@ -183,7 +196,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let hasConfirmedSavedRegion = false;
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
-      const parsedUser: User | null = saved ? JSON.parse(saved) : null;
+      const storedUser: User | null = saved ? JSON.parse(saved) : null;
+      // A stored role is not trusted: admin rights are re-confirmed by the server after sign-in
+      const parsedUser: User | null =
+        storedUser && storedUser.id !== RETIRED_DEMO_ADMIN_ID ? { ...storedUser, role: 'user' } : null;
+      if (storedUser && !parsedUser) {
+        window.localStorage.removeItem(STORAGE_KEY);
+      }
       if (parsedUser) {
         userRef.current = parsedUser;
         setUser(parsedUser);
@@ -434,37 +453,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { auth } = getFirebaseAuth();
     if (!auth) return;
 
-    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
-      if (fbUser) {
-        const name = fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultClinicalUser;
-        const isAdminRole = Boolean(fbUser.email?.toLowerCase().includes('admin'));
-        const authenticatedUser: User = {
-          id: fbUser.uid,
-          name,
-          email: fbUser.email || '',
-          initials: deriveInitials(name, COPY.auth.initials.clinicalUser),
-          isGuest: false,
-          role: isAdminRole ? 'admin' : 'user',
-          createdAt: Date.now()
-        };
-        persistUser(authenticatedUser);
+    let active = true;
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      if (!fbUser) {
+        // A signed-in user restored from localStorage without a Firebase session cannot call
+        // the server, so sign them out locally instead of showing a broken signed-in state.
+        const current = userRef.current;
+        if (current && !current.isGuest) {
+          persistUser(null);
+        }
+        return;
       }
+
+      const name = fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultClinicalUser;
+      const role = await fetchServerRole();
+      if (!active) return;
+      persistUser({
+        id: fbUser.uid,
+        name,
+        email: fbUser.email || '',
+        initials: deriveInitials(name, COPY.auth.initials.clinicalUser),
+        isGuest: false,
+        role,
+        createdAt: Date.now()
+      });
     });
 
-    return () => unsubscribe();
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, [persistUser]);
 
   const loginAsGuest = useCallback(() => {
     persistUser(GUEST_USER);
   }, [persistUser]);
 
-  const loginAsAdmin = useCallback(() => {
-    persistUser(ADMIN_USER);
-  }, [persistUser]);
-
   const loginWithEmail = useCallback(
-    async (email: string, password?: string, asAdmin?: boolean) => {
-      const isTargetAdmin = Boolean(asAdmin || email.toLowerCase().includes('admin'));
+    async (email: string, password?: string) => {
       const { auth } = getFirebaseAuth();
 
       if (!auth) {
@@ -485,15 +511,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email: fbUser.email || email.trim(),
           initials: deriveInitials(name, COPY.auth.initials.clinicalUser),
           isGuest: false,
-          role: isTargetAdmin ? 'admin' : 'user',
+          role: await fetchServerRole(),
           createdAt: Date.now()
         };
         persistUser(authenticatedUser);
-        fetch('/api/user/account', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'reactivate', userId: authenticatedUser.id })
-        }).catch(() => {});
+        reactivateOnServer();
         return;
       } catch (err: unknown) {
         throw formatFirebaseAuthError(err);
@@ -513,22 +535,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await signInWithPopup(auth, googleProvider);
       const fbUser = result.user;
       const name = fbUser.displayName || fbUser.email?.split('@')[0] || COPY.auth.defaultGoogleUser;
-      const isAdminRole = Boolean(fbUser.email?.toLowerCase().includes('admin'));
       const authenticatedUser: User = {
         id: fbUser.uid,
         name,
         email: fbUser.email || '',
         initials: deriveInitials(name, COPY.auth.initials.googleUser),
         isGuest: false,
-        role: isAdminRole ? 'admin' : 'user',
+        role: await fetchServerRole(),
         createdAt: Date.now()
       };
       persistUser(authenticatedUser);
-      fetch('/api/user/account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'reactivate', userId: authenticatedUser.id })
-      }).catch(() => {});
+      reactivateOnServer();
       return;
     } catch (err: unknown) {
       throw formatFirebaseAuthError(err);
@@ -536,8 +553,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [persistUser]);
 
   const signupWithEmail = useCallback(
-    async (name: string, email: string, password?: string, asAdmin?: boolean) => {
-      const isTargetAdmin = Boolean(asAdmin || email.toLowerCase().includes('admin'));
+    async (name: string, email: string, password?: string) => {
       const { auth } = getFirebaseAuth();
 
       if (!auth) {
@@ -566,7 +582,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email: fbUser.email || email.trim(),
           initials: deriveInitials(displayName, COPY.auth.initials.clinicalUser),
           isGuest: false,
-          role: isTargetAdmin ? 'admin' : 'user',
+          role: 'user',
           createdAt: Date.now()
         };
         try {
@@ -643,11 +659,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const deactivateAccount = useCallback(async () => {
     const activeUser = user;
     if (activeUser && !activeUser.isGuest) {
-      const res = await fetch('/api/user/account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'deactivate', userId: activeUser.id })
-      });
+      const res = await apiPostJson('/api/user/account', { action: 'deactivate' });
       if (!res.ok) {
         throw new Error(COPY.profile.actionErrorToast);
       }
@@ -672,11 +684,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const deleteAccount = useCallback(async () => {
     const activeUser = user;
     if (activeUser && !activeUser.isGuest) {
-      const res = await fetch(`/api/user/account?userId=${encodeURIComponent(activeUser.id)}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: activeUser.id })
-      });
+      const res = await apiFetch('/api/user/account', { method: 'DELETE' });
       if (!res.ok) {
         throw new Error(COPY.profile.actionErrorToast);
       }
@@ -703,11 +711,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.replace(ROUTES.landing);
   }, [user, persistUser, router]);
 
-  const isAdmin = Boolean(
-    user &&
-    !user.isGuest &&
-    (user.role === 'admin' || user.email.toLowerCase().includes('admin'))
-  );
+  const isAdmin = Boolean(user && !user.isGuest && user.role === 'admin');
 
   const value = useMemo<AuthState>(
     () => ({
@@ -726,7 +730,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       deactivateAccount,
       deleteAccount,
       loginAsGuest,
-      loginAsAdmin,
       loginWithEmail,
       loginWithGoogle,
       signupWithEmail,
@@ -746,7 +749,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       deactivateAccount,
       deleteAccount,
       loginAsGuest,
-      loginAsAdmin,
       loginWithEmail,
       loginWithGoogle,
       signupWithEmail,

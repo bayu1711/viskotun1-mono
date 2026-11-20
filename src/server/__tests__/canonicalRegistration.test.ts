@@ -24,6 +24,9 @@ vi.mock('../papersStorage', () => ({
 
 import { POST as extractPost } from '../../app/api/extract/route';
 import { POST as papersPost } from '../../app/api/papers/route';
+import { authHeaders, installTestAuth } from './authTestUtils';
+
+installTestAuth();
 
 const candidate = {
   id: 'astym-achilles',
@@ -69,16 +72,77 @@ describe('canonical registration', () => {
     expect(saveCanonicalRoutine).not.toHaveBeenCalled();
   });
 
-  it('registers the routine when the user confirms it', async () => {
-    saveCanonicalRoutine.mockResolvedValue({ routine: candidate, isNew: true });
-    const req = new Request('http://localhost/api/papers', {
-      method: 'POST',
-      body: JSON.stringify({ paper: { id: candidate.id, title: candidate.title }, routine: candidate })
+  it('registers the server copy of a Europe PMC extraction when the user confirms it', async () => {
+    extractPaperRoutine.mockResolvedValue({
+      success: true,
+      eligible: true,
+      routine: candidate,
+      sourceKind: 'europe-pmc',
+      source: 'x'
     });
+    findCanonicalRoutine.mockResolvedValue(null);
+    saveCanonicalRoutine.mockResolvedValue({ routine: candidate, isNew: true });
 
-    const res = await papersPost(req);
+    const extracted = await (await extractPost(extractRequest())).json();
+    expect(typeof extracted.candidateId).toBe('string');
+
+    // Routine content in the body is ignored: only the stored candidate is registered
+    const tampered = { ...candidate, title: 'Tampered dosing' };
+    const res = await papersPost(
+      new Request('http://localhost/api/papers', {
+        method: 'POST',
+        headers: authHeaders('confirming-user'),
+        body: JSON.stringify({ candidateId: extracted.candidateId, routine: tampered })
+      })
+    );
 
     expect(res.status).toBe(200);
-    expect(saveCanonicalRoutine).toHaveBeenCalledWith(candidate);
+    expect(saveCanonicalRoutine).toHaveBeenCalledTimes(1);
+    const registered = saveCanonicalRoutine.mock.calls[0][0] as Routine;
+    expect(registered.title).toBe(candidate.title);
+    expect(registered.id).toBe('doi__10_1177_1941738116631498');
+  });
+
+  it('keeps uploaded-PDF extractions private instead of sharing them', async () => {
+    extractPaperRoutine.mockResolvedValue({
+      success: true,
+      eligible: true,
+      routine: candidate,
+      sourceKind: 'pdf-upload',
+      source: 'x'
+    });
+    findCanonicalRoutine.mockResolvedValue(null);
+
+    const extracted = await (await extractPost(extractRequest())).json();
+    const res = await papersPost(
+      new Request('http://localhost/api/papers', {
+        method: 'POST',
+        headers: authHeaders('confirming-user'),
+        body: JSON.stringify({ candidateId: extracted.candidateId })
+      })
+    );
+
+    expect(res.status).toBe(200);
+    expect((await res.json()).shared).toBe(false);
+    expect(saveCanonicalRoutine).not.toHaveBeenCalled();
+  });
+
+  it('rejects a confirmation without sign-in or with an unknown candidate', async () => {
+    const anonymous = await papersPost(
+      new Request('http://localhost/api/papers', {
+        method: 'POST',
+        body: JSON.stringify({ candidateId: '00000000-0000-0000-0000-000000000000' })
+      })
+    );
+    expect(anonymous.status).toBe(401);
+
+    const unknown = await papersPost(
+      new Request('http://localhost/api/papers', {
+        method: 'POST',
+        headers: authHeaders('confirming-user'),
+        body: JSON.stringify({ candidateId: '00000000-0000-0000-0000-000000000000' })
+      })
+    );
+    expect(unknown.status).toBe(404);
   });
 });

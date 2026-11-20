@@ -16,6 +16,7 @@ import { useRoutine } from '../../../contexts/RoutineContext';
 import { ROUTES } from '../../../data/navigation';
 import { PRECALIBRATED_SAMPLE_ROUTINES, type SamplePaper } from '../../../data/samplePapers';
 import { buildExternalSearchLinks, matchCommunityPapers } from '../../../utils/paperQuery';
+import { apiFetch } from '../../../lib/apiClient';
 import { Icon } from '../../ui/Icon';
 import { IconTile } from '../../ui/IconTile';
 import { PillButton } from '../../ui/PillButton';
@@ -81,7 +82,7 @@ export function PaperGuidanceCard({ content }: PaperGuidanceCardProps) {
 
     async function searchLive() {
       try {
-        const res = await fetch(`/api/papers/search?q=${encodeURIComponent(trimmed)}`, {
+        const res = await apiFetch(`/api/papers/search?q=${encodeURIComponent(trimmed)}`, {
           signal: controller.signal
         });
         if (res.ok) {

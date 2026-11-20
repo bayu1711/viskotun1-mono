@@ -32,3 +32,6 @@ out
 *.sln
 *.sw?
 *.tsbuildinfo
+
+# Next.js regenerates this per distDir (next dev / next build / next typegen)
+next-env.d.ts

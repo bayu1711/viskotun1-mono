@@ -293,6 +293,10 @@ export interface Routine {
   id: string;
   canonicalId?: string;
   isCanonical?: boolean;
+  /** Server-side id of an unconfirmed extraction; only set on a candidate in the add-paper flow. */
+  extractionCandidateId?: string;
+  /** Verbatim Methods/Interventions excerpt kept server-side to ground assistant answers. */
+  methodsExcerpt?: string;
   version?: string;
   changelog?: RoutineChangelogEntry[];
   title: string;

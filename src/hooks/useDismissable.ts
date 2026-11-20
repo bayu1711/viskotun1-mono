@@ -1,7 +1,7 @@
 import { type RefObject, useEffect } from 'react';
 
 /** Closes a popover on outside pointer-down or Escape. */
-export function useDismissable<T extends HTMLElement>(ref: RefObject<T>, open: boolean, onDismiss: () => void) {
+export function useDismissable<T extends HTMLElement>(ref: RefObject<T | null>, open: boolean, onDismiss: () => void) {
   useEffect(() => {
     if (!open) return;
 

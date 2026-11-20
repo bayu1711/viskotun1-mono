@@ -7,7 +7,9 @@ import { generateFallbackRoutine } from './fallbackRoutines';
 import { classifyPaperSource, containsTerm } from './gatekeeper';
 import { getEffectiveGuardrails } from './guardrailLedger';
 import { findCanonicalRoutine } from './routineRegistry';
-import { validateAndRegisterRoutineWidgets } from './widgetRegistry';
+import { validateRoutineWidgets } from './widgetRegistry';
+import { validateExtractedRoutine } from './routineSchema';
+import { logEvent } from './log';
 import { executeWithGeminiFailover, getGeminiApiKeys } from './geminiKeys';
 import { resolvePaperSource, type PaperResolution } from './paperSource';
 import { extractQueryFromInput } from '../utils/paperQuery';
@@ -18,9 +20,16 @@ export interface ExtractInput {
   text?: string | null;
 }
 
+/**
+ * Where an extracted routine's content came from. Only `europe-pmc` (full text fetched by the
+ * server from Europe PMC) is trusted enough to become the shared routine for a paper.
+ */
+export type ExtractionSourceKind = 'europe-pmc' | 'pdf-upload' | 'pasted-text' | 'demo-fallback' | 'catalog';
+
 export interface ExtractResult {
   success: boolean;
   eligible: boolean;
+  sourceKind?: ExtractionSourceKind;
   rejectionReason?: string;
   errorType?: 'unrecognized' | 'not-found' | 'no-full-text' | 'policy-rejection';
   suggestedQuery?: string;
@@ -245,6 +254,7 @@ async function screenPaper(
       eligible: true,
       routine,
       isExistingCanonical: true,
+      sourceKind: 'catalog',
       source: sourceName
     };
   }
@@ -258,6 +268,8 @@ async function screenPaper(
  * EXTRACTION_CLIENT_TIMEOUT_MS (src/data/config.ts).
  */
 export const EXTRACTION_PER_KEY_TIMEOUT_MS = 40_000;
+/** Whole extraction budget across keys; stays under EXTRACTION_CLIENT_TIMEOUT_MS (95 s). */
+export const EXTRACTION_TOTAL_DEADLINE_MS = 85_000;
 
 const UNRESOLVED_LINK_REASONS: Record<Exclude<PaperResolution, { ok: true }>['reason'], string> = {
   unrecognized: COPY.extraction.linkNotRecognized,
@@ -333,7 +345,9 @@ export async function extractPaperRoutine(input: ExtractInput): Promise<ExtractR
         const dynamicPolicyInstruction = `\n### ACTIVE CLINICAL GUARDRAIL POLICY (Version: ${activePolicy.version}):
 - Escalation Threshold: If subjective discomfort/pain reaches ${activePolicy.painEscalationThreshold}/10 or higher, escalation MUST be paused with a ${activePolicy.loadReductionPercent}% load reduction.
 - Mandatory Clinical Disclaimer: "${activePolicy.clinicalDisclaimer}"
-- Banned criteria: Studies matching [${activePolicy.bannedKeywords.join(', ')}] MUST be marked eligible=false.`;
+- Banned criteria: Studies matching [${activePolicy.bannedKeywords.join(', ')}] MUST be marked eligible=false.
+- Grounding: add a "methodsExcerpt" string field to the routine with the paper's Methods / Interventions text copied VERBATIM (no paraphrase), up to 4000 characters, covering the intervention, dosing, sets, reps, timing and safety rules.
+- Never mark a proposed widget as approved; approval is a human decision.`;
 
         let promptParts: (string | { inlineData: { data: string; mimeType: string } })[] = [];
 
@@ -384,89 +398,98 @@ export async function extractPaperRoutine(input: ExtractInput): Promise<ExtractR
           };
         }
 
-        const rawRoutine = parsed.routine;
-        if (rawRoutine) {
-          const normalizedSteps: RoutineStep[] = Array.isArray(rawRoutine.steps)
-            ? rawRoutine.steps.map((step: RoutineStep) => ({
-                ...step,
-                timing: resolveStepTiming(step)
-              }))
-            : [];
-
-          const routine: Routine = {
-            ...rawRoutine,
-            steps: normalizedSteps,
-            version: rawRoutine.version || '1.0',
-            changelog: rawRoutine.changelog && rawRoutine.changelog.length > 0
-              ? rawRoutine.changelog
-              : [
-                  {
-                    version: '1.0',
-                    date: new Date().toISOString(),
-                    summary: 'Initial clinical routine extraction',
-                    author: 'Gemini Multimodal Extraction'
-                  }
-                ],
-            dayHistory: rawRoutine.dayHistory ?? [],
-            initialSetsDone: rawRoutine.initialSetsDone ?? {},
-            initialFeedbackLogs: rawRoutine.initialFeedbackLogs ?? [],
-            feedbackMetric: rawRoutine.feedbackMetric
-              ? {
-                  ...rawRoutine.feedbackMetric,
-                  escalationThreshold: activePolicy.painEscalationThreshold,
-                  escalationMessage: activePolicy.escalationAlertMessage
-                }
-              : undefined,
-            initialMessages: rawRoutine.initialMessages ?? [
-              {
-                id: `${rawRoutine.id}-msg-1`,
-                role: 'user',
-                kind: 'file',
-                content: sourceName,
-                timestamp: COPY.assistant.timestampJustNow
-              },
-              {
-                id: `${rawRoutine.id}-msg-2`,
-                role: 'ai',
-                kind: 'text',
-                content: COPY.assistant.parsedSummary(rawRoutine.paper?.pages ?? 'the'),
-                timestamp: COPY.assistant.timestampJustNow
-              },
-              {
-                id: `${rawRoutine.id}-msg-3`,
-                role: 'ai',
-                kind: 'routine',
-                content: rawRoutine.id,
-                timestamp: COPY.assistant.timestampJustNow
-              }
-            ]
-          };
-
-          const validatedRoutine = await validateAndRegisterRoutineWidgets(routine);
-
-          return {
-            success: true,
-            eligible: true,
-            routine: validatedRoutine,
-            source: sourceName
-          };
+        const validation = validateExtractedRoutine(parsed.routine);
+        if (!validation.ok) {
+          // Unusable model output is reported as a model failure, never shown as a routine
+          throw new Error(`Gemini routine failed validation: ${validation.reason}`);
         }
+        const rawRoutine = validation.routine;
+
+        const normalizedSteps: RoutineStep[] = rawRoutine.steps.map((step: RoutineStep) => ({
+          ...step,
+          timing: resolveStepTiming(step)
+        }));
+
+        const routine: Routine = {
+          ...rawRoutine,
+          steps: normalizedSteps,
+          version: rawRoutine.version || '1.0',
+          changelog: rawRoutine.changelog && rawRoutine.changelog.length > 0
+            ? rawRoutine.changelog
+            : [
+                {
+                  version: '1.0',
+                  date: new Date().toISOString(),
+                  summary: 'Initial clinical routine extraction',
+                  author: 'Gemini Multimodal Extraction'
+                }
+              ],
+          dayHistory: [],
+          initialSetsDone: {},
+          initialFeedbackLogs: [],
+          feedbackMetric: rawRoutine.feedbackMetric
+            ? {
+                ...rawRoutine.feedbackMetric,
+                escalationThreshold: activePolicy.painEscalationThreshold,
+                escalationMessage: activePolicy.escalationAlertMessage
+              }
+            : undefined,
+          initialMessages: [
+            {
+              id: `${rawRoutine.id}-msg-1`,
+              role: 'user',
+              kind: 'file',
+              content: sourceName,
+              timestamp: COPY.assistant.timestampJustNow
+            },
+            {
+              id: `${rawRoutine.id}-msg-2`,
+              role: 'ai',
+              kind: 'text',
+              content: COPY.assistant.parsedSummary(rawRoutine.paper?.pages || 'the'),
+              timestamp: COPY.assistant.timestampJustNow
+            },
+            {
+              id: `${rawRoutine.id}-msg-3`,
+              role: 'ai',
+              kind: 'routine',
+              content: rawRoutine.id,
+              timestamp: COPY.assistant.timestampJustNow
+            }
+          ]
+        };
+
+        // Proposals are only registered for review once the user confirms the routine
+        const validatedRoutine = await validateRoutineWidgets(routine);
+
+        return {
+          success: true,
+          eligible: true,
+          routine: validatedRoutine,
+          sourceKind: (paperFromLink ? 'europe-pmc' : input.file ? 'pdf-upload' : 'pasted-text') as ExtractionSourceKind,
+          source: sourceName
+        };
 
         throw new Error('Gemini output missing routine or eligible field');
-      }, EXTRACTION_PER_KEY_TIMEOUT_MS);
+      }, EXTRACTION_PER_KEY_TIMEOUT_MS, { totalDeadlineMs: EXTRACTION_TOTAL_DEADLINE_MS });
 
       if (extracted) {
+        logEvent('extraction_completed', {
+          eligible: extracted.eligible,
+          sourceKind: extracted.sourceKind ?? null
+        });
         return extracted;
       }
     } catch (err) {
-      console.error('[GeminiExtraction] Error calling Gemini API, falling back to simulated extraction:', err);
+      console.error('[GeminiExtraction] Gemini extraction failed:', err);
+      logEvent('extraction_model_failed', { inputKind: input.file ? 'pdf' : input.url ? 'link' : 'text' });
     }
   }
 
-  // Gemini was configured but failed (timeout, 503, quota). A real paper was supplied, as a link or
-  // an uploaded PDF, so never stand in a simulated routine for it: say the model is busy instead.
-  // The canned fallback below is only for local setups without any Gemini key.
-  if (linkedPaper || (geminiKeys.length > 0 && input.file)) {
+  // A real paper was supplied (link, PDF or pasted text). Never stand in a simulated routine for it:
+  // when Gemini failed or is not configured, say the model is unavailable instead. The canned
+  // routine below is only for local development, or a deliberate demo (ENABLE_DEMO_EXTRACTION=true).
+  if (geminiKeys.length > 0 || linkedPaper || !isDemoExtractionAllowed()) {
     return {
       success: false,
       eligible: false,
@@ -475,8 +498,8 @@ export async function extractPaperRoutine(input: ExtractInput): Promise<ExtractR
     };
   }
 
-  // Development / fallback mode: provides instant, calibrated routine extraction
-  const fallbackRoutine = await validateAndRegisterRoutineWidgets(
+  // Development / demo mode: provides instant, calibrated routine extraction
+  const fallbackRoutine = await validateRoutineWidgets(
     generateFallbackRoutine(sourceName)
   );
   if (fallbackRoutine.feedbackMetric) {
@@ -491,8 +514,14 @@ export async function extractPaperRoutine(input: ExtractInput): Promise<ExtractR
     success: true,
     eligible: true,
     routine: fallbackRoutine,
+    sourceKind: 'demo-fallback',
     source: sourceName
   };
+}
+
+/** The canned routine is allowed outside production, or when a demo deploy opts in. */
+export function isDemoExtractionAllowed(): boolean {
+  return process.env.ENABLE_DEMO_EXTRACTION === 'true' || process.env.NODE_ENV !== 'production';
 }
 
 

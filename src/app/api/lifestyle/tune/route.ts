@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { getRequestUser } from '../../../../server/auth';
+import { enforceRateLimit } from '../../../../server/rateLimit';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { getLocaleCopy } from '../../../../data/locales';
 import type { AppLocale } from '../../../../data/locales/types';
@@ -55,10 +57,14 @@ function parseRhythmsParam(raw: string | null): CulturalRhythmId[] | undefined {
 }
 
 export async function GET(request: Request) {
+  const user = await getRequestUser(request);
+  const limited = enforceRateLimit('lifestyle', request, user);
+  if (limited) return limited;
+
   const { searchParams } = new URL(request.url);
-  const country = searchParams.get('country') || 'AE';
-  const countryName = searchParams.get('countryName') || undefined;
-  const city = searchParams.get('city') || undefined;
+  const country = (searchParams.get('country') || 'AE').slice(0, 8);
+  const countryName = searchParams.get('countryName')?.slice(0, 80) || undefined;
+  const city = searchParams.get('city')?.slice(0, 80) || undefined;
   const culturalRhythms = parseRhythmsParam(searchParams.get('rhythms'));
 
   const { suggestions, source } = await deriveGlobalRegionalSuggestions({
@@ -70,11 +76,20 @@ export async function GET(request: Request) {
   return NextResponse.json({ country, countryName, city, source, suggestions });
 }
 
+const MAX_MESSAGE_LENGTH = 2_000;
+
 export async function POST(request: Request) {
+  const user = await getRequestUser(request);
+  const limited = enforceRateLimit('lifestyle', request, user);
+  if (limited) return limited;
+
   try {
     const body = await request.json().catch(() => null);
-    if (!body || !body.message) {
+    if (!body || typeof body.message !== 'string' || !body.message.trim()) {
       return NextResponse.json({ error: 'Message required' }, { status: 400 });
+    }
+    if (body.message.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json({ error: `Message is too long. Keep it under ${MAX_MESSAGE_LENGTH} characters.` }, { status: 400 });
     }
 
     const {

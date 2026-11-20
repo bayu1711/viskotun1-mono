@@ -488,8 +488,6 @@ export const COPY_AR_COMPLETION: DeepPartial<LocaleCopy> = {
     namePlaceholder: 'مثال: د. سارة أحمد',
     googleButton: 'المتابعة باستخدام Google',
     guestNotice: 'يحفظ وضع الزائر خططك محلياً في متصفحك. سجّل الدخول في أي وقت للمزامنة مع السحابة.',
-    adminButton: 'المتابعة كمسؤول سريري',
-    adminLifecycleNotice: 'ملاحظة: أدوات المسؤول السريري متاحة مؤقتاً لتقييم مسابقة Google AI Builder Cup وستُغلق بعد انتهاء المسابقة.',
     haveAccount: 'لديك حساب بالفعل؟ سجّل الدخول',
     needAccount: 'ليس لديك حساب؟ أنشئ حساباً',
     saveNotice: 'سجّل الدخول لمزامنة أوراقك مع السحابة',
@@ -509,8 +507,7 @@ export const COPY_AR_COMPLETION: DeepPartial<LocaleCopy> = {
     toastAuthFailed: 'فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.',
     toastGoogleSuccess: 'تم تسجيل الدخول باستخدام Google!',
     toastGoogleFailed: 'فشل تسجيل الدخول باستخدام Google.',
-    toastGuestEntered: 'دخلت كزائر مستكشف',
-    toastAdminEntered: 'تم تسجيل الدخول كمسؤول سريري'
+    toastGuestEntered: 'دخلت كزائر مستكشف'
   },
   errors: {
     boundaryTitle: 'حدث خطأ ما',

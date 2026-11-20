@@ -95,52 +95,75 @@ function runWithTimeout<T>(promise: Promise<T>, ms: number, label: string): Prom
   });
 }
 
+function isTimeoutError(err: unknown): boolean {
+  const message = String((err as { message?: unknown })?.message ?? err).toLowerCase();
+  return message.includes('timed out') || message.includes('timeout');
+}
+
+export interface FailoverOptions {
+  /** Hard cap on the whole call across all keys. Defaults to 1.5x the per-key timeout. */
+  totalDeadlineMs?: number;
+}
+
+/** Below this much remaining time another attempt cannot finish, so we stop. */
+const MIN_ATTEMPT_MS = 5_000;
+
 /**
  * Executes a Gemini operation with automatic rotation and failover across the key pool.
- * If a key hits 429 / quota limit or times out, it immediately attempts the next key in the pool.
+ * A 429/quota error moves straight to the next key. A timeout fails over at most once,
+ * because a slow request is usually slow on every key, and the whole call is bounded by
+ * `totalDeadlineMs` so N keys can never mean N full timeouts.
  */
 export async function executeWithGeminiFailover<T>(
   action: (apiKey: string, keyIndex: number, totalKeys: number) => Promise<T>,
-  perKeyTimeoutMs = 15000
+  perKeyTimeoutMs = 15000,
+  options: FailoverOptions = {}
 ): Promise<T> {
   const keys = getGeminiApiKeys();
   if (keys.length === 0) {
     throw new Error('No GEMINI_API_KEYS or GEMINI_API_KEY configured');
   }
 
+  const deadline = Date.now() + (options.totalDeadlineMs ?? Math.round(perKeyTimeoutMs * 1.5));
   const startIndex = currentKeyIndex % keys.length;
   // Advance index for subsequent calls to distribute traffic
   currentKeyIndex = (currentKeyIndex + 1) % keys.length;
 
   let lastError: unknown;
+  let timeoutFailovers = 0;
 
-  // Try each key in sequence starting from startIndex
   for (let attempt = 0; attempt < keys.length; attempt++) {
+    const remaining = deadline - Date.now();
+    if (attempt > 0 && remaining < MIN_ATTEMPT_MS) break;
+
     const targetIdx = (startIndex + attempt) % keys.length;
     const apiKey = keys[targetIdx];
-    const maskedKey = `${apiKey.slice(0, 8)}...${apiKey.slice(-4)}`;
 
     try {
       return await runWithTimeout(
         action(apiKey, targetIdx, keys.length),
-        perKeyTimeoutMs,
+        Math.max(1, Math.min(perKeyTimeoutMs, remaining)),
         `Gemini API operation [key #${targetIdx + 1}]`
       );
     } catch (err: unknown) {
       lastError = err;
 
-      if (isRateLimitOrQuotaError(err)) {
-        console.warn(
-          `[GeminiKeyManager] Key #${targetIdx + 1} (${maskedKey}) hit quota/rate limit or timeout. Attempting failover to next key...`
-        );
-        continue;
+      if (!isRateLimitOrQuotaError(err)) {
+        // A validation or syntax error will fail on every key, so do not fail over
+        throw err;
       }
 
-      // If it's a fatal validation or syntax error, do not failover needlessly
-      throw err;
+      if (isTimeoutError(err)) {
+        timeoutFailovers += 1;
+        if (timeoutFailovers > 1) break;
+      }
+
+      console.warn(
+        `[GeminiKeyManager] Key #${targetIdx + 1} hit quota/rate limit or timeout. Attempting failover to next key...`
+      );
     }
   }
 
-  console.error('[GeminiKeyManager] All configured Gemini API keys exhausted their rate limits or timed out.');
+  console.error('[GeminiKeyManager] Gemini call failed after failover or deadline.');
   throw lastError;
 }

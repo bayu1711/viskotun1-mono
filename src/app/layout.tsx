@@ -72,7 +72,11 @@ export default function RootLayout({
     : null;
 
   return (
-    <html lang={COPY.metadata.lang} className={`${bodyFont.variable} ${displayFont.variable}`}>
+    <html
+      lang={COPY.metadata.lang}
+      className={`${bodyFont.variable} ${displayFont.variable}`}
+      data-scroll-behavior="smooth"
+    >
       <head>
         {runtimeFirebaseConfig && (
           <script

@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { getSamplePapers, savePaper, getUserPapers } from '../papersStorage';
 import { NextRequest } from 'next/server';
 import { GET, POST } from '../../app/api/papers/route';
+import { authHeaders, installTestAuth } from './authTestUtils';
+
+installTestAuth();
 
 describe('papersStorage and /api/papers endpoint', () => {
   it('retrieves sample and trending papers with pre-calibrated routines sorted by popularity', async () => {
@@ -17,17 +20,13 @@ describe('papersStorage and /api/papers endpoint', () => {
     expect(trendingPapers[0].id).toBe('achilles-rehab');
     expect(trendingPapers[0].trendingRank).toBe(1);
     expect(trendingPapers[0].popularityScore).toBe(98);
-    expect(trendingPapers[0].activeTrackersCount).toBe(4);
-    expect(trendingPapers[0].totalLogsCount).toBe(30);
+    // Counts come from real users only; no example participants are seeded
+    expect(trendingPapers[0].activeTrackersCount).toBe(0);
+    expect(trendingPapers[0].totalLogsCount).toBe(0);
 
-    // Verify other papers have authentic telemetry
     const hairPaper = trendingPapers.find((p) => p.id === 'hair-regrowth');
-    expect(hairPaper?.activeTrackersCount).toBe(4);
-    expect(hairPaper?.totalLogsCount).toBe(21);
-
-    const creatinePaper = trendingPapers.find((p) => p.id === 'creatine-sleep');
-    expect(creatinePaper?.activeTrackersCount).toBe(2);
-    expect(creatinePaper?.totalLogsCount).toBe(12);
+    expect(hairPaper?.activeTrackersCount).toBe(0);
+    expect(hairPaper?.totalLogsCount).toBe(0);
 
     const fastingPaper = trendingPapers.find((p) => p.id === 'time-restricted-eating');
     expect(fastingPaper?.activeTrackersCount).toBe(0);
@@ -83,9 +82,15 @@ describe('papersStorage and /api/papers endpoint', () => {
     expect(data.routines['achilles'].currentDay).toBe(1);
   });
 
-  it('POST /api/papers validates paper presence', async () => {
+  it('POST /api/papers requires sign-in and a candidateId', async () => {
+    const anonymous = await POST(
+      new NextRequest('http://localhost:3000/api/papers', { method: 'POST', body: JSON.stringify({ candidateId: 'x' }) })
+    );
+    expect(anonymous.status).toBe(401);
+
     const req = new NextRequest('http://localhost:3000/api/papers', {
       method: 'POST',
+      headers: authHeaders('papers-test-user'),
       body: JSON.stringify({})
     });
     const res = await POST(req);
@@ -94,10 +99,10 @@ describe('papersStorage and /api/papers endpoint', () => {
     expect(data.error).toBeDefined();
   });
 
-  it('assigns trending and sample papers to user fazarathfazal@gmail.com in the database', async () => {
-    const userPapers = await getUserPapers('fazarathfazal@gmail.com');
-    expect(userPapers.length).toBeGreaterThanOrEqual(5);
-    expect(userPapers.some((p) => p.id === 'achilles-rehab')).toBe(true);
-    expect(userPapers.every((p) => p.userId === 'fazarathfazal@gmail.com')).toBe(true);
+  it('attributes curated sample papers to the team, not to a personal account', async () => {
+    const curated = await getUserPapers('trialn1-curated');
+    expect(curated.length).toBeGreaterThanOrEqual(5);
+    expect(curated.some((p) => p.id === 'achilles-rehab')).toBe(true);
+    expect(curated.every((p) => !String(p.userEmail ?? '').includes('@'))).toBe(true);
   });
 });

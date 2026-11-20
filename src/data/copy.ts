@@ -918,6 +918,7 @@ export const COPY = {
     cancel: 'Cancel',
     reviewSuccessToast: 'Outcome published to community registry',
     reviewErrorToast: 'Could not submit outcome. Please try again.',
+    reviewSignInToast: 'Sign in to share your outcome with the community.',
     /** Display names for paper category ids; unknown ids fall back to the raw id. */
     categoryLabels: {
       rehab: 'Rehab',
@@ -1607,9 +1608,6 @@ export const COPY = {
     googleButton: 'Continue with Google',
     guestButton: 'Continue as guest (no sign-up required)',
     guestNotice: 'Guest mode stores routines locally in your browser. Sign in anytime to sync to the cloud.',
-    adminButton: 'Continue as clinical administrator',
-    adminLifecycleNotice:
-      'Note: Clinical admin controls are temporarily surfaced for Google AI Builder Cup evaluation and will be sealed off post-competition.',
     haveAccount: 'Already have an account? Sign in',
     needAccount: "Don't have an account? Create one",
     signOut: 'Sign out',
@@ -1619,7 +1617,6 @@ export const COPY = {
     signInToSyncBadge: 'Sign in to sync',
     cloudSyncedBadge: 'Cloud synced',
     defaultGuestName: 'Guest Explorer',
-    defaultAdminName: 'Dr. Evelyn Vance',
     defaultClinicalUser: 'Verified Clinical User',
     defaultGoogleUser: 'Google User',
     googleResearcher: 'Google Researcher',
@@ -1651,8 +1648,7 @@ export const COPY = {
     toastAuthFailed: 'Authentication failed. Please try again.',
     toastGoogleSuccess: 'Signed in with Google!',
     toastGoogleFailed: 'Google sign-in failed.',
-    toastGuestEntered: 'Entered as guest explorer',
-    toastAdminEntered: 'Signed in as Clinical Administrator'
+    toastGuestEntered: 'Entered as guest explorer'
   },
   errors: {
     boundaryTitle: 'Something went wrong',
@@ -1867,11 +1863,13 @@ export const COPY = {
     },
     assistant: {
       questionRequired: 'Question is required',
+      questionTooLong: (max: number) => `Question is too long. Keep it under ${max} characters.`,
       invalidJson: 'Invalid JSON payload',
       internalError: 'Internal Server Error'
     },
     extract: {
       inputRequired: 'PDF file or paper URL/DOI is required',
+      textTooLong: (max: number) => `Pasted text is too long. Keep it under ${max} characters or upload the PDF.`,
       fileSizeExceeded: 'File size exceeds maximum limit of 20MB',
       invalidFormat: 'Invalid file format. Only PDF files are supported.',
       internalError: 'Internal Server Error during extraction'
@@ -1884,6 +1882,8 @@ export const COPY = {
     },
     userSync: {
       userIdRequired: 'User ID is required',
+      conflict: 'Your data changed on another device. Merge the latest copy and try again.',
+      invalidAction: 'Valid account action is required',
       internalError: 'Internal Server Error during user sync',
       fetchError: 'Internal Server Error fetching user sync'
     },
@@ -1898,6 +1898,8 @@ export const COPY = {
       fetchError: 'Internal Server Error fetching papers',
       saveError: 'Internal Server Error saving paper',
       paperRequired: 'Paper object is required',
+      candidateRequired: 'candidateId is required',
+      candidateNotFound: 'This extraction has expired. Add the paper again to confirm it.',
       seedSuccess: 'Sample papers seeded successfully',
       saveSuccess: 'Paper saved to Firestore papers collection'
     },
@@ -1905,6 +1907,7 @@ export const COPY = {
       routineIdRequired: 'Routine ID is required',
       invalidOutcome: 'Outcome must be one of: improved, adjusted, paused',
       textRequired: 'Review text is required',
+      textTooLong: (max: number) => `Review text is too long. Keep it under ${max} characters.`,
       saveSuccess: 'Community review recorded',
       fetchError: 'Failed to retrieve community data',
       saveError: 'Failed to save community review'

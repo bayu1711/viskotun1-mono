@@ -16,7 +16,7 @@ interface DialogA11yOptions {
   open: boolean;
   onClose: () => void;
   /** Element to focus on open. Defaults to the first focusable element. */
-  initialFocusRef?: RefObject<HTMLElement>;
+  initialFocusRef?: RefObject<HTMLElement | null>;
 }
 
 /**
@@ -25,7 +25,7 @@ interface DialogA11yOptions {
  * Stack-aware so nested dialogs (feedback log over the assistant) behave correctly.
  */
 export function useDialogA11y<T extends HTMLElement>(
-containerRef: RefObject<T>,
+containerRef: RefObject<T | null>,
 { open, onClose, initialFocusRef }: DialogA11yOptions)
 {
   const onCloseRef = useRef(onClose);

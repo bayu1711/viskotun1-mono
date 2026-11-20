@@ -2,25 +2,31 @@ import { NextResponse } from 'next/server';
 import { COPY } from '../../../../data/copy';
 import { injectApprovedWidgetIntoCanonicalRoutine } from '../../../../server/routineRegistry';
 import { approveWidgetProposal, listWidgetProposals } from '../../../../server/widgetRegistry';
+import { requireAdmin } from '../../../../server/auth';
+import { errorResponse, readJsonBody } from '../../../../server/http';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+/** GET: Pending and approved AI widget proposals (admin only) */
+export async function GET(request: Request) {
+  const auth = await requireAdmin(request);
+  if (auth instanceof Response) return auth;
+
   try {
     const proposals = await listWidgetProposals();
     return NextResponse.json({ proposals });
   } catch (error) {
-    console.error('[AdminWidgetsAPI] Failed to list widget proposals:', error);
-    return NextResponse.json(
-      { error: COPY.api.widgets.fetchError },
-      { status: 500 }
-    );
+    return errorResponse('AdminWidgetsRoute.GET', error, COPY.api.widgets.fetchError);
   }
 }
 
+/** POST: Approve one widget proposal (admin only) */
 export async function POST(request: Request) {
+  const auth = await requireAdmin(request);
+  if (auth instanceof Response) return auth;
+
   try {
-    const body = await request.json();
+    const body = await readJsonBody<{ proposalId?: unknown }>(request);
     const proposalId = typeof body?.proposalId === 'string' ? body.proposalId.trim() : '';
 
     if (!proposalId) {
@@ -46,10 +52,6 @@ export async function POST(request: Request) {
       routine: updatedRoutine
     });
   } catch (error) {
-    console.error('[AdminWidgetsAPI] Failed to approve widget proposal:', error);
-    return NextResponse.json(
-      { error: COPY.api.widgets.approveError },
-      { status: 500 }
-    );
+    return errorResponse('AdminWidgetsRoute.POST', error, COPY.api.widgets.approveError);
   }
 }

@@ -11,6 +11,7 @@ import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import { toast } from 'sonner';
 import { useAuth } from '../../contexts/AuthContext';
+import { apiFetch, apiPostJson } from '../../lib/apiClient';
 import { usePolicyLedger } from '../../contexts/PolicyLedgerContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
@@ -54,7 +55,7 @@ export function PolicyLedgerDrawer() {
   useEffect(() => {
     if (!isDrawerOpen) return;
     let active = true;
-    fetch('/api/admin/widgets')
+    apiFetch('/api/admin/widgets')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (active && Array.isArray(data?.proposals)) {
@@ -101,34 +102,24 @@ export function PolicyLedgerDrawer() {
   const handleApproveWidget = async (proposal: ProposedWidgetSpec) => {
     try {
       setApprovingId(proposal.id);
-      const res = await fetch('/api/admin/widgets', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ proposalId: proposal.id })
-      });
-      const approvedSpec: ProposedWidgetSpec = {
+      const res = await apiPostJson('/api/admin/widgets', { proposalId: proposal.id });
+      if (!res.ok) {
+        // Only the server can approve a widget; never show it as approved when that failed
+        toast.error(copy.policyLedger.toastWidgetApproveError);
+        return;
+      }
+      const data = await res.json();
+      const resolved: ProposedWidgetSpec = data?.proposal ?? {
         ...proposal,
         status: 'approved',
         approvedAt: new Date().toISOString()
       };
-      if (res.ok) {
-        const data = await res.json();
-        const resolved = data?.proposal ?? approvedSpec;
-        setRemoteProposals((prev) =>
-          prev.some((p) => p.id === resolved.id)
-            ? prev.map((p) => (p.id === resolved.id ? resolved : p))
-            : [resolved, ...prev]
-        );
-        approveProposedWidget(resolved);
-      } else {
-        // Still apply to client session if proposal originated in local storage
-        setRemoteProposals((prev) =>
-          prev.some((p) => p.id === approvedSpec.id)
-            ? prev.map((p) => (p.id === approvedSpec.id ? approvedSpec : p))
-            : [approvedSpec, ...prev]
-        );
-        approveProposedWidget(approvedSpec);
-      }
+      setRemoteProposals((prev) =>
+        prev.some((p) => p.id === resolved.id)
+          ? prev.map((p) => (p.id === resolved.id ? resolved : p))
+          : [resolved, ...prev]
+      );
+      approveProposedWidget(resolved);
       toast.success(copy.policyLedger.toastWidgetApproved(proposal.title));
     } catch {
       toast.error(copy.policyLedger.toastWidgetApproveError);
