@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { generateLifestyleAdaptation } from '@/server/lifestyleEngine';
 import type { UserLifestyleProfile, UserProfile } from '@/types/auth';
 import type { Routine } from '@/types/routine';
+import type { RoutineSchedulePreference } from '@/types/schedule';
 
 export async function POST(request: Request) {
   try {
@@ -13,17 +14,20 @@ export async function POST(request: Request) {
     const {
       userProfile,
       lifestyleProfile,
-      routine
+      routine,
+      routineSchedule
     }: {
       userProfile?: UserProfile;
       lifestyleProfile?: Partial<UserLifestyleProfile>;
       routine?: Routine | null;
+      routineSchedule?: RoutineSchedulePreference;
     } = body;
 
     const adaptation = await generateLifestyleAdaptation({
       userProfile,
       lifestyleProfile,
-      routine
+      routine,
+      routineSchedule
     });
 
     return NextResponse.json({ adaptation });

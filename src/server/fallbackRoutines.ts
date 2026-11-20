@@ -38,7 +38,13 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
       setLabel: 'doses',
       perSetLabel: '× 5g',
       statLabel: 'dose:',
-      statValue: '5g'
+      statValue: '5g',
+      timing: {
+        type: 'anchored',
+        anchorSlot: 'morning',
+        anchorHint: 'Morning with light meal',
+        estimatedMinutes: 3
+      }
     },
     {
       id: 'cr-2',
@@ -53,7 +59,12 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
       setLabel: 'session',
       perSetLabel: '× 10 min',
       statLabel: 'duration:',
-      statValue: '10m'
+      statValue: '10m',
+      timing: {
+        type: 'flexible',
+        anchorHint: '1× daily · 10 min quiet window',
+        estimatedMinutes: 10
+      }
     },
     {
       id: 'cr-3',
@@ -74,6 +85,11 @@ export const FALLBACK_CREATINE_SLEEP: Routine = {
         tier: 'guideline',
         source: 'Clinical Hydration Standard',
         rationale: 'Standard fluid intake alongside creatine supplementation'
+      },
+      timing: {
+        type: 'continuous',
+        anchorHint: 'Spaced throughout waking hours',
+        estimatedMinutes: 2
       }
     }
   ],
@@ -288,7 +304,12 @@ export const FALLBACK_PATELLAR_REHAB: Routine = {
       frequency: '3x Weekly',
       tempo: '3s up, 3s down',
       statLabel: 'tempo:',
-      statValue: '3s / 3s'
+      statValue: '3s / 3s',
+      timing: {
+        type: 'flexible',
+        anchorHint: '3× weekly · any training window',
+        estimatedMinutes: 15
+      }
     },
     {
       id: 'pat-2',
@@ -299,7 +320,12 @@ export const FALLBACK_PATELLAR_REHAB: Routine = {
       sets: 4,
       reps: 8,
       frequency: '3x Weekly',
-      tempo: '3s eccentric'
+      tempo: '3s eccentric',
+      timing: {
+        type: 'flexible',
+        anchorHint: '3× weekly · any training window',
+        estimatedMinutes: 12
+      }
     },
     {
       id: 'pat-3',
@@ -312,7 +338,12 @@ export const FALLBACK_PATELLAR_REHAB: Routine = {
       reps: 1,
       frequency: 'Daily',
       durationSeconds: 45,
-      inferred: true
+      inferred: true,
+      timing: {
+        type: 'flexible',
+        anchorHint: 'Daily · 5 min anytime',
+        estimatedMinutes: 5
+      }
     }
   ],
   progressionRules: [

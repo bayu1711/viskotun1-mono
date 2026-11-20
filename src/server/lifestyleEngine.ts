@@ -7,7 +7,13 @@ import type {
   UserProfile
 } from '../types/auth';
 import type { Routine } from '../types/routine';
+import type { RoutineSchedulePreference } from '../types/schedule';
 import { resolveCulturalRhythms } from '../utils/profile';
+import {
+  evaluateRoutineScheduleCompatibility,
+  formatAvailabilitySummary,
+  resolveStepTiming
+} from '../utils/schedule';
 import { executeWithGeminiFailover, getGeminiApiKeys } from './geminiKeys';
 import { getEffectiveGuardrails } from './guardrailLedger';
 import {
@@ -128,6 +134,7 @@ export function buildDeterministicAdaptation(params: {
   userProfile?: UserProfile;
   lifestyleProfile?: Partial<UserLifestyleProfile>;
   routine?: Routine | null;
+  routineSchedule?: RoutineSchedulePreference;
 }): Partial<LifestyleAdaptationSpec> {
   const lp = params.lifestyleProfile;
   const up = params.userProfile;
@@ -135,22 +142,36 @@ export function buildDeterministicAdaptation(params: {
   const regionCountry = lp?.region?.countryName?.trim() || lp?.region?.countryCode || 'Global';
   const regionLabel = regionCity ? `${regionCity}, ${regionCountry}` : regionCountry;
 
+  const scheduleCompatibility = params.routine
+    ? evaluateRoutineScheduleCompatibility(params.routine, up, params.routineSchedule)
+    : undefined;
+
+  const availabilityLabel = formatAvailabilitySummary(up, params.routineSchedule);
   const notes: string[] = [];
   const rhythms = resolveCulturalRhythms(lp);
   const hasRamadan = rhythms.includes('ramadan_fasting');
   const hasOtherFasting =
     rhythms.includes('intermittent_fasting') || rhythms.includes('periodic_religious_fasting');
-  let suggestedWindow = up?.preferredReminderTime ? `Scheduled around ${up.preferredReminderTime}` : 'Standard waking hours';
+
+  let suggestedWindow = availabilityLabel || 'Standard waking hours';
   let recommendedDoseMode: 'standard' | 'micro' | 'rest' = 'standard';
 
-  if (hasRamadan) {
-    suggestedWindow = `Post-Iftar (${up?.preferredReminderTime || '20:30'}) & Pre-Suhoor`;
+  if (scheduleCompatibility?.status === 'conflict') {
+    suggestedWindow = 'Schedule review needed';
+    notes.push(scheduleCompatibility.explanation);
+  } else if (scheduleCompatibility?.status === 'tight') {
+    recommendedDoseMode = 'micro';
+    notes.push(scheduleCompatibility.explanation);
+  } else if (params.routineSchedule?.mode === 'anytime') {
+    suggestedWindow = 'Anytime (this routine)';
+  } else if (hasRamadan) {
+    suggestedWindow = `Post-Iftar (${availabilityLabel || '20:30–22:00'}) & Pre-Suhoor`;
     notes.push('Exertion and hydration steps paced into non-fasting hours');
   } else if (rhythms.includes('early_dawn_riser')) {
-    suggestedWindow = `Early dawn window (${up?.preferredReminderTime || '06:00'})`;
+    suggestedWindow = `Early dawn window (${availabilityLabel || '05:30–07:00'})`;
     notes.push('Core movement anchored in calm early-morning hours');
   } else if (rhythms.includes('late_family_dinner')) {
-    suggestedWindow = `Post-dinner recovery (${up?.preferredReminderTime || '21:30'}) or pre-dinner`;
+    suggestedWindow = `Post-dinner recovery (${availabilityLabel || '21:30–22:30'}) or pre-dinner`;
     notes.push('Evening digestion gap and sleep wind-down protected');
   } else if (hasOtherFasting) {
     notes.push('Hydration and exertion paced around your fasting & refeed window');
@@ -167,7 +188,7 @@ export function buildDeterministicAdaptation(params: {
   }
 
   if (lp?.workPattern === 'shift_work') {
-    if (!hasRamadan) suggestedWindow = 'Post-shift waking window';
+    if (!hasRamadan && scheduleCompatibility?.status !== 'conflict') suggestedWindow = 'Post-shift waking window';
     notes.push('Intervals aligned to shift rotation to protect sleep debt');
     recommendedDoseMode = 'micro';
   } else if (lp?.workPattern === 'desk_sedentary') {
@@ -187,9 +208,22 @@ export function buildDeterministicAdaptation(params: {
     notes.push(`Protective pacing active for ${lp.physicalCautions.slice(0, 2).join(' & ').toLowerCase()}`);
   }
 
+  const assignmentByStep = new Map(
+    (scheduleCompatibility?.stepAssignments ?? []).map((a) => [a.stepId, a])
+  );
+
   const stepTips: Record<string, string> = {};
   for (const step of params.routine?.steps ?? []) {
-    if (hasRamadan) {
+    const timing = resolveStepTiming(step);
+    const assignment = assignmentByStep.get(step.id);
+
+    if (timing.type === 'on_demand') {
+      stepTips[step.id] = timing.anchorHint || 'Use anytime a craving or trigger strikes';
+    } else if (timing.type === 'continuous') {
+      stepTips[step.id] = assignment?.assignedLabel || 'All-day boundary · confirm at day end';
+    } else if (assignment?.status === 'conflict') {
+      stepTips[step.id] = assignment.assignedLabel;
+    } else if (hasRamadan) {
       stepTips[step.id] = 'Best completed after Iftar hydration';
     } else if (rhythms.includes('late_family_dinner')) {
       stepTips[step.id] = 'Time 45 min after dinner or pre-meal';
@@ -205,6 +239,8 @@ export function buildDeterministicAdaptation(params: {
       stepTips[step.id] = 'Flexible timing within your waking shift window';
     } else if (lp?.physicalCautions && lp.physicalCautions.length > 0) {
       stepTips[step.id] = `Caution: ease into range (${lp.physicalCautions[0]})`;
+    } else if (assignment?.assignedLabel) {
+      stepTips[step.id] = assignment.assignedLabel;
     }
   }
 
@@ -224,6 +260,7 @@ export function buildDeterministicAdaptation(params: {
     recommendedDoseMode,
     suggestedWindow,
     stepTips,
+    ...(scheduleCompatibility ? { scheduleCompatibility } : {}),
     source: 'deterministic-fallback',
     regionLabel
   };
@@ -237,6 +274,7 @@ export async function generateLifestyleAdaptation(params: {
   userProfile?: UserProfile;
   lifestyleProfile?: Partial<UserLifestyleProfile>;
   routine?: Routine | null;
+  routineSchedule?: RoutineSchedulePreference;
 }): Promise<LifestyleAdaptationSpec> {
   const activePolicy = await getEffectiveGuardrails();
   const deterministic = buildDeterministicAdaptation(params);
@@ -255,14 +293,17 @@ export async function generateLifestyleAdaptation(params: {
     const stepSummary = params.routine.steps.map((s) => ({
       id: s.id,
       action: s.action,
-      frequency: s.frequency
+      frequency: s.frequency,
+      timing: resolveStepTiming(s)
     }));
 
     const prompt = `You are TrialN1's Guardrail-Protected Adaptive Lifestyle Engine.
-Adapt the presentation, timing window, and step execution hints for this routine based on BOTH the participant's chosen cultural/household rhythms (e.g. fasting, meal timing, dawn schedule, weekly rest) AND their physical location/climate/work schedule — without ever stereotyping by country.
+Adapt the presentation, timing window, and step execution hints for this routine based on BOTH the participant's chosen cultural/household rhythms (e.g. fasting, meal timing, dawn schedule, weekly rest) AND their physical location/climate/work schedule AND their available time windows — without ever stereotyping by country.
 
 Participant UserProfile: ${JSON.stringify(params.userProfile || {})}
 Participant UserLifestyleProfile: ${JSON.stringify(params.lifestyleProfile || {})}
+Per-Routine Schedule Preference: ${JSON.stringify(params.routineSchedule || { mode: 'profile_windows' })}
+Schedule Compatibility Check: ${JSON.stringify(deterministic.scheduleCompatibility || {})}
 Active Routine: ${params.routine.shortTitle || params.routine.title}
 Routine Steps: ${JSON.stringify(stepSummary)}
 Clinical Policy Limits: Pause escalation and reduce load ${activePolicy.loadReductionPercent}% if symptom score >= ${activePolicy.painEscalationThreshold}/10.
@@ -272,7 +313,7 @@ Output ONLY raw JSON matching:
   "bannerTitle": "Concise 4-7 word adaptive headline referencing city/region or key factor",
   "bannerGuidance": "1-2 sentences tailoring scheduling, environment (AC/indoor/sunlight), and recovery to their chosen cultural & daily life",
   "recommendedDoseMode": "standard" | "micro" | "rest",
-  "suggestedWindow": "Best daily execution window matching their chosen rhythms (e.g. 'Post-Iftar 20:30', '06:00 Dawn', 'Post-dinner 21:30', or 'Evening cool-down')",
+  "suggestedWindow": "Best daily execution window matching their chosen rhythms & open windows",
   "stepTips": {
     "<stepId>": "Short 4-8 word practical lifestyle tip for that step"
   }
@@ -281,8 +322,9 @@ Output ONLY raw JSON matching:
 STRICT SAFETY GUARDRAILS:
 1. NEVER inflate sets, reps, duration, or medication dosage beyond the paper's standard dose.
 2. You may only shift timing, suggest safer environmental conditions, or scale DOWN to 'micro' / 'rest'.
-3. NEVER assume a participant's religion/diet from their country unless selected in culturalRhythms/activeTags; adapt strictly around physiological timing, hydration, sleep, and heat/cold safety.
-4. NEVER give medical diagnoses or advise ignoring sharp pain or stopping prescribed medications.`;
+3. NEVER force on_demand / trigger-based steps (e.g. smoking craving tools) into a single fixed clock time — keep them anytime on trigger.
+4. NEVER assume a participant's religion/diet from their country unless selected in culturalRhythms/activeTags; adapt strictly around physiological timing, hydration, sleep, and heat/cold safety.
+5. NEVER give medical diagnoses or advise ignoring sharp pain or stopping prescribed medications.`;
 
     const rawText = await executeWithGeminiFailover(async (apiKey) => {
       const genAI = new GoogleGenerativeAI(apiKey);
@@ -293,7 +335,11 @@ STRICT SAFETY GUARDRAILS:
 
     const parsed = JSON.parse(stripJsonCodeFences(rawText));
     return validateAdaptationWithGuardrails(
-      { ...parsed, source: 'gemini-global-ai' },
+      {
+        ...parsed,
+        scheduleCompatibility: deterministic.scheduleCompatibility,
+        source: 'gemini-global-ai'
+      },
       params.routine,
       params.lifestyleProfile,
       activePolicy

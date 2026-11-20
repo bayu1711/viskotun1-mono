@@ -1,7 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { COPY } from '../data/copy';
-import type { Routine } from '../types/routine';
+import type { Routine, RoutineStep } from '../types/routine';
 import { applyGuardrailThreshold } from '../utils/routineMetrics';
+import { resolveStepTiming } from '../utils/schedule';
 import { generateFallbackRoutine } from './fallbackRoutines';
 import { classifyPaperSource, containsTerm } from './gatekeeper';
 import { getEffectiveGuardrails } from './guardrailLedger';
@@ -55,6 +56,14 @@ Your role is to transform dense peer-reviewed research papers into executable, a
    - Validated categorical criteria (sleepiness scale, stool scale) -> type: "multichoice", with options
    - Symptoms / perceived discomfort -> type: "scale", min: 0, max: 10, with escalationThreshold
    - If the paper requires a specialized measurement widget not covered by ["scale", "numeric", "photo", "timer", "multichoice", "boolean"] (e.g. breath-pacer, body-pain-map, goniometer, composite-index), include a "proposedWidget" object on the field with { "requestedType": string, "title": string, "description": string, "unit": string, "min": number, "max": number, "step": number } so it can be validated with human oversight.
+5. CLINICAL TIMING ARCHETYPE (step.timing):
+   Classify EVERY extracted step with a "timing" object so TrialN1 can reconcile the paper's timing requirements against each participant's real-world available time windows:
+   - "flexible": Session can be done in any open window (e.g. daily cardio, resistance training, cognitive drills, stretches).
+   - "spaced": Must be split across 2+ separated sessions (e.g. 2x/day eccentric rehab, morning & night topical serum/supplement). Include "minSpacingHours" (e.g. 8).
+   - "anchored": Biologically or cue-anchored to a specific part of the day (e.g. morning sunlight, pre-bed warm bath, post-dinner extinction cue, upon-waking patch). Include "anchorSlot": "wake" | "morning" | "midday" | "meal" | "evening" | "bedtime".
+   - "on_demand": Trigger-based / PRN behavioral or rescue step (e.g. smoking cessation craving urge-surfing, rescue breathwork/walk when an urge hits). NEVER force these into a fixed time slot.
+   - "continuous": All-day boundary or adherence rule confirmed once per day (e.g. daily cigarette/bowl cap, abstinence rule, throughout-day hydration target).
+   Always include "anchorHint" (short clinical cue) and "estimatedMinutes" (realistic session duration).
 
 ### OUTPUT JSON FORMAT:
 Return a JSON object conforming strictly to:
@@ -99,7 +108,14 @@ Return a JSON object conforming strictly to:
         "setLabel": string, // unit label: "dose", "serving", "application", "session", or "sets"
         "perSetLabel": string, // per-round description: e.g. "× 5g with meal", "× 1 mL topical", "× 15 reps"
         "statLabel": string, // primary measure label: e.g. "dose:", "volume:", "duration:", "reps:"
-        "statValue": string // primary measure value: e.g. "5g", "1 mL", "20 min", "15"
+        "statValue": string, // primary measure value: e.g. "5g", "1 mL", "20 min", "15"
+        "timing": {
+          "type": "flexible" | "spaced" | "anchored" | "on_demand" | "continuous",
+          "anchorHint": string, // e.g. "When a craving hits", "90 min before bed", "Morning & evening >=8h apart"
+          "anchorSlot": "wake" | "morning" | "midday" | "meal" | "evening" | "bedtime", // required when type is "anchored"
+          "minSpacingHours": number, // required when type is "spaced" (e.g. 8)
+          "estimatedMinutes": number // estimated duration in minutes
+        }
       }
     ],
     "progressionRules": [
@@ -356,8 +372,16 @@ export async function extractPaperRoutine(input: ExtractInput): Promise<ExtractR
 
         const rawRoutine = parsed.routine;
         if (rawRoutine) {
+          const normalizedSteps: RoutineStep[] = Array.isArray(rawRoutine.steps)
+            ? rawRoutine.steps.map((step: RoutineStep) => ({
+                ...step,
+                timing: resolveStepTiming(step)
+              }))
+            : [];
+
           const routine: Routine = {
             ...rawRoutine,
+            steps: normalizedSteps,
             version: rawRoutine.version || '1.0',
             changelog: rawRoutine.changelog && rawRoutine.changelog.length > 0
               ? rawRoutine.changelog

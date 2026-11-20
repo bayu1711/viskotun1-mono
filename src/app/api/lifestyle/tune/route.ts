@@ -152,7 +152,8 @@ Participant's reply: "${message}"
 Extracted updates: ${JSON.stringify({
             region: profileUpdates.region,
             age: userProfileUpdates.age,
-            preferredReminderTime: userProfileUpdates.preferredReminderTime,
+            availabilityMode: userProfileUpdates.availabilityMode,
+            availableWindows: userProfileUpdates.availableWindows,
             workPattern: profileUpdates.workPattern,
             climateSensitivity: profileUpdates.climateSensitivity,
             culturalRhythms: profileUpdates.culturalRhythms,
@@ -239,8 +240,11 @@ Rules:
 
     const userProfileUpdates: Partial<UserProfile> = {
       ...(conversationalExtra.age !== undefined ? { age: conversationalExtra.age } : {}),
-      ...(conversationalExtra.preferredReminderTime
-        ? { preferredReminderTime: conversationalExtra.preferredReminderTime }
+      ...(conversationalExtra.availabilityMode
+        ? { availabilityMode: conversationalExtra.availabilityMode }
+        : {}),
+      ...(conversationalExtra.availableWindows && conversationalExtra.availableWindows.length > 0
+        ? { availableWindows: conversationalExtra.availableWindows }
         : {})
     };
 

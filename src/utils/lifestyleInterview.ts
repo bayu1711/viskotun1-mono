@@ -7,16 +7,24 @@ import type {
   UserProfile,
   WorkPattern
 } from '../types/auth';
+import type { AvailabilityMode, AvailableTimeWindow } from '../types/schedule';
 import type { LocaleCopy } from '../data/locales/types';
 import { resolveCountryCodeFromInput, resolveCountryName } from './geo';
 import { formatLifestyleTagLabel } from './lifestyleTags';
 import {
   deriveClinicalFocus,
-  getRegionalReminderPresets,
+  getRegionalAvailabilityPresets,
   resolveCulturalRhythms,
   sanitizeAge,
   syncLifestyleActiveTags
 } from './profile';
+import {
+  formatAvailabilitySummary,
+  formatMinutesToTime,
+  formatWindowRange,
+  inferWindowLabel,
+  normalizeAvailableWindows
+} from './schedule';
 
 export type LifestyleInterviewStage = 'region' | 'age_time' | 'rhythm' | 'cautions' | 'complete';
 
@@ -105,7 +113,8 @@ const QUICK_REGION_PRESETS = [
 export interface InterviewParseResult {
   region?: RegionContext;
   age?: number;
-  preferredReminderTime?: string;
+  availabilityMode?: AvailabilityMode;
+  availableWindows?: AvailableTimeWindow[];
   workPattern?: WorkPattern;
   climateSensitivity?: NonNullable<UserLifestyleProfile['climateSensitivity']>;
   culturalRhythms?: CulturalRhythmId[];
@@ -129,10 +138,6 @@ export function formatRegionLabel(region?: Partial<RegionContext>): string {
   return city ? `${city}, ${countryName}` : countryName;
 }
 
-function padTwo(n: number): string {
-  return String(n).padStart(2, '0');
-}
-
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -147,73 +152,157 @@ function matchesCityToken(lowerText: string, token: string): boolean {
   return lowerText.includes(norm);
 }
 
-/** Extracts an HH:mm 24-hour reminder time and returns remaining text with matched time spans stripped. */
-function extractTimeFromMessage(message: string): { time?: string; remainingText: string } {
-  let remaining = message;
-
-  // 1. Explicit 12-hour format with am/pm (e.g. "7am", "7:30 am", "8:15pm")
-  const twelveHourRegex = /\b(1[0-2]|0?[1-9])(?::([0-5]\d))?\s*(am|pm|a\.m\.|p\.m\.)\b/i;
-  const twelveMatch = twelveHourRegex.exec(message);
-  if (twelveMatch) {
-    let hour = Number.parseInt(twelveMatch[1], 10);
-    const minute = twelveMatch[2] ? Number.parseInt(twelveMatch[2], 10) : 0;
-    const meridiem = twelveMatch[3].toLowerCase().startsWith('p') ? 'pm' : 'am';
-    if (meridiem === 'pm' && hour < 12) hour += 12;
-    if (meridiem === 'am' && hour === 12) hour = 0;
-    remaining = message.replace(twelveMatch[0], ' ');
-    return { time: `${padTwo(hour)}:${padTwo(minute)}`, remainingText: remaining };
-  }
-
-  // 2. Explicit 24-hour HH:mm (e.g. "07:00", "20:30", "9:00")
-  const twentyFourRegex = /\b([01]?\d|2[0-3]):([0-5]\d)\b/;
-  const twentyFourMatch = twentyFourRegex.exec(message);
-  if (twentyFourMatch) {
-    const hour = Number.parseInt(twentyFourMatch[1], 10);
-    const minute = Number.parseInt(twentyFourMatch[2], 10);
-    remaining = message.replace(twentyFourMatch[0], ' ');
-    return { time: `${padTwo(hour)}:${padTwo(minute)}`, remainingText: remaining };
-  }
-
-  // 3. Arabic am/pm phrasing (e.g. "7 صباحاً", "8 مساءً")
-  const arabicHourRegex = /\b(1[0-2]|0?[1-9])\s*(صباحاً|صباحا|مساءً|مساءا)/;
-  const arabicMatch = arabicHourRegex.exec(message);
-  if (arabicMatch) {
-    let hour = Number.parseInt(arabicMatch[1], 10);
-    const isPm = arabicMatch[2].startsWith('مساء');
+function to24HourMinutes(hourRaw: number, minuteRaw: number, meridiem?: string): number {
+  let hour = hourRaw;
+  if (meridiem) {
+    const isPm = meridiem.toLowerCase().startsWith('p') || meridiem.startsWith('مساء');
     if (isPm && hour < 12) hour += 12;
     if (!isPm && hour === 12) hour = 0;
-    remaining = message.replace(arabicMatch[0], ' ');
-    return { time: `${padTwo(hour)}:00`, remainingText: remaining };
+  }
+  return Math.max(0, Math.min(23 * 60 + 59, hour * 60 + minuteRaw));
+}
+
+/**
+ * Extracts available daily time windows (ranges, multiple windows, single timestamps, named periods,
+ * or "anytime / flexible") and returns remaining text with matched time spans stripped so age parsing stays accurate.
+ */
+function extractAvailabilityFromMessage(message: string): {
+  availabilityMode?: AvailabilityMode;
+  availableWindows?: AvailableTimeWindow[];
+  remainingText: string;
+} {
+  let remaining = message;
+  const collected: AvailableTimeWindow[] = [];
+
+  // 1. Explicit 12h or mixed ranges (e.g. "7:30-9am", "7am to 8:30am", "7-9pm", "7:30am - 9:00am")
+  const twelveRangeRegex =
+    /\b(1[0-2]|0?[1-9])(?::([0-5]\d))?\s*(am|pm|a\.m\.|p\.m\.)?\s*(?:-|–|—|to)\s*(1[0-2]|0?[1-9])(?::([0-5]\d))?\s*(am|pm|a\.m\.|p\.m\.)\b/gi;
+  remaining = remaining.replace(
+    twelveRangeRegex,
+    (match, h1, m1, mer1, h2, m2, mer2) => {
+      const startMer = mer1 || mer2;
+      const startMins = to24HourMinutes(Number.parseInt(h1, 10), m1 ? Number.parseInt(m1, 10) : 0, startMer);
+      const endMins = to24HourMinutes(Number.parseInt(h2, 10), m2 ? Number.parseInt(m2, 10) : 0, mer2);
+      collected.push({
+        id: `win-${startMins}`,
+        label: inferWindowLabel(startMins),
+        start: formatMinutesToTime(startMins),
+        end: formatMinutesToTime(endMins)
+      });
+      return ' ';
+    }
+  );
+
+  // 2. Explicit 24-hour HH:mm ranges (e.g. "07:30–09:00", "19:00-21:00", "20:30 to 22:00")
+  const twentyFourRangeRegex =
+    /\b([01]?\d|2[0-3]):([0-5]\d)\s*(?:-|–|—|to)\s*([01]?\d|2[0-3]):([0-5]\d)\b/gi;
+  remaining = remaining.replace(twentyFourRangeRegex, (_match, h1, m1, h2, m2) => {
+    const startMins = Number.parseInt(h1, 10) * 60 + Number.parseInt(m1, 10);
+    const endMins = Number.parseInt(h2, 10) * 60 + Number.parseInt(m2, 10);
+    collected.push({
+      id: `win-${startMins}`,
+      label: inferWindowLabel(startMins),
+      start: formatMinutesToTime(startMins),
+      end: formatMinutesToTime(endMins)
+    });
+    return ' ';
+  });
+
+  // 3. Remaining standalone 12-hour timestamps (e.g. "7:30am", "8pm") -> expand into 60-min window
+  const twelveHourRegex = /\b(1[0-2]|0?[1-9])(?::([0-5]\d))?\s*(am|pm|a\.m\.|p\.m\.)\b/gi;
+  remaining = remaining.replace(twelveHourRegex, (_match, h1, m1, mer) => {
+    const startMins = to24HourMinutes(Number.parseInt(h1, 10), m1 ? Number.parseInt(m1, 10) : 0, mer);
+    const endMins = Math.min(23 * 60 + 45, startMins + 60);
+    collected.push({
+      id: `win-${startMins}`,
+      label: inferWindowLabel(startMins),
+      start: formatMinutesToTime(startMins),
+      end: formatMinutesToTime(endMins)
+    });
+    return ' ';
+  });
+
+  // 4. Remaining standalone 24-hour HH:mm timestamps -> expand into 60-min window
+  const twentyFourRegex = /\b([01]?\d|2[0-3]):([0-5]\d)\b/g;
+  remaining = remaining.replace(twentyFourRegex, (_match, h1, m1) => {
+    const startMins = Number.parseInt(h1, 10) * 60 + Number.parseInt(m1, 10);
+    const endMins = Math.min(23 * 60 + 45, startMins + 60);
+    collected.push({
+      id: `win-${startMins}`,
+      label: inferWindowLabel(startMins),
+      start: formatMinutesToTime(startMins),
+      end: formatMinutesToTime(endMins)
+    });
+    return ' ';
+  });
+
+  // 5. Arabic am/pm phrasing (e.g. "7 صباحاً", "8 مساءً")
+  const arabicHourRegex = /\b(1[0-2]|0?[1-9])\s*(صباحاً|صباحا|مساءً|مساءا)/g;
+  remaining = remaining.replace(arabicHourRegex, (_match, h1, mer) => {
+    const startMins = to24HourMinutes(Number.parseInt(h1, 10), 0, mer);
+    const endMins = Math.min(23 * 60 + 45, startMins + 60);
+    collected.push({
+      id: `win-${startMins}`,
+      label: inferWindowLabel(startMins),
+      start: formatMinutesToTime(startMins),
+      end: formatMinutesToTime(endMins)
+    });
+    return ' ';
+  });
+
+  const normalizedExplicit = normalizeAvailableWindows(collected);
+  if (normalizedExplicit.length > 0) {
+    return {
+      availabilityMode: 'windows',
+      availableWindows: normalizedExplicit,
+      remainingText: remaining
+    };
   }
 
-  // 4. Natural named windows
+  // 6. Explicit anytime / flexible intent
   const lower = message.toLowerCase();
-  if (lower.includes('post-iftar') || lower.includes('after iftar') || lower.includes('بعد الإفطار')) {
-    return { time: '20:30', remainingText: remaining };
+  if (
+    /(?:anytime|any\s*time|flexible|no\s*fixed|whenever|في أي وقت|مرن)/i.test(lower)
+  ) {
+    return {
+      availabilityMode: 'anytime',
+      remainingText: remaining
+    };
   }
-  if (lower.includes('early morning') || lower.includes('قبل العمل')) {
-    return { time: '06:30', remainingText: remaining };
-  }
+
+  // 7. Named daily periods (can capture multiple in one message, e.g. "mornings and evenings")
+  const namedWindows: AvailableTimeWindow[] = [];
   if (lower.includes('dawn') || lower.includes('fajr') || lower.includes('الفجر')) {
-    return { time: '05:30', remainingText: remaining };
+    namedWindows.push({ id: 'dawn', label: 'Dawn', start: '05:30', end: '07:00' });
+  } else if (lower.includes('early morning') || lower.includes('قبل العمل')) {
+    namedWindows.push({ id: 'early-morning', label: 'Early Morning', start: '06:00', end: '07:30' });
+  } else if (lower.includes('morning') || lower.includes('صباح')) {
+    namedWindows.push({ id: 'morning', label: 'Morning', start: '07:30', end: '09:00' });
   }
-  if (lower.includes('mid-morning') || lower.includes('mid morning')) {
-    return { time: '09:30', remainingText: remaining };
-  }
-  if (lower.includes('morning') || lower.includes('صباح')) {
-    return { time: '08:00', remainingText: remaining };
-  }
+
   if (lower.includes('midday') || lower.includes('noon') || lower.includes('lunch') || lower.includes('ظهر')) {
-    return { time: '12:30', remainingText: remaining };
+    namedWindows.push({ id: 'midday', label: 'Midday', start: '12:30', end: '13:30' });
   }
   if (lower.includes('afternoon') || lower.includes('عصر')) {
-    return { time: '15:00', remainingText: remaining };
+    namedWindows.push({ id: 'afternoon', label: 'Afternoon', start: '15:00', end: '16:30' });
   }
-  if (lower.includes('evening') || lower.includes('مساء')) {
-    return { time: '18:30', remainingText: remaining };
+  if (lower.includes('post-iftar') || lower.includes('after iftar') || lower.includes('بعد الإفطار')) {
+    namedWindows.push({ id: 'post-iftar', label: 'Post-Iftar', start: '20:30', end: '22:00' });
+  } else if (lower.includes('post-dinner') || lower.includes('after dinner') || lower.includes('بعد العشاء')) {
+    namedWindows.push({ id: 'post-dinner', label: 'Post-Dinner', start: '21:30', end: '22:30' });
+  } else if (lower.includes('evening') || lower.includes('مساء')) {
+    namedWindows.push({ id: 'evening', label: 'Evening', start: '19:00', end: '21:00' });
+  } else if (lower.includes('late night') || lower.includes('bedtime') || lower.includes('قبل النوم')) {
+    namedWindows.push({ id: 'night', label: 'Night', start: '21:00', end: '22:30' });
   }
-  if (lower.includes('late night') || lower.includes('bedtime') || lower.includes('قبل النوم')) {
-    return { time: '21:30', remainingText: remaining };
+
+  const normalizedNamed = normalizeAvailableWindows(namedWindows);
+  if (normalizedNamed.length > 0) {
+    return {
+      availabilityMode: 'windows',
+      availableWindows: normalizedNamed,
+      remainingText: remaining
+    };
   }
 
   return { remainingText: remaining };
@@ -409,27 +498,32 @@ export function parseConversationalLifestyleAnswer(
     result.acknowledgments.push(formatRegionLabel(regionCheck.region));
   }
 
-  // 2. Time & Age
-  const { time, remainingText } = extractTimeFromMessage(trimmed);
+  // 2. Available Time Windows & Age
+  const { availabilityMode, availableWindows, remainingText } = extractAvailabilityFromMessage(trimmed);
   const age = extractAgeFromMessage(remainingText, stage);
   const isSkipAgeTime =
     stage === 'age_time' &&
-    /(?:skip|prefer not|no preference|either|anytime|تخطي|لا يهم)/i.test(trimmed);
+    /(?:skip|prefer not|no preference|either|anytime|flexible|تخطي|لا يهم|في أي وقت)/i.test(trimmed);
 
   if (age !== undefined) {
     result.age = age;
     result.answeredAgeTime = true;
     result.acknowledgments.push(`age ${age}`);
   }
-  if (time) {
-    result.preferredReminderTime = time;
+  if (availableWindows && availableWindows.length > 0) {
+    result.availabilityMode = 'windows';
+    result.availableWindows = availableWindows;
     result.answeredAgeTime = true;
-    result.acknowledgments.push(`${time} daily window`);
+    result.acknowledgments.push(availableWindows.map(formatWindowRange).join(' & '));
+  } else if (availabilityMode === 'anytime') {
+    result.availabilityMode = 'anytime';
+    result.answeredAgeTime = true;
+    result.acknowledgments.push('flexible anytime schedule');
   }
   if (isSkipAgeTime) {
     result.answeredAgeTime = true;
-    if (!result.preferredReminderTime && !context.currentUserProfile?.preferredReminderTime) {
-      result.preferredReminderTime = '09:00';
+    if (!result.availabilityMode && !context.currentUserProfile?.availabilityMode) {
+      result.availabilityMode = 'anytime';
     }
   }
 
@@ -792,7 +886,10 @@ export function buildProfileUpdatesFromParse(
 
   const userProfileUpdates: Partial<UserProfile> = {
     ...(parsed.age !== undefined ? { age: parsed.age } : {}),
-    ...(parsed.preferredReminderTime ? { preferredReminderTime: parsed.preferredReminderTime } : {}),
+    ...(parsed.availabilityMode ? { availabilityMode: parsed.availabilityMode } : {}),
+    ...(parsed.availableWindows && parsed.availableWindows.length > 0
+      ? { availableWindows: parsed.availableWindows }
+      : {}),
     ...(nextStage === 'complete' ? { clinicalGoals: suggestedFocus } : {})
   };
 
@@ -874,8 +971,8 @@ export function formatProfileSummary(
   copy?: LocaleCopy
 ): string {
   const parts: string[] = [];
-  if (userProfile?.preferredReminderTime) {
-    parts.push(userProfile.preferredReminderTime);
+  if (userProfile?.availabilityMode || (userProfile?.availableWindows && userProfile.availableWindows.length > 0)) {
+    parts.push(formatAvailabilitySummary(userProfile));
   }
   if (lifestyleProfile?.workPattern && lifestyleProfile.workPattern !== 'standard' && copy) {
     parts.push(copy.profile.workPatterns[lifestyleProfile.workPattern]);
@@ -918,16 +1015,17 @@ export function getQuickRepliesForStage(options: {
       return [confirmChip, ...alternates].slice(0, 5);
     }
     case 'age_time': {
-      const presets = getRegionalReminderPresets({
+      const presets = getRegionalAvailabilityPresets({
         countryCode,
         isRamadanFastingObserver: culturalRhythms.includes('ramadan_fasting'),
         culturalRhythms,
-        basePresets: pCopy.reminderPresets,
-        fastingPreset: pCopy.fastingReminderPreset,
-        dawnPreset: pCopy.dawnReminderPreset,
-        lateDinnerPreset: pCopy.lateDinnerReminderPreset
+        basePresets: pCopy.availabilityPresets,
+        fastingPreset: pCopy.fastingAvailabilityPreset,
+        dawnPreset: pCopy.dawnAvailabilityPreset,
+        lateDinnerPreset: pCopy.lateDinnerAvailabilityPreset
       });
-      return [...presets.map((p) => p.label), t.quickSkipAge].slice(0, 5);
+      const presetLabels = presets.map((p) => `${p.label} ${p.start}–${p.end}`);
+      return [...presetLabels, t.quickSkipAge].slice(0, 5);
     }
     case 'rhythm': {
       const regionalLabels = suggestions

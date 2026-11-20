@@ -156,6 +156,9 @@ export function validateAdaptationWithGuardrails(
     recommendedDoseMode,
     suggestedWindow,
     stepTips,
+    ...(rawSpec.scheduleCompatibility
+      ? { scheduleCompatibility: rawSpec.scheduleCompatibility }
+      : {}),
     safetyGuardrailNote,
     guardrailVerified: true,
     source: rawSpec.source === 'gemini-global-ai' ? 'gemini-global-ai' : 'deterministic-fallback',
