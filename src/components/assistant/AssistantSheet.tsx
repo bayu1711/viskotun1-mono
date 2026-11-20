@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useId, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -11,6 +12,7 @@ import { useRoutine } from '../../contexts/RoutineContext';
 import type { RoutineSchedulePreference } from '../../types/schedule';
 import { MOTION } from '../../data/config';
 import { COPY } from '../../data/copy';
+import { ROUTES } from '../../data/navigation';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useScrollToLatest } from '../../hooks/useScrollToLatest';
 import { isPdfFile } from '../../utils/files';
@@ -33,8 +35,10 @@ import { TypingIndicator } from './TypingIndicator';
 import { UploadDropzone } from './UploadDropzone';
 
 export function AssistantSheet() {
+  const router = useRouter();
   const { isOpen, mode, setMode, closeAssistant } = useAssistant();
   const { locale, copy } = useLocale();
+  const [selectedChips, setSelectedChips] = useState<string[]>([]);
   const {
     messages,
     routine,
@@ -112,17 +116,78 @@ export function AssistantSheet() {
     setMode('ask');
   };
 
-  const handleLifestyleReply = (input: string) => {
-    if (input === copy.lifestyleTuning.onboarding.quickDone) {
-      closeAssistant();
-      return;
-    }
-    if (input === copy.lifestyleTuning.onboarding.quickUpdateProfile) {
-      restartLifestyleInterview(copy);
-      return;
-    }
-    tuneLifestyle(input, { locale, localeCopy: copy });
-  };
+  useEffect(() => {
+    setSelectedChips([]);
+  }, [lifestyleInterviewStage, isOpen]);
+
+  const isMultiSelectStage =
+    isLifestyle && (lifestyleInterviewStage === 'rhythm' || lifestyleInterviewStage === 'cautions');
+
+  const isNoneOption = useCallback(
+    (item: string) =>
+      item === copy.lifestyleTuning.onboarding.quickNoCautions ||
+      item === copy.lifestyleTuning.onboarding.quickStandardRhythm,
+    [copy]
+  );
+
+  const isPrimaryOption = useCallback(
+    (item: string) => item === copy.lifestyleTuning.onboarding.quickExploreRoutines,
+    [copy]
+  );
+
+  const handleToggleChip = useCallback((item: string) => {
+    setSelectedChips((prev) =>
+      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
+    );
+  }, []);
+
+  const handleLifestyleReply = useCallback(
+    (input: string) => {
+      const trimmed = input.trim();
+      if (
+        trimmed === copy.lifestyleTuning.onboarding.quickExploreRoutines ||
+        /^(?:explore(?:\s+routines?)?|browse(?:\s+routines?)?|find(?:\s+a)?\s+routine|show(?:\s+me)?\s+routines?|استكشاف الروتينات)/i.test(trimmed)
+      ) {
+        setSelectedChips([]);
+        closeAssistant();
+        router.push(`${ROUTES.community}?tab=explore`);
+        return;
+      }
+      if (
+        trimmed === copy.lifestyleTuning.onboarding.quickDone ||
+        /^(?:done|back to routine|view routine|go to routine|العودة للخطة)/i.test(trimmed)
+      ) {
+        setSelectedChips([]);
+        closeAssistant();
+        if (routine) {
+          router.push(ROUTES.routine);
+        } else {
+          router.push(`${ROUTES.community}?tab=explore`);
+        }
+        return;
+      }
+      if (trimmed === copy.lifestyleTuning.onboarding.quickUpdateProfile) {
+        setSelectedChips([]);
+        restartLifestyleInterview(copy);
+        return;
+      }
+
+      let finalMessage = input;
+      if (selectedChips.length > 0 && !isNoneOption(trimmed) && !selectedChips.includes(trimmed)) {
+        finalMessage = `${selectedChips.join(', ')}, ${trimmed}`;
+      }
+      setSelectedChips([]);
+      tuneLifestyle(finalMessage, { locale, localeCopy: copy });
+    },
+    [copy, closeAssistant, router, routine, selectedChips, isNoneOption, tuneLifestyle, locale, restartLifestyleInterview]
+  );
+
+  const handleConfirmChips = useCallback(() => {
+    if (selectedChips.length === 0) return;
+    const combined = selectedChips.join(', ');
+    setSelectedChips([]);
+    tuneLifestyle(combined, { locale, localeCopy: copy });
+  }, [selectedChips, tuneLifestyle, locale, copy]);
 
   const hasAskConversation = messages.length > 0 || assistantTyping;
   const activeMessages = isLifestyle ? lifestyleMessages : isAsk ? messages : stagingMessages;
@@ -137,9 +202,10 @@ export function AssistantSheet() {
         stage: lifestyleInterviewStage,
         lifestyleProfile,
         suggestions: lifestyleSuggestions,
-        copy
+        copy,
+        hasActiveRoutine: Boolean(routine)
       }),
-    [lifestyleInterviewStage, lifestyleProfile, lifestyleSuggestions, copy]
+    [lifestyleInterviewStage, lifestyleProfile, lifestyleSuggestions, copy, routine]
   );
 
   const lifestylePlaceholder = getStagePlaceholder(lifestyleInterviewStage, copy);
@@ -330,6 +396,13 @@ export function AssistantSheet() {
                     suggestions={lifestyleQuickReplies}
                     onSelect={handleLifestyleReply}
                     disabled={isLifestyleTyping}
+                    isMultiSelect={isMultiSelectStage}
+                    selected={selectedChips}
+                    onToggle={handleToggleChip}
+                    onConfirm={handleConfirmChips}
+                    confirmLabel={copy.lifestyleTuning.onboarding.multiSelectContinue(selectedChips.length)}
+                    isNoneOption={isNoneOption}
+                    isPrimaryOption={isPrimaryOption}
                   />
                   <AssistantComposer
                     ref={inputRef}

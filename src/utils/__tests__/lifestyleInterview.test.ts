@@ -191,10 +191,69 @@ describe('Conversational Adaptive Lifestyle Interview', () => {
         suggestions: [],
         copy: copyAr
       });
-      expect(chipsEn.length).toBeGreaterThanOrEqual(2);
-      expect(chipsAr.length).toBeGreaterThanOrEqual(2);
+      expect(chipsEn.length).toBeGreaterThanOrEqual(1);
+      expect(chipsAr.length).toBeGreaterThanOrEqual(1);
       expect(getStagePlaceholder(stage, copyEn).length).toBeGreaterThan(10);
       expect(getStagePlaceholder(stage, copyAr).length).toBeGreaterThan(10);
     }
+  });
+
+  it('provides "Explore routines" on completion and does NOT suggest restarting with "Update my full profile"', () => {
+    const copyEn = getLocaleCopy('en');
+    const copyAr = getLocaleCopy('ar');
+
+    const completeChipsWithoutRoutine = getQuickRepliesForStage({
+      stage: 'complete',
+      lifestyleProfile: { region: DEFAULT_REGION, activeTags: [] },
+      suggestions: [],
+      copy: copyEn,
+      hasActiveRoutine: false
+    });
+    expect(completeChipsWithoutRoutine[0]).toBe(copyEn.lifestyleTuning.onboarding.quickExploreRoutines);
+    expect(completeChipsWithoutRoutine).not.toContain(copyEn.lifestyleTuning.onboarding.quickUpdateProfile);
+    expect(completeChipsWithoutRoutine).not.toContain(copyEn.lifestyleTuning.onboarding.quickDone);
+
+    const completeChipsWithRoutine = getQuickRepliesForStage({
+      stage: 'complete',
+      lifestyleProfile: { region: DEFAULT_REGION, activeTags: [] },
+      suggestions: [],
+      copy: copyEn,
+      hasActiveRoutine: true
+    });
+    expect(completeChipsWithRoutine[0]).toBe(copyEn.lifestyleTuning.onboarding.quickExploreRoutines);
+    expect(completeChipsWithRoutine[1]).toBe(copyEn.lifestyleTuning.onboarding.quickDone);
+    expect(completeChipsWithRoutine).not.toContain(copyEn.lifestyleTuning.onboarding.quickUpdateProfile);
+
+    const completeChipsAr = getQuickRepliesForStage({
+      stage: 'complete',
+      lifestyleProfile: { region: DEFAULT_REGION, activeTags: [] },
+      suggestions: [],
+      copy: copyAr,
+      hasActiveRoutine: false
+    });
+    expect(completeChipsAr[0]).toBe(copyAr.lifestyleTuning.onboarding.quickExploreRoutines);
+    expect(completeChipsAr).not.toContain(copyAr.lifestyleTuning.onboarding.quickUpdateProfile);
+  });
+
+  it('parses combined multi-select lifestyle answers into structured profile fields cleanly', () => {
+    const combined = parseConversationalLifestyleAnswer(
+      'Knee stiffness / sensitivity, Lower back sensitivity, Shisha / waterpipe',
+      'cautions',
+      { currentRegion: DEFAULT_REGION }
+    );
+    expect(combined.answeredCautions).toBe(true);
+    expect(combined.smokingStatus).toBe('shisha_waterpipe');
+    expect(combined.physicalCautions).toContain('Knee sensitivity');
+    expect(combined.physicalCautions).toContain('Lower back sensitivity');
+
+    const rhythmCombined = parseConversationalLifestyleAnswer(
+      'Desk-bound Sedentary, Intermittent Fasting (16:8), Summer Heat Adaptation',
+      'rhythm',
+      { currentRegion: DEFAULT_REGION }
+    );
+    expect(rhythmCombined.answeredRhythm).toBe(true);
+    expect(rhythmCombined.workPattern).toBe('desk_sedentary');
+    expect(rhythmCombined.culturalRhythms).toContain('intermittent_fasting');
+    expect(rhythmCombined.climateSensitivity).toBe('summer_heat');
   });
 });

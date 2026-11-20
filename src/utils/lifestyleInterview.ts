@@ -993,8 +993,9 @@ export function getQuickRepliesForStage(options: {
   lifestyleProfile?: Partial<UserLifestyleProfile>;
   suggestions: RegionalLifestyleTag[];
   copy: LocaleCopy;
+  hasActiveRoutine?: boolean;
 }): string[] {
-  const { stage, lifestyleProfile, suggestions, copy } = options;
+  const { stage, lifestyleProfile, suggestions, copy, hasActiveRoutine = true } = options;
   const t = copy.lifestyleTuning.onboarding;
   const pCopy = copy.profile;
   const region = lifestyleProfile?.region;
@@ -1072,7 +1073,10 @@ export function getQuickRepliesForStage(options: {
           return true;
         })
         .slice(0, 3);
-      return [t.quickDone, ...remainingSuggestions, t.quickUpdateProfile];
+      const actionChips = hasActiveRoutine
+        ? [t.quickExploreRoutines, t.quickDone]
+        : [t.quickExploreRoutines];
+      return [...actionChips, ...remainingSuggestions];
     }
   }
 }
