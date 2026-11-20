@@ -135,6 +135,8 @@ export function useRoutineState() {
   const [isBctLedgerOpen, setIsBctLedgerOpen] = useState(false);
   const [isReEntryOpen, setIsReEntryOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isDoseModeModalOpen, setIsDoseModeModalOpen] = useState(false);
+  const [isLifestyleModalOpen, setIsLifestyleModalOpen] = useState(false);
   const [isAdaptingLifestyle, setIsAdaptingLifestyle] = useState(false);
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
   const [runtime, setRuntime] = useState<Record<string, RoutineRuntime>>({});
@@ -652,6 +654,12 @@ export function useRoutineState() {
 
   const openShareModal = useCallback(() => setIsShareModalOpen(true), []);
   const closeShareModal = useCallback(() => setIsShareModalOpen(false), []);
+
+  const openDoseModeModal = useCallback(() => setIsDoseModeModalOpen(true), []);
+  const closeDoseModeModal = useCallback(() => setIsDoseModeModalOpen(false), []);
+
+  const openLifestyleModal = useCallback(() => setIsLifestyleModalOpen(true), []);
+  const closeLifestyleModal = useCallback(() => setIsLifestyleModalOpen(false), []);
 
   const loadSampleRoutine = useCallback(
     (sampleId: string, options?: { forceRestart?: boolean }) => {
@@ -2705,6 +2713,12 @@ export function useRoutineState() {
       isShareModalOpen,
       openShareModal,
       closeShareModal,
+      isDoseModeModalOpen,
+      openDoseModeModal,
+      closeDoseModeModal,
+      isLifestyleModalOpen,
+      openLifestyleModal,
+      closeLifestyleModal,
       loadTrendingRoutine: loadSampleRoutine,
       loadSampleRoutine,
       redoRoutine,
@@ -2811,6 +2825,12 @@ export function useRoutineState() {
       isShareModalOpen,
       openShareModal,
       closeShareModal,
+      isDoseModeModalOpen,
+      openDoseModeModal,
+      closeDoseModeModal,
+      isLifestyleModalOpen,
+      openLifestyleModal,
+      closeLifestyleModal,
       isReEntryOpen,
       openReEntryModal,
       closeReEntryModal,
