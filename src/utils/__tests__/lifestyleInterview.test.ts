@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { getLocaleCopy } from '../../data/locales';
-import type { RegionContext, UserLifestyleProfile } from '../../types/auth';
+import type { RegionContext, RegionalLifestyleTag, UserLifestyleProfile } from '../../types/auth';
 import {
   buildConversationalLifestyleReply,
   buildProfileUpdatesFromParse,
@@ -154,8 +154,8 @@ describe('Conversational Adaptive Lifestyle Interview', () => {
         expect(lifestyle.intakeCompleted).toBe(true);
         expect(suggestedFocus.toLowerCase()).toContain('post-iftar');
         expect(lifestyle.activeTags).toEqual([
-          'Desk-bound Sedentary',
           'ramadan_fasting',
+          'desk_bound_worker',
           'extreme_heat_summer'
         ]);
       }
