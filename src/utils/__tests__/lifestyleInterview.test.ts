@@ -321,4 +321,14 @@ describe('Conversational Adaptive Lifestyle Interview', () => {
     expect(parsed.region?.countryCode).toBe('LK');
     expect(parsed.region?.countryName).toBe('Sri Lanka');
   });
+
+  it('keeps initial profile availability unset so skipping age_time resolves to flexible anytime', () => {
+    const skipped = parseConversationalLifestyleAnswer('Skip', 'age_time', {
+      currentRegion: DEFAULT_REGION,
+      currentUserProfile: {}
+    });
+    expect(skipped.answeredAgeTime).toBe(true);
+    expect(skipped.availabilityMode).toBe('anytime');
+    expect(skipped.availableWindows).toBeUndefined();
+  });
 });

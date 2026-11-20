@@ -112,14 +112,13 @@ export function resolveProfileAvailability(userProfile?: Partial<UserProfile>): 
   mode: AvailabilityMode;
   windows: AvailableTimeWindow[];
 } {
-  const mode: AvailabilityMode = userProfile?.availabilityMode === 'anytime' ? 'anytime' : 'windows';
   const normalized = normalizeAvailableWindows(userProfile?.availableWindows);
-  if (mode === 'anytime') {
+  if (userProfile?.availabilityMode === 'anytime' || normalized.length === 0) {
     return { mode: 'anytime', windows: normalized };
   }
   return {
     mode: 'windows',
-    windows: normalized.length > 0 ? normalized : [...DEFAULT_AVAILABLE_WINDOWS]
+    windows: normalized
   };
 }
 

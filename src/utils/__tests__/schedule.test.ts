@@ -14,6 +14,8 @@ import { completionOf } from '../routineMetrics';
 import {
   buildCalendarBlocksForRoutine,
   evaluateRoutineScheduleCompatibility,
+  formatAvailabilitySummary,
+  resolveProfileAvailability,
   resolveStepTiming
 } from '../schedule';
 
@@ -192,5 +194,16 @@ describe('Schedule Compatibility & Timing Archetypes', () => {
       type: 'anchored',
       anchorSlot: 'bedtime'
     });
+  });
+
+  it('defaults unset or empty availability profiles to Flexible / Anytime rather than hardcoded clock windows', () => {
+    expect(resolveProfileAvailability(undefined)).toEqual({ mode: 'anytime', windows: [] });
+    expect(resolveProfileAvailability({})).toEqual({ mode: 'anytime', windows: [] });
+    expect(resolveProfileAvailability({ availabilityMode: 'windows', availableWindows: [] })).toEqual({
+      mode: 'anytime',
+      windows: []
+    });
+    expect(formatAvailabilitySummary({})).toBe('Flexible / Anytime');
+    expect(formatAvailabilitySummary({}, undefined, 'ar')).toBe('مرن في أي وقت');
   });
 });
