@@ -20,6 +20,8 @@ export interface UserRecord {
   runtime: Record<string, RoutineRuntime>;
   profile?: UserProfile;
   lifestyleProfile?: UserLifestyleProfile;
+  accountStatus?: 'active' | 'deactivated';
+  deactivatedAt?: number;
   updatedAt: number;
 }
 
@@ -140,6 +142,105 @@ export async function saveUserRecord(record: UserRecord): Promise<void> {
       console.warn('[UserStorage] Firestore save failed, stored in memory cache:', err?.message || err);
     }
   }
+}
+
+/**
+ * Clears all tracked routines, runtime telemetry, and saved profile/lifestyle settings
+ * while keeping the account record active.
+ */
+export async function clearUserData(userId: string): Promise<UserRecord> {
+  const existing = await getUserRecord(userId);
+  const cleared: UserRecord = {
+    userId,
+    activeRoutineId: '',
+    routines: [],
+    runtime: {},
+    accountStatus: existing?.accountStatus ?? 'active',
+    updatedAt: Date.now()
+  };
+
+  memoryUserStorage.set(userId, cleared);
+  persistLocalUserLedger();
+
+  const db = getFirestore();
+  if (db) {
+    try {
+      await db.collection('users').doc(userId).set(cleared, { merge: false });
+    } catch (err: any) {
+      console.warn('[UserStorage] Firestore clear failed, cleared memory cache:', err?.message || err);
+    }
+  }
+
+  return cleared;
+}
+
+/**
+ * Temporarily pauses/deactivates a user account while preserving their stored routines and logs.
+ */
+export async function deactivateUserAccount(userId: string): Promise<UserRecord> {
+  const existing = await getUserRecord(userId);
+  const deactivated: UserRecord = {
+    userId,
+    activeRoutineId: existing?.activeRoutineId ?? '',
+    routines: existing?.routines ?? [],
+    runtime: existing?.runtime ?? {},
+    ...(existing?.profile ? { profile: existing.profile } : {}),
+    ...(existing?.lifestyleProfile ? { lifestyleProfile: existing.lifestyleProfile } : {}),
+    accountStatus: 'deactivated',
+    deactivatedAt: Date.now(),
+    updatedAt: Date.now()
+  };
+
+  await saveUserRecord(deactivated);
+  return deactivated;
+}
+
+/**
+ * Reactivates a previously deactivated user account upon sign-in.
+ */
+export async function reactivateUserAccount(userId: string): Promise<UserRecord | null> {
+  const existing = await getUserRecord(userId);
+  if (!existing) return null;
+
+  const reactivated: UserRecord = {
+    ...existing,
+    accountStatus: 'active',
+    updatedAt: Date.now()
+  };
+  delete reactivated.deactivatedAt;
+
+  memoryUserStorage.set(userId, reactivated);
+  persistLocalUserLedger();
+
+  const db = getFirestore();
+  if (db) {
+    try {
+      await db.collection('users').doc(userId).set(reactivated, { merge: false });
+    } catch (err: any) {
+      console.warn('[UserStorage] Firestore reactivate failed:', err?.message || err);
+    }
+  }
+
+  return reactivated;
+}
+
+/**
+ * Permanently deletes a user record from memory cache, local ledger, and Cloud Firestore.
+ */
+export async function deleteUserAccount(userId: string): Promise<boolean> {
+  const existed = memoryUserStorage.delete(userId);
+  persistLocalUserLedger();
+
+  const db = getFirestore();
+  if (db) {
+    try {
+      await db.collection('users').doc(userId).delete();
+    } catch (err: any) {
+      console.warn('[UserStorage] Firestore delete failed, removed from memory cache:', err?.message || err);
+    }
+  }
+
+  return existed;
 }
 
 /**
