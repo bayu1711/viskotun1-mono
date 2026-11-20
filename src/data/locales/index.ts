@@ -1,5 +1,6 @@
 import { COPY } from '../copy';
 import { COPY_AR_OVERRIDE } from './ar';
+import { COPY_AR_COMPLETION } from './ar.completion';
 import type { AppLocale, DeepPartial, LocaleCopy, LocaleMeta, SecondaryLanguage } from './types';
 
 export * from './types';
@@ -78,7 +79,11 @@ export function mergeLocaleCopy(
 }
 
 export const COPY_EN: LocaleCopy = COPY as unknown as LocaleCopy;
-export const COPY_AR: LocaleCopy = mergeLocaleCopy(COPY_EN, COPY_AR_OVERRIDE);
+// Base Arabic first, then the completion file that covers sections ar.ts did not translate.
+export const COPY_AR: LocaleCopy = mergeLocaleCopy(
+  mergeLocaleCopy(COPY_EN, COPY_AR_OVERRIDE),
+  COPY_AR_COMPLETION
+);
 
 export function getLocaleCopy(locale: AppLocale): LocaleCopy {
   return locale === 'ar' ? COPY_AR : COPY_EN;

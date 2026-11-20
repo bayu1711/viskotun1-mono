@@ -48,6 +48,7 @@ export const COPY = {
     community: 'Community'
   },
   shell: {
+    dayBadge: (day: number): string => `Day ${day}`,
     streak: (days: number) => `${days} day streak`,
     addPaper: 'Add new paper',
     openAssistant: 'Ask N1',
@@ -475,6 +476,7 @@ export const COPY = {
     projectedAgeLabel: 'Projected Health Age',
     deltaLabel: (delta: number) => `${Math.abs(delta)} years younger`,
     baselineAgeLabel: (age: number) => `Chronological Baseline: ${age} yrs`,
+    sustainedBasis: (days: number): string => `Based on a ${days}-day sustained habit loop`,
     cvdRiskLabel: 'Cardiovascular Risk Reduction',
     metabolicRiskLabel: 'Metabolic Syndrome Risk Reduction',
     resilienceLabel: 'Habit Resilience Score',
@@ -500,7 +502,7 @@ export const COPY = {
     allChangesSaved: 'All changes saved',
     savedToast: 'Profile & adaptive lifestyle saved',
     tuneWithAi: 'Tune with N1 AI',
-    userProfileEyebrow: 'UserProfile',
+    userProfileEyebrow: 'Your details',
     userProfileTitle: 'Identity & Physiological Baseline',
     displayNameLabel: 'Display name',
     displayNamePlaceholder: 'Your name or handle',
@@ -746,7 +748,7 @@ export const COPY = {
     standardDurationFallback: 'Follow standardized clinical duration.',
     stopImmediatelyIf: 'Stop immediately if:',
     standardMonitoringFallback: 'Standard clinical monitoring; pause if severe discomfort occurs.',
-    dayUnit: (count: number) => (count === 1 ? 'day' : 'days'),
+    dayUnit: (count: number): string => (count === 1 ? 'day' : 'days'),
     sampleSize: (sampleSize: number | string) => `Sample Size: N = ${sampleSize}`,
     dayRatio: (current: number, total: number) => `Day ${current} / ${total}`,
     briefBadge: 'Shareable Routine Brief',
@@ -916,6 +918,16 @@ export const COPY = {
     cancel: 'Cancel',
     reviewSuccessToast: 'Outcome published to community registry',
     reviewErrorToast: 'Could not submit outcome. Please try again.',
+    /** Display names for paper category ids; unknown ids fall back to the raw id. */
+    categoryLabels: {
+      rehab: 'Rehab',
+      dermatology: 'Dermatology',
+      nutrition: 'Nutrition',
+      metabolic: 'Metabolic',
+      circadian: 'Circadian',
+      cognitive: 'Cognitive',
+      sleep: 'Sleep'
+    } as Record<string, string>,
     canonicalPaperBadge: 'Canonical research paper',
     canonicalPaperNote: (doi: string) => `Deduplicated via DOI ${doi} · Shared across participants`,
     existingCanonicalFound: (title: string) => `Matched existing verified paper in community registry: ${title}`,
@@ -1210,7 +1222,9 @@ export const COPY = {
       'Declined: Observational study lacking an executable routine. Cohort, case-control and cross-sectional studies measure associations; researchers did not assign participants a routine, so there is no routine to copy.'
   },
   landing: {
-    topBanner: 'Strictly interventional human research · Zero-hallucination daily routines',
+    topBanner: 'Strictly interventional human research · Routines traced to the paper',
+    uaeBannerBadge: 'Abu Dhabi 2026',
+    uaeBannerText: 'Future Health Challenge: Sustaining Healthy Behaviors in the UAE',
     heroEyebrow: 'Evidence into action',
     heroTitle: 'Live healthier with daily routines from real human science.',
     heroSubtitle:
@@ -1931,7 +1945,7 @@ export const COPY = {
     eyebrow: 'User guide & trending clinical research papers',
     badge: 'Interactive Research Pipeline',
     intro:
-      'TrialN1 converts dense, peer-reviewed human interventional research into executable daily routines with zero hallucinated gaps and N1 AI, an evidence-grounded safety companion.',
+      'TrialN1 converts dense, peer-reviewed human interventional research into executable daily routines, marks every parameter the paper left out, and adds N1 AI, a companion that answers from the paper.',
     tabs: {
       guide: 'How it works',
       science: 'Habit science (BCT)',

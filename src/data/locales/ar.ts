@@ -121,6 +121,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     projectedAgeLabel: 'العمر الصحي المتوقع',
     deltaLabel: (delta: number) => `أصغر بـ ${Math.abs(delta)} سنوات بيولوجياً`,
     baselineAgeLabel: (age: number) => `العمر الزمني المرجعي: ${age} سنة`,
+    sustainedBasis: (days: number) => `بناءً على ${days} يوماً من الاستمرارية في العادة`,
     cvdRiskLabel: 'انخفاض مخاطر القلب والأوعية الدموية',
     metabolicRiskLabel: 'انخفاض مخاطر المتلازمة الأيضية',
     resilienceLabel: 'مؤشر مرونة العادة السلوكية',
@@ -146,7 +147,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     allChangesSaved: 'تم حفظ كل التغييرات',
     savedToast: 'تم حفظ الملف الشخصي ونمط الحياة بنجاح',
     tuneWithAi: 'التخصيص عبر N1 AI',
-    userProfileEyebrow: 'UserProfile',
+    userProfileEyebrow: 'بياناتك',
     userProfileTitle: 'الهوية والأساس الفسيولوجي',
     displayNameLabel: 'الاسم المعروض',
     displayNamePlaceholder: 'اسمك أو اللقب المفضل',
@@ -790,6 +791,8 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     dropSubtext: 'تجارب سريرية، إعادة تأهيل، تغذية، نوم، وعلوم دوائية بشرية'
   },
   landing: {
+    uaeBannerBadge: 'أبوظبي 2026',
+    uaeBannerText: 'تحدي صحة المستقبل: استدامة السلوكيات الصحية في الإمارات',
     ctaGuest: 'جرّب كزائر',
     ctaLogin: 'تسجيل الدخول',
     ctaSignup: 'إنشاء حساب',
