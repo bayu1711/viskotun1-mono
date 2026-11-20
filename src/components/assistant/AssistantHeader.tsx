@@ -109,7 +109,7 @@ export function AssistantHeader({
               <span>{COPY.assistant.medicalDisclaimerChip}</span>
             </button>
 
-            {(isAsk || mode === 'lifestyle') && engine && (() => {
+            {(isAsk || mode === 'lifestyle') && engine && engine !== 'cloud-gemini' && (() => {
               const engineMeta = getEngineMeta(engine);
               return (
                 <span

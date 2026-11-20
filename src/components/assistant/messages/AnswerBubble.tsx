@@ -14,15 +14,18 @@ interface AnswerBubbleProps {
 
 export function AnswerBubble({ content, engine, source }: AnswerBubbleProps) {
   const cleanContent = stripClinicalDisclaimer(content);
-  const engineMeta = engine ? getEngineMeta(engine) : null;
+  const isCloudGemini = engine === 'cloud-gemini';
+  const engineMeta = engine && !isCloudGemini ? getEngineMeta(engine) : null;
 
-  let badgeLabel: string = COPY.assistant.answerSource;
+  let badgeLabel: string = source || COPY.assistant.answerSource;
   if (engine === 'on-device-gemma' && engineMeta) {
     badgeLabel = `${engineMeta.label} · ${COPY.assistant.engines.onDeviceBadge}`;
   } else if (engine === 'server-gemma' && engineMeta) {
     badgeLabel = engineMeta.label;
-  } else if ((engine === 'cloud-gemini' || engine === 'local-rules') && engineMeta) {
+  } else if (engine === 'local-rules' && engineMeta) {
     badgeLabel = `${engineMeta.label} · ${source || COPY.assistant.answerSource}`;
+  } else if (isCloudGemini) {
+    badgeLabel = source || COPY.assistant.answerSource;
   }
 
   return (
