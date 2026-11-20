@@ -422,7 +422,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       askCautions:
         'سؤال أخير: هل لديك أي حساسية في المفاصل (مثل الركبتين أو أسفل الظهر أو الكتفين) أو عادات تدخين أحتاج لمراعاتها بأمان؟',
       completionSummary: (focus: string) =>
-        `تم كل شيء — ملف نمط الحياة التكيفي جاهز الآن. قمت بمواءمة تركيز خطتك حول: ${focus}. أخبرني في أي وقت إذا تغير جدولك أو موقعك أو عاداتك.`,
+        `تم كل شيء — تمت معايرة ملف نمط حياتك المتكيف بنجاح! قمت بضبط تركيز خطتك حول: ${focus}. الخطوة التالية: استكشف الأبحاث والروتينات المتوافقة مع احتياجاتك، أو راسلني في أي وقت لتعديل جدولك أو موقعك أو عاداتك.`,
       returningGreeting: (regionLabel: string, summary: string) =>
         `ملفك مخصص حالياً لمنطقة ${regionLabel}${summary ? ` (${summary})` : ''}. أخبرني في أي وقت إذا تغير موقعك أو جدولك أو عاداتك وسأكيف خطتك فوراً.`,
       rerunGreeting: (regionLabel: string) =>
@@ -436,6 +436,8 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       quickStandardRhythm: 'عمل منتظم · لا شيء مما سبق',
       quickNoCautions: 'لا توجد احتياطات · غير مدخن',
       quickDone: 'تم — العودة للخطة',
+      quickExploreRoutines: 'استكشاف الروتينات',
+      multiSelectContinue: (count: number) => `متابعة (${count} محدد)`,
       quickUpdateProfile: 'تحديث ملفي بالكامل',
       q1Title: '1. من أي مدينة أو دولة تتابع خطتك؟',
       q1Ask: (regionLabel: string) =>

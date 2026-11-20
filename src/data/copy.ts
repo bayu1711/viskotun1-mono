@@ -209,7 +209,7 @@ export const COPY = {
       askCautions:
         'Last question: are there any joint sensitivities (like knees, lower back, or shoulders) or smoking/tobacco habits I should pace around safely?',
       completionSummary: (focus: string) =>
-        `All set — your adaptive lifestyle profile is calibrated. I've tailored your routine focus around: ${focus}. Message me anytime if your schedule, location, or habits change.`,
+        `All set — your adaptive lifestyle profile is calibrated! I've tailored your routine parameters around: ${focus}. Next step: explore evidence-based routines matched to your focus, or message me anytime if your schedule, location, or habits change.`,
       returningGreeting: (regionLabel: string, summary: string) =>
         `You're tuned for ${regionLabel}${summary ? ` (${summary})` : ''}. Tell me anytime if your location, schedule, or habits change and I'll adapt your routine right away.`,
       rerunGreeting: (regionLabel: string) =>
@@ -223,6 +223,8 @@ export const COPY = {
       quickStandardRhythm: 'Standard 9–5 · none of these',
       quickNoCautions: 'No cautions · non-smoker',
       quickDone: 'Done — back to routine',
+      quickExploreRoutines: 'Explore routines',
+      multiSelectContinue: (count: number) => `Continue (${count} selected)`,
       quickUpdateProfile: 'Update my full profile',
       q1Title: '1. Where are you joining from?',
       q1Ask: (regionLabel: string) =>
