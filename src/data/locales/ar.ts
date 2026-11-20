@@ -188,9 +188,13 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     secondaryLanguageLabel: 'اللغة الثانوية',
     secondaryLanguageNone: 'بدون (لغة واحدة)',
     languageHint: 'يتيح الشريط العلوي التبديل السريع بين لغتك الأساسية والثانوية. اختر «بدون» لاستخدام لغة واحدة فقط.',
-    lifestyleEyebrow: 'UserLifestyleProfile',
-    lifestyleTitle: 'سياق نمط الحياة التكيفي',
+    lifestyleEyebrow: 'مشترك مع N1 AI',
+    lifestyleTitle: 'ملف نمط الحياة التكيفي',
+    lifestyleSyncNote:
+      'يقرأ N1 AI هذه الحقول نفسها ويعدّلها. ما تخبره به في المحادثة يظهر هنا، وما تحفظه هنا يوجّه إجاباته.',
     regionLabel: 'المنطقة والمدينة',
+    countryPlaceholder: 'الدولة (مثال: اليابان، البرازيل، الإمارات، ألمانيا)',
+    countryAria: 'الدولة',
     cityPlaceholder: 'المدينة (مثال: أبوظبي، دبي، الرياض)',
     regionConfirmed: 'مؤكد',
     workPatternLabel: 'نمط العمل',
@@ -239,8 +243,37 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       collectivist_household: 'أسرة ممتدة / جدول عائلي مشترك'
     },
     cautionsLabel: 'ملاحظات واحتياطات بدنية',
-    cautionPresets: ['تيبس صباحي', 'حساسية الركبة', 'حذر أسفل الظهر', 'إجهاد حراري'],
+    cautionsHint: 'اختر ما ينطبق عليك أو أضف ملاحظتك. يستخدم المساعد الذكي القائمة نفسها.',
+    cautionLabels: {
+      'Morning stiffness': 'تيبس صباحي',
+      'Knee sensitivity': 'حساسية الركبة',
+      'Lower back sensitivity': 'حساسية أسفل الظهر',
+      'Shoulder mobility limit': 'محدودية حركة الكتف',
+      'Ankle / Achilles tenderness': 'ألم الكاحل / وتر أخيل',
+      'Hip stiffness': 'تيبس الورك',
+      'Neck tension': 'شد الرقبة',
+      'Wrist sensitivity': 'حساسية المعصم',
+      'Joint sensitivity': 'حساسية المفاصل',
+      'Heat fatigue': 'إجهاد حراري'
+    },
+    customCautionPlaceholder: 'أضف ملاحظة أخرى (مثال: ألم باطن القدم)',
+    customCautionAria: 'إضافة احتياط بدني',
+    addCautionBtn: 'إضافة',
+    removeCautionAria: (caution: string) => `إزالة ${caution}`,
     activeTagsLabel: 'الوسوم التكيفية النشطة',
+    activeTagsHint: 'تُبنى من الحقول أعلاه ومن العادات التي تذكرها لـ N1 AI.',
+    removeTagAria: (tag: string) => `إزالة ${tag}`,
+    managedTagLabels: {
+      healthcare_shift_worker: 'عمل بنظام النوبات',
+      desk_bound_worker: 'عمل مكتبي طويل',
+      frequent_traveler: 'سفر متكرر',
+      midwakh_dokha: 'مدواخ / دوخة',
+      shisha_waterpipe: 'شيشة / أرجيلة',
+      cigarette_smoker: 'سجائر',
+      vape_user: 'سيجارة إلكترونية',
+      extreme_heat_summer: 'حر الصيف الشديد',
+      cold_climate_winter: 'مناخ بارد'
+    },
     noTagsYet: 'فعّل أياً من العوامل أعلاه أو استخدم التخصيص الذكي لإضافة وسوم السياق.',
     impactEyebrow: 'ترابط ذكي عبر TrialN1',
     impactTitle: 'كيف يخصص هذا تجربتك',
@@ -397,6 +430,8 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     suggestionsEyebrow: (region: string) => `عوامل ثقافية ومجتمعية متنوعة في ${region}`,
     tagAddedToast: (tag: string) => `تمت إضافة "${tag}" إلى ملفك الصحي`,
     tagRemovedToast: (tag: string) => `تمت إزالة "${tag}" من ملفك الصحي`,
+    regionUpdatedReply: (regionLabel: string) =>
+      `تم تحديث المنطقة إلى ${regionLabel}. أصبح توقيت روتينك ووتيرته يتبعان مناخك المحلي ويومك.`,
     lifestyleIntro: (region: string) =>
       `إليك أبرز العوامل الشائعة في ${region}. اختر ما ينطبق على يومك، أو صف جدولك وعاداتك بكلماتك الخاصة:`,
     tagAddedConfirmation: (tag: string) =>

@@ -183,6 +183,8 @@ export const COPY = {
     suggestionsEyebrow: (region: string) => `Diverse lifestyle & cultural factors in ${region}`,
     tagAddedToast: (tag: string) => `Added "${tag}" to lifestyle profile`,
     tagRemovedToast: (tag: string) => `Removed "${tag}" from lifestyle profile`,
+    regionUpdatedReply: (regionLabel: string) =>
+      `Region updated to ${regionLabel}. Your routine timing and pacing now follow your local climate and day.`,
     lifestyleIntro: (region: string) =>
       `Here is a diverse mix of cultural, climate, and schedule patterns in ${region}. Select any that reflect how your day actually works, or describe your habits in your own words:`,
     tagAddedConfirmation: (tag: string) =>
@@ -538,9 +540,13 @@ export const COPY = {
     secondaryLanguageLabel: 'Secondary language',
     secondaryLanguageNone: 'None (single language)',
     languageHint: 'The top header toggles quickly between your primary and secondary languages. Choose None for a single-language header.',
-    lifestyleEyebrow: 'UserLifestyleProfile',
-    lifestyleTitle: 'Adaptive Lifestyle Context',
+    lifestyleEyebrow: 'Shared with N1 AI',
+    lifestyleTitle: 'Adaptive Lifestyle Profile',
+    lifestyleSyncNote:
+      'N1 AI reads and edits these same fields. Anything you tell it in chat shows up here, and changes you save here guide its answers.',
     regionLabel: 'Region & city',
+    countryPlaceholder: 'Country (e.g. Japan, Brazil, UAE, Germany)',
+    countryAria: 'Country',
     cityPlaceholder: 'City (e.g. Abu Dhabi, Dubai, Riyadh)',
     regionConfirmed: 'Confirmed',
     workPatternLabel: 'Work schedule',
@@ -589,8 +595,39 @@ export const COPY = {
       collectivist_household: 'Multi-generational household'
     },
     cautionsLabel: 'Physical cautions',
-    cautionPresets: ['Morning stiffness', 'Knee sensitivity', 'Lower back caution', 'Heat fatigue'],
+    cautionsHint: 'Select any that apply, or add your own. The AI uses the same list.',
+    /** Display labels keyed by the canonical caution stored on the profile. */
+    cautionLabels: {
+      'Morning stiffness': 'Morning stiffness',
+      'Knee sensitivity': 'Knee sensitivity',
+      'Lower back sensitivity': 'Lower back sensitivity',
+      'Shoulder mobility limit': 'Shoulder mobility limit',
+      'Ankle / Achilles tenderness': 'Ankle / Achilles tenderness',
+      'Hip stiffness': 'Hip stiffness',
+      'Neck tension': 'Neck tension',
+      'Wrist sensitivity': 'Wrist sensitivity',
+      'Joint sensitivity': 'Joint sensitivity',
+      'Heat fatigue': 'Heat fatigue'
+    },
+    customCautionPlaceholder: 'Add another caution (e.g. Plantar fascia pain)',
+    customCautionAria: 'Add a physical caution',
+    addCautionBtn: 'Add',
+    removeCautionAria: (caution: string) => `Remove ${caution}`,
     activeTagsLabel: 'Active adaptation tags',
+    activeTagsHint: 'Built from the fields above and from habits you mention to N1 AI.',
+    removeTagAria: (tag: string) => `Remove ${tag}`,
+    /** Display labels for tags derived from structured fields. */
+    managedTagLabels: {
+      healthcare_shift_worker: 'Shift work',
+      desk_bound_worker: 'Desk-bound work',
+      frequent_traveler: 'Frequent travel',
+      midwakh_dokha: 'Midwakh / Dokha',
+      shisha_waterpipe: 'Shisha / Waterpipe',
+      cigarette_smoker: 'Cigarettes',
+      vape_user: 'Vape / E-cig',
+      extreme_heat_summer: 'Extreme summer heat',
+      cold_climate_winter: 'Cold climate'
+    },
     noTagsYet: 'Toggle any factor above or open AI tuning to activate context tags.',
     impactEyebrow: 'Connected Across TrialN1',
     impactTitle: 'How this personalizes your app',
