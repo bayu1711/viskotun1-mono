@@ -2,9 +2,11 @@ import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { answerFor } from '../../../utils/assistant';
 import {
+  answerForGuidance,
   answerForRejection,
   classifyRejectionQuestion,
-  isRejectionQuestionInScope
+  isRejectionQuestionInScope,
+  isUnrecognizedLinkReason
 } from '../../../utils/rejectionAssistant';
 import { stripClinicalDisclaimer } from '../../../utils/disclaimer';
 import { COPY } from '../../../data/copy';
@@ -43,6 +45,15 @@ export async function POST(request: Request) {
 
     if (typeof rejectionReason === 'string' && rejectionReason.trim().length > 0) {
       const trimmedReason = rejectionReason.trim();
+
+      if (isUnrecognizedLinkReason(trimmedReason)) {
+        return NextResponse.json({
+          answer: answerForGuidance(question),
+          source: COPY.assistant.rejection.guidanceSource,
+          engine: 'local-rules'
+        });
+      }
+
       const scope = classifyRejectionQuestion(question);
       if (!isRejectionQuestionInScope(scope) || scope.asksAboutContent) {
         return NextResponse.json({

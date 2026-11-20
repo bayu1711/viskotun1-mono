@@ -1,4 +1,6 @@
 import { COPY } from '../data/copy';
+import { SAMPLE_PAPERS } from '../data/samplePapers';
+import { buildExternalSearchLinks, extractQueryFromInput, matchCommunityPapers } from './paperQuery';
 
 /** What a follow-up question about a declined paper is asking for. */
 export type RejectionIntent = 'why' | 'criteria' | 'nonHuman';
@@ -34,11 +36,57 @@ export function isRejectionQuestionInScope(scope: RejectionQuestionScope): boole
   return scope.intents.length > 0;
 }
 
+/** Checks whether a rejection reason stems from an unrecognized link or missing paper ID rather than a policy violation. */
+export function isUnrecognizedLinkReason(reason: string): boolean {
+  if (!reason) return false;
+  return (
+    reason.includes('No DOI') ||
+    reason.includes('Europe PMC') ||
+    reason === COPY.extraction.linkNotRecognized ||
+    reason === COPY.extraction.paperNotFound ||
+    reason === COPY.extraction.fullTextUnavailable
+  );
+}
+
+/**
+ * Provides helpful discovery guidance, matching community routines, and external database search links.
+ */
+export function answerForGuidance(question: string): string {
+  const query = extractQueryFromInput(question);
+  const matches = matchCommunityPapers(query, SAMPLE_PAPERS);
+  const links = buildExternalSearchLinks(query);
+
+  const lines: string[] = [
+    'To build an executable routine, TrialN1 requires an interventional human study with an open-access DOI, PubMed ID, or PDF.'
+  ];
+
+  if (matches.length > 0) {
+    const list = matches
+      .slice(0, 3)
+      .map((p) => `• **${p.shortTitle}**: ${p.domain} (${p.journal}, ${p.year}) — DOI: \`${p.doi}\``)
+      .join('\n');
+    lines.push(`\n### Recommended Community Routines:\n${list}\nYou can load any of these routines with 1 click from the community library!`);
+  }
+
+  lines.push(
+    `\n### Search External Peer-Reviewed Databases:\n• [Search on PubMed (Clinical Trials)](${links.pubmed})\n• [Search on Europe PMC (Open Access)](${links.europePmc})\n• [Search on Google Scholar](${links.googleScholar})`
+  );
+  lines.push(
+    '\n💡 **Tip:** Copy the DOI (e.g. `10.1177/1941738116631498`) or the PubMed URL from any study, paste it here, or upload the paper PDF directly.'
+  );
+
+  return lines.join('\n');
+}
+
 /**
  * Deterministic answer for a follow-up about a declined paper. Only ever draws on the gatekeeper's
  * stated reason and the public acceptance criteria, never on the paper itself.
  */
 export function answerForRejection(reason: string, question: string): string {
+  if (isUnrecognizedLinkReason(reason)) {
+    return answerForGuidance(question);
+  }
+
   const answers = COPY.assistant.rejection.answers;
   const scope = classifyRejectionQuestion(question);
   if (!isRejectionQuestionInScope(scope)) return answers.outOfScope;
