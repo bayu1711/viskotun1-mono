@@ -32,9 +32,7 @@ const configFunction = (phase) => {
     },
     distDir: process.env.NEXT_DIST_DIR || (isDev ? '.next-dev' : '.next'),
     transpilePackages: ['@mui/icons-material'],
-    experimental: {
-      serverComponentsExternalPackages: ['@google-cloud/firestore']
-    },
+    serverExternalPackages: ['@google-cloud/firestore'],
     async headers() {
       return [
         {
@@ -42,9 +40,6 @@ const configFunction = (phase) => {
           headers: SECURITY_HEADERS
         }
       ];
-    },
-    webpack: (config) => {
-      return config;
     }
   };
 };
