@@ -67,6 +67,11 @@ export const plantarFasciitisRoutine: Routine = {
         source: 'ACSM Clinical Baseline: 2 min rest',
         rationale:
           'Warm-up and rest between sets were not reported. Applied ACSM resistance-training baseline: 5 min easy walking warm-up and 2 min rest between sets.'
+      },
+      timing: {
+        type: 'flexible',
+        anchorHint: 'Every other day · any window',
+        estimatedMinutes: 15
       }
     }
   ],
@@ -225,7 +230,12 @@ export const imstBloodPressureRoutine: Routine = {
       setLabel: 'session',
       perSetLabel: '× 30 breaths at 75% PImax',
       statLabel: 'resistance:',
-      statValue: '75% PImax'
+      statValue: '75% PImax',
+      timing: {
+        type: 'flexible',
+        anchorHint: '6× weekly · ~5 min anytime',
+        estimatedMinutes: 5
+      }
     }
   ],
   progressionRules: [
@@ -393,7 +403,13 @@ export const warmBathSleepRoutine: Routine = {
       setLabel: 'session',
       perSetLabel: '× 15 min at 40.0–42.5°C',
       statLabel: 'water:',
-      statValue: '40.0–42.5°C'
+      statValue: '40.0–42.5°C',
+      timing: {
+        type: 'anchored',
+        anchorSlot: 'bedtime',
+        anchorHint: '1–2 hours before bedtime',
+        estimatedMinutes: 15
+      }
     },
     {
       id: 'wb-2',
@@ -408,7 +424,13 @@ export const warmBathSleepRoutine: Routine = {
       setLabel: 'window',
       perSetLabel: '× 90 min before bed',
       statLabel: 'timing:',
-      statValue: '90 min'
+      statValue: '90 min',
+      timing: {
+        type: 'anchored',
+        anchorSlot: 'bedtime',
+        anchorHint: '90 min cooldown before lights out',
+        estimatedMinutes: 20
+      }
     }
   ],
   progressionRules: [
@@ -564,7 +586,12 @@ export const cervicalPostureRoutine: Routine = {
       durationSeconds: 5,
       perSetLabel: '× 10 holds of 5s',
       statLabel: 'hold:',
-      statValue: '5s isometric'
+      statValue: '5s isometric',
+      timing: {
+        type: 'flexible',
+        anchorHint: '1× daily · any window',
+        estimatedMinutes: 5
+      }
     },
     {
       id: 'cp-2',
@@ -574,7 +601,12 @@ export const cervicalPostureRoutine: Routine = {
       detail: 'Squeeze the shoulder blades back and down against a light resistance band.',
       sets: 2,
       reps: 12,
-      frequency: '3x Weekly'
+      frequency: '3x Weekly',
+      timing: {
+        type: 'flexible',
+        anchorHint: '3× weekly · any window',
+        estimatedMinutes: 5
+      }
     },
     {
       id: 'cp-3',
@@ -591,6 +623,11 @@ export const cervicalPostureRoutine: Routine = {
         tier: 'guideline',
         source: 'ACSM Flexibility Guidelines',
         rationale: 'Stretch hold time was not reported. Applied the ACSM 30-second static stretch baseline.'
+      },
+      timing: {
+        type: 'flexible',
+        anchorHint: '1× daily · any window',
+        estimatedMinutes: 3
       }
     }
   ],
@@ -748,6 +785,12 @@ export const ashwagandhaStressRoutine: Routine = {
         tier: 'guideline',
         source: 'Standard Oral Dosing: 250 mL water',
         rationale: 'Authors did not state what to take the capsule with. Applied the standard 250 mL glass of water.'
+      },
+      timing: {
+        type: 'spaced',
+        anchorHint: 'Morning & night with food (≥8h apart)',
+        minSpacingHours: 8,
+        estimatedMinutes: 2
       }
     }
   ],
@@ -907,7 +950,12 @@ export const dualNBackRoutine: Routine = {
       setLabel: 'session',
       perSetLabel: '× 20 blocks · 20 min',
       statLabel: 'duration:',
-      statValue: '20 min'
+      statValue: '20 min',
+      timing: {
+        type: 'flexible',
+        anchorHint: '1× daily · ~20 min focused window',
+        estimatedMinutes: 20
+      }
     }
   ],
   progressionRules: [
@@ -1072,6 +1120,12 @@ export const uaeHeatCircadianRoutine: Routine = {
         sets: 1,
         reps: 1,
         tempo: '5 min gaze'
+      },
+      timing: {
+        type: 'anchored',
+        anchorSlot: 'morning',
+        anchorHint: 'Pre-8:00 AM outdoor light exposure',
+        estimatedMinutes: 15
       }
     },
     {
@@ -1100,6 +1154,11 @@ export const uaeHeatCircadianRoutine: Routine = {
         sets: 1,
         reps: 10,
         tempo: '30s hold'
+      },
+      timing: {
+        type: 'flexible',
+        anchorHint: 'Indoor AC corridor · afternoon or anytime',
+        estimatedMinutes: 12
       }
     },
     {
@@ -1122,6 +1181,12 @@ export const uaeHeatCircadianRoutine: Routine = {
         sets: 1,
         reps: 1,
         tempo: 'immediate'
+      },
+      timing: {
+        type: 'spaced',
+        anchorHint: '2× daily prior to outdoor transit (≥6h apart)',
+        minSpacingHours: 6,
+        estimatedMinutes: 3
       }
     }
   ],
@@ -1276,6 +1341,12 @@ export const uaeRamadanMetabolicRoutine: Routine = {
         sets: 1,
         reps: 1,
         tempo: 'immediate'
+      },
+      timing: {
+        type: 'anchored',
+        anchorSlot: 'wake',
+        anchorHint: 'Pre-Fajr Suhoor window',
+        estimatedMinutes: 10
       }
     },
     {
@@ -1304,6 +1375,12 @@ export const uaeRamadanMetabolicRoutine: Routine = {
         sets: 1,
         reps: 10,
         tempo: '5 min'
+      },
+      timing: {
+        type: 'anchored',
+        anchorSlot: 'evening',
+        anchorHint: '45 min post-Iftar / post-Taraweeh',
+        estimatedMinutes: 15
       }
     },
     {
@@ -1325,6 +1402,11 @@ export const uaeRamadanMetabolicRoutine: Routine = {
         sets: 1,
         reps: 1,
         tempo: '15 min'
+      },
+      timing: {
+        type: 'continuous',
+        anchorHint: 'Split sleep + Qaylulah window · confirm daily',
+        estimatedMinutes: 5
       }
     }
   ],
@@ -1485,6 +1567,11 @@ export const uaeMidwakhTaperingRoutine: Routine = {
         sets: 1,
         reps: 3,
         tempo: '60s'
+      },
+      timing: {
+        type: 'on_demand',
+        anchorHint: 'When a craving or urge hits',
+        estimatedMinutes: 3
       }
     },
     {
@@ -1506,6 +1593,11 @@ export const uaeMidwakhTaperingRoutine: Routine = {
         detail: 'Log craving urge and delay bowl by 10 minutes.',
         sets: 1,
         reps: 1
+      },
+      timing: {
+        type: 'continuous',
+        anchorHint: 'All-day boundary (≤4 bowls) · confirm daily',
+        estimatedMinutes: 2
       }
     },
     {
@@ -1527,6 +1619,12 @@ export const uaeMidwakhTaperingRoutine: Routine = {
         detail: 'Sip one glass of iced lemon water.',
         sets: 1,
         reps: 1
+      },
+      timing: {
+        type: 'anchored',
+        anchorSlot: 'evening',
+        anchorHint: 'Immediately after evening dinner',
+        estimatedMinutes: 10
       }
     }
   ],

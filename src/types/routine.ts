@@ -1,3 +1,5 @@
+import type { RoutineSchedulePreference, StepTiming } from './schedule';
+
 export type EvidenceBadge = 'rct' | 'pilot' | 'missing-parameters';
 
 export interface PaperMeta {
@@ -70,6 +72,8 @@ export interface RoutineStep {
   statValue?: string;
   /** Scaled low-friction fallback step for micro-dose mode. */
   microDoseStep?: MicroDoseStep;
+  /** Clinical timing archetype extracted from the paper (flexible, spaced, anchored, on_demand, continuous). */
+  timing?: StepTiming;
 }
 
 export interface ProgressionRule {
@@ -312,6 +316,8 @@ export interface Routine {
   initialFeedbackLogs?: FeedbackLog[];
   initialBarrierLogs?: BarrierLog[];
   initialDoseMode?: DoseMode;
+  /** Per-routine scheduling preference chosen during candidate review (defaults to profile windows). */
+  initialSchedule?: RoutineSchedulePreference;
   feedbackMetric?: FeedbackMetric;
   dataCollectionSpec?: DataCollectionField[];
   initialMorphingLogs?: MorphingDataLog[];
@@ -338,6 +344,8 @@ export interface RoutineRuntime {
   morphingLogs?: MorphingDataLog[];
   barrierLogs?: BarrierLog[];
   doseMode?: DoseMode;
+  /** Per-routine schedule mode & optional custom windows (independent per routine). */
+  schedule?: RoutineSchedulePreference;
   pendingReEntryCheckin?: boolean;
   lapseDays?: number;
   lifestyleProfile?: import('./auth').UserLifestyleProfile;

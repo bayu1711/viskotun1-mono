@@ -1,4 +1,5 @@
 import type { CulturalRhythmId, UserLifestyleProfile } from '../types/auth';
+import type { AvailableTimeWindow } from '../types/schedule';
 
 export type DerivedLifestyleCohort = 'smoker' | 'ramadan' | 'shift_work' | 'general';
 
@@ -29,17 +30,6 @@ export function sanitizeAge(raw: string | number | undefined): number | undefine
   const rounded = Math.round(num);
   if (rounded < 13 || rounded > 110) return undefined;
   return rounded;
-}
-
-/** Parses 24-hour HH:mm string into numeric calendar reminder hours & minutes. */
-export function parseReminderTime(time?: string): { hour: number; minute: number } {
-  if (!time || typeof time !== 'string') return { hour: 9, minute: 0 };
-  const match = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(time.trim());
-  if (!match) return { hour: 9, minute: 0 };
-  return {
-    hour: Number.parseInt(match[1], 10),
-    minute: Number.parseInt(match[2], 10)
-  };
 }
 
 const FASTING_CONTEXT_COUNTRY_CODES = new Set([
@@ -74,9 +64,11 @@ export function isFastingContextRegion(countryCode?: string): boolean {
   return FASTING_CONTEXT_COUNTRY_CODES.has(countryCode.trim().toUpperCase());
 }
 
-export interface ReminderPresetChip {
+export interface AvailabilityWindowPreset {
+  id: string;
   label: string;
-  value: string;
+  start: string;
+  end: string;
 }
 
 /** Keeps `culturalRhythms` and legacy `isRamadanFastingObserver` aligned across callers. */
@@ -87,28 +79,28 @@ export function resolveCulturalRhythms(profile?: Partial<UserLifestyleProfile>):
 }
 
 /**
- * Computes daily reminder preset chips adapted to cultural rhythms, fasting status,
- * and regional defaults so users in any country can access timing windows matching
+ * Computes available time window preset chips adapted to cultural rhythms, fasting status,
+ * and regional defaults so users in any country can pick realistic open windows matching
  * *their* actual household & cultural schedule without regional stereotyping.
  */
-export function getRegionalReminderPresets(options: {
+export function getRegionalAvailabilityPresets(options: {
   countryCode?: string;
   isRamadanFastingObserver?: boolean;
   culturalRhythms?: readonly CulturalRhythmId[];
-  basePresets: readonly ReminderPresetChip[];
-  fastingPreset?: ReminderPresetChip;
-  dawnPreset?: ReminderPresetChip;
-  lateDinnerPreset?: ReminderPresetChip;
-}): ReminderPresetChip[] {
+  basePresets: readonly AvailabilityWindowPreset[];
+  fastingPreset?: AvailabilityWindowPreset;
+  dawnPreset?: AvailabilityWindowPreset;
+  lateDinnerPreset?: AvailabilityWindowPreset;
+}): AvailableTimeWindow[] {
   const rhythms = new Set(options.culturalRhythms ?? []);
-  const presets: ReminderPresetChip[] = [];
+  const presets: AvailableTimeWindow[] = [];
 
   if (options.dawnPreset && rhythms.has('early_dawn_riser')) {
-    presets.push({ label: options.dawnPreset.label, value: options.dawnPreset.value });
+    presets.push({ ...options.dawnPreset });
   }
 
   for (const preset of options.basePresets) {
-    presets.push({ label: preset.label, value: preset.value });
+    presets.push({ ...preset });
   }
 
   if (
@@ -117,11 +109,11 @@ export function getRegionalReminderPresets(options: {
       rhythms.has('ramadan_fasting') ||
       isFastingContextRegion(options.countryCode))
   ) {
-    presets.push({ label: options.fastingPreset.label, value: options.fastingPreset.value });
+    presets.push({ ...options.fastingPreset });
   }
 
   if (options.lateDinnerPreset && rhythms.has('late_family_dinner')) {
-    presets.push({ label: options.lateDinnerPreset.label, value: options.lateDinnerPreset.value });
+    presets.push({ ...options.lateDinnerPreset });
   }
 
   return presets;

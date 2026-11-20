@@ -1,5 +1,6 @@
 import { CALENDAR_WINDOW_DAYS } from '../data/config';
 import type { Routine } from '../types/routine';
+import type { CalendarScheduleBlock } from '../types/schedule';
 import { stopRuleOf } from './routineMetrics';
 
 export type CalendarDayStatus = 'complete' | 'partial' | 'today' | 'upcoming';
@@ -41,6 +42,8 @@ export interface CalendarExportOptions {
   minute?: number;
   durationMinutes?: number;
   startDate?: Date;
+  /** Optional multi-block schedule derived from available windows & clinical step archetypes. */
+  blocks?: CalendarScheduleBlock[];
 }
 
 /** Escapes special characters for RFC 5545 compliance. */
@@ -77,7 +80,7 @@ export function formatGoogleCalendarDateTime(date: Date): string {
 }
 
 /** Builds an informative multi-line plain text routine summary for calendar event description. */
-export function buildRoutineCalendarDescription(routine: Routine): string {
+export function buildRoutineCalendarDescription(routine: Routine, filterStepIds?: string[]): string {
   const lines: string[] = [];
 
   const displayTitle = routine.shortTitle || routine.title;
@@ -89,8 +92,13 @@ export function buildRoutineCalendarDescription(routine: Routine): string {
   lines.push('');
   lines.push('Prescribed Steps:');
 
-  for (let i = 0; i < routine.steps.length; i++) {
-    const s = routine.steps[i];
+  const stepsToInclude =
+    filterStepIds && filterStepIds.length > 0
+      ? routine.steps.filter((s) => filterStepIds.includes(s.id))
+      : routine.steps;
+
+  for (let i = 0; i < stepsToInclude.length; i++) {
+    const s = stepsToInclude[i];
     const sets = s.sets ?? 1;
     const reps = s.reps ? ` × ${s.reps} reps` : '';
     const hold = s.durationSeconds ? ` × ${s.durationSeconds}s` : '';
@@ -110,23 +118,58 @@ export function buildRoutineCalendarDescription(routine: Routine): string {
   return lines.join('\n');
 }
 
-/** Generates RFC 5545 iCalendar (.ics) string. */
+/** Generates RFC 5545 iCalendar (.ics) string with one or more VEVENT blocks matching the routine schedule. */
 export function generateIcsCalendar(routine: Routine, options: CalendarExportOptions = {}): string {
   const now = new Date();
-  const start = options.startDate ? new Date(options.startDate) : new Date();
-
-  const hour = options.hour ?? 9;
-  const minute = options.minute ?? 0;
-  const duration = options.durationMinutes ?? 30;
-
-  start.setHours(hour, minute, 0, 0);
-  const end = new Date(start.getTime() + duration * 60 * 1000);
-
+  const baseDate = options.startDate ? new Date(options.startDate) : new Date();
   const totalDays = Math.max(1, routine.totalDays ?? 14);
   const title = routine.shortTitle || routine.title;
-  const summary = `TrialN1: ${title}`;
-  const description = escapeIcsText(buildRoutineCalendarDescription(routine));
-  const uid = `trialn1-${routine.id}-${now.getTime()}@trialn1.app`;
+
+  const blocks: CalendarScheduleBlock[] =
+    options.blocks && options.blocks.length > 0
+      ? options.blocks
+      : [
+          {
+            id: 'default',
+            label: '',
+            hour: options.hour ?? 9,
+            minute: options.minute ?? 0,
+            durationMinutes: options.durationMinutes ?? 30,
+            stepIds: []
+          }
+        ];
+
+  const eventLines: string[] = [];
+
+  blocks.forEach((block, index) => {
+    const start = new Date(baseDate);
+    start.setHours(block.hour, block.minute, 0, 0);
+    const end = new Date(start.getTime() + block.durationMinutes * 60 * 1000);
+    const suffix = blocks.length > 1 && block.label ? ` · ${block.label}` : '';
+    const summary = `TrialN1: ${title}${suffix}`;
+    const description = escapeIcsText(
+      buildRoutineCalendarDescription(routine, block.stepIds.length > 0 ? block.stepIds : undefined)
+    );
+    const uid = `trialn1-${routine.id}-${index}-${now.getTime()}@trialn1.app`;
+
+    eventLines.push(
+      'BEGIN:VEVENT',
+      `UID:${uid}`,
+      `DTSTAMP:${formatIcsDateTime(now)}`,
+      `DTSTART:${formatIcsDateTime(start)}`,
+      `DTEND:${formatIcsDateTime(end)}`,
+      `RRULE:FREQ=DAILY;COUNT=${totalDays}`,
+      `SUMMARY:${escapeIcsText(summary)}`,
+      `DESCRIPTION:${description}`,
+      'STATUS:CONFIRMED',
+      'BEGIN:VALARM',
+      'TRIGGER:-PT15M',
+      'ACTION:DISPLAY',
+      `DESCRIPTION:Reminder: ${escapeIcsText(title)}${escapeIcsText(suffix)}`,
+      'END:VALARM',
+      'END:VEVENT'
+    );
+  });
 
   return [
     'BEGIN:VCALENDAR',
@@ -134,21 +177,7 @@ export function generateIcsCalendar(routine: Routine, options: CalendarExportOpt
     'PRODID:-//TrialN1//Clinical Routine Calendar//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    'BEGIN:VEVENT',
-    `UID:${uid}`,
-    `DTSTAMP:${formatIcsDateTime(now)}`,
-    `DTSTART:${formatIcsDateTime(start)}`,
-    `DTEND:${formatIcsDateTime(end)}`,
-    `RRULE:FREQ=DAILY;COUNT=${totalDays}`,
-    `SUMMARY:${escapeIcsText(summary)}`,
-    `DESCRIPTION:${description}`,
-    'STATUS:CONFIRMED',
-    'BEGIN:VALARM',
-    'TRIGGER:-PT15M',
-    'ACTION:DISPLAY',
-    `DESCRIPTION:Reminder: ${escapeIcsText(title)}`,
-    'END:VALARM',
-    'END:VEVENT',
+    ...eventLines,
     'END:VCALENDAR'
   ].join('\r\n');
 }
@@ -179,17 +208,23 @@ export function downloadIcsFile(routine: Routine, options: CalendarExportOptions
 
 /** Generates Google Calendar web creation URL with recurrence and pre-filled instructions. */
 export function getGoogleCalendarUrl(routine: Routine, options: CalendarExportOptions = {}): string {
+  const primaryBlock = options.blocks?.[0];
   const start = options.startDate ? new Date(options.startDate) : new Date();
-  const hour = options.hour ?? 9;
-  const minute = options.minute ?? 0;
-  const duration = options.durationMinutes ?? 30;
+  const hour = primaryBlock?.hour ?? options.hour ?? 9;
+  const minute = primaryBlock?.minute ?? options.minute ?? 0;
+  const duration = primaryBlock?.durationMinutes ?? options.durationMinutes ?? 30;
 
   start.setHours(hour, minute, 0, 0);
   const end = new Date(start.getTime() + duration * 60 * 1000);
 
   const totalDays = Math.max(1, routine.totalDays ?? 14);
-  const title = `TrialN1: ${routine.shortTitle || routine.title}`;
-  const details = buildRoutineCalendarDescription(routine);
+  const blockSuffix =
+    options.blocks && options.blocks.length > 1 && primaryBlock?.label ? ` · ${primaryBlock.label}` : '';
+  const title = `TrialN1: ${routine.shortTitle || routine.title}${blockSuffix}`;
+  const details = buildRoutineCalendarDescription(
+    routine,
+    primaryBlock && primaryBlock.stepIds.length > 0 ? primaryBlock.stepIds : undefined
+  );
 
   const datesParam = `${formatGoogleCalendarDateTime(start)}/${formatGoogleCalendarDateTime(end)}`;
   const recurParam = `RRULE:FREQ=DAILY;COUNT=${totalDays}`;

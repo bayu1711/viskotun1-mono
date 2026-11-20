@@ -157,16 +157,27 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       other: 'آخر',
       prefer_not_to_say: 'أفضل عدم التحديد'
     },
-    reminderTimeLabel: 'الوقت المفضل للتنبيه اليومي',
-    reminderTimeHint: 'يُستخدم كوقت بدء افتراضي عند تصدير الخطط إلى تقويم Google أو .ics.',
-    reminderPresets: [
-      { label: '08:00 صباحاً', value: '08:00' },
-      { label: '09:00 قياسي', value: '09:00' },
-      { label: '18:00 مساءً', value: '18:00' }
+    availabilityLabel: 'الفترات الزمنية المتاحة يومياً',
+    availabilityHint:
+      'تُستخدم لمطابقة قواعد التوقيت السريرية في كل بحث (التباعد مرتين يومياً، التوقيت الصباحي، أو السجل المسائي) وتصدير التقويم. يمكنك تخصيص أي خطة بمفردها كـ «في أي وقت» أو بفترات مخصصة.',
+    availabilityModes: {
+      windows: 'فترات محددة',
+      anytime: 'مرن / في أي وقت'
+    },
+    availabilityAnytimeDesc:
+      'لا توجد أوقات افتراضية ثابتة — تبقى الخطط مرنة ما لم يتطلب البحث توقيتاً بيولوجياً محدداً يمكنك مراجعته قبل البدء.',
+    addWindowBtn: '+ إضافة فترة متاحة',
+    removeWindowAria: (label: string) => `إزالة فترة ${label}`,
+    windowLabelPlaceholder: 'الاسم (مثال: الصباح)',
+    windowPresetsHeading: 'إضافة سريعة',
+    availabilityPresets: [
+      { id: 'morning', label: 'الصباح', start: '07:30', end: '09:00' },
+      { id: 'midday', label: 'الظهيرة', start: '12:30', end: '13:30' },
+      { id: 'evening', label: 'المساء', start: '19:00', end: '21:00' }
     ],
-    fastingReminderPreset: { label: '20:30 بعد الإفطار', value: '20:30' },
-    dawnReminderPreset: { label: '06:00 الفجر', value: '06:00' },
-    lateDinnerReminderPreset: { label: '21:30 بعد العشاء', value: '21:30' },
+    fastingAvailabilityPreset: { id: 'post-iftar', label: 'بعد الإفطار', start: '20:30', end: '22:00' },
+    dawnAvailabilityPreset: { id: 'dawn', label: 'الفجر', start: '05:30', end: '07:00' },
+    lateDinnerAvailabilityPreset: { id: 'post-dinner', label: 'بعد العشاء', start: '21:30', end: '22:30' },
     goalsLabel: 'الهدف الصحي أو التأهيلي الأساسي',
     goalsPlaceholder: 'يُنشأ تلقائياً من ملف نمط الحياة — أو يمكنك تعديله هنا',
     goalsGenerateBtn: 'توليد من نمط الحياة',
@@ -234,8 +245,8 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     impactTitle: 'كيف يخصص هذا تجربتك',
     impactAgeItem: (age: number, isCustom: boolean) =>
       `يعتمد العمر الصحي على عمر ${age} سنة (${isCustom ? 'عمرك المحفوظ' : 'المرجع الافتراضي'}).`,
-    impactReminderItem: (time: string) =>
-      `تُجدول تنبيهات التقويم (.ics وGoogle) يومياً عند الساعة ${time}.`,
+    impactAvailabilityItem: (summary: string) =>
+      `تُطابق الأبحاث الجديدة ملاءمة الجدول وفترات التقويم مع: ${summary}.`,
     impactCohortItem: (cohort: string) =>
       `تُصنف مراجعات المجتمع ضمن فئة "${cohort}".`,
     impactLanguageItem: (primaryLabel: string, secondaryLabel?: string) =>
@@ -405,7 +416,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       greetingRegion: (regionLabel: string) =>
         `مرحباً! يسعدني تكييف خطتك اليومية لتناسب إيقاع حياتك الفعلي. رصدت أنك في ${regionLabel} — هل هذا صحيح، أم أنك تتابع خطتك من مكان آخر؟`,
       askAgeTime:
-        'كم عمرك، وما هو الوقت الأنسب لك يومياً لتنفيذ خطتك؟ يساعد العمر في معايرة توقع العمر الصحي، ويمكنك تخطيه إذا رغبت.',
+        'كم عمرك، ومتى تكون متاحاً عادةً خلال اليوم؟ شاركني فترة أو فترتين مفتوحتين (مثل 7:30–9 صباحاً و7–9 مساءً) أو اكتب «في أي وقت» — سأطابق قواعد توقيت كل بحث مع أوقاتك المتاحة.',
       askRhythm: (regionLabel: string) =>
         `كيف يبدو يومك المعتاد في ${regionLabel}؟ أخبرني عن ساعات عملك أو المناخ أو أي إيقاعات ثقافية وأسرية مثل العمل بنظام النوبات أو العمل المكتبي أو الصيام أو الاستيقاظ المبكر أو العشاء المتأخر.`,
       askCautions:
@@ -417,11 +428,11 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       rerunGreeting: (regionLabel: string) =>
         `بكل سرور، لنحدّث ملف نمط حياتك. هل ما زلت تتابع خطتك من ${regionLabel} أم من مكان آخر؟`,
       placeholderRegion: 'أجب بنعم، أو اكتب مدينتك ودولتك (مثال: دبي، الإمارات)...',
-      placeholderAgeTime: 'مثال: 34، صباحاً الساعة 7:30 (أو الوقت فقط)...',
+      placeholderAgeTime: 'مثال: 34، متاح 7:30–9 صباحاً و7–9 مساءً (أو في أي وقت)...',
       placeholderRhythm: 'مثال: عمل مكتبي، صيام رمضان، حرارة الصيف...',
       placeholderCautions: 'مثال: تيبس خفيف في الركبة، غير مدخن (أو لا يوجد)...',
       placeholderComplete: 'أخبرني بأي تغيير في جدولك أو موقعك أو عاداتك...',
-      quickSkipAge: 'تخطي العمر · 09:00',
+      quickSkipAge: 'مرن · في أي وقت',
       quickStandardRhythm: 'عمل منتظم · لا شيء مما سبق',
       quickNoCautions: 'لا توجد احتياطات · غير مدخن',
       quickDone: 'تم — العودة للخطة',
@@ -429,9 +440,9 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       q1Title: '1. من أي مدينة أو دولة تتابع خطتك؟',
       q1Ask: (regionLabel: string) =>
         `رصدنا موقعك في ${regionLabel}. أكد المنطقة أو أدخل مدينتك ودولتك لنستخرج عوامل المناخ والحياة المناسبة لموقعك.`,
-      q2Title: '2. العمر ووقت التذكير اليومي المفضل',
+      q2Title: '2. العمر والفترات المتاحة يومياً',
       q2Ask:
-        'كم عمرك، وما هو أفضل وقت يومي لتنفيذ خطتك؟ يُستخدم عمرك لتخصيص توقع العمر الصحي في لوحة المؤشرات.',
+        'كم عمرك، ومتى تكون متاحاً عادةً خلال اليوم؟ لكل دراسة سريرية قواعد توقيت خاصة بها — وتساعدنا فتراتك المتاحة في التحقق من الملاءمة قبل البدء.',
       q3Title: '3. الإيقاع اليومي، الثقافة، والبيئة المحلية',
       q3Ask: (regionLabel: string) =>
         `يتبع المقيمون في ${regionLabel} أنماطاً ثقافية ومعيشية متعددة. اختر ما يعبر عن يومك الفعلي:`,
@@ -440,6 +451,36 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
         'هل لديك أي حساسية مفاصل أو عادات تدخين أحتاج لمراعاتها بأمان؟ يمكنك أيضاً كتابة أي تفاصيل إضافية أدناه.',
       autoFocusLabel: 'التركيز المشتق لـ N1 AI:'
     }
+  },
+  schedule: {
+    eyebrow: 'ملاءمة الجدول الزمني',
+    modeLabels: {
+      profile_windows: 'فتراتي المتاحة',
+      anytime: 'في أي وقت',
+      custom_windows: 'تخصيص لهذه الخطة'
+    },
+    archetypeLabels: {
+      flexible: 'مرن',
+      spaced: 'جلسات متباعدة',
+      anchored: 'مرتبط بتوقيت محدد',
+      on_demand: 'عند الحاجة · في أي وقت',
+      continuous: 'قاعدة يومية مستمرة'
+    },
+    statusBadges: {
+      compatible: 'يناسب أوقاتك المتاحة',
+      tight: 'وقت ضيق نسبياً',
+      conflict: 'تعارض مع جدولك',
+      flexible_anytime: 'مرن في أي وقت'
+    },
+    conflictProceedBtn: 'المتابعة بتوقيت مرن',
+    onDemandCounterLabel: 'مسجّل اليوم',
+    onDemandLogBtn: '+ تسجيل استخدام',
+    onDemandOptionalHint: 'أداة اختيارية عند الحاجة — اضغط عليها عند الشعور بالرغبة فقط، ولا تمنع اكتمال اليوم بنسبة 100% عند عدم حدوثها.',
+    continuousBadge: 'قاعدة طوال اليوم',
+    continuousConfirmLabel: 'تم الالتزام اليوم',
+    continuousPendingLabel: 'تأكيد نهاية اليوم',
+    routineOverrideTitle: 'جدول هذه الخطة',
+    customWindowHint: 'يُطبّق على هذه الخطة فقط — وتحتفظ خططك الأخرى بجداولها المستقلة.'
   },
   dayActions: {
     markComplete: 'تحديد اليوم كمكتمل',

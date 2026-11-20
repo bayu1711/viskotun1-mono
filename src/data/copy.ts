@@ -203,7 +203,7 @@ export const COPY = {
       greetingRegion: (regionLabel: string) =>
         `Hi! I'd like to tailor your routine around how your days actually run. I detected you're in ${regionLabel} — is that right, or are you following your routine from somewhere else?`,
       askAgeTime:
-        'How old are you, and what time of day usually works best for your daily routine? Age calibrates your Biological Health Age projection, or you can skip it.',
+        'How old are you, and when are you usually available during the day? Share 1–2 open time windows (like 7:30–9am & 7–9pm) or say "anytime" — TrialN1 checks each paper’s timing rules against your availability.',
       askRhythm: (regionLabel: string) =>
         `How does a typical day look for you in ${regionLabel}? Mention your work hours, local climate, or any cultural and household rhythms — like shift work, desk hours, fasting, early mornings, or late dinners.`,
       askCautions:
@@ -215,11 +215,11 @@ export const COPY = {
       rerunGreeting: (regionLabel: string) =>
         `Sure, let's refresh your lifestyle profile. Are you still following your routine from ${regionLabel}, or somewhere else?`,
       placeholderRegion: 'Reply yes, or type your city & country (e.g. Tokyo, Japan)...',
-      placeholderAgeTime: 'e.g. 34, mornings around 7:30am (or just a time)...',
+      placeholderAgeTime: 'e.g. 34, free 7:30–9am & 7–9pm (or "anytime")...',
       placeholderRhythm: 'e.g. Desk job, Ramadan fasting, summer heat...',
       placeholderCautions: 'e.g. Slight knee stiffness, non-smoker (or none)...',
       placeholderComplete: 'Tell me any schedule, location, or habit change...',
-      quickSkipAge: 'Skip age · 09:00',
+      quickSkipAge: 'Flexible · Anytime',
       quickStandardRhythm: 'Standard 9–5 · none of these',
       quickNoCautions: 'No cautions · non-smoker',
       quickDone: 'Done — back to routine',
@@ -227,9 +227,9 @@ export const COPY = {
       q1Title: '1. Where are you joining from?',
       q1Ask: (regionLabel: string) =>
         `I detected ${regionLabel}. Confirm this region or type your city & country so I can fetch locally relevant factors and climate guidance.`,
-      q2Title: '2. Your age & preferred daily time',
+      q2Title: '2. Your age & available time windows',
       q2Ask:
-        'How old are you, and what time works best for your daily routine? Your age calibrates Biological Health Age projections on Dashboard.',
+        'How old are you, and when are you typically available? Each research paper has its own timing rules — your open windows let TrialN1 verify fit before you start.',
       q3Title: '3. Daily rhythm, culture & local environment',
       q3Ask: (regionLabel: string) =>
         `People in ${regionLabel} follow many different cultural & daily rhythms. Select how your day actually works:`,
@@ -238,6 +238,36 @@ export const COPY = {
         'Any joint sensitivities or smoking/tobacco habits I should adapt pacing around safely? You can also type anything else below.',
       autoFocusLabel: 'Derived focus for N1 AI:'
     }
+  },
+  schedule: {
+    eyebrow: 'Schedule Compatibility',
+    modeLabels: {
+      profile_windows: 'My windows',
+      anytime: 'Anytime',
+      custom_windows: 'Custom for this routine'
+    },
+    archetypeLabels: {
+      flexible: 'Flexible',
+      spaced: 'Spaced sessions',
+      anchored: 'Time-anchored',
+      on_demand: 'On trigger · Anytime',
+      continuous: 'All-day boundary'
+    },
+    statusBadges: {
+      compatible: 'Fits your availability',
+      tight: 'Tight fit',
+      conflict: 'Schedule conflict',
+      flexible_anytime: 'Flexible anytime'
+    },
+    conflictProceedBtn: 'Proceed with flexible timing',
+    onDemandCounterLabel: 'logged today',
+    onDemandLogBtn: '+ Log use',
+    onDemandOptionalHint: 'Optional tool — tap whenever an urge or trigger hits. Does not block 100% completion on trigger-free days.',
+    continuousBadge: 'All-day boundary',
+    continuousConfirmLabel: 'Kept today',
+    continuousPendingLabel: 'Confirm at end of day',
+    routineOverrideTitle: 'Schedule for this routine',
+    customWindowHint: 'Applies only to this routine — your other routines keep their own schedules.'
   },
   dayActions: {
     markComplete: 'Mark today complete',
@@ -454,16 +484,27 @@ export const COPY = {
       other: 'Other',
       prefer_not_to_say: 'Prefer not to say'
     },
-    reminderTimeLabel: 'Preferred daily reminder time',
-    reminderTimeHint: 'Used as default start time when exporting routines to Google Calendar or .ics.',
-    reminderPresets: [
-      { label: '08:00 Morning', value: '08:00' },
-      { label: '09:00 Standard', value: '09:00' },
-      { label: '18:00 Evening', value: '18:00' }
+    availabilityLabel: 'Available daily time windows',
+    availabilityHint:
+      'Used to match each paper’s clinical timing rules (2×/day spacing, morning anchors, evening logs) and export calendar blocks. You can override any individual routine to Anytime or Custom windows.',
+    availabilityModes: {
+      windows: 'Specific windows',
+      anytime: 'Flexible / Anytime'
+    },
+    availabilityAnytimeDesc:
+      'No fixed default slots — routines stay flexible unless a paper requires specific biological anchors, which you can review before starting.',
+    addWindowBtn: '+ Add time window',
+    removeWindowAria: (label: string) => `Remove ${label} window`,
+    windowLabelPlaceholder: 'Label (e.g. Morning)',
+    windowPresetsHeading: 'Quick-add presets',
+    availabilityPresets: [
+      { id: 'morning', label: 'Morning', start: '07:30', end: '09:00' },
+      { id: 'midday', label: 'Midday', start: '12:30', end: '13:30' },
+      { id: 'evening', label: 'Evening', start: '19:00', end: '21:00' }
     ],
-    fastingReminderPreset: { label: '20:30 Post-Iftar', value: '20:30' },
-    dawnReminderPreset: { label: '06:00 Dawn', value: '06:00' },
-    lateDinnerReminderPreset: { label: '21:30 Post-Dinner', value: '21:30' },
+    fastingAvailabilityPreset: { id: 'post-iftar', label: 'Post-Iftar', start: '20:30', end: '22:00' },
+    dawnAvailabilityPreset: { id: 'dawn', label: 'Dawn', start: '05:30', end: '07:00' },
+    lateDinnerAvailabilityPreset: { id: 'post-dinner', label: 'Post-Dinner', start: '21:30', end: '22:30' },
     goalsLabel: 'Primary health / rehab focus',
     goalsPlaceholder: 'Auto-synthesized from your Lifestyle Profile — or customize here',
     goalsGenerateBtn: 'Generate from lifestyle',
@@ -531,8 +572,8 @@ export const COPY = {
     impactTitle: 'How this personalizes your app',
     impactAgeItem: (age: number, isCustom: boolean) =>
       `Dashboard Health Age uses ${age} yrs (${isCustom ? 'your saved age' : 'default baseline'}).`,
-    impactReminderItem: (time: string) =>
-      `Calendar exports (.ics & Google) schedule daily reminders at ${time}.`,
+    impactAvailabilityItem: (summary: string) =>
+      `New papers check schedule fit and calendar blocks against: ${summary}.`,
     impactCohortItem: (cohort: string) =>
       `Community reviews tag your cohort as "${cohort}".`,
     impactLanguageItem: (primaryLabel: string, secondaryLabel?: string) =>

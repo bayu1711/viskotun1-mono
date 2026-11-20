@@ -33,7 +33,13 @@ export const achillesRoutine: Routine = {
     sets: 3,
     reps: 15,
     frequency: '2x Daily',
-    tempo: '3s eccentric'
+    tempo: '3s eccentric',
+    timing: {
+      type: 'spaced',
+      anchorHint: 'Morning & evening (≥8h apart)',
+      minSpacingHours: 8,
+      estimatedMinutes: 10
+    }
   },
   {
     id: 'ach-2',
@@ -44,7 +50,13 @@ export const achillesRoutine: Routine = {
     sets: 3,
     reps: 15,
     frequency: '2x Daily',
-    tempo: '3s eccentric'
+    tempo: '3s eccentric',
+    timing: {
+      type: 'spaced',
+      anchorHint: 'Morning & evening (≥8h apart)',
+      minSpacingHours: 8,
+      estimatedMinutes: 10
+    }
   },
   {
     id: 'ach-3',
@@ -61,6 +73,11 @@ export const achillesRoutine: Routine = {
     inferredProvenance: {
       tier: 'guideline',
       source: 'ACSM Clinical Guidelines'
+    },
+    timing: {
+      type: 'flexible',
+      anchorHint: 'After either session or anytime daily',
+      estimatedMinutes: 5
     }
   }],
 

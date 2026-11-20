@@ -21,6 +21,7 @@ import type {
 } from '../types/routine';
 import { clamp, toPercent } from './math';
 import { normalizeDoi } from './paperFingerprint';
+import { isOnDemandStep } from './schedule';
 
 export function resolveFeedbackMetric(routine?: { feedbackMetric?: FeedbackMetric }): FeedbackMetric {
   return routine?.feedbackMetric ?? DEFAULT_FEEDBACK_METRIC;
@@ -163,7 +164,11 @@ export function targetSetsForStep(step: RoutineStep, doseMode: DoseMode = 'stand
   return step.sets;
 }
 
-/** Fraction (0–1) of today's sets completed across all active (non-excluded) steps, scaled by dose mode. */
+/**
+ * Fraction (0–1) of today's required steps completed across all active (non-excluded) steps, scaled by dose mode.
+ * On-demand / trigger-based steps (e.g. smoking craving urge-surfing) are anytime tools and do not block
+ * 100% daily completion when zero triggers occur, as long as the routine has scheduled or continuous steps.
+ */
 export function completionOf(
   routine: Routine,
   setsDone: Record<string, number>,
@@ -173,9 +178,12 @@ export function completionOf(
   const activeSteps = routine.steps.filter((step) => !excludedStepIds.includes(step.id));
   if (activeSteps.length === 0) return 0;
 
+  const nonTriggerSteps = activeSteps.filter((step) => !isOnDemandStep(step));
+  const countedSteps = nonTriggerSteps.length > 0 ? nonTriggerSteps : activeSteps;
+
   if (doseMode === 'micro') {
-    // In micro-dose mode: target is 1 set per active step to preserve neural & behavioral habit loops
-    const targetSets = activeSteps.map((step) => ({
+    // In micro-dose mode: target is 1 set per active required step to preserve neural & behavioral habit loops
+    const targetSets = countedSteps.map((step) => ({
       id: step.id,
       target: 1
     }));
@@ -193,8 +201,8 @@ export function completionOf(
     return anySets ? 1 : 0;
   }
 
-  const total = activeSteps.reduce((sum, step) => sum + step.sets, 0);
-  const done = activeSteps.reduce(
+  const total = countedSteps.reduce((sum, step) => sum + step.sets, 0);
+  const done = countedSteps.reduce(
     (sum, step) => sum + Math.min(setsDone[step.id] ?? 0, step.sets),
     0
   );

@@ -36,7 +36,13 @@ export const hairLossRoutine: Routine = {
     setLabel: 'doses',
     perSetLabel: '× 1 mL',
     statLabel: 'dose:',
-    statValue: '1 mL'
+    statValue: '1 mL',
+    timing: {
+      type: 'spaced',
+      anchorHint: 'Morning & night (≥8h apart)',
+      minSpacingHours: 8,
+      estimatedMinutes: 5
+    }
   },
   {
     id: 'hair-2',
@@ -50,7 +56,12 @@ export const hairLossRoutine: Routine = {
     setLabel: 'session',
     perSetLabel: '× 1.5 mm roller',
     statLabel: 'depth:',
-    statValue: '1.5 mm'
+    statValue: '1.5 mm',
+    timing: {
+      type: 'flexible',
+      anchorHint: '1× weekly (any calm window)',
+      estimatedMinutes: 10
+    }
   },
   {
     id: 'hair-3',
@@ -64,7 +75,12 @@ export const hairLossRoutine: Routine = {
     setLabel: 'wash',
     perSetLabel: '× 3–5 min contact',
     statLabel: 'contact:',
-    statValue: '3–5 min'
+    statValue: '3–5 min',
+    timing: {
+      type: 'flexible',
+      anchorHint: '3× weekly during shower',
+      estimatedMinutes: 8
+    }
   }],
 
   progressionRules: [

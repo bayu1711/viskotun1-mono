@@ -1,4 +1,9 @@
 import type { AppLocale, SecondaryLanguage } from '../data/locales/types';
+import type {
+  AvailabilityMode,
+  AvailableTimeWindow,
+  ScheduleCompatibilityReport
+} from './schedule';
 
 export type UserRole = 'admin' | 'user';
 
@@ -55,6 +60,8 @@ export interface LifestyleAdaptationSpec {
   suggestedWindow: string;
   /** Per-step context-aware guidance tips keyed by step ID. */
   stepTips: Record<string, string>;
+  /** Deterministic compatibility check between the active routine's timing rules and user availability. */
+  scheduleCompatibility?: ScheduleCompatibilityReport;
   safetyGuardrailNote: string;
   guardrailVerified: boolean;
   source: 'gemini-global-ai' | 'deterministic-fallback';
@@ -69,8 +76,10 @@ export interface UserProfile {
   displayName?: string;
   age?: number;
   biologicalSex?: BiologicalSex;
-  /** Daily reminder time in 24-hour HH:mm format (used for calendar exports). */
-  preferredReminderTime?: string;
+  /** Whether the user follows specific open time windows or runs flexibly anytime. */
+  availabilityMode?: AvailabilityMode;
+  /** 1–4 typical open time ranges during the day (used to match paper timing rules & export calendar blocks). */
+  availableWindows?: AvailableTimeWindow[];
   clinicalGoals?: string;
   /** Preferred primary UI language. */
   primaryLanguage?: AppLocale;
