@@ -1,16 +1,17 @@
 import React from 'react';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
 import { useAssistant } from '../../../contexts/AssistantContext';
-import { COPY } from '../../../data/copy';
 import { Callout } from '../../feedback/Callout';
 import { Icon } from '../../ui/Icon';
 import { IconTile } from '../../ui/IconTile';
 
+import { useLocale } from '../../../contexts/LocaleContext';
 interface AlertCardProps {
   content: string;
 }
 
 export function AlertCard({ content }: AlertCardProps) {
+  const { copy } = useLocale();
   const { closeAssistant } = useAssistant();
 
   return (
@@ -29,7 +30,7 @@ export function AlertCard({ content }: AlertCardProps) {
         onClick={closeAssistant}
         className="mt-1 text-xs text-ink/60 underline underline-offset-2 hover:text-ink">
         
-        {COPY.assistant.backToToday}
+        {copy.assistant.backToToday}
       </button>
     </Callout>);
 

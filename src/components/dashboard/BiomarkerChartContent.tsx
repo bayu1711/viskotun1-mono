@@ -12,8 +12,7 @@ import {
   YAxis
 } from 'recharts';
 import { CHART_MARGIN, CHART_TICK_FONT_SIZE } from '../../data/config';
-import { COPY } from '../../data/copy';
-
+import { useLocale } from '../../contexts/LocaleContext';
 export interface BiomarkerDataPoint {
   day: number;
   value: number;
@@ -36,13 +35,14 @@ interface CustomTooltipProps {
 }
 
 function CustomTooltip({ active, payload, label, unit }: CustomTooltipProps) {
+  const { copy } = useLocale();
   if (!active || !payload || !payload.length) return null;
   const val = payload[0]?.value;
 
   return (
     <div className="rounded-card bg-white p-2.5 shadow-md">
       <p className="text-[11px] font-semibold uppercase tracking-wider text-ink/60">
-        {COPY.morphing.dashboard.dayTooltip(Number(label))}
+        {copy.morphing.dashboard.dayTooltip(Number(label))}
       </p>
       <p className="mt-0.5 text-sm font-medium text-ink">
         {val} {unit || ''}
@@ -59,6 +59,7 @@ export function BiomarkerChartContent({
   min,
   max
 }: BiomarkerChartContentProps) {
+  const { copy } = useLocale();
   if (data.length === 0) return null;
 
   return (
@@ -77,7 +78,7 @@ export function BiomarkerChartContent({
             tickLine={false}
             axisLine={false}
             tick={{ className: 'fill-ink/40', fontSize: CHART_TICK_FONT_SIZE }}
-            tickFormatter={(day) => COPY.morphing.dashboard.dayTick(Number(day))}
+            tickFormatter={(day) => copy.morphing.dashboard.dayTick(Number(day))}
           />
           <YAxis
             domain={[min ?? 'auto', max ?? 'auto']}

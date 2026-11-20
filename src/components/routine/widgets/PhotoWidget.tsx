@@ -14,6 +14,7 @@ import { CircleButton } from '../../ui/CircleButton';
 import { Icon } from '../../ui/Icon';
 import { PillButton } from '../../ui/PillButton';
 
+import { useLocale } from '../../../contexts/LocaleContext';
 interface PhotoWidgetProps {
   field: DataCollectionField;
   value: string;
@@ -25,6 +26,7 @@ const DEFAULT_DEMO_PHOTO = COPY.morphing.widgets.photo.demoPhotoSvg(
 );
 
 export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
+  const { copy } = useLocale();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const currentPhoto = typeof value === 'string' && value.length > 0 ? value : '';
@@ -35,7 +37,7 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
 
   const processAndUploadFile = async (file: File) => {
     if (!file || !file.type.startsWith('image/')) {
-      toast.error(COPY.morphing.widgets.photo.invalidFile);
+      toast.error(copy.morphing.widgets.photo.invalidFile);
       return;
     }
 
@@ -62,7 +64,7 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
       }
 
       onChange(data.url);
-      toast.success(COPY.morphing.widgets.photo.uploadSuccess);
+      toast.success(copy.morphing.widgets.photo.uploadSuccess);
     } catch (err: any) {
       console.warn('[PhotoWidget] Cloud Storage upload failed, falling back to local preview:', err?.message || err);
       // Fallback seamlessly to local data URL so the user's routine workflow isn't blocked
@@ -71,7 +73,7 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
         const result = event.target?.result;
         if (typeof result === 'string') {
           onChange(result);
-          toast.info(COPY.morphing.widgets.photo.uploadError);
+          toast.info(copy.morphing.widgets.photo.uploadError);
         }
       };
       reader.readAsDataURL(file);
@@ -101,7 +103,7 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
         <div className="mt-4 flex flex-col items-center justify-center rounded-tile border border-ink/15 bg-canvas p-8 shadow-inner">
           <Spinner className="h-7 w-7 text-ink" />
           <p className="mt-3 text-xs font-medium text-ink">
-            {COPY.morphing.widgets.photo.uploading}
+            {copy.morphing.widgets.photo.uploading}
           </p>
         </div>
       ) : currentPhoto ? (
@@ -110,12 +112,12 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={currentPhoto}
-              alt={COPY.morphing.widgets.photo.previewAlt}
+              alt={copy.morphing.widgets.photo.previewAlt}
               className="h-full w-full object-cover"
             />
             <div className="absolute right-2 top-2">
               <CircleButton
-                label={COPY.morphing.widgets.photo.removePhoto}
+                label={copy.morphing.widgets.photo.removePhoto}
                 size={36}
                 onClick={() => onChange('')}
                 className="bg-white/90 backdrop-blur"
@@ -132,7 +134,7 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
           </div>
           <p className="mt-2 flex items-center gap-1.5 text-2xs text-ink/60">
             <Icon icon={CheckCircleOutlineIcon} size="xs" className="text-ink/70" />
-            <span>{COPY.morphing.widgets.photo.attached}</span>
+            <span>{copy.morphing.widgets.photo.attached}</span>
           </p>
         </div>
       ) : (
@@ -154,10 +156,10 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
             <Icon icon={CameraAltOutlinedIcon} size="md" />
           </div>
           <p className="mt-3 text-sm font-medium text-ink">
-            {COPY.morphing.widgets.photo.uploadPrompt}
+            {copy.morphing.widgets.photo.uploadPrompt}
           </p>
           <p className="mt-1 text-2xs text-ink/60">
-            {COPY.morphing.widgets.photo.dropHint}
+            {copy.morphing.widgets.photo.dropHint}
           </p>
 
           <div className="mt-4 flex gap-2">
@@ -170,8 +172,8 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
                 fileInputRef.current?.click();
               }}
             >
-              <Icon icon={UploadFileOutlinedIcon} size="sm" className="mr-1 inline" />
-              {COPY.morphing.widgets.photo.uploadButton}
+              <Icon icon={UploadFileOutlinedIcon} size="sm" className="me-1 inline" />
+              {copy.morphing.widgets.photo.uploadButton}
             </PillButton>
             <PillButton
               type="button"
@@ -182,16 +184,16 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
                 onChange(DEFAULT_DEMO_PHOTO);
               }}
             >
-              {COPY.morphing.widgets.photo.demoCaptureButton}
+              {copy.morphing.widgets.photo.demoCaptureButton}
             </PillButton>
           </div>
         </div>
       )}
 
       {field.instructions && (
-        <div className="mt-4 rounded-tile bg-ink/5 p-3 text-2xs text-ink/75 leading-relaxed text-left">
+        <div className="mt-4 rounded-tile bg-ink/5 p-3 text-2xs text-ink/75 leading-relaxed text-start">
           <p className="font-semibold text-ink">
-            {COPY.morphing.widgets.photo.instructionsLabel}
+            {copy.morphing.widgets.photo.instructionsLabel}
           </p>
           <p className="mt-1">{field.instructions}</p>
         </div>

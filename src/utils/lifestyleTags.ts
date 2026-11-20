@@ -13,7 +13,26 @@ import SmokeFreeOutlinedIcon from '@mui/icons-material/SmokeFreeOutlined';
 import SmokingRoomsOutlinedIcon from '@mui/icons-material/SmokingRoomsOutlined';
 import TrainOutlinedIcon from '@mui/icons-material/TrainOutlined';
 import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
-import type { RegionalLifestyleTag } from '../types/auth';
+import type { LocaleCopy } from '../data/locales/types';
+import type { CulturalRhythmId, RegionalLifestyleTag } from '../types/auth';
+
+/**
+ * Localized label for a stored tag. Managed ids (rhythms, work, smoking, climate)
+ * use the same wording as the /profile chips; custom habits show as typed.
+ */
+export function getLifestyleTagDisplayLabel(tag: string, copy: LocaleCopy): string {
+  const profileCopy = copy.profile;
+  const rhythmLabel = profileCopy.culturalRhythmOptions[tag as CulturalRhythmId];
+  if (rhythmLabel) return rhythmLabel;
+  const managed = (profileCopy.managedTagLabels as Record<string, string>)[tag];
+  if (managed) return managed;
+  return formatLifestyleTagLabel(tag);
+}
+
+/** Localized label for a canonical caution; custom cautions show as typed. */
+export function getCautionDisplayLabel(caution: string, copy: LocaleCopy): string {
+  return (copy.profile.cautionLabels as Record<string, string>)[caution] ?? caution;
+}
 
 /** Strips any legacy leading pictograph/emoji prefix and formats snake_case rhythm IDs cleanly. */
 export function formatLifestyleTagLabel(tag: string): string {

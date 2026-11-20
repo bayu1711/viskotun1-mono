@@ -10,11 +10,12 @@ import type {
 import type { AvailabilityMode, AvailableTimeWindow } from '../types/schedule';
 import type { LocaleCopy } from '../data/locales/types';
 import { resolveCountryCodeFromInput, resolveCountryName } from './geo';
-import { formatLifestyleTagLabel } from './lifestyleTags';
+import { formatLifestyleTagLabel, getLifestyleTagDisplayLabel } from './lifestyleTags';
 import {
   deriveClinicalFocus,
   getRegionalAvailabilityPresets,
   isFastingContextRegion,
+  normalizePhysicalCautions,
   resolveCulturalRhythms,
   sanitizeAge,
   syncLifestyleActiveTags
@@ -942,6 +943,9 @@ export function buildProfileUpdatesFromParse(
 } {
   const existingTags = currentProfile?.activeTags ?? [];
   const mergedTags = Array.from(new Set([...existingTags, ...parsed.customTags]));
+  const normalizedCautions = parsed.physicalCautions
+    ? normalizePhysicalCautions(parsed.physicalCautions)
+    : undefined;
 
   const provisionalLifestyle: Partial<UserLifestyleProfile> = {
     ...currentProfile,
@@ -953,7 +957,7 @@ export function buildProfileUpdatesFromParse(
       ? { isRamadanFastingObserver: parsed.isRamadanFastingObserver }
       : {}),
     ...(parsed.smokingStatus ? { smokingStatus: parsed.smokingStatus } : {}),
-    ...(parsed.physicalCautions ? { physicalCautions: parsed.physicalCautions } : {}),
+    ...(normalizedCautions ? { physicalCautions: normalizedCautions } : {}),
     activeTags: mergedTags
   };
 
@@ -973,7 +977,7 @@ export function buildProfileUpdatesFromParse(
       ? { isRamadanFastingObserver: parsed.isRamadanFastingObserver }
       : {}),
     ...(parsed.smokingStatus ? { smokingStatus: parsed.smokingStatus } : {}),
-    ...(parsed.physicalCautions ? { physicalCautions: parsed.physicalCautions } : {}),
+    ...(normalizedCautions ? { physicalCautions: normalizedCautions } : {}),
     activeTags: syncedTags,
     ...(nextStage === 'complete' ? { intakeCompleted: true } : {})
   };
@@ -984,7 +988,10 @@ export function buildProfileUpdatesFromParse(
     ...(parsed.availableWindows && parsed.availableWindows.length > 0
       ? { availableWindows: parsed.availableWindows }
       : {}),
-    ...(nextStage === 'complete' ? { clinicalGoals: suggestedFocus } : {})
+    // Never overwrite a goal the participant wrote on /profile.
+    ...(nextStage === 'complete' && !currentUserProfile?.clinicalGoals?.trim()
+      ? { clinicalGoals: suggestedFocus }
+      : {})
   };
 
   return { profileUpdates, userProfileUpdates, suggestedFocus };
@@ -1079,9 +1086,11 @@ export function formatProfileSummary(
   if (lifestyleProfile?.workPattern && lifestyleProfile.workPattern !== 'standard' && copy) {
     parts.push(copy.profile.workPatterns[lifestyleProfile.workPattern]);
   }
-  const activeTags = lifestyleProfile?.activeTags ?? [];
+  // Work-pattern tags repeat the work label above, so skip them.
+  const WORK_TAGS = new Set(['healthcare_shift_worker', 'desk_bound_worker', 'frequent_traveler']);
+  const activeTags = (lifestyleProfile?.activeTags ?? []).filter((tag) => !WORK_TAGS.has(tag));
   for (const tag of activeTags.slice(0, 2)) {
-    const label = formatLifestyleTagLabel(tag);
+    const label = copy ? getLifestyleTagDisplayLabel(tag, copy) : formatLifestyleTagLabel(tag);
     if (!parts.some((p) => p.toLowerCase() === label.toLowerCase())) {
       parts.push(label);
     }
@@ -1171,7 +1180,7 @@ export function getQuickRepliesForStage(options: {
         .filter((label) => !activeTagSet.has(label.toLowerCase()));
 
       // 2. Physical caution fallbacks
-      const physicalFallbacks = [pCopy.cautionPresets[0], pCopy.cautionPresets[1]].filter(Boolean);
+      const physicalFallbacks = [pCopy.cautionLabels['Knee sensitivity'], pCopy.cautionLabels['Lower back sensitivity']].filter(Boolean);
 
       // 3. Country-aware substance / smoking fallbacks
       const isUae = countryCode === 'AE';

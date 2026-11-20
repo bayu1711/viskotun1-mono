@@ -6,7 +6,6 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useRoutine } from '../../contexts/RoutineContext';
-import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
 import { SAMPLE_PAPERS, type SamplePaper } from '../../data/samplePapers';
 import { formatRoutineTitle } from '../../utils/text';
@@ -16,7 +15,9 @@ import { PageContainer } from '../layout/PageContainer';
 import { PageHeader } from '../layout/PageHeader';
 import { Icon } from '../ui/Icon';
 
+import { useLocale } from '../../contexts/LocaleContext';
 export function EmptyRoutineView() {
+  const { copy } = useLocale();
   const { trendingPapers, samplePapers } = useRoutine();
   const { openAssistant } = useAssistant();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -45,13 +46,13 @@ export function EmptyRoutineView() {
   return (
     <PageContainer>
       <PageHeader
-        eyebrow={COPY.onboarding.welcomeEyebrow}
-        title={COPY.onboarding.welcomeTitle}
+        eyebrow={copy.onboarding.welcomeEyebrow}
+        title={copy.onboarding.welcomeTitle}
       />
 
       <div className="mt-5 max-w-3xl space-y-6">
         <p className="text-base leading-relaxed text-ink/70">
-          {COPY.onboarding.welcomeSubtitle}
+          {copy.onboarding.welcomeSubtitle}
         </p>
 
         {/* Drag & Drop Prompt Card */}
@@ -71,10 +72,10 @@ export function EmptyRoutineView() {
             <Icon icon={UploadFileOutlinedIcon} size="lg" />
           </div>
           <h3 className="mt-4 text-base font-medium text-ink">
-            {COPY.onboarding.dropPrompt}
+            {copy.onboarding.dropPrompt}
           </h3>
           <p className="mx-auto mt-1 max-w-md text-xs text-ink/60">
-            {COPY.onboarding.dropSubtext}
+            {copy.onboarding.dropSubtext}
           </p>
         </div>
       </div>
@@ -84,16 +85,16 @@ export function EmptyRoutineView() {
         <div className="flex flex-wrap items-center justify-between gap-2.5">
           <div className="space-y-2">
             <h3 className="text-xs font-medium text-ink/70">
-              {COPY.onboarding.trendingHeading}
+              {copy.onboarding.trendingHeading}
             </h3>
             {selectedCategory !== 'all' && (
               <div className="flex items-center gap-1.5 text-2xs">
-                <span className="text-ink/60">{COPY.howTo.filterByTopic}</span>
+                <span className="text-ink/60">{copy.howTo.filterByTopic}</span>
                 <button
                   type="button"
                   onClick={() => setSelectedCategory('all')}
                   className="relative inline-flex items-center gap-1 rounded-full bg-ink px-2.5 py-0.5 font-medium text-white transition-opacity hover:opacity-90 before:absolute before:-inset-y-3 before:inset-x-0"
-                  title={COPY.howTo.clearFilter}
+                  title={copy.howTo.clearFilter}
                 >
                   <span>{selectedCategory}</span>
                   <span className="text-white/80">×</span>
@@ -106,7 +107,7 @@ export function EmptyRoutineView() {
             className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
           >
             <Icon icon={TrendingUpIcon} size="xs" />
-            <span>{COPY.howTo.buttonExploreSamples}</span>
+            <span>{copy.howTo.buttonExploreSamples}</span>
           </Link>
         </div>
 
@@ -130,7 +131,7 @@ export function EmptyRoutineView() {
         paperTitle={
           viewingVersionPaper?.title ||
           formatRoutineTitle(viewingVersionPaper?.shortTitle) ||
-          COPY.community.defaultRoutineTitle
+          copy.community.defaultRoutineTitle
         }
         currentVersion={viewingVersionPaper?.version || '1.0'}
         changelog={viewingVersionPaper?.changelog || []}

@@ -3,10 +3,10 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import CheckIcon from '@mui/icons-material/Check';
-import { COPY } from '../../data/copy';
 import type { PaperFaq } from '../../types/routine';
 import { Icon } from '../ui/Icon';
 
+import { useLocale } from '../../contexts/LocaleContext';
 interface FaqSuggestionsProps {
   suggestions?: string[];
   faqs?: PaperFaq[];
@@ -34,6 +34,7 @@ export function FaqSuggestions({
   isNoneOption,
   isPrimaryOption
 }: FaqSuggestionsProps) {
+  const { copy } = useLocale();
   const items = suggestions ?? (faqs || []).map((f) => f.question);
   if (items.length === 0) return null;
 
@@ -42,7 +43,7 @@ export function FaqSuggestions({
   return (
     <div
       role="group"
-      aria-label={COPY.assistant.suggestionsLabel}
+      aria-label={copy.assistant.suggestionsLabel}
       className={`flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar transition-opacity ${
         disabled ? 'opacity-50 pointer-events-none' : 'opacity-100'
       }`}

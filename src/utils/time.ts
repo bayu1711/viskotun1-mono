@@ -5,11 +5,11 @@ export function nowLabel(date = new Date()) {
   return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
 
-export function greeting(date = new Date()) {
+export function greeting(date = new Date(), labels: { morning: string; afternoon: string; evening: string } = COPY.greeting) {
   const hour = date.getHours();
-  if (hour < MORNING_END_HOUR) return COPY.greeting.morning;
-  if (hour < AFTERNOON_END_HOUR) return COPY.greeting.afternoon;
-  return COPY.greeting.evening;
+  if (hour < MORNING_END_HOUR) return labels.morning;
+  if (hour < AFTERNOON_END_HOUR) return labels.afternoon;
+  return labels.evening;
 }
 
 /**

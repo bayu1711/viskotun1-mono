@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRoutine } from '../../contexts/RoutineContext';
-import { COPY } from '../../data/copy';
+import type { LocaleCopy } from '../../data/locales/types';
 import { reviewFilters } from '../../data/reviewFilters';
 import type { ReviewFilter, CommunityReview } from '../../types/routine';
 import { EmptyState } from '../feedback/EmptyState';
@@ -12,17 +12,19 @@ import { PillButton } from '../ui/PillButton';
 import { SectionHeading } from '../ui/SectionHeading';
 import { ReviewCard } from './ReviewCard';
 
+import { useLocale } from '../../contexts/LocaleContext';
 type CohortFilter = 'all' | 'smoker' | 'non_smoker' | 'ramadan' | 'shift_work';
 
-const COHORT_FILTER_OPTIONS: { id: CohortFilter; label: string }[] = [
-  { id: 'all', label: COPY.lifestyleTuning.filterAll },
-  { id: 'smoker', label: COPY.lifestyleTuning.filterSmokers },
-  { id: 'non_smoker', label: COPY.lifestyleTuning.filterNonSmokers },
-  { id: 'ramadan', label: COPY.lifestyleTuning.filterRamadan },
-  { id: 'shift_work', label: COPY.lifestyleTuning.filterShiftWork }
+const COHORT_FILTER_OPTIONS = (copy: LocaleCopy): { id: CohortFilter; label: string }[] => [
+  { id: 'all', label: copy.lifestyleTuning.filterAll },
+  { id: 'smoker', label: copy.lifestyleTuning.filterSmokers },
+  { id: 'non_smoker', label: copy.lifestyleTuning.filterNonSmokers },
+  { id: 'ramadan', label: copy.lifestyleTuning.filterRamadan },
+  { id: 'shift_work', label: copy.lifestyleTuning.filterShiftWork }
 ];
 
 export function ReviewsPanel() {
+  const { copy } = useLocale();
   const { routine, openReviewDrawer } = useRoutine();
   const targetRoutine = routine;
   const [filter, setFilter] = useState<ReviewFilter>('all');
@@ -114,13 +116,13 @@ export function ReviewsPanel() {
   });
 
   return (
-    <Panel aria-label={COPY.community.reviewsLabel}>
+    <Panel aria-label={copy.community.reviewsLabel}>
       <SectionHeading
-        eyebrow={COPY.community.reviewsEyebrow}
-        title={COPY.community.reviewsTitle}
+        eyebrow={copy.community.reviewsEyebrow}
+        title={copy.community.reviewsTitle}
         action={
           <PillButton size="sm" onClick={openReviewDrawer}>
-            {COPY.community.shareAction}
+            {copy.community.shareAction}
           </PillButton>
         }
       />
@@ -129,10 +131,10 @@ export function ReviewsPanel() {
           options={reviewFilters}
           value={filter}
           onChange={setFilter}
-          ariaLabel={COPY.community.filterLabel}
+          ariaLabel={copy.community.filterLabel}
         />
         <FilterChips
-          options={COHORT_FILTER_OPTIONS}
+          options={COHORT_FILTER_OPTIONS(copy)}
           value={cohortFilter}
           onChange={setCohortFilter}
           ariaLabel="Filter reviews by participant lifestyle cohort"
@@ -145,7 +147,7 @@ export function ReviewsPanel() {
           <div className="h-20 w-full animate-pulse rounded-tile bg-canvas" />
         </div>
       ) : reviews.length === 0 ? (
-        <EmptyState className="mt-4" title={COPY.community.emptyReviews} />
+        <EmptyState className="mt-4" title={copy.community.emptyReviews} />
       ) : (
         <ul className="mt-4 space-y-2">
           {reviews.map((review) => (

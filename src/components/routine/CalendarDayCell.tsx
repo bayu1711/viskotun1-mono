@@ -1,10 +1,10 @@
 import React from 'react';
-import { COPY } from '../../data/copy';
 import { cn } from '../../utils/cn';
 import type { CalendarDay } from '../../utils/calendar';
 import { toPercent } from '../../utils/math';
 import { ProgressRing } from '../ui/ProgressRing';
 
+import { useLocale } from '../../contexts/LocaleContext';
 const CELL = 'flex h-cell w-cell items-center justify-center rounded-full text-xs';
 
 interface CalendarDayCellProps {
@@ -12,10 +12,11 @@ interface CalendarDayCellProps {
 }
 
 export function CalendarDayCell({ day }: CalendarDayCellProps) {
+  const { copy } = useLocale();
   const label =
   day.status === 'upcoming' ?
-  COPY.calendar.upcoming(day.day) :
-  COPY.calendar.progress(day.day, toPercent(day.completion));
+  copy.calendar.upcoming(day.day) :
+  copy.calendar.progress(day.day, toPercent(day.completion));
 
   return (
     <li className="flex justify-center" aria-current={day.status === 'today' ? 'date' : undefined}>
@@ -34,7 +35,7 @@ function renderVisual({ day, completion, status }: CalendarDay) {
           size={38}
           tone="light-bare"
           decorative
-          className="rounded-full bg-orange text-xs font-semibold text-white shadow-sm ring-2 ring-orange/30"
+          className="rounded-full bg-orange text-xs font-semibold text-ink shadow-sm ring-2 ring-orange/30"
         >
           {day}
         </ProgressRing>

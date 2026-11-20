@@ -29,7 +29,7 @@ export function Callout({ tone, children, icon, role, className }: CalloutProps)
       className={cn('flex items-start gap-3 rounded-callout p-4 text-sm leading-relaxed text-ink', TONES[tone], className)}>
       
       {icon}
-      <div className="min-w-0 flex-1">{children}</div>
+      <div className="min-w-0 flex-1 [unicode-bidi:plaintext]">{children}</div>
     </div>);
 
 }

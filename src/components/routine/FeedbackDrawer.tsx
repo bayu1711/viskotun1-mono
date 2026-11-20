@@ -4,16 +4,17 @@ import React, { useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
-import { COPY } from '../../data/copy';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { FeedbackLogForm } from './FeedbackLogForm';
 
+import { useLocale } from '../../contexts/LocaleContext';
 interface FeedbackDrawerProps {
   open?: boolean;
   onClose?: () => void;
 }
 
 export function FeedbackDrawer({ open, onClose }: FeedbackDrawerProps = {}) {
+  const { copy } = useLocale();
   const routine = useRoutine();
   const isOpen = open ?? routine.isFeedbackDrawerOpen;
   const handleClose = onClose ?? routine.closeFeedbackDrawer;
@@ -35,7 +36,7 @@ export function FeedbackDrawer({ open, onClose }: FeedbackDrawerProps = {}) {
             ref={panelRef}
             role="dialog"
             aria-modal="true"
-            aria-label={COPY.feedbackDrawer.metricDialogLabel(routine.feedbackMetric?.name)}
+            aria-label={copy.feedbackDrawer.metricDialogLabel(routine.feedbackMetric?.name)}
             tabIndex={-1}
             initial={{ y: MOTION.dialogOffsetY, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}

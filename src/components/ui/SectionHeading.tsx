@@ -24,14 +24,15 @@ interface SectionHeadingProps {
 
 export function SectionHeading({ eyebrow, title, action, size = 'md', as: Tag = 'h2', id }: SectionHeadingProps) {
   return (
-    <div className="flex items-end justify-between gap-4">
+    <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
       <div className="min-w-0">
-        <p className={cn('leading-none text-ink/60', EYEBROW_SIZE[size])}>{eyebrow}</p>
-        <Tag id={id} className={cn('mt-1 text-ink', TITLE_SIZE[size])}>
+        <p className={cn('leading-none text-ink/70', EYEBROW_SIZE[size])}>{eyebrow}</p>
+        <Tag id={id} className={cn('mt-1 text-ink [text-wrap:balance]', TITLE_SIZE[size])}>
           {title}
         </Tag>
       </div>
-      {action}
+      {/* Actions wrap under the title on narrow screens instead of squeezing into a blob. */}
+      {action && <div className="shrink-0">{action}</div>}
     </div>);
 
 }

@@ -6,7 +6,6 @@ import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useLocale } from '../../contexts/LocaleContext';
 import { useRoutine } from '../../contexts/RoutineContext';
-import { COPY } from '../../data/copy';
 import type { RoutineStep } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { targetSetsForStep } from '../../utils/routineMetrics';
@@ -50,7 +49,7 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
   const done = isOnDemand ? rawDone : Math.min(rawDone, targetSets);
   const complete = isStepComplete(step.id);
   const styles = toneStyles[step.tone];
-  const display = getStepDisplay(step);
+  const display = getStepDisplay(step, copy);
 
   if (excluded) {
     return (
@@ -70,7 +69,7 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
                 {step.action}
               </h3>
               <span className="rounded-full bg-ink/10 px-2 py-0.5 text-3xs font-medium uppercase tracking-wider text-ink/60">
-                {COPY.task.excludedBadge}
+                {copy.task.excludedBadge}
               </span>
             </div>
             <p className="mt-1 text-2xs text-ink/60">{step.detail}</p>
@@ -80,13 +79,13 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
             onClick={() => toggleExcludeStep(step.id)}
             className="inline-flex min-h-11 items-center rounded-full border border-ink/20 bg-white px-3 text-2xs font-medium text-ink transition-colors hover:bg-mint hover:border-ink"
           >
-            {COPY.task.restoreStep}
+            {copy.task.restoreStep}
           </button>
         </div>
 
         <div className="mt-auto pt-4">
           <p className="text-2xs italic text-ink/60">
-            {COPY.task.excludedNote}
+            {copy.task.excludedNote}
           </p>
         </div>
       </article>
@@ -113,7 +112,7 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             {step.tempo && (
               <span className="inline-flex items-center rounded-full bg-white/70 px-2 py-0.5 text-3xs font-medium tabular-nums text-ink">
-                {COPY.task.tempoBadge(step.tempo)}
+                {copy.task.tempoBadge(step.tempo)}
               </span>
             )}
 
@@ -133,19 +132,19 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
 
           {step.inferred && (
             <div className="mt-1 flex flex-wrap items-center gap-1.5 text-2xs">
-              <span className="text-3xs text-ink/60">
+              <span className="text-3xs text-ink/80">
                 {step.inferredProvenance?.tier === 'lineage'
-                  ? COPY.task.lineageBadge(step.inferredProvenance.source)
-                  : COPY.task.inferredBadge(step.inferredProvenance?.source)}
+                  ? copy.task.lineageBadge(step.inferredProvenance.source)
+                  : copy.task.inferredBadge(step.inferredProvenance?.source)}
               </span>
               <span className="text-3xs text-ink/30">·</span>
               <button
                 type="button"
                 onClick={() => toggleExcludeStep(step.id)}
-                className="inline-flex min-h-11 items-center text-3xs text-ink/60 underline decoration-dotted transition-colors hover:text-ink hover:opacity-100"
-                title={COPY.task.excludedNote}
+                className="inline-flex min-h-11 items-center text-3xs text-ink/80 underline decoration-dotted transition-colors hover:text-ink hover:opacity-100"
+                title={copy.task.excludedNote}
               >
-                {COPY.task.excludeStep}
+                {copy.task.excludeStep}
               </button>
             </div>
           )}
@@ -157,8 +156,8 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
               e.stopPropagation();
               askAboutTask(step);
             }}
-            aria-label={COPY.task.helpAriaLabel(step.action)}
-            title={COPY.task.helpTooltip(step.action)}
+            aria-label={copy.task.helpAriaLabel(step.action)}
+            title={copy.task.helpTooltip(step.action)}
             className="relative flex h-7 w-7 items-center justify-center rounded-full border border-ink/15 bg-white/80 text-ink/60 transition-colors before:absolute before:-inset-2 hover:border-ink hover:bg-mint hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
           >
             <Icon icon={HelpOutlineOutlinedIcon} size="xs" />
@@ -176,7 +175,7 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
           <div className="flex items-baseline gap-2">
             <p className="text-metric font-light leading-none tabular-nums">
               {done}
-              <span className={cn('ml-1.5 text-sm', styles.muted)}>{sCopy.onDemandCounterLabel}</span>
+              <span className={cn('ms-1.5 text-sm', styles.muted)}>{sCopy.onDemandCounterLabel}</span>
             </p>
           </div>
           <p className={cn('text-3xs leading-snug', styles.muted)}>{sCopy.onDemandOptionalHint}</p>
@@ -184,7 +183,7 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
             <button
               type="button"
               onClick={() => incrementSet(step.id)}
-              className="inline-flex min-h-9 items-center gap-1 rounded-full bg-ink px-3.5 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
+              className="inline-flex min-h-11 items-center gap-1 rounded-full bg-ink px-4 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
             >
               <Icon icon={AddIcon} size="xs" />
               <span>{sCopy.onDemandLogBtn.replace(/^\+\s*/, '')}</span>
@@ -193,8 +192,8 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
               <button
                 type="button"
                 onClick={() => decrementSet(step.id)}
-                aria-label={`Decrease logged count for ${step.action}`}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-ink/20 bg-white/80 text-ink hover:border-ink cursor-pointer"
+                aria-label={copy.task.decrease(step.action)}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-ink/20 bg-white/80 text-ink hover:border-ink cursor-pointer"
               >
                 <Icon icon={RemoveIcon} size="xs" />
               </button>
@@ -206,7 +205,7 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
           <p className="text-metric font-light leading-none tabular-nums">
             {done}
             <span className={styles.muted}> / {targetSets}</span>
-            <span className={cn('ml-1.5 text-sm', styles.muted)}>
+            <span className={cn('ms-1.5 text-sm', styles.muted)}>
               {isContinuous
                 ? complete
                   ? sCopy.continuousConfirmLabel
@@ -214,8 +213,8 @@ export function TaskCard({ step, wide = false }: TaskCardProps) {
                 : display.setLabel}
             </span>
             {doseMode === 'micro' && (
-              <span className="ml-2 inline-flex items-center rounded bg-mint px-1.5 py-0.5 text-3xs font-semibold text-ink">
-                Micro
+              <span className="ms-2 inline-flex items-center rounded bg-mint px-1.5 py-0.5 text-3xs font-semibold text-ink">
+                {copy.task.microBadge}
               </span>
             )}
           </p>

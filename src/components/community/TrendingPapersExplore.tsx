@@ -2,13 +2,14 @@
 
 import React, { useMemo, useState } from 'react';
 import { useRoutine } from '../../contexts/RoutineContext';
-import { COPY } from '../../data/copy';
 import { SAMPLE_PAPERS, type SamplePaper } from '../../data/samplePapers';
 import { formatRoutineTitle } from '../../utils/text';
 import { TrendingPaperCard } from './TrendingPaperCard';
 import { VersionHistoryModal } from './VersionHistoryModal';
 
+import { useLocale } from '../../contexts/LocaleContext';
 export function TrendingPapersExplore() {
+  const { copy } = useLocale();
   const { samplePapers, trendingPapers } = useRoutine();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -32,17 +33,17 @@ export function TrendingPapersExplore() {
       {/* Intro Subtitle */}
       <div className="max-w-3xl space-y-3">
         <p className="text-base leading-relaxed text-ink/70">
-          {COPY.howTo.trendingSubtitle}
+          {copy.howTo.trendingSubtitle}
         </p>
 
         {selectedCategory !== 'all' && (
           <div className="flex items-center gap-1.5 pt-1 text-2xs">
-            <span className="text-ink/60">{COPY.howTo.filterByTopic}</span>
+            <span className="text-ink/60">{copy.howTo.filterByTopic}</span>
             <button
               type="button"
               onClick={() => setSelectedCategory('all')}
               className="relative inline-flex items-center gap-1 rounded-full bg-ink px-2.5 py-0.5 font-medium text-white transition-opacity hover:opacity-90 before:absolute before:-inset-y-3 before:inset-x-0"
-              title={COPY.howTo.clearFilter}
+              title={copy.howTo.clearFilter}
             >
               <span>{selectedCategory}</span>
               <span className="text-white/80">×</span>
@@ -71,7 +72,7 @@ export function TrendingPapersExplore() {
         paperTitle={
           viewingVersionPaper?.title ||
           formatRoutineTitle(viewingVersionPaper?.shortTitle) ||
-          COPY.community.defaultRoutineTitle
+          copy.community.defaultRoutineTitle
         }
         currentVersion={viewingVersionPaper?.version || '1.0'}
         changelog={viewingVersionPaper?.changelog || []}

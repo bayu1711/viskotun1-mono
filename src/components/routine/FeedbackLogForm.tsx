@@ -5,7 +5,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import { toast } from 'sonner';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { FEEDBACK_NOTE_MAX_LENGTH, FEEDBACK_SCORE_DEFAULT } from '../../data/config';
-import { COPY } from '../../data/copy';
 import type { DataCollectionField, MorphingDataLog } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { fieldValueExceedsThreshold } from '../../utils/routineMetrics';
@@ -16,6 +15,7 @@ import { Icon } from '../ui/Icon';
 import { PillButton } from '../ui/PillButton';
 import { DynamicFieldRenderer } from './DynamicFieldRenderer';
 
+import { useLocale } from '../../contexts/LocaleContext';
 interface FeedbackLogFormProps {
   onClose: () => void;
 }
@@ -51,6 +51,7 @@ function getInitialValueForField(field: DataCollectionField, logs: MorphingDataL
 
 /** Mounted only while the drawer is open, so its state resets naturally on every open. */
 export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
+  const { copy } = useLocale();
   const {
     currentDay,
     scheduledFields,
@@ -104,13 +105,13 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
   }
 
   const numericScore = typeof value === 'number' ? value : 0;
-  const tone = severityTone(numericScore);
+  const tone = severityTone(numericScore, copy.severityLevels);
   const isExceeded = fieldValueExceedsThreshold(activeField, value);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     logMorphingData(activeField.id, value, note.trim());
-    toast.success(COPY.morphing.savedToast(activeField.name));
+    toast.success(copy.morphing.savedToast(activeField.name));
     onClose();
   };
 
@@ -129,12 +130,12 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
                 className={cn(
                   'rounded-full px-3 py-1 text-2xs font-medium whitespace-nowrap transition-colors',
                   isSelected
-                    ? 'bg-orange text-white shadow-2xs font-semibold'
+                    ? 'bg-orange text-ink shadow-2xs font-semibold'
                     : 'bg-white text-ink/65 border border-ink/15 hover:bg-ink/5'
                 )}
               >
                 {field.name}
-                {field.frequency === 'milestone' && COPY.morphing.milestoneSuffix}
+                {field.frequency === 'milestone' && copy.morphing.milestoneSuffix}
               </button>
             );
           })}
@@ -149,17 +150,17 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
         )}
       >
         <div className="flex items-center justify-between border-b border-ink/20 pb-3">
-          <CircleButton label={COPY.feedbackDrawer.close} onClick={onClose}>
+          <CircleButton label={copy.feedbackDrawer.close} onClick={onClose}>
             <Icon icon={CloseIcon} size="md" />
           </CircleButton>
           <div className="text-center">
             <h2 className="text-sm font-medium">
-              {COPY.morphing.dialogTitle(activeField.name, currentDay)}
+              {copy.morphing.dialogTitle(activeField.name, currentDay)}
             </h2>
             <span className="text-3xs uppercase tracking-wider text-ink/60">
               {activeField.frequency === 'milestone'
-                ? COPY.morphing.milestoneTag
-                : COPY.morphing.dailyTag}
+                ? copy.morphing.milestoneTag
+                : copy.morphing.dailyTag}
             </span>
           </div>
           <span className="w-10" aria-hidden="true" />
@@ -180,12 +181,12 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
       <div className="px-6 pb-8 pt-5 sm:pb-6">
         {isExceeded && (
           <Callout tone="blush" role="status" className="mb-4 rounded-tile px-4 py-3">
-            {COPY.safety.dynamicEscalationAlert(activeField.name, activeField.escalationMessage)}
+            {copy.safety.dynamicEscalationAlert(activeField.name, activeField.escalationMessage)}
           </Callout>
         )}
 
         <label htmlFor={noteId} className="sr-only">
-          {COPY.feedbackDrawer.notesLabel}
+          {copy.feedbackDrawer.notesLabel}
         </label>
         <textarea
           id={noteId}
@@ -193,12 +194,12 @@ export function FeedbackLogForm({ onClose }: FeedbackLogFormProps) {
           value={note}
           maxLength={FEEDBACK_NOTE_MAX_LENGTH}
           onChange={(event) => setNote(event.target.value)}
-          placeholder={COPY.feedbackDrawer.notesPlaceholder}
+          placeholder={copy.feedbackDrawer.notesPlaceholder}
           className="w-full resize-none rounded-tile border border-ink/15 px-4 py-3 text-sm placeholder:text-ink/60 focus:border-ink focus:outline-none"
         />
 
         <PillButton type="submit" fullWidth className="mt-4">
-          {COPY.morphing.saveEntry}
+          {copy.morphing.saveEntry}
         </PillButton>
       </div>
     </form>

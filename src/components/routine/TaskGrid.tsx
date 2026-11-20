@@ -1,23 +1,24 @@
 import React from 'react';
 import FitnessCenterOutlinedIcon from '@mui/icons-material/FitnessCenterOutlined';
-import { COPY } from '../../data/copy';
 import type { RoutineStep } from '../../types/routine';
 import { isWideStep } from '../../utils/steps';
 import { EmptyState } from '../feedback/EmptyState';
 import { TaskCard } from './TaskCard';
 
+import { useLocale } from '../../contexts/LocaleContext';
 interface TaskGridProps {
   steps: RoutineStep[];
 }
 
 export function TaskGrid({ steps }: TaskGridProps) {
+  const { copy } = useLocale();
   if (steps.length === 0) {
     return (
       <EmptyState
         className="mt-2.5"
         icon={FitnessCenterOutlinedIcon}
-        title={COPY.routine.emptyStepsTitle}
-        description={COPY.routine.emptyStepsBody} />);
+        title={copy.routine.emptyStepsTitle}
+        description={copy.routine.emptyStepsBody} />);
 
 
   }

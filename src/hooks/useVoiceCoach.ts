@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { COPY } from '../data/copy';
+import { useLocale } from '../contexts/LocaleContext';
 import type { RoutineStep } from '../types/routine';
 import { formatVoiceName, getCuratedNaturalVoices } from '../utils/voice';
 
@@ -76,7 +77,13 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
   const [isSoundEnabled, setIsSoundEnabled] = useState(true);
   const [countdownRemaining, setCountdownRemaining] = useState<number | null>(null);
   const [countdownKind, setCountdownKind] = useState<CountdownKind>('hold');
-  const [statusText, setStatusText] = useState<string>(COPY.voiceCoach.idle);
+  // On-screen status follows the app language; spoken lines stay English to match the voice.
+  const { copy } = useLocale();
+  const statusCopyRef = useRef(copy.voiceCoach);
+  useEffect(() => {
+    statusCopyRef.current = copy.voiceCoach;
+  }, [copy]);
+  const [statusText, setStatusText] = useState<string>(copy.voiceCoach.idle);
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoiceIndex, setSelectedVoiceIndex] = useState(0);
 
@@ -281,14 +288,14 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
         kind === 'hold'
           ? {
               start: COPY.voiceCoach.holdCountdownStart,
-              active: COPY.voiceCoach.countdownActive,
-              complete: COPY.voiceCoach.countdownComplete,
+              active: statusCopyRef.current.countdownActive,
+              complete: statusCopyRef.current.countdownComplete,
               finished: COPY.voiceCoach.holdFinished
             }
           : {
               start: COPY.voiceCoach.timerStart,
-              active: COPY.voiceCoach.timerActive,
-              complete: COPY.voiceCoach.timerComplete,
+              active: statusCopyRef.current.timerActive,
+              complete: statusCopyRef.current.timerComplete,
               finished: COPY.voiceCoach.timerFinished
             };
       let remaining = seconds;
@@ -355,7 +362,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
       resumeRef.current = null;
       setCurrentStepIndex(index);
       setCountdownRemaining(null);
-      setStatusText(COPY.voiceCoach.stepPacing(index + 1, steps.length));
+      setStatusText(statusCopyRef.current.stepPacing(index + 1, steps.length));
 
       chime('start');
 
@@ -393,7 +400,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
           startHoldCountdown(holdSeconds, () => restThen(() => guideStep(index + 1)), '', 'timer');
         } else {
           // Rep-based steps are logged by the user on the step card, then the user moves on
-          setStatusText(COPY.voiceCoach.awaitingNext);
+          setStatusText(statusCopyRef.current.awaitingNext);
           speak(COPY.voiceCoach.awaitNextPrompt);
         }
       });
@@ -421,7 +428,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
     clearTimer();
     setIsPlaying(false);
     setIsPaused(true);
-    setStatusText(COPY.voiceCoach.pause);
+    setStatusText(statusCopyRef.current.pause);
   }, [cancelSpeech, clearTimer]);
 
   const resumeCoach = useCallback(() => {
@@ -442,7 +449,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
     setIsPaused(false);
     setCountdownRemaining(null);
     setCurrentStepIndex(0);
-    setStatusText(COPY.voiceCoach.idle);
+    setStatusText(statusCopyRef.current.idle);
   }, [cancelSpeech, clearTimer]);
 
   const nextStep = useCallback(() => {

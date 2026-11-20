@@ -2,12 +2,12 @@ import React, { type FormEvent, forwardRef, useRef, useState } from 'react';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import type { AssistantMode } from '../../contexts/AssistantContext';
-import { COPY } from '../../data/copy';
 import { isPaperLink } from '../../utils/assistant';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 import { HiddenPdfInput } from './HiddenPdfInput';
 
+import { useLocale } from '../../contexts/LocaleContext';
 interface AssistantComposerProps {
   mode: AssistantMode;
   onAsk: (question: string) => void;
@@ -22,6 +22,7 @@ export const AssistantComposer = forwardRef<HTMLInputElement, AssistantComposerP
 { mode, onAsk, onAddPaper, onFile, placeholder, ariaLabel },
 inputRef)
 {
+  const { copy } = useLocale();
   const [draft, setDraft] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const isAsk = mode === 'ask';
@@ -43,23 +44,23 @@ inputRef)
 
   const defaultPlaceholder =
     mode === 'lifestyle'
-      ? COPY.lifestyleTuning.customPromptPlaceholder
+      ? copy.lifestyleTuning.customPromptPlaceholder
       : isAsk
-      ? COPY.assistant.placeholderAsk
-      : COPY.assistant.placeholderUpload;
+      ? copy.assistant.placeholderAsk
+      : copy.assistant.placeholderUpload;
   const defaultAriaLabel =
     mode === 'lifestyle'
-      ? COPY.lifestyleTuning.title
+      ? copy.lifestyleTuning.title
       : isAsk
-      ? COPY.assistant.inputAsk
-      : COPY.assistant.inputUpload;
+      ? copy.assistant.inputAsk
+      : copy.assistant.inputUpload;
 
   const isLifestyle = mode === 'lifestyle';
 
   return (
     <form onSubmit={handleSubmit} className="flex items-center gap-2 rounded-full border border-ink/10 bg-white p-1.5">
       {!isLifestyle && (
-        <CircleButton label={COPY.assistant.attach} onClick={() => fileRef.current?.click()} size={38}>
+        <CircleButton label={copy.assistant.attach} onClick={() => fileRef.current?.click()} size={38}>
           <Icon icon={AttachFileIcon} size="md" />
         </CircleButton>
       )}
@@ -71,12 +72,12 @@ inputRef)
         aria-label={ariaLabel || defaultAriaLabel}
         placeholder={placeholder || defaultPlaceholder}
         className={`min-w-0 flex-1 bg-transparent py-2 text-base sm:text-sm placeholder:text-ink/60 focus:outline-none ${
-          isLifestyle ? 'pl-3.5' : ''
+          isLifestyle ? 'ps-3.5' : ''
         }`} />
       
       <button
         type="submit"
-        aria-label={COPY.assistant.send}
+        aria-label={copy.assistant.send}
         disabled={!canSend}
         className="flex h-cell w-cell shrink-0 items-center justify-center rounded-full bg-ink text-white transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 disabled:opacity-30 cursor-pointer">
         

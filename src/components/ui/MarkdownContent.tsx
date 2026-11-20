@@ -242,7 +242,7 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
 
           case 'ul': {
             return (
-              <ul key={idx} className="my-1.5 space-y-1.5 pl-0.5">
+              <ul key={idx} className="my-1.5 space-y-1.5 ps-0.5">
                 {block.items.map((item, itemIdx) => (
                   <li key={itemIdx} className="flex items-start gap-2 text-sm leading-relaxed text-ink/90">
                     <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ink/50" />
@@ -255,7 +255,7 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
 
           case 'ol': {
             return (
-              <ol key={idx} className="my-1.5 space-y-1.5 pl-0.5">
+              <ol key={idx} className="my-1.5 space-y-1.5 ps-0.5">
                 {block.items.map((item, itemIdx) => (
                   <li key={itemIdx} className="flex items-start gap-2 text-sm leading-relaxed text-ink/90">
                     <span className="shrink-0 font-medium text-xs text-ink/60 tabular-nums">
@@ -270,7 +270,7 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
 
           case 'blockquote': {
             return (
-              <blockquote key={idx} className="my-2 border-l-2 border-ink/20 pl-3 italic text-xs text-ink/70">
+              <blockquote key={idx} className="my-2 border-s-2 border-ink/20 ps-3 italic text-xs text-ink/70">
                 {block.lines.map((line, lIdx) => (
                   <p key={lIdx}>{renderInline(line)}</p>
                 ))}

@@ -3,12 +3,12 @@
 import React, { useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import { COPY } from '../../../data/copy';
 import type { DataCollectionField } from '../../../types/routine';
 import { clamp } from '../../../utils/math';
 import { CircleButton } from '../../ui/CircleButton';
 import { Icon } from '../../ui/Icon';
 
+import { useLocale } from '../../../contexts/LocaleContext';
 interface NumericWidgetProps {
   field: DataCollectionField;
   value: number;
@@ -16,6 +16,7 @@ interface NumericWidgetProps {
 }
 
 export function NumericWidget({ field, value, onChange }: NumericWidgetProps) {
+  const { copy } = useLocale();
   const min = field.min ?? 0;
   const max = field.max ?? 1000;
   const step = field.step ?? 1;
@@ -66,7 +67,7 @@ export function NumericWidget({ field, value, onChange }: NumericWidgetProps) {
     <div className="w-full text-center">
       <div className="mt-6 flex items-center justify-center gap-6">
         <CircleButton
-          label={COPY.morphing.widgets.numeric.decrease(field.name)}
+          label={copy.morphing.widgets.numeric.decrease(field.name)}
           onClick={() => handleStep(-step)}
           disabled={currentVal <= min}
           size={40}
@@ -95,7 +96,7 @@ export function NumericWidget({ field, value, onChange }: NumericWidgetProps) {
         </div>
 
         <CircleButton
-          label={COPY.morphing.widgets.numeric.increase(field.name)}
+          label={copy.morphing.widgets.numeric.increase(field.name)}
           variant="solid"
           onClick={() => handleStep(step)}
           disabled={currentVal >= max}
@@ -106,17 +107,17 @@ export function NumericWidget({ field, value, onChange }: NumericWidgetProps) {
       </div>
 
       <p className="mt-3 text-xs text-ink/60">
-        {COPY.morphing.widgets.numeric.referenceRange(min, max, field.unit)}
+        {copy.morphing.widgets.numeric.referenceRange(min, max, field.unit)}
       </p>
       {wasClamped && (
         <p role="status" className="mt-1 text-xs font-medium text-ink">
-          {COPY.morphing.widgets.numeric.outOfRange(min, max, field.unit)}
+          {copy.morphing.widgets.numeric.outOfRange(min, max, field.unit)}
         </p>
       )}
 
       {field.instructions && (
-        <p className="mt-3 rounded-tile bg-ink/5 p-3 text-2xs text-ink/70 leading-relaxed text-left">
-          <strong className="text-ink font-medium">{COPY.morphing.widgets.routineNote}</strong>
+        <p className="mt-3 rounded-tile bg-ink/5 p-3 text-2xs text-ink/70 leading-relaxed text-start">
+          <strong className="text-ink font-medium">{copy.morphing.widgets.routineNote}</strong>
           {field.instructions}
         </p>
       )}

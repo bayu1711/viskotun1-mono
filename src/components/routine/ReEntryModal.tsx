@@ -102,7 +102,7 @@ export function ReEntryModal() {
                       {copy.reEntry.badge}
                     </span>
                     {lapseDays > 0 && (
-                      <span className="text-3xs font-medium text-ink/50">
+                      <span className="text-3xs font-medium text-ink/70">
                         {locale === 'ar' ? `مضى ${lapseDays} يوم` : `${lapseDays} days elapsed`}
                       </span>
                     )}
@@ -149,7 +149,7 @@ export function ReEntryModal() {
                         onClick={() => setSelectedBarrier(key)}
                         className={cn(
                           'flex items-start gap-3 rounded-xl border p-3 transition-all cursor-pointer',
-                          isRtl ? 'text-right' : 'text-left',
+                          isRtl ? 'text-end' : 'text-start',
                           isSelected
                             ? 'border-ink bg-white shadow-sm ring-1 ring-ink'
                             : 'border-ink/10 bg-white/40 hover:bg-white/80'
@@ -195,7 +195,7 @@ export function ReEntryModal() {
                         onClick={() => setSelectedDose(mode)}
                         className={cn(
                           'flex w-full items-start gap-3.5 rounded-xl border p-3.5 transition-all cursor-pointer',
-                          isRtl ? 'text-right' : 'text-left',
+                          isRtl ? 'text-end' : 'text-start',
                           isSelected
                             ? 'border-ink bg-white shadow-sm ring-2 ring-ink/80'
                             : 'border-ink/10 bg-white/40 hover:bg-white/80'
@@ -242,7 +242,7 @@ export function ReEntryModal() {
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder={locale === 'ar' ? 'مثال: تأخر في موعد السفر، إرهاق بعد نوبة عمل طويلة...' : 'e.g. Flight delay, felt fatigued after long workday...'}
-                  className="w-full rounded-lg border border-ink/15 bg-white px-3 py-2 text-xs text-ink placeholder:text-ink/30 focus:border-ink focus:outline-none"
+                  className="w-full rounded-lg border border-ink/15 bg-white px-3 py-2 text-xs text-ink placeholder:text-ink/60 focus:border-ink focus:outline-none"
                 />
               </div>
             </div>

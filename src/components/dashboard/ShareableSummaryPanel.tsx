@@ -3,14 +3,15 @@
 import React, { useId, useState } from 'react';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import { useRoutine } from '../../contexts/RoutineContext';
-import { COPY } from '../../data/copy';
 import { formatRoutineTitle } from '../../utils/text';
 import { Icon } from '../ui/Icon';
 import { Panel } from '../ui/Panel';
 import { PillButton } from '../ui/PillButton';
 import { ShareableSummaryModal } from './ShareableSummaryModal';
 
+import { useLocale } from '../../contexts/LocaleContext';
 export function ShareableSummaryPanel() {
+  const { copy } = useLocale();
   const { routine } = useRoutine();
   const headingId = useId();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,14 +19,14 @@ export function ShareableSummaryPanel() {
   return (
     <>
       <Panel tone="ink" aria-labelledby={headingId}>
-        <p className="text-sm leading-none text-white/45">
-          {COPY.shareableSummary.eyebrow}
+        <p className="text-sm leading-none text-white/65">
+          {copy.shareableSummary.eyebrow}
         </p>
         <h2 id={headingId} className="mt-1 text-2xl">
-          {COPY.shareableSummary.title}
+          {copy.shareableSummary.title}
         </h2>
         <p className="mt-3 text-sm text-white/55">
-          {COPY.shareableSummary.body(formatRoutineTitle(routine.shortTitle))}
+          {copy.shareableSummary.body(formatRoutineTitle(routine.shortTitle))}
         </p>
 
         <PillButton
@@ -36,7 +37,7 @@ export function ShareableSummaryPanel() {
           onClick={() => setIsModalOpen(true)}
         >
           <Icon icon={PrintOutlinedIcon} size="sm" />
-          <span>{COPY.shareableSummary.export}</span>
+          <span>{copy.shareableSummary.export}</span>
         </PillButton>
       </Panel>
 

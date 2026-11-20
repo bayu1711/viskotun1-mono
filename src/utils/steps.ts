@@ -1,4 +1,5 @@
 import { COPY } from '../data/copy';
+import type { LocaleCopy } from '../data/locales/types';
 import type { RoutineStep } from '../types/routine';
 import { formatStatLabel } from './text';
 
@@ -12,32 +13,34 @@ export interface StepDisplay {
 }
 
 /** Resolves display strings for a step, falling back to reps or hold time when the paper omits labels. */
-export function getStepDisplay(step: RoutineStep): StepDisplay {
+/** Pass the locale copy from `useLocale()` so labels follow the app language (defaults to English). */
+export function getStepDisplay(step: RoutineStep, copy?: LocaleCopy): StepDisplay {
+  const t = (copy ?? COPY).task;
   const seconds = step.durationSeconds ?? 0;
   const isTimed = seconds > 0;
-  const setLabel = step.setLabel ?? COPY.task.defaultSetLabel;
-  const isSingleUnit = step.reps === 1 && step.setLabel && step.setLabel !== COPY.task.defaultSetLabel;
+  const setLabel = step.setLabel ?? t.defaultSetLabel;
+  const isSingleUnit = step.reps === 1 && step.setLabel && step.setLabel !== COPY.task.defaultSetLabel /* stored data is English */;
 
   const defaultPerSet = isTimed
-    ? COPY.task.perSetHold(seconds)
+    ? t.perSetHold(seconds)
     : isSingleUnit
-    ? COPY.task.singleUnitPerSet(setLabel)
-    : COPY.task.perSetReps(step.reps);
+    ? t.singleUnitPerSet(setLabel)
+    : t.perSetReps(step.reps);
 
   const defaultStatLabel = isTimed
-    ? COPY.task.holdStatLabel
+    ? t.holdStatLabel
     : isSingleUnit
-    ? COPY.task.targetStatLabel
-    : COPY.task.repsStatLabel;
+    ? t.targetStatLabel
+    : t.repsStatLabel;
 
   const defaultStatValue = isTimed
-    ? COPY.task.holdValue(seconds)
+    ? t.holdValue(seconds)
     : isSingleUnit
-    ? COPY.task.singleUnitStat(setLabel)
+    ? t.singleUnitStat(setLabel)
     : String(step.reps);
 
   const summaryValue =
-    step.statValue ?? (isTimed ? COPY.task.holdSummary(seconds) : isSingleUnit ? COPY.task.singleUnitStat(setLabel) : COPY.task.repsSummary(step.reps));
+    step.statValue ?? (isTimed ? t.holdSummary(seconds) : isSingleUnit ? t.singleUnitStat(setLabel) : t.repsSummary(step.reps));
 
   return {
     setLabel,

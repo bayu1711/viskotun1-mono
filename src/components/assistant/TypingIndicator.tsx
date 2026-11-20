@@ -1,15 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MOTION, TYPING_DOT_COUNT } from '../../data/config';
-import { COPY } from '../../data/copy';
-
+import { useLocale } from '../../contexts/LocaleContext';
 const DOTS = Array.from({ length: TYPING_DOT_COUNT }, (_, index) => index);
 
 export function TypingIndicator() {
+  const { copy } = useLocale();
   return (
     <div
       role="status"
-      aria-label={COPY.assistant.typing}
+      aria-label={copy.assistant.typing}
       className="flex w-16 items-center justify-center gap-1 rounded-full bg-white py-3">
       
       {DOTS.map((dot) =>

@@ -12,10 +12,11 @@ import { PageContainer } from '../components/layout/PageContainer';
 import { PageHeader } from '../components/layout/PageHeader';
 import { Icon } from '../components/ui/Icon';
 import { useRoutine } from '../contexts/RoutineContext';
-import { COPY } from '../data/copy';
 import type { CommunityInsights } from '../types/routine';
 
+import { useLocale } from '../contexts/LocaleContext';
 export function CommunityPage() {
+  const { copy } = useLocale();
   const { routine } = useRoutine();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab');
@@ -87,7 +88,7 @@ export function CommunityPage() {
         className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
       >
         <Icon icon={BarChartOutlinedIcon} size="xs" />
-        <span>{COPY.community.activeTab}</span>
+        <span>{copy.community.activeTab}</span>
       </button>
     ) : (
       <button
@@ -96,13 +97,13 @@ export function CommunityPage() {
         className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
       >
         <Icon icon={TrendingUpIcon} size="xs" />
-        <span>{COPY.howTo.buttonExploreSamples}</span>
+        <span>{copy.howTo.buttonExploreSamples}</span>
       </button>
     )
   ) : (
     <span className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-mint/40 px-3 text-xs font-semibold text-ink">
       <Icon icon={TrendingUpIcon} size="xs" />
-      <span>{COPY.howTo.buttonExploreSamples}</span>
+      <span>{copy.howTo.buttonExploreSamples}</span>
     </span>
   );
 
@@ -111,8 +112,8 @@ export function CommunityPage() {
   return (
     <PageContainer>
       <PageHeader
-        eyebrow={isExplore ? COPY.howTo.eyebrow : COPY.community.eyebrow}
-        title={isExplore ? COPY.howTo.trendingTitle : COPY.community.title}
+        eyebrow={isExplore ? copy.howTo.eyebrow : copy.community.eyebrow}
+        title={isExplore ? copy.howTo.trendingTitle : copy.community.title}
         switcherExtra={switcherAction}
       />
 
@@ -124,7 +125,7 @@ export function CommunityPage() {
           <div className="mt-2 flex items-center gap-2 text-xs text-ink/60">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-mint/30 px-2.5 py-0.5 font-medium text-ink">
               <span className="h-1.5 w-1.5 rounded-full bg-mint ring-1 ring-ink/20" />
-              {COPY.community.canonicalPaperBadge}
+              {copy.community.canonicalPaperBadge}
             </span>
             {routine?.paper?.doi ? (
               <span className="font-mono text-ink/60">DOI: {routine.paper.doi}</span>
@@ -134,18 +135,18 @@ export function CommunityPage() {
           </div>
 
           {insights && (
-            <section aria-label={COPY.community.comparisonLabel} className="mt-6 grid grid-cols-2 gap-2.5">
+            <section aria-label={copy.community.comparisonLabel} className="mt-6 grid grid-cols-2 gap-2.5">
               <EfficacyCard
                 tone="orange"
-                label={COPY.community.studyEfficacy}
+                label={copy.community.studyEfficacy}
                 value={insights.studyEfficacy}
-                caption={COPY.community.studyCaption(routine?.paper?.sampleSize || 120)}
+                caption={copy.community.studyCaption(routine?.paper?.sampleSize || 120)}
               />
               <EfficacyCard
                 tone="yellow"
-                label={COPY.community.realWorldEfficacy}
+                label={copy.community.realWorldEfficacy}
                 value={insights.realWorldEfficacy ?? 0}
-                caption={COPY.community.realWorldCaption(insights.userCount ?? 0)}
+                caption={copy.community.realWorldCaption(insights.userCount ?? 0)}
               />
             </section>
           )}

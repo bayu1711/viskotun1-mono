@@ -134,4 +134,10 @@ module.exports = {
       },
     },
   },
+  plugins: [
+    // `coarse:` targets touch screens, where PRODUCT.md requires 44px tap targets.
+    ({ addVariant }) => {
+      addVariant('coarse', '@media (pointer: coarse)');
+    },
+  ],
 };

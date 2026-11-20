@@ -27,14 +27,15 @@ export function MobileTabBar() {
               <li key={item.href} className="flex-1">
                 <Link
                   href={item.href}
-                  aria-label={item.label}
+                  aria-current={isActive ? 'page' : undefined}
                   className={cn(
-                    'flex min-h-11 items-center justify-center gap-1.5 rounded-full text-xs transition-colors',
-                    isActive ? 'bg-ink text-white' : 'text-ink/60'
+                    'flex min-h-11 items-center justify-center gap-1.5 rounded-full px-2 text-xs transition-colors',
+                    isActive ? 'bg-ink font-medium text-white' : 'text-ink/75 hover:text-ink'
                   )}
                 >
-                  <Icon icon={item.icon} size="md" />
-                  {isActive && <span>{item.label}</span>}
+                  <Icon icon={item.icon} size="md" className="shrink-0" />
+                  {/* Labels on every tab: icon-only items hid two of the three destinations. */}
+                  <span className="truncate">{item.label}</span>
                 </Link>
               </li>
             );

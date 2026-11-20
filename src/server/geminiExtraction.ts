@@ -252,6 +252,13 @@ async function screenPaper(
   return null;
 }
 
+/**
+ * Reading a whole paper and writing a routine takes far longer than a chat reply, so extraction
+ * gets its own per-key limit instead of the 15 s default. Two keys fit inside the client's
+ * EXTRACTION_CLIENT_TIMEOUT_MS (src/data/config.ts).
+ */
+export const EXTRACTION_PER_KEY_TIMEOUT_MS = 40_000;
+
 const UNRESOLVED_LINK_REASONS: Record<Exclude<PaperResolution, { ok: true }>['reason'], string> = {
   unrecognized: COPY.extraction.linkNotRecognized,
   'not-found': COPY.extraction.paperNotFound,
@@ -446,7 +453,7 @@ export async function extractPaperRoutine(input: ExtractInput): Promise<ExtractR
         }
 
         throw new Error('Gemini output missing routine or eligible field');
-      });
+      }, EXTRACTION_PER_KEY_TIMEOUT_MS);
 
       if (extracted) {
         return extracted;
@@ -456,8 +463,10 @@ export async function extractPaperRoutine(input: ExtractInput): Promise<ExtractR
     }
   }
 
-  // A real paper was fetched from the link: never stand in a simulated routine for it
-  if (linkedPaper) {
+  // Gemini was configured but failed (timeout, 503, quota). A real paper was supplied, as a link or
+  // an uploaded PDF, so never stand in a simulated routine for it: say the model is busy instead.
+  // The canned fallback below is only for local setups without any Gemini key.
+  if (linkedPaper || (geminiKeys.length > 0 && input.file)) {
     return {
       success: false,
       eligible: false,

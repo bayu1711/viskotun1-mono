@@ -1,8 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
-import { COPY } from '../../data/copy';
 import { cn } from '../../utils/cn';
 
+import { useLocale } from '../../contexts/LocaleContext';
 export type AIIconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
 export const AI_ICON_SIZES: Record<AIIconSize, { px: number; className: string }> = {
@@ -23,11 +23,12 @@ export interface AIIconProps {
 
 /** Brand favicon representing the N1 AI assistant across the application. Rendered unoptimized to maintain crisp retina resolution without lossy compression. */
 export function AIIcon({ size = 'md', className, alt = '', priority = false }: AIIconProps) {
+  const { copy } = useLocale();
   const { className: sizeClass } = AI_ICON_SIZES[size];
 
   return (
     <Image
-      src={COPY.brand.iconUrl}
+      src={copy.brand.iconUrl}
       alt={alt}
       width={241}
       height={239}

@@ -7,14 +7,15 @@ import CompareArrowsOutlinedIcon from '@mui/icons-material/CompareArrowsOutlined
 import GridOnOutlinedIcon from '@mui/icons-material/GridOnOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useRoutine } from '../../contexts/RoutineContext';
-import { COPY } from '../../data/copy';
 import { isFieldScheduledForDay, resolveMilestoneDays } from '../../utils/routineMetrics';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 import { Panel } from '../ui/Panel';
 import { SectionHeading } from '../ui/SectionHeading';
 
+import { useLocale } from '../../contexts/LocaleContext';
 export function MilestonePhotoComparison() {
+  const { copy } = useLocale();
   const { routine, morphingLogs, openFeedbackDrawer } = useRoutine();
   const headingId = useId();
 
@@ -55,14 +56,14 @@ export function MilestonePhotoComparison() {
     <Panel aria-labelledby={headingId} className="overflow-hidden">
       <SectionHeading
         id={headingId}
-        eyebrow={COPY.morphing.milestoneTag}
-        title={COPY.morphing.dashboard.photoSplitTitle}
+        eyebrow={copy.morphing.milestoneTag}
+        title={copy.morphing.dashboard.photoSplitTitle}
         action={
           <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={() => setShowGrid((prev) => !prev)}
-              aria-label={COPY.morphing.dashboard.gridToggle}
+              aria-label={copy.morphing.dashboard.gridToggle}
               className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors ${
                 showGrid
                   ? 'border-ink bg-ink text-white'
@@ -70,13 +71,13 @@ export function MilestonePhotoComparison() {
               }`}
             >
               <Icon icon={GridOnOutlinedIcon} size="xs" />
-              <span>{COPY.morphing.dashboard.gridToggle}</span>
+              <span>{copy.morphing.dashboard.gridToggle}</span>
             </button>
             <CircleButton
               label={
                 isScheduledToday
-                  ? COPY.morphing.milestone.action
-                  : COPY.morphing.dashboard.notScheduledPhotoTooltip(nextMilestoneDay)
+                  ? copy.morphing.milestone.action
+                  : copy.morphing.dashboard.notScheduledPhotoTooltip(nextMilestoneDay)
               }
               onClick={() => openFeedbackDrawer(photoField.id)}
               disabled={!isScheduledToday}
@@ -92,9 +93,9 @@ export function MilestonePhotoComparison() {
           <Icon icon={InfoOutlinedIcon} size="sm" className="mt-0.5 shrink-0 text-ink/60" />
           <div className="flex-1 leading-relaxed">
             <span className="font-medium text-ink">
-              {COPY.morphing.dashboard.notScheduledBadge}:
+              {copy.morphing.dashboard.notScheduledBadge}:
             </span>{' '}
-            {COPY.morphing.dashboard.notScheduledPhotoNote(
+            {copy.morphing.dashboard.notScheduledPhotoNote(
               routine.currentDay,
               nextMilestoneDay,
               daysUntilNext
@@ -104,21 +105,21 @@ export function MilestonePhotoComparison() {
       ) : (
         <div className="mt-3 flex items-center justify-between rounded-tile border border-mint/40 bg-mint/15 px-3.5 py-2 text-xs text-ink">
           <span className="font-medium">
-            {COPY.morphing.milestone.bannerTitle(routine.currentDay)}
+            {copy.morphing.milestone.bannerTitle(routine.currentDay)}
           </span>
-          <span className="rounded-full bg-orange px-2.5 py-0.5 text-3xs font-semibold uppercase tracking-wider text-white shadow-2xs">
-            {COPY.morphing.dashboard.scheduledTodayBadge}
+          <span className="rounded-full bg-orange px-2.5 py-0.5 text-3xs font-semibold uppercase tracking-wider text-ink shadow-2xs">
+            {copy.morphing.dashboard.scheduledTodayBadge}
           </span>
         </div>
       )}
 
       <p className="mt-2 text-xs text-ink/60">
-        {photoField.instructions || COPY.morphing.dashboard.photoSplitSubtitle}
+        {photoField.instructions || copy.morphing.dashboard.photoSplitSubtitle}
       </p>
 
       {/* Milestone Day Switcher */}
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <span className="text-xs font-medium text-ink/60">{COPY.morphing.dashboard.milestonePeriod}</span>
+        <span className="text-xs font-medium text-ink/60">{copy.morphing.dashboard.milestonePeriod}</span>
         {nonBaselineDays.map((day) => {
           const hasLog = morphingLogs.some(
             (log) => log.fieldId === photoField.id && log.day === day
@@ -131,11 +132,11 @@ export function MilestonePhotoComparison() {
               onClick={() => setSelectedMilestoneDay(day)}
               className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs transition-colors ${
                 isSelected
-                  ? 'bg-orange font-medium text-white shadow-2xs'
+                  ? 'bg-orange font-medium text-ink shadow-2xs'
                   : 'bg-canvas text-ink/70 hover:bg-ink/10'
               }`}
             >
-              <span>{COPY.morphing.dashboard.dayPill(day)}</span>
+              <span>{copy.morphing.dashboard.dayPill(day)}</span>
               {hasLog && <Icon icon={CheckIcon} size="xs" />}
             </button>
           );
@@ -149,17 +150,17 @@ export function MilestonePhotoComparison() {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={milestoneSrc}
-            alt={COPY.morphing.dashboard.milestoneAlt(activeMilestoneDay)}
+            alt={copy.morphing.dashboard.milestoneAlt(activeMilestoneDay)}
             className="absolute inset-0 h-full w-full object-cover"
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-canvas px-6 text-center">
-            <Icon icon={CameraAltOutlinedIcon} size="md" className="text-ink/40" />
+            <Icon icon={CameraAltOutlinedIcon} size="md" className="text-ink/65" />
             <p className="mt-2 text-xs font-medium text-ink/75">
-              {COPY.morphing.dashboard.missingMilestonePhoto(activeMilestoneDay)}
+              {copy.morphing.dashboard.missingMilestonePhoto(activeMilestoneDay)}
             </p>
-            <p className="mt-1 max-w-xs text-[11px] text-ink/55">
-              {COPY.morphing.dashboard.uploadPhotoPrompt}
+            <p className="mt-1 max-w-xs text-[11px] text-ink/70">
+              {copy.morphing.dashboard.uploadPhotoPrompt}
             </p>
           </div>
         )}
@@ -173,18 +174,18 @@ export function MilestonePhotoComparison() {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={baselineSrc}
-              alt={COPY.morphing.dashboard.baselineAlt}
+              alt={copy.morphing.dashboard.baselineAlt}
               className="absolute inset-0 h-full max-w-none object-cover"
               style={{ width: '100%', minWidth: '100%', height: '100%' }}
             />
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/90 px-6 text-center">
-              <Icon icon={CameraAltOutlinedIcon} size="md" className="text-ink/40" />
+              <Icon icon={CameraAltOutlinedIcon} size="md" className="text-ink/65" />
               <p className="mt-2 text-xs font-medium text-ink/75">
-                {COPY.morphing.dashboard.missingBaselinePhoto}
+                {copy.morphing.dashboard.missingBaselinePhoto}
               </p>
-              <p className="mt-1 max-w-xs text-[11px] text-ink/55">
-                {COPY.morphing.dashboard.uploadPhotoPrompt}
+              <p className="mt-1 max-w-xs text-[11px] text-ink/70">
+                {copy.morphing.dashboard.uploadPhotoPrompt}
               </p>
             </div>
           )}
@@ -215,7 +216,7 @@ export function MilestonePhotoComparison() {
           className="pointer-events-none absolute top-0 bottom-0 w-0.5 bg-orange shadow-lg"
           style={{ left: `${sliderPos}%` }}
         >
-          <div className="absolute top-1/2 left-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-orange text-white shadow-md">
+          <div className="absolute top-1/2 left-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-orange text-ink shadow-md">
             <Icon icon={CompareArrowsOutlinedIcon} size="xs" />
           </div>
         </div>
@@ -227,22 +228,22 @@ export function MilestonePhotoComparison() {
           max={100}
           value={sliderPos}
           onChange={(e) => setSliderPos(Number(e.target.value))}
-          aria-label={COPY.morphing.dashboard.sliderAria}
+          aria-label={copy.morphing.dashboard.sliderAria}
           className="absolute inset-0 h-full w-full cursor-ew-resize opacity-0"
         />
 
         {/* Labels Overlay */}
         <div className="pointer-events-none absolute top-3 left-3 rounded-full bg-ink/80 px-3 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
-          {COPY.morphing.dashboard.baselineLabel}
+          {copy.morphing.dashboard.baselineLabel}
         </div>
         <div className="pointer-events-none absolute top-3 right-3 rounded-full bg-ink/80 px-3 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
-          {COPY.morphing.dashboard.currentLabel(activeMilestoneDay)}
+          {copy.morphing.dashboard.currentLabel(activeMilestoneDay)}
         </div>
       </div>
 
       <div className="mt-3 flex items-center justify-between text-[11px] text-ink/60">
-        <span>{COPY.morphing.dashboard.dragHint}</span>
-        <span>{COPY.morphing.dashboard.overheadStandard}</span>
+        <span>{copy.morphing.dashboard.dragHint}</span>
+        <span>{copy.morphing.dashboard.overheadStandard}</span>
       </div>
     </Panel>
   );

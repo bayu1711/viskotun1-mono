@@ -48,6 +48,7 @@ export const COPY = {
     community: 'Community'
   },
   shell: {
+    dayBadge: (day: number): string => `Day ${day}`,
     streak: (days: number) => `${days} day streak`,
     addPaper: 'Add new paper',
     openAssistant: 'Ask N1',
@@ -183,6 +184,8 @@ export const COPY = {
     suggestionsEyebrow: (region: string) => `Diverse lifestyle & cultural factors in ${region}`,
     tagAddedToast: (tag: string) => `Added "${tag}" to lifestyle profile`,
     tagRemovedToast: (tag: string) => `Removed "${tag}" from lifestyle profile`,
+    regionUpdatedReply: (regionLabel: string) =>
+      `Region updated to ${regionLabel}. Your routine timing and pacing now follow your local climate and day.`,
     lifestyleIntro: (region: string) =>
       `Here is a diverse mix of cultural, climate, and schedule patterns in ${region}. Select any that reflect how your day actually works, or describe your habits in your own words:`,
     tagAddedConfirmation: (tag: string) =>
@@ -288,7 +291,7 @@ export const COPY = {
     routineOverrideTitle: 'Schedule for this routine',
     customWindowHint: 'Applies only to this routine — your other routines keep their own schedules.',
     lifestyleButton: 'Lifestyle & Location',
-    modalTitle: 'Adaptive Lifestyle Context',
+    modalTitle: 'Adaptive Lifestyle Profile',
     modalSubtitle:
       'Tailored to your geographic location, climate conditions, cultural rhythms, and daily schedule availability.'
   },
@@ -384,6 +387,8 @@ export const COPY = {
     excludeStep: 'Exclude step',
     restoreStep: 'Restore step',
     excludedBadge: 'Excluded',
+    microBadge: 'Micro',
+    pendingCheckinTitle: 'Lapse check-in waiting',
     excludedNote: 'Excluded from daily routine — does not affect progress ring or streak',
     defaultSetLabel: 'Sets',
     holdStatLabel: 'Hold:',
@@ -471,6 +476,7 @@ export const COPY = {
     projectedAgeLabel: 'Projected Health Age',
     deltaLabel: (delta: number) => `${Math.abs(delta)} years younger`,
     baselineAgeLabel: (age: number) => `Chronological Baseline: ${age} yrs`,
+    sustainedBasis: (days: number): string => `Based on a ${days}-day sustained habit loop`,
     cvdRiskLabel: 'Cardiovascular Risk Reduction',
     metabolicRiskLabel: 'Metabolic Syndrome Risk Reduction',
     resilienceLabel: 'Habit Resilience Score',
@@ -492,9 +498,11 @@ export const COPY = {
     saveButton: 'Save profile',
     saveAccountButton: 'Save account',
     saveLifestyleButton: 'Save lifestyle',
+    unsavedChanges: 'Unsaved changes',
+    allChangesSaved: 'All changes saved',
     savedToast: 'Profile & adaptive lifestyle saved',
     tuneWithAi: 'Tune with N1 AI',
-    userProfileEyebrow: 'UserProfile',
+    userProfileEyebrow: 'Your details',
     userProfileTitle: 'Identity & Physiological Baseline',
     displayNameLabel: 'Display name',
     displayNamePlaceholder: 'Your name or handle',
@@ -538,9 +546,13 @@ export const COPY = {
     secondaryLanguageLabel: 'Secondary language',
     secondaryLanguageNone: 'None (single language)',
     languageHint: 'The top header toggles quickly between your primary and secondary languages. Choose None for a single-language header.',
-    lifestyleEyebrow: 'UserLifestyleProfile',
-    lifestyleTitle: 'Adaptive Lifestyle Context',
+    lifestyleEyebrow: 'Shared with N1 AI',
+    lifestyleTitle: 'Adaptive Lifestyle Profile',
+    lifestyleSyncNote:
+      'N1 AI reads and edits these same fields. Anything you tell it in chat shows up here, and changes you save here guide its answers.',
     regionLabel: 'Region & city',
+    countryPlaceholder: 'Country (e.g. Japan, Brazil, UAE, Germany)',
+    countryAria: 'Country',
     cityPlaceholder: 'City (e.g. Abu Dhabi, Dubai, Riyadh)',
     regionConfirmed: 'Confirmed',
     workPatternLabel: 'Work schedule',
@@ -589,8 +601,39 @@ export const COPY = {
       collectivist_household: 'Multi-generational household'
     },
     cautionsLabel: 'Physical cautions',
-    cautionPresets: ['Morning stiffness', 'Knee sensitivity', 'Lower back caution', 'Heat fatigue'],
+    cautionsHint: 'Select any that apply, or add your own. The AI uses the same list.',
+    /** Display labels keyed by the canonical caution stored on the profile. */
+    cautionLabels: {
+      'Morning stiffness': 'Morning stiffness',
+      'Knee sensitivity': 'Knee sensitivity',
+      'Lower back sensitivity': 'Lower back sensitivity',
+      'Shoulder mobility limit': 'Shoulder mobility limit',
+      'Ankle / Achilles tenderness': 'Ankle / Achilles tenderness',
+      'Hip stiffness': 'Hip stiffness',
+      'Neck tension': 'Neck tension',
+      'Wrist sensitivity': 'Wrist sensitivity',
+      'Joint sensitivity': 'Joint sensitivity',
+      'Heat fatigue': 'Heat fatigue'
+    },
+    customCautionPlaceholder: 'Add another caution (e.g. Plantar fascia pain)',
+    customCautionAria: 'Add a physical caution',
+    addCautionBtn: 'Add',
+    removeCautionAria: (caution: string) => `Remove ${caution}`,
     activeTagsLabel: 'Active adaptation tags',
+    activeTagsHint: 'Built from the fields above and from habits you mention to N1 AI.',
+    removeTagAria: (tag: string) => `Remove ${tag}`,
+    /** Display labels for tags derived from structured fields. */
+    managedTagLabels: {
+      healthcare_shift_worker: 'Shift work',
+      desk_bound_worker: 'Desk-bound work',
+      frequent_traveler: 'Frequent travel',
+      midwakh_dokha: 'Midwakh / Dokha',
+      shisha_waterpipe: 'Shisha / Waterpipe',
+      cigarette_smoker: 'Cigarettes',
+      vape_user: 'Vape / E-cig',
+      extreme_heat_summer: 'Extreme summer heat',
+      cold_climate_winter: 'Cold climate'
+    },
     noTagsYet: 'Toggle any factor above or open AI tuning to activate context tags.',
     impactEyebrow: 'Connected Across TrialN1',
     impactTitle: 'How this personalizes your app',
@@ -705,7 +748,7 @@ export const COPY = {
     standardDurationFallback: 'Follow standardized clinical duration.',
     stopImmediatelyIf: 'Stop immediately if:',
     standardMonitoringFallback: 'Standard clinical monitoring; pause if severe discomfort occurs.',
-    dayUnit: (count: number) => (count === 1 ? 'day' : 'days'),
+    dayUnit: (count: number): string => (count === 1 ? 'day' : 'days'),
     sampleSize: (sampleSize: number | string) => `Sample Size: N = ${sampleSize}`,
     dayRatio: (current: number, total: number) => `Day ${current} / ${total}`,
     briefBadge: 'Shareable Routine Brief',
@@ -735,6 +778,7 @@ export const COPY = {
     downloadedIcsToast: 'Calendar event file (.ics) downloaded',
     deepLinkToast: (title: string) => `Loaded shared routine: ${title}`,
     openShareButton: 'Share',
+    openShareTitle: 'Share routine and QR code',
     addToCalendarButton: 'Calendar',
     scanQrLabel: 'Scan with mobile camera to load routine',
     closeButton: 'Close'
@@ -874,6 +918,16 @@ export const COPY = {
     cancel: 'Cancel',
     reviewSuccessToast: 'Outcome published to community registry',
     reviewErrorToast: 'Could not submit outcome. Please try again.',
+    /** Display names for paper category ids; unknown ids fall back to the raw id. */
+    categoryLabels: {
+      rehab: 'Rehab',
+      dermatology: 'Dermatology',
+      nutrition: 'Nutrition',
+      metabolic: 'Metabolic',
+      circadian: 'Circadian',
+      cognitive: 'Cognitive',
+      sleep: 'Sleep'
+    } as Record<string, string>,
     canonicalPaperBadge: 'Canonical research paper',
     canonicalPaperNote: (doi: string) => `Deduplicated via DOI ${doi} · Shared across participants`,
     existingCanonicalFound: (title: string) => `Matched existing verified paper in community registry: ${title}`,
@@ -1118,6 +1172,8 @@ export const COPY = {
     ],
     ready:
       "Draft ready for review. It'll appear in your papers once you confirm the extracted parameters."
+,
+    slowHint: 'Still reading. Long papers can take up to a minute; keep this open and the draft will appear here.'
   },
   upload: {
     title: 'Drop a research PDF',
@@ -1151,7 +1207,7 @@ export const COPY = {
     fullTextUnavailable:
       'This paper is not open access, so its methods cannot be read from the link. Upload the PDF to extract the routine.',
     paperLookupFailed: 'Could not reach Europe PMC to fetch this paper. Try again or upload the PDF.',
-    modelUnavailable: 'The paper was found, but the extraction model is busy right now. Try again in a minute.',
+    modelUnavailable: 'Your paper arrived, but the extraction model is busy right now, so nothing was extracted. Try again in a minute.',
     matchedBannedKeyword: (keyword: string, version: string) =>
       `Paper declined: Matched restricted non-human / theoretical policy criterion ("${keyword}"). TrialN1 enforces interventional human science only per clinical policy v${version}.`,
     declinedAnimalReason:
@@ -1168,17 +1224,19 @@ export const COPY = {
       'Declined: Observational study lacking an executable routine. Cohort, case-control and cross-sectional studies measure associations; researchers did not assign participants a routine, so there is no routine to copy.'
   },
   landing: {
-    topBanner: 'Strictly interventional human research · Zero-hallucination daily routines',
+    topBanner: 'Strictly interventional human research · Routines traced to the paper',
+    uaeBannerBadge: 'Abu Dhabi 2026',
+    uaeBannerText: 'Future Health Challenge: Sustaining Healthy Behaviors in the UAE',
     heroEyebrow: 'Evidence into action',
     heroTitle: 'Live healthier with daily routines from real human science.',
     heroSubtitle:
-      'TrialN1 converts dense, peer-reviewed human clinical research into simple, colorful daily habits with voice coaching, parameter auditing, and zero guesswork.',
+      'TrialN1 converts dense, peer-reviewed human clinical research into simple daily habits with voice coaching and a clear note wherever the paper left a parameter out.',
     heroCtaPrimary: 'Start your routine — Free',
     heroCtaSecondary: 'See health domains',
     heroTrustPoints: [
       'Instant guest demo · No card required',
-      '100% human interventional trials',
-      'Zero AI hallucinations'
+      'Built only from human interventional trials',
+      'Answers quote the paper, not guesses'
     ],
     heroImageAlt: 'Participant performing focused daily rehabilitation and mobility routine',
     interactivePreview: {
@@ -1328,7 +1386,7 @@ export const COPY = {
     backToGlobal: 'Global Edition',
     heroTrustPoints: [
       'Zero streak shame · 48°C & Ramadan adaptive',
-      '100% human interventional trials',
+      'Built only from human interventional trials',
       'Bilingual English & Arabic RTL support'
     ],
     interactivePreview: {
@@ -1889,7 +1947,7 @@ export const COPY = {
     eyebrow: 'User guide & trending clinical research papers',
     badge: 'Interactive Research Pipeline',
     intro:
-      'TrialN1 converts dense, peer-reviewed human interventional research into executable daily routines with zero hallucinated gaps and N1 AI, an evidence-grounded safety companion.',
+      'TrialN1 converts dense, peer-reviewed human interventional research into executable daily routines, marks every parameter the paper left out, and adds N1 AI, a companion that answers from the paper.',
     tabs: {
       guide: 'How it works',
       science: 'Habit science (BCT)',
@@ -1947,9 +2005,9 @@ export const COPY = {
     samplesTitle: 'Trending Clinical Research Papers',
     trendingTitle: 'Trending Clinical Research Papers',
     samplesSubtitle:
-      'Explore top-ranked clinical research papers in our database with real-time community participants, compliance tracking, and verified biofeedback telemetry.',
+      'Explore top-ranked clinical research papers in our database and see how many people follow each one and how often they log.',
     trendingSubtitle:
-      'Explore top-ranked clinical research papers in our database with real-time community participants, compliance tracking, and verified biofeedback telemetry.',
+      'Explore top-ranked clinical research papers in our database and see how many people follow each one and how often they log.',
     firestoreSyncLive: 'Firebase Firestore live',
     firestoreSyncLocal: 'Local verified catalog',
     filterByTopic: 'Filtered by:',

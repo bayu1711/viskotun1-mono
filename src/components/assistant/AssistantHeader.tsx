@@ -5,7 +5,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { AssistantMode } from '../../contexts/AssistantContext';
-import { COPY } from '../../data/copy';
+import type { LocaleCopy } from '../../data/locales/types';
 import type { AIEngineType } from '../../types/routine';
 import { isEdgeGemmaAvailable } from '../../utils/edgeGemma';
 import { CircleButton } from '../ui/CircleButton';
@@ -13,10 +13,11 @@ import { Icon } from '../ui/Icon';
 import { SegmentedTabs } from '../ui/SegmentedTabs';
 import { getEngineMeta } from './engineMeta';
 
-const MODE_OPTIONS: { id: AssistantMode; label: string }[] = [
-  { id: 'ask', label: COPY.assistant.modes.ask },
-  { id: 'upload', label: COPY.assistant.modes.upload },
-  { id: 'lifestyle', label: COPY.assistant.modes.lifestyle }
+import { useLocale } from '../../contexts/LocaleContext';
+const MODE_OPTIONS = (copy: LocaleCopy): { id: AssistantMode; label: string }[] => [
+  { id: 'ask', label: copy.assistant.modes.ask },
+  { id: 'upload', label: copy.assistant.modes.upload },
+  { id: 'lifestyle', label: copy.assistant.modes.lifestyle }
 ];
 
 interface AssistantHeaderProps {
@@ -41,6 +42,7 @@ export function AssistantHeader({
   customEyebrow,
   lastEngine
 }: AssistantHeaderProps) {
+  const { copy } = useLocale();
   const isAsk = mode === 'ask';
   const displayTitle = routineTitle || '';
   const [isEdgeAvailable, setIsEdgeAvailable] = useState<boolean>(false);
@@ -79,34 +81,34 @@ export function AssistantHeader({
   return (
     <header className="shrink-0 px-5 pt-5">
       <div className="flex items-center justify-between gap-3 border-b border-ink pb-4">
-        <CircleButton label={COPY.assistant.close} onClick={onClose}>
+        <CircleButton label={copy.assistant.close} onClick={onClose}>
           <Icon icon={CloseIcon} size="md" />
         </CircleButton>
         <SegmentedTabs
-          options={MODE_OPTIONS}
+          options={MODE_OPTIONS(copy)}
           value={mode}
           onChange={onModeChange}
-          ariaLabel={COPY.assistant.modeLabel}
+          ariaLabel={copy.assistant.modeLabel}
         />
         <span className="w-10" aria-hidden="true" />
       </div>
       <div className="pt-4">
         <div className="flex items-center justify-between gap-2">
           <p className="truncate text-sm leading-none text-ink/60">
-            {customEyebrow || (mode === 'lifestyle' ? COPY.lifestyleTuning.badge : isAsk ? displayTitle : COPY.assistant.eyebrowUpload)}
+            {customEyebrow || (mode === 'lifestyle' ? copy.lifestyleTuning.badge : isAsk ? displayTitle : copy.assistant.eyebrowUpload)}
           </p>
           <div ref={disclaimerRef} className="relative flex items-center gap-1.5 shrink-0">
             <button
               type="button"
               onClick={() => setIsDisclaimerOpen((prev) => !prev)}
               className="inline-flex items-center gap-1 rounded-full border border-ink/10 bg-cream/70 hover:bg-cream px-2 py-0.5 text-3xs font-medium text-ink transition-colors focus:outline-none focus:ring-1 focus:ring-ink cursor-pointer"
-              title={COPY.safety.clinicalDisclaimer}
+              title={copy.safety.clinicalDisclaimer}
               aria-expanded={isDisclaimerOpen}
               aria-haspopup="dialog"
-              aria-label={COPY.assistant.medicalDisclaimerChip}
+              aria-label={copy.assistant.medicalDisclaimerChip}
             >
               <Icon icon={ShieldOutlinedIcon} size="xs" className="text-ink/60" />
-              <span>{COPY.assistant.medicalDisclaimerChip}</span>
+              <span>{copy.assistant.medicalDisclaimerChip}</span>
             </button>
 
             {(isAsk || mode === 'lifestyle') && engine && engine !== 'cloud-gemini' && (() => {
@@ -130,28 +132,28 @@ export function AssistantHeader({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -4, scale: 0.96 }}
                   transition={{ duration: 0.15, ease: 'easeOut' }}
-                  className="absolute right-0 top-full mt-2 z-30 w-72 sm:w-80 rounded-card bg-white p-3.5 shadow-lg text-left"
+                  className="absolute end-0 top-full mt-2 z-popover w-72 sm:w-80 rounded-card bg-white p-3.5 shadow-lg text-start"
                   role="dialog"
-                  aria-label={COPY.assistant.medicalDisclaimerChip}
+                  aria-label={copy.assistant.medicalDisclaimerChip}
                 >
                   <div className="flex items-start justify-between gap-2 pb-1.5 border-b border-ink/5">
                     <div className="flex items-center gap-1.5">
                       <Icon icon={ShieldOutlinedIcon} size="xs" className="text-ink/70" />
                       <h4 className="text-xs font-semibold text-ink">
-                        {COPY.assistant.medicalDisclaimerTitle}
+                        {copy.assistant.medicalDisclaimerTitle}
                       </h4>
                     </div>
                     <button
                       type="button"
                       onClick={() => setIsDisclaimerOpen(false)}
                       className="text-ink/60 hover:text-ink transition-colors p-0.5 rounded cursor-pointer"
-                      aria-label={COPY.assistant.closeDisclaimer}
+                      aria-label={copy.assistant.closeDisclaimer}
                     >
                       <Icon icon={CloseIcon} size="xs" />
                     </button>
                   </div>
                   <p className="mt-2 text-2xs leading-relaxed text-ink/75">
-                    {COPY.safety.clinicalDisclaimer}
+                    {copy.safety.clinicalDisclaimer}
                   </p>
                   <div className="mt-3 flex justify-end">
                     <button
@@ -159,7 +161,7 @@ export function AssistantHeader({
                       onClick={() => setIsDisclaimerOpen(false)}
                       className="rounded-full bg-ink px-3 py-1 text-3xs font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
                     >
-                      {COPY.assistant.medicalDisclaimerGotIt}
+                      {copy.assistant.medicalDisclaimerGotIt}
                     </button>
                   </div>
                 </motion.div>
@@ -168,7 +170,7 @@ export function AssistantHeader({
           </div>
         </div>
         <h2 id={titleId} className="mt-1 text-display-sm leading-tight tracking-tight">
-          {customTitle || (mode === 'lifestyle' ? COPY.lifestyleTuning.title : isAsk ? COPY.assistant.titleAsk : COPY.assistant.titleUpload)}
+          {customTitle || (mode === 'lifestyle' ? copy.lifestyleTuning.title : isAsk ? copy.assistant.titleAsk : copy.assistant.titleUpload)}
         </h2>
       </div>
     </header>

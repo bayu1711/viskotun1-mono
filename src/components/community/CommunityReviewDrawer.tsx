@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useId, useRef, useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
-import { COPY } from '../../data/copy';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { Icon } from '../ui/Icon';
 import { PillButton } from '../ui/PillButton';
@@ -14,12 +13,14 @@ import type { ReviewOutcome } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { deriveLifestyleCohort } from '../../utils/profile';
 
+import { useLocale } from '../../contexts/LocaleContext';
 interface CommunityReviewDrawerProps {
   open?: boolean;
   onClose?: () => void;
 }
 
 export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerProps = {}) {
+  const { copy } = useLocale();
   const {
     routine,
     adherenceRate,
@@ -34,6 +35,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
   const handleClose = onClose ?? closeReviewDrawer;
 
   const panelRef = useRef<HTMLDivElement>(null);
+  const fieldId = useId();
   useDialogA11y(panelRef, { open: isOpen, onClose: handleClose });
 
   const [outcome, setOutcome] = useState<ReviewOutcome>('improved');
@@ -97,7 +99,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
             ref={panelRef}
             role="dialog"
             aria-modal="true"
-            aria-label={COPY.community.shareModalTitle}
+            aria-label={copy.community.shareModalTitle}
             tabIndex={-1}
             initial={{ y: MOTION.dialogOffsetY, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -109,17 +111,17 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
               <div className="flex items-start justify-between border-b border-ink/10 pb-4">
                 <div>
                   <span className="text-xs uppercase tracking-wider text-ink/60 font-mono">
-                    {COPY.community.shareModalEyebrow}
+                    {copy.community.shareModalEyebrow}
                   </span>
                   <h2 className="text-lg font-medium text-ink mt-0.5">
-                    {COPY.community.shareModalTitle}
+                    {copy.community.shareModalTitle}
                   </h2>
                 </div>
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="rounded-full p-1 text-ink/60 hover:bg-ink/5 hover:text-ink transition-colors"
-                  aria-label={COPY.community.cancel}
+                  className="relative rounded-full p-1 text-ink/70 hover:bg-ink/5 hover:text-ink transition-colors before:absolute before:-inset-2.5"
+                  aria-label={copy.community.cancel}
                 >
                   <Icon icon={CloseIcon} size="sm" />
                 </button>
@@ -129,7 +131,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
                 <div className="mt-3 rounded-tile bg-canvas p-3 text-xs border border-ink/10">
                   <span className="font-semibold text-ink">{currentRoutine.title}</span>
                   {currentRoutine.paper?.doi && (
-                    <span className="ml-2 text-ink/60 font-mono">
+                    <span className="ms-2 text-ink/60 font-mono">
                       · {currentRoutine.paper.doi}
                     </span>
                   )}
@@ -139,23 +141,24 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
               <div className="mt-4 space-y-4">
                 {/* Clinical Outcome Selection */}
                 <div>
-                  <label className="block text-xs font-medium text-ink mb-1.5">
-                    {COPY.community.outcomeLabel}
-                  </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <p id={`${fieldId}-outcome`} className="block text-xs font-medium text-ink mb-1.5">
+                    {copy.community.outcomeLabel}
+                  </p>
+                  <div role="group" aria-labelledby={`${fieldId}-outcome`} className="grid grid-cols-3 gap-2">
                     {(['improved', 'adjusted', 'paused'] as ReviewOutcome[]).map((opt) => (
                       <button
                         key={opt}
                         type="button"
                         onClick={() => setOutcome(opt)}
+                        aria-pressed={outcome === opt}
                         className={cn(
-                          'rounded-tile border py-2 px-2.5 text-xs text-center transition-all',
+                          'min-h-10 rounded-tile border py-2 px-2.5 text-xs text-center transition-colors coarse:min-h-11',
                           outcome === opt
                             ? outcomeColors[opt].active
                             : `bg-white text-ink/70 ${outcomeColors[opt].border}`
                         )}
                       >
-                        {opt}
+                        {copy.community.filters[opt]}
                       </button>
                     ))}
                   </div>
@@ -164,57 +167,61 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
                 {/* Day & Adherence Inputs */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-ink mb-1">
-                      {COPY.community.dayLabel}
+                    <label htmlFor={`${fieldId}-day`} className="block text-xs font-medium text-ink mb-1">
+                      {copy.community.dayLabel}
                     </label>
                     <input
+                      id={`${fieldId}-day`}
                       type="number"
                       min={1}
                       max={currentRoutine?.totalDays || 180}
                       value={day}
                       onChange={(e) => setDay(Number(e.target.value))}
-                      className="w-full rounded-tile border border-ink/20 bg-white px-3 py-1.5 text-xs text-ink focus:border-ink focus:outline-none"
+                      className="w-full rounded-tile border border-ink/20 bg-white px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-ink mb-1">
-                      {COPY.community.adherenceLabel} (%)
+                    <label htmlFor={`${fieldId}-adherence`} className="block text-xs font-medium text-ink mb-1">
+                      {copy.community.adherenceLabel} (%)
                     </label>
                     <input
+                      id={`${fieldId}-adherence`}
                       type="number"
                       min={0}
                       max={100}
                       value={adherence}
                       onChange={(e) => setAdherence(Number(e.target.value))}
-                      className="w-full rounded-tile border border-ink/20 bg-white px-3 py-1.5 text-xs text-ink focus:border-ink focus:outline-none"
+                      className="w-full rounded-tile border border-ink/20 bg-white px-3 py-2 text-sm text-ink focus:border-ink focus:outline-none"
                     />
                   </div>
                 </div>
 
                 {/* Demographic Handle */}
                 <div>
-                  <label className="block text-xs font-medium text-ink mb-1">
-                    {COPY.community.handleLabel}
+                  <label htmlFor={`${fieldId}-handle`} className="block text-xs font-medium text-ink mb-1">
+                    {copy.community.handleLabel}
                   </label>
                   <input
+                    id={`${fieldId}-handle`}
                     type="text"
-                    placeholder={COPY.community.handlePlaceholder}
+                    placeholder={copy.community.handlePlaceholder}
                     value={handle}
                     onChange={(e) => setHandle(e.target.value)}
                     maxLength={50}
-                    className="w-full rounded-tile border border-ink/20 bg-white px-3 py-1.5 text-xs text-ink placeholder:text-ink/60 focus:border-ink focus:outline-none"
+                    className="w-full rounded-tile border border-ink/20 bg-white px-3 py-2 text-sm text-ink placeholder:text-ink/60 focus:border-ink focus:outline-none"
                   />
                 </div>
 
                 {/* Experience & Observations Text */}
                 <div>
-                  <label className="block text-xs font-medium text-ink mb-1">
-                    {COPY.community.notesLabel}
+                  <label htmlFor={`${fieldId}-notes`} className="block text-xs font-medium text-ink mb-1">
+                    {copy.community.notesLabel}
                   </label>
                   <textarea
+                    id={`${fieldId}-notes`}
                     rows={3}
                     required
-                    placeholder={COPY.community.notesPlaceholder}
+                    placeholder={copy.community.notesPlaceholder}
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     maxLength={300}
@@ -226,7 +233,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
               {/* Action Buttons */}
               <div className="mt-5 flex items-center justify-end gap-2.5 pt-3 border-t border-ink/10">
                 <PillButton type="button" size="sm" variant="outline" onClick={handleClose}>
-                  {COPY.community.cancel}
+                  {copy.community.cancel}
                 </PillButton>
                 <PillButton
                   type="submit"
@@ -236,10 +243,10 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
                   {isSubmitting ? (
                     <span className="flex items-center gap-1.5">
                       <Spinner className="h-3 w-3" />
-                      {COPY.community.submitting}
+                      {copy.community.submitting}
                     </span>
                   ) : (
-                    COPY.community.submitReview
+                    copy.community.submitReview
                   )}
                 </PillButton>
               </div>

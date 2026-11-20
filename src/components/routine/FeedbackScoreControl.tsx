@@ -8,7 +8,6 @@ import {
   FEEDBACK_SCORE_STEP,
   MOTION
 } from '../../data/config';
-import { COPY } from '../../data/copy';
 import type { FeedbackMetric } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { clampFeedbackScore } from '../../utils/routineMetrics';
@@ -16,6 +15,7 @@ import type { SeverityTone } from '../../utils/tones';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 
+import { useLocale } from '../../contexts/LocaleContext';
 interface FeedbackScoreControlProps {
   score: number;
   tone: SeverityTone;
@@ -25,10 +25,11 @@ interface FeedbackScoreControlProps {
 
 /** Stepper + slider for picking a subjective feedback score. */
 export function FeedbackScoreControl({ score, tone, onChange, metric }: FeedbackScoreControlProps) {
+  const { copy } = useLocale();
   const sliderId = useId();
   const maxScore = metric?.maxScore ?? FEEDBACK_SCORE_MAX;
   const minScore = FEEDBACK_SCORE_MIN;
-  const metricName = metric?.name ?? COPY.feedbackDrawer.defaultMetricName;
+  const metricName = metric?.name ?? copy.feedbackDrawer.defaultMetricName;
   const fillRatio = (score - minScore) / (maxScore - minScore);
   const stepBy = (delta: number) => onChange(clampFeedbackScore(score + delta, maxScore, minScore));
 
@@ -36,7 +37,7 @@ export function FeedbackScoreControl({ score, tone, onChange, metric }: Feedback
     <>
       <div className="mt-8 flex items-center justify-center gap-7">
         <CircleButton
-          label={COPY.feedbackDrawer.decreaseMetric(metricName)}
+          label={copy.feedbackDrawer.decreaseMetric(metricName)}
           onClick={() => stepBy(-FEEDBACK_SCORE_STEP)}
           disabled={score === minScore}
           size={36}
@@ -47,7 +48,7 @@ export function FeedbackScoreControl({ score, tone, onChange, metric }: Feedback
           {score}
         </p>
         <CircleButton
-          label={COPY.feedbackDrawer.increaseMetric(metricName)}
+          label={copy.feedbackDrawer.increaseMetric(metricName)}
           variant="solid"
           onClick={() => stepBy(FEEDBACK_SCORE_STEP)}
           disabled={score === maxScore}
@@ -57,11 +58,11 @@ export function FeedbackScoreControl({ score, tone, onChange, metric }: Feedback
         </CircleButton>
       </div>
       <p className="mt-3 text-center text-2xl">
-        {COPY.feedbackDrawer.ofMax(maxScore)} <span className="text-sm text-ink/60">/ {tone.label}</span>
+        {copy.feedbackDrawer.ofMax(maxScore)} <span className="text-sm text-ink/60">/ {tone.label}</span>
       </p>
 
       <label htmlFor={sliderId} className="sr-only">
-        {COPY.feedbackDrawer.metricSliderLabel(metricName, minScore, maxScore)}
+        {copy.feedbackDrawer.metricSliderLabel(metricName, minScore, maxScore)}
       </label>
       <div className={cn('relative mt-7 flex items-center', tone.accent)}>
         <div aria-hidden="true" className="absolute inset-x-0 h-1 overflow-hidden rounded-full bg-ink/10">
@@ -80,13 +81,13 @@ export function FeedbackScoreControl({ score, tone, onChange, metric }: Feedback
           step={FEEDBACK_SCORE_STEP}
           value={score}
           onChange={(event) => onChange(Number(event.target.value))}
-          aria-valuetext={COPY.feedbackDrawer.sliderValue(score, maxScore, tone.label)}
+          aria-valuetext={copy.feedbackDrawer.sliderValue(score, maxScore, tone.label)}
           className="feedback-slider relative w-full bg-transparent"
         />
       </div>
       <div className="mt-2 flex justify-between text-xs text-ink/60">
-        <span>{metric?.minLabel ?? COPY.feedbackDrawer.minLabel(minScore)}</span>
-        <span>{metric?.maxLabel ?? COPY.feedbackDrawer.maxLabel(maxScore)}</span>
+        <span>{metric?.minLabel ?? copy.feedbackDrawer.minLabel(minScore)}</span>
+        <span>{metric?.maxLabel ?? copy.feedbackDrawer.maxLabel(maxScore)}</span>
       </div>
     </>
   );

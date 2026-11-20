@@ -4,13 +4,13 @@ import React from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import VerifiedOutlinedIcon from '@mui/icons-material/VerifiedOutlined';
-import { COPY } from '../../../data/copy';
 import type { DataCollectionField } from '../../../types/routine';
 import { clamp } from '../../../utils/math';
 import { AIIcon } from '../../ui/AIIcon';
 import { CircleButton } from '../../ui/CircleButton';
 import { Icon } from '../../ui/Icon';
 
+import { useLocale } from '../../../contexts/LocaleContext';
 type MorphingValue = number | string | boolean;
 
 interface CustomGeneratedWidgetProps {
@@ -24,6 +24,7 @@ export function CustomGeneratedWidget({
   value,
   onChange
 }: CustomGeneratedWidgetProps) {
+  const { copy } = useLocale();
   const proposed = field.proposedWidget;
   const min = proposed?.min ?? field.min ?? 0;
   const max = proposed?.max ?? field.max ?? 100;
@@ -43,16 +44,16 @@ export function CustomGeneratedWidget({
   ];
 
   return (
-    <div className="mt-4 w-full rounded-card border border-ink/15 bg-white p-4 text-left shadow-2xs space-y-4">
+    <div className="mt-4 w-full rounded-card border border-ink/15 bg-white p-4 text-start shadow-2xs space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink/10 pb-2.5">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-mint px-2.5 py-0.5 text-3xs font-semibold text-ink">
           <AIIcon size="xs" />
           <Icon icon={VerifiedOutlinedIcon} size="xs" />
-          {COPY.morphing.widgets.custom.approvedBadge}
+          {copy.morphing.widgets.custom.approvedBadge}
         </span>
         {proposed?.requestedType && (
           <span className="text-3xs font-mono text-ink/60">
-            {COPY.morphing.widgets.custom.proposedTypeLabel(proposed.requestedType)}
+            {copy.morphing.widgets.custom.proposedTypeLabel(proposed.requestedType)}
           </span>
         )}
       </div>
@@ -75,7 +76,7 @@ export function CustomGeneratedWidget({
                 key={opt}
                 type="button"
                 onClick={() => onChange(opt)}
-                className={`rounded-tile border px-3 py-2 text-left text-xs transition-colors ${
+                className={`rounded-tile border px-3 py-2 text-start text-xs transition-colors ${
                   isSelected
                     ? 'border-ink bg-ink text-white font-medium'
                     : 'border-ink/15 bg-canvas text-ink hover:bg-ink/5'
@@ -90,7 +91,7 @@ export function CustomGeneratedWidget({
         <div className="space-y-3 pt-1">
           <div className="flex items-center justify-center gap-5">
             <CircleButton
-              label={COPY.morphing.widgets.numeric.decrease(field.name)}
+              label={copy.morphing.widgets.numeric.decrease(field.name)}
               onClick={() => onChange(clamp(numericVal - step, min, max))}
               disabled={numericVal <= min}
               size={36}
@@ -108,7 +109,7 @@ export function CustomGeneratedWidget({
             </div>
 
             <CircleButton
-              label={COPY.morphing.widgets.numeric.increase(field.name)}
+              label={copy.morphing.widgets.numeric.increase(field.name)}
               variant="solid"
               onClick={() => onChange(clamp(numericVal + step, min, max))}
               disabled={numericVal >= max}

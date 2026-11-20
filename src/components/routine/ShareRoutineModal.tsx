@@ -14,7 +14,6 @@ import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import XIcon from '@mui/icons-material/X';
 import { toast } from 'sonner';
 import { useRoutine } from '../../contexts/RoutineContext';
-import { COPY } from '../../data/copy';
 import { downloadIcsFile, getGoogleCalendarUrl } from '../../utils/calendar';
 import { buildCalendarBlocksForRoutine } from '../../utils/schedule';
 import {
@@ -27,7 +26,9 @@ import {
 import { formatRoutineTitle } from '../../utils/text';
 import { Icon } from '../ui/Icon';
 
+import { useLocale } from '../../contexts/LocaleContext';
 export function ShareRoutineModal() {
+  const { copy } = useLocale();
   const { routine, routineSchedule, userProfile, isShareModalOpen, closeShareModal } = useRoutine();
   const titleId = useId();
   const descId = useId();
@@ -101,7 +102,7 @@ export function ShareRoutineModal() {
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      toast.success(COPY.shareModal.copiedToast);
+      toast.success(copy.shareModal.copiedToast);
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error('Could not copy link to clipboard');
@@ -119,7 +120,7 @@ export function ShareRoutineModal() {
   const handleDownloadIcs = () => {
     const ok = downloadIcsFile(routine, { blocks: calendarPlan.blocks });
     if (ok) {
-      toast.success(COPY.shareModal.downloadedIcsToast);
+      toast.success(copy.shareModal.downloadedIcsToast);
     }
   };
 
@@ -144,20 +145,20 @@ export function ShareRoutineModal() {
         <div className="flex items-start justify-between gap-4 border-b border-ink/10 pb-4">
           <div>
             <p className="text-2xs font-semibold uppercase tracking-wider text-ink/60">
-              {COPY.shareModal.eyebrow}
+              {copy.shareModal.eyebrow}
             </p>
             <h2 id={titleId} className="mt-0.5 text-xl font-bold text-ink">
-              {COPY.shareModal.title}
+              {copy.shareModal.title}
             </h2>
             <p id={descId} className="mt-1 text-xs text-ink/70">
-              {COPY.shareModal.description}
+              {copy.shareModal.description}
             </p>
           </div>
           <button
             type="button"
             onClick={closeShareModal}
             className="rounded-full p-1.5 text-ink/60 hover:bg-cream hover:text-ink transition-colors cursor-pointer"
-            aria-label={COPY.shareModal.closeButton}
+            aria-label={copy.shareModal.closeButton}
           >
             <Icon icon={CloseIcon} size="md" />
           </button>
@@ -176,14 +177,14 @@ export function ShareRoutineModal() {
                 className="h-52 w-52 rounded-xl object-contain"
               />
             ) : (
-              <div className="flex flex-col items-center text-ink/40">
+              <div className="flex flex-col items-center text-ink/65">
                 <Icon icon={QrCode2OutlinedIcon} size="xl" />
                 <p className="mt-2 text-xs">QR Code</p>
               </div>
             )}
           </div>
           <p className="mt-2 text-xs font-medium text-ink/75">
-            {COPY.shareModal.scanQrLabel}
+            {copy.shareModal.scanQrLabel}
           </p>
         </div>
 
@@ -203,7 +204,7 @@ export function ShareRoutineModal() {
               className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:bg-ink/90 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
             >
               <Icon icon={copied ? CheckOutlinedIcon : ContentCopyOutlinedIcon} size="xs" />
-              <span>{copied ? 'Copied' : COPY.shareModal.copyLink}</span>
+              <span>{copied ? 'Copied' : copy.shareModal.copyLink}</span>
             </button>
           </div>
 
@@ -214,7 +215,7 @@ export function ShareRoutineModal() {
               className="mt-2.5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-ink/20 bg-cream/70 hover:bg-cream py-2 text-xs font-semibold text-ink transition-colors cursor-pointer"
             >
               <Icon icon={IosShareOutlinedIcon} size="xs" />
-              <span>{COPY.shareModal.nativeShare}</span>
+              <span>{copy.shareModal.nativeShare}</span>
             </button>
           )}
         </div>
@@ -234,7 +235,7 @@ export function ShareRoutineModal() {
                 className="flex items-center justify-center gap-1.5 rounded-xl border border-[#25D366]/40 bg-[#25D366]/10 hover:bg-[#25D366]/20 py-2 px-3 text-xs font-semibold text-[#128C7E] transition-colors cursor-pointer"
               >
                 <Icon icon={WhatsAppIcon} size="xs" />
-                <span>{COPY.shareModal.socialWhatsApp}</span>
+                <span>{copy.shareModal.socialWhatsApp}</span>
               </a>
 
               {/* X / Twitter */}
@@ -245,7 +246,7 @@ export function ShareRoutineModal() {
                 className="flex items-center justify-center gap-1.5 rounded-xl border border-ink/20 bg-white hover:bg-cream/70 py-2 px-3 text-xs font-semibold text-ink transition-colors cursor-pointer"
               >
                 <Icon icon={XIcon} size="xs" />
-                <span>{COPY.shareModal.socialX}</span>
+                <span>{copy.shareModal.socialX}</span>
               </a>
 
               {/* LinkedIn */}
@@ -256,7 +257,7 @@ export function ShareRoutineModal() {
                 className="flex items-center justify-center gap-1.5 rounded-xl border border-[#0A66C2]/30 bg-[#0A66C2]/10 hover:bg-[#0A66C2]/20 py-2 px-3 text-xs font-semibold text-[#0A66C2] transition-colors cursor-pointer"
               >
                 <span className="font-bold text-xs">in</span>
-                <span>{COPY.shareModal.socialLinkedIn}</span>
+                <span>{copy.shareModal.socialLinkedIn}</span>
               </a>
 
               {/* Email */}
@@ -265,7 +266,7 @@ export function ShareRoutineModal() {
                 className="flex items-center justify-center gap-1.5 rounded-xl border border-ink/20 bg-white hover:bg-cream/70 py-2 px-3 text-xs font-semibold text-ink transition-colors cursor-pointer"
               >
                 <Icon icon={EmailOutlinedIcon} size="xs" />
-                <span>{COPY.shareModal.socialEmail}</span>
+                <span>{copy.shareModal.socialEmail}</span>
               </a>
             </div>
           </div>
@@ -276,11 +277,11 @@ export function ShareRoutineModal() {
           <div className="flex items-center gap-2">
             <Icon icon={CalendarTodayOutlinedIcon} size="sm" className="text-ink" />
             <h3 className="text-xs font-bold text-ink">
-              {COPY.shareModal.calendarSectionTitle}
+              {copy.shareModal.calendarSectionTitle}
             </h3>
           </div>
           <p className="mt-1 text-2xs text-ink/70">
-            {COPY.shareModal.calendarSectionDesc}
+            {copy.shareModal.calendarSectionDesc}
           </p>
 
           <div className="mt-3 flex flex-wrap gap-2">
@@ -292,7 +293,7 @@ export function ShareRoutineModal() {
               className="inline-flex items-center gap-1.5 rounded-xl bg-ink px-3 py-2 text-xs font-semibold text-white hover:bg-ink/90 active:scale-95 transition-all cursor-pointer"
             >
               <Icon icon={OpenInNewOutlinedIcon} size="xs" />
-              <span>{COPY.shareModal.googleCalendar}</span>
+              <span>{copy.shareModal.googleCalendar}</span>
             </a>
 
             {/* Apple / Outlook iCal */}
@@ -302,7 +303,7 @@ export function ShareRoutineModal() {
               className="inline-flex items-center gap-1.5 rounded-xl border border-ink/20 bg-white hover:bg-cream px-3 py-2 text-xs font-semibold text-ink transition-colors cursor-pointer"
             >
               <Icon icon={DownloadOutlinedIcon} size="xs" />
-              <span>{COPY.shareModal.downloadIcs}</span>
+              <span>{copy.shareModal.downloadIcs}</span>
             </button>
           </div>
         </div>

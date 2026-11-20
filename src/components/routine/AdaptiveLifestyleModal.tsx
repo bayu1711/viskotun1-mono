@@ -199,8 +199,8 @@ export function AdaptiveLifestyleModal() {
             {/* Schedule Conflict Callout */}
             {hasConflict && compatibility && (
               <div className="mt-4 rounded-xl border border-orange/40 bg-orange/10 p-3.5 text-xs text-ink">
-                <div className="flex items-center gap-1.5 font-bold text-orange-950">
-                  <Icon icon={WarningAmberOutlinedIcon} size="xs" className="text-orange-600" />
+                <div className="flex items-center gap-1.5 font-bold text-ink">
+                  <Icon icon={WarningAmberOutlinedIcon} size="xs" className="text-warning" />
                   <span>{sCopy.statusBadges.conflict}</span>
                 </div>
                 <p className="mt-1 leading-relaxed text-ink/85">{compatibility.explanation}</p>

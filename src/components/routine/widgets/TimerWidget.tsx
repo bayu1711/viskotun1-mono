@@ -4,11 +4,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
-import { COPY } from '../../../data/copy';
 import type { DataCollectionField } from '../../../types/routine';
 import { CircleButton } from '../../ui/CircleButton';
 import { Icon } from '../../ui/Icon';
 
+import { useLocale } from '../../../contexts/LocaleContext';
 interface TimerWidgetProps {
   field: DataCollectionField;
   value: number;
@@ -23,6 +23,7 @@ function formatTime(totalSec: number) {
 
 /** Stopwatch by default; with timerMode 'countdown' it counts down from `field.max` seconds. The logged value is always elapsed seconds. */
 export function TimerWidget({ field, value, onChange }: TimerWidgetProps) {
+  const { copy } = useLocale();
   const isCountdown = field.timerMode === 'countdown' && (field.max ?? 0) > 0;
   const total = isCountdown ? field.max ?? 0 : 0;
   const [elapsed, setElapsed] = useState(typeof value === 'number' && value > 0 ? value : 0);
@@ -86,18 +87,18 @@ export function TimerWidget({ field, value, onChange }: TimerWidgetProps) {
         </p>
         <span className="mt-1 text-xs text-ink/60">
           {isCountdown
-            ? COPY.morphing.widgets.timer.remainingSummary(remaining, total)
-            : COPY.morphing.widgets.timer.elapsedSummary(elapsed, field.max)}
+            ? copy.morphing.widgets.timer.remainingSummary(remaining, total)
+            : copy.morphing.widgets.timer.elapsedSummary(elapsed, field.max)}
         </span>
 
         <div className="mt-6 flex items-center justify-center gap-4">
-          <CircleButton label={COPY.morphing.widgets.timer.reset} onClick={resetTimer} size={40}>
+          <CircleButton label={copy.morphing.widgets.timer.reset} onClick={resetTimer} size={40}>
             <Icon icon={RotateLeftIcon} size="md" />
           </CircleButton>
 
           {isRunning ? (
             <CircleButton
-              label={COPY.morphing.widgets.timer.pause}
+              label={copy.morphing.widgets.timer.pause}
               variant="solid"
               onClick={pauseTimer}
               size={40}
@@ -107,12 +108,12 @@ export function TimerWidget({ field, value, onChange }: TimerWidgetProps) {
             </CircleButton>
           ) : (
             <CircleButton
-              label={isCountdown ? COPY.morphing.widgets.timer.startCountdown : COPY.morphing.widgets.timer.start}
+              label={isCountdown ? copy.morphing.widgets.timer.startCountdown : copy.morphing.widgets.timer.start}
               variant="solid"
               onClick={startTimer}
               disabled={isCountdown && remaining === 0}
               size={40}
-              className="bg-orange text-white hover:bg-orange/90 shadow-2xs"
+              className="bg-orange text-ink hover:bg-orange/90 shadow-2xs"
             >
               <Icon icon={PlayArrowIcon} size="md" />
             </CircleButton>
@@ -121,8 +122,8 @@ export function TimerWidget({ field, value, onChange }: TimerWidgetProps) {
       </div>
 
       {field.instructions && (
-        <p className="mt-5 rounded-tile bg-ink/5 p-3 text-2xs text-ink/75 leading-relaxed text-left">
-          <strong className="text-ink font-medium">{COPY.morphing.widgets.routineGuidelines}</strong>
+        <p className="mt-5 rounded-tile bg-ink/5 p-3 text-2xs text-ink/75 leading-relaxed text-start">
+          <strong className="text-ink font-medium">{copy.morphing.widgets.routineGuidelines}</strong>
           {field.instructions}
         </p>
       )}

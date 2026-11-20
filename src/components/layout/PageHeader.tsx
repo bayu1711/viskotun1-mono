@@ -6,10 +6,10 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { RoutineSwitcher } from '../routine/RoutineSwitcher';
 import { SectionHeading } from '../ui/SectionHeading';
 import { Icon } from '../ui/Icon';
-import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
 import { useRoutine } from '../../contexts/RoutineContext';
 
+import { useLocale } from '../../contexts/LocaleContext';
 interface PageHeaderProps {
   eyebrow: string;
   title: string;
@@ -26,6 +26,7 @@ export function PageHeader({
   switcherExtra,
   hideRoutineSwitcher = false
 }: PageHeaderProps) {
+  const { copy } = useLocale();
   const { routine } = useRoutine();
 
   return (
@@ -40,7 +41,7 @@ export function PageHeader({
             className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
           >
             <Icon icon={TrendingUpIcon} size="xs" />
-            <span>{COPY.howTo.buttonExploreSamples}</span>
+            <span>{copy.howTo.buttonExploreSamples}</span>
           </Link>
         ) : null}
       </div>

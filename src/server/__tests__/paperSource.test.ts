@@ -143,6 +143,19 @@ describe('extractPaperRoutine with a link', () => {
     expect(result.routine).toBeUndefined();
   });
 
+  it('never hands back a canned routine for an uploaded PDF when Gemini fails', async () => {
+    vi.stubEnv('GEMINI_API_KEY', 'test-key');
+    generateContent.mockRejectedValue(new Error('503 high demand'));
+    const file = new File([new Uint8Array([37, 80, 68, 70])], 'smith-2020-knee-rehab.pdf', {
+      type: 'application/pdf'
+    });
+
+    const result = await extractPaperRoutine({ file });
+
+    expect(result).toMatchObject({ success: false, eligible: false, rejectionReason: COPY.extraction.modelUnavailable });
+    expect(result.routine).toBeUndefined();
+  });
+
   it('declines an animal study by its resolved title without calling Gemini', async () => {
     vi.stubEnv('GEMINI_API_KEY', 'test-key');
     mockEuropePmc(

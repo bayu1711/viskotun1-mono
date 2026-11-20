@@ -57,7 +57,7 @@ export function RoutineSwitcher() {
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         aria-controls={isOpen ? listId : undefined}
-        className="flex min-h-11 items-center gap-2 rounded-full border border-ink py-1.5 pl-1.5 pr-3 text-sm transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 cursor-pointer"
+        className="flex min-h-11 items-center gap-2 rounded-full border border-ink py-1.5 ps-1.5 pe-3 text-sm transition-colors hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 cursor-pointer"
       >
         <IconTile variant="orange" shape="circle" size={28}>
           <StepIcon icon={routine.icon} size="xs" />
