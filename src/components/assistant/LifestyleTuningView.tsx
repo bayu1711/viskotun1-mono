@@ -157,7 +157,7 @@ export function LifestyleTuningView({
               return (
                 <span
                   key={tag}
-                  className={`inline-flex items-center gap-1 rounded-full border border-mint bg-mint/35 py-1 text-2xs font-medium text-ink ${canRemove ? 'pl-2.5 pr-1.5' : 'px-2.5'}`}
+                  className={`inline-flex items-center gap-1 rounded-full border border-mint bg-mint/35 py-1 text-2xs font-medium text-ink ${canRemove ? 'ps-2.5 pe-1.5' : 'px-2.5'}`}
                 >
                   <Icon icon={TagIcon} size="xs" className="text-ink/75" />
                   <span>{displayLabel}</span>
@@ -180,7 +180,7 @@ export function LifestyleTuningView({
               return (
                 <span
                   key={`caution-${caution}`}
-                  className="inline-flex items-center gap-1 rounded-full border border-blush bg-blush/40 pl-2.5 pr-1.5 py-1 text-2xs font-medium text-ink"
+                  className="inline-flex items-center gap-1 rounded-full border border-blush bg-blush/40 ps-2.5 pe-1.5 py-1 text-2xs font-medium text-ink"
                 >
                   <Icon icon={HealingOutlinedIcon} size="xs" className="text-ink/75" />
                   <span>{displayLabel}</span>

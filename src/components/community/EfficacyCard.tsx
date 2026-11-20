@@ -1,7 +1,7 @@
 import React from 'react';
-import { COPY } from '../../data/copy';
 import { cn } from '../../utils/cn';
 
+import { useLocale } from '../../contexts/LocaleContext';
 type EfficacyTone = 'cream' | 'mint' | 'orange' | 'yellow' | 'sky' | 'lavender' | 'peach';
 
 interface EfficacyStyle {
@@ -28,13 +28,14 @@ interface EfficacyCardProps {
 }
 
 export function EfficacyCard({ label, value, caption, tone }: EfficacyCardProps) {
+  const { copy } = useLocale();
   const styles = TONES[tone];
   return (
     <article className={cn('flex min-h-card flex-col rounded-card p-4 sm:p-5', styles.card)}>
       <h2 className="text-body font-medium">{label}</h2>
       <p className="mt-auto pt-6 text-jumbo font-light leading-none tabular-nums sm:text-jumbo-lg">
         {value}
-        <span className={styles.percent}>{COPY.common.percentSign}</span>
+        <span className={styles.percent}>{copy.common.percentSign}</span>
       </p>
       <p className={cn('mt-2 text-xs', styles.caption)}>{caption}</p>
     </article>

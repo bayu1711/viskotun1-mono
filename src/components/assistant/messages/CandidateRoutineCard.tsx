@@ -7,7 +7,6 @@ import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import { useLocale } from '../../../contexts/LocaleContext';
-import { COPY } from '../../../data/copy';
 import type { UserProfile } from '../../../types/auth';
 import type { Routine, RoutineStep } from '../../../types/routine';
 import type {
@@ -91,12 +90,12 @@ export function CandidateRoutineCard({
   );
 
   const meta = [
-    { label: COPY.assistant.meta.sample, value: COPY.assistant.meta.sampleValue(paper.sampleSize) },
+    { label: copy.assistant.meta.sample, value: copy.assistant.meta.sampleValue(paper.sampleSize) },
     {
-      label: COPY.assistant.meta.design,
-      value: isRandomizedTrial(paper) ? COPY.evidence.rctShort : COPY.evidence.pilotShort
+      label: copy.assistant.meta.design,
+      value: isRandomizedTrial(paper) ? copy.evidence.rctShort : copy.evidence.pilotShort
     },
-    { label: COPY.assistant.meta.year, value: String(paper.year) }
+    { label: copy.assistant.meta.year, value: String(paper.year) }
   ];
 
   const handleConfirmClick = () => {
@@ -120,7 +119,7 @@ export function CandidateRoutineCard({
         <div className="flex items-center gap-1.5">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-mint px-2.5 py-0.5 text-xs font-medium text-ink">
             <AIIcon size="xs" />
-            {COPY.assistant.stagingEyebrow}
+            {copy.assistant.stagingEyebrow}
           </span>
           <span className="inline-flex items-center rounded-full bg-cream border border-ink/15 px-2 py-0.5 text-3xs font-semibold text-ink">
             v{targetRoutine.version || '1.0'}
@@ -135,10 +134,10 @@ export function CandidateRoutineCard({
         <div className="rounded-tile border border-ink/15 bg-cream/70 p-3 text-xs text-ink space-y-1">
           <div className="flex items-center gap-1.5 font-semibold text-ink">
             <AIIcon size="xs" />
-            <span>{COPY.assistant.existingCanonicalPill(targetRoutine.version || '1.0')}</span>
+            <span>{copy.assistant.existingCanonicalPill(targetRoutine.version || '1.0')}</span>
           </div>
           <p className="text-2xs text-ink/75 leading-relaxed">
-            {COPY.assistant.existingCanonicalNotice(targetRoutine.version || '1.0')}
+            {copy.assistant.existingCanonicalNotice(targetRoutine.version || '1.0')}
           </p>
         </div>
       )}
@@ -176,10 +175,10 @@ export function CandidateRoutineCard({
         >
           <div className="flex items-center gap-1.5 font-semibold">
             <AIIcon size="xs" />
-            <span>{COPY.morphing.widgets.custom.pendingNotice}</span>
+            <span>{copy.morphing.widgets.custom.pendingNotice}</span>
           </div>
           <p className="text-2xs text-ink/70">
-            {COPY.morphing.widgets.custom.pendingSubtext}
+            {copy.morphing.widgets.custom.pendingSubtext}
           </p>
         </div>
       )}
@@ -187,7 +186,7 @@ export function CandidateRoutineCard({
       {targetRoutine.steps && targetRoutine.steps.length > 0 && (
         <div className="space-y-2 pt-1 border-t border-ink/10">
           <p className="text-2xs font-semibold uppercase tracking-wider text-ink/60">
-            {COPY.assistant.candidateStepsTitle}
+            {copy.assistant.candidateStepsTitle}
           </p>
           <ul className="space-y-2.5">
             {targetRoutine.steps.map((step, idx) => {
@@ -218,7 +217,7 @@ export function CandidateRoutineCard({
                         </p>
                         {isExcluded && (
                           <span className="rounded bg-ink/10 px-1 py-0.5 text-3xs text-ink/60">
-                            {COPY.task.excludedBadge}
+                            {copy.task.excludedBadge}
                           </span>
                         )}
                       </div>
@@ -246,8 +245,8 @@ export function CandidateRoutineCard({
                       {step.inferred && (
                         <p className="mt-1 text-3xs text-ink/60">
                           {step.inferredProvenance?.tier === 'lineage'
-                            ? COPY.task.lineageBadge(step.inferredProvenance.source)
-                            : COPY.task.inferredBadge(step.inferredProvenance?.source)}
+                            ? copy.task.lineageBadge(step.inferredProvenance.source)
+                            : copy.task.inferredBadge(step.inferredProvenance?.source)}
                         </p>
                       )}
                     </div>
@@ -257,8 +256,8 @@ export function CandidateRoutineCard({
                         <button
                           type="button"
                           onClick={() => onAskAboutStep(step)}
-                          aria-label={COPY.task.helpAriaLabel(step.action)}
-                          title={COPY.task.helpTooltip(step.action)}
+                          aria-label={copy.task.helpAriaLabel(step.action)}
+                          title={copy.task.helpTooltip(step.action)}
                           className="relative flex h-6 w-6 items-center justify-center rounded-full border border-ink/15 bg-white text-ink/60 transition-colors before:absolute before:-inset-2.5 hover:border-ink hover:bg-mint hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
                         >
                           <Icon icon={HelpOutlineOutlinedIcon} size="xs" />
@@ -269,9 +268,9 @@ export function CandidateRoutineCard({
                           type="button"
                           onClick={() => onToggleExcludeStep(step.id)}
                           className="text-3xs text-ink/60 underline decoration-dotted hover:text-ink transition-colors"
-                          title={isExcluded ? COPY.task.restoreStep : COPY.missingData.candidateExclusionNotice}
+                          title={isExcluded ? copy.task.restoreStep : copy.missingData.candidateExclusionNotice}
                         >
-                          {isExcluded ? COPY.assistant.restoreCandidateStep : COPY.assistant.excludeCandidateStep}
+                          {isExcluded ? copy.assistant.restoreCandidateStep : copy.assistant.excludeCandidateStep}
                         </button>
                       )}
                     </div>
@@ -346,7 +345,7 @@ export function CandidateRoutineCard({
 
       {progressionRule && (
         <p className="text-2xs text-ink/60 px-1">
-          {COPY.routineCard.rulePrefix} {COPY.routineCard.ruleCondition(progressionRule.condition)} {COPY.routineCard.ruleArrow}{' '}
+          {copy.routineCard.rulePrefix} {copy.routineCard.ruleCondition(progressionRule.condition)} {copy.routineCard.ruleArrow}{' '}
           <span className="font-medium text-ink">{progressionRule.action.toLowerCase()}</span>
         </p>
       )}
@@ -363,8 +362,8 @@ export function CandidateRoutineCard({
               {compatibility.status === 'conflict'
                 ? sCopy.conflictProceedBtn
                 : targetRoutine.isCanonical
-                  ? COPY.assistant.adoptExistingRoutine
-                  : COPY.assistant.confirmAddPaper}
+                  ? copy.assistant.adoptExistingRoutine
+                  : copy.assistant.confirmAddPaper}
             </span>
           </button>
           <button
@@ -373,7 +372,7 @@ export function CandidateRoutineCard({
             className="flex items-center gap-1 rounded-full border border-ink/20 px-3 py-2.5 text-xs font-medium text-ink/65 hover:bg-ink/5 hover:text-ink transition-colors focus:outline-none cursor-pointer"
           >
             <Icon icon={CloseIcon} size="xs" />
-            <span>{COPY.assistant.discardCandidate}</span>
+            <span>{copy.assistant.discardCandidate}</span>
           </button>
         </div>
 
@@ -383,18 +382,18 @@ export function CandidateRoutineCard({
             onClick={() => {
               onAskAboutStep({
                 id: 'improvement',
-                action: COPY.assistant.proposeImprovementPrompt
+                action: copy.assistant.proposeImprovementPrompt
               } as unknown as RoutineStep);
             }}
             className="w-full text-center text-2xs font-medium text-ink/65 hover:text-ink underline decoration-dotted transition-colors py-1"
           >
-            {COPY.assistant.proposeImprovementButton}
+            {copy.assistant.proposeImprovementButton}
           </button>
         )}
       </div>
 
       <p className="text-center text-3xs text-ink/60">
-        {COPY.assistant.stagingDescription}
+        {copy.assistant.stagingDescription}
       </p>
     </article>
   );

@@ -324,6 +324,20 @@ export function ProfilePage() {
   };
   const previewTags = syncLifestyleActiveTags(draftLifestyle);
   const previewCohort = deriveLifestyleCohort(draftLifestyle);
+  // Localized names for the cohort id and the region presets (the stored values stay English).
+  const cohortLabels: Record<typeof previewCohort, string> = {
+    smoker: copy.lifestyleTuning.filterSmokers,
+    ramadan: copy.lifestyleTuning.filterRamadan,
+    shift_work: copy.lifestyleTuning.filterShiftWork,
+    general: copy.lifestyleTuning.filterAll
+  };
+  const regionNames = useMemo(() => {
+    try {
+      return new Intl.DisplayNames([locale], { type: 'region' });
+    } catch {
+      return null;
+    }
+  }, [locale]);
   const parsedAge = sanitizeAge(ageInput);
   const generatedFocus = deriveClinicalFocus(draftLifestyle, {
     age: parsedAge,
@@ -531,7 +545,7 @@ export function ProfilePage() {
                 className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3.5 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
               >
                 <span>{t.backToRoutine}</span>
-                <Icon icon={NorthEastIcon} size="xs" />
+                <Icon icon={NorthEastIcon} size="xs" className="rtl:-scale-x-100" />
               </Link>
             </div>
           }
@@ -851,7 +865,7 @@ export function ProfilePage() {
                         <span className="font-mono text-2xs font-semibold opacity-70" aria-hidden="true">
                           {preset.countryCode}
                         </span>
-                        <span>{preset.countryName}</span>
+                        <span>{regionNames?.of(preset.countryCode) ?? preset.countryName}</span>
                       </button>
                     );
                   })}
@@ -1012,7 +1026,7 @@ export function ProfilePage() {
                           key={tag}
                           className={cn(
                             'inline-flex items-center gap-1 rounded-full border border-mint bg-mint/35 py-1 text-2xs font-medium text-ink',
-                            isCustom ? 'pl-2.5 pr-1' : 'px-2.5'
+                            isCustom ? 'ps-2.5 pe-1' : 'px-2.5'
                           )}
                         >
                           <Icon icon={getLifestyleTagIcon(tag)} size="xs" className="text-ink/75" />
@@ -1080,7 +1094,7 @@ export function ProfilePage() {
                       className="mt-1 inline-flex items-center gap-1 text-2xs font-semibold text-ink underline underline-offset-2"
                     >
                       <span>{copy.routine.openDashboard}</span>
-                      <Icon icon={NorthEastIcon} size="xs" />
+                      <Icon icon={NorthEastIcon} size="xs" className="rtl:-scale-x-100" />
                     </Link>
                   </div>
                 </li>
@@ -1093,13 +1107,13 @@ export function ProfilePage() {
                 <li className="flex items-start gap-2.5 rounded-xl bg-white/80 p-3 border border-ink/10">
                   <Icon icon={PeopleAltOutlinedIcon} size="sm" className="mt-0.5 shrink-0 text-ink" />
                   <div>
-                    <p>{t.impactCohortItem(previewCohort)}</p>
+                    <p>{t.impactCohortItem(cohortLabels[previewCohort])}</p>
                     <Link
                       href={ROUTES.community}
                       className="mt-1 inline-flex items-center gap-1 text-2xs font-semibold text-ink underline underline-offset-2"
                     >
                       <span>{copy.nav.community}</span>
-                      <Icon icon={NorthEastIcon} size="xs" />
+                      <Icon icon={NorthEastIcon} size="xs" className="rtl:-scale-x-100" />
                     </Link>
                   </div>
                 </li>

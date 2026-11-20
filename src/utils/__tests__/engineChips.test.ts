@@ -5,6 +5,10 @@ import { AnswerBubble } from '../../components/assistant/messages/AnswerBubble';
 import { getEngineMeta } from '../../components/assistant/engineMeta';
 import { COPY } from '../../data/copy';
 import { COPY_AR_OVERRIDE } from '../../data/locales/ar';
+import { LocaleProvider } from '../../contexts/LocaleContext';
+
+/** AnswerBubble reads locale copy, so it renders inside the provider like in the app. */
+const inLocale = (el: React.ReactElement) => React.createElement(LocaleProvider, null, el);
 
 describe('AI Engine attribution and chip privacy guardrails', () => {
   it('does not expose Gemini Flash model name in English copy dictionary', () => {
@@ -22,10 +26,10 @@ describe('AI Engine attribution and chip privacy guardrails', () => {
 
   it('omits model identifiers when cloud-gemini answers in AnswerBubble', () => {
     const html = renderToStaticMarkup(
-      React.createElement(AnswerBubble, {
+      inLocale(React.createElement(AnswerBubble, {
         content: 'Take 5g creatine monohydrate daily with breakfast.',
         engine: 'cloud-gemini'
-      })
+      }))
     );
 
     // Verify model identifiers are completely absent
@@ -38,11 +42,11 @@ describe('AI Engine attribution and chip privacy guardrails', () => {
 
   it('preserves custom clinical paper source for cloud-gemini without model chip', () => {
     const html = renderToStaticMarkup(
-      React.createElement(AnswerBubble, {
+      inLocale(React.createElement(AnswerBubble, {
         content: 'Hydration protocol from Section 2.4.',
         engine: 'cloud-gemini',
         source: 'Methods · Section 2.4'
-      })
+      }))
     );
 
     expect(html).not.toContain('Gemini');
@@ -52,10 +56,10 @@ describe('AI Engine attribution and chip privacy guardrails', () => {
 
   it('retains on-device attribution for on-device-gemma when running locally', () => {
     const html = renderToStaticMarkup(
-      React.createElement(AnswerBubble, {
+      inLocale(React.createElement(AnswerBubble, {
         content: 'Local inference answer.',
         engine: 'on-device-gemma'
-      })
+      }))
     );
 
     expect(html).toContain('On-Device Gemma');

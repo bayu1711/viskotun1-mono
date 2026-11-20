@@ -14,7 +14,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { usePolicyLedger } from '../../contexts/PolicyLedgerContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
-import { COPY } from '../../data/copy';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import type { ProposedWidgetSpec } from '../../types/routine';
 import { AIIcon } from '../ui/AIIcon';
@@ -22,7 +21,9 @@ import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 import { PillButton } from '../ui/PillButton';
 
+import { useLocale } from '../../contexts/LocaleContext';
 export function PolicyLedgerDrawer() {
+  const { copy } = useLocale();
   const { isAdmin } = useAuth();
   const { dataCollectionSpec, stagingRoutine, approveProposedWidget } = useRoutine();
   const {
@@ -128,9 +129,9 @@ export function PolicyLedgerDrawer() {
         );
         approveProposedWidget(approvedSpec);
       }
-      toast.success(COPY.policyLedger.toastWidgetApproved(proposal.title));
+      toast.success(copy.policyLedger.toastWidgetApproved(proposal.title));
     } catch {
-      toast.error(COPY.policyLedger.toastWidgetApproveError);
+      toast.error(copy.policyLedger.toastWidgetApproveError);
     } finally {
       setApprovingId(null);
     }
@@ -168,7 +169,7 @@ export function PolicyLedgerDrawer() {
             ref={panelRef}
             role="dialog"
             aria-modal="true"
-            aria-label={COPY.policyLedger.dialogLabel}
+            aria-label={copy.policyLedger.dialogLabel}
             tabIndex={-1}
             initial={{ y: MOTION.dialogOffsetY, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -184,25 +185,25 @@ export function PolicyLedgerDrawer() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base font-semibold">{COPY.policyLedger.title}</h2>
+                    <h2 className="text-base font-semibold">{copy.policyLedger.title}</h2>
                     {isLiveFirestore ? (
                       <span className="inline-flex items-center gap-1 rounded-full border border-mint bg-mint/30 px-2 py-0.5 text-3xs font-semibold text-ink">
                         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-ink" />
-                        {COPY.policyLedger.firestoreLive}
+                        {copy.policyLedger.firestoreLive}
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 rounded-full border border-ink/15 bg-cream px-2 py-0.5 text-3xs font-medium text-ink/70">
-                        {COPY.policyLedger.memoryCache}
+                        {copy.policyLedger.memoryCache}
                       </span>
                     )}
                   </div>
                   <p className="text-xs text-ink/60">
-                    {COPY.policyLedger.versionLabel(policy?.version || COPY.policyLedger.versionFallback)}
+                    {copy.policyLedger.versionLabel(policy?.version || copy.policyLedger.versionFallback)}
                   </p>
                 </div>
               </div>
 
-              <CircleButton label={COPY.policyLedger.close} onClick={closePolicyDrawer} size={36}>
+              <CircleButton label={copy.policyLedger.close} onClick={closePolicyDrawer} size={36}>
                 <Icon icon={CloseIcon} size="md" />
               </CircleButton>
             </div>
@@ -213,17 +214,17 @@ export function PolicyLedgerDrawer() {
               <div className="rounded-card border border-ink/10 bg-canvas p-4 text-xs leading-relaxed text-ink/75">
                 <div className="flex items-center gap-1.5 font-medium text-ink">
                   <Icon icon={TuneOutlinedIcon} size="sm" />
-                  <span>{COPY.policyLedger.governanceBadge}</span>
+                  <span>{copy.policyLedger.governanceBadge}</span>
                 </div>
                 <p className="mt-1">
-                  {COPY.policyLedger.governanceDesc}
+                  {copy.policyLedger.governanceDesc}
                 </p>
               </div>
 
               {/* Competition Evaluation Lifecycle Notice */}
               <div className="rounded-card border border-ink/10 bg-cream/50 p-3.5 text-xs leading-relaxed text-ink/80">
                 <span className="font-semibold text-ink">Google AI Builder Cup Note:</span>{' '}
-                {COPY.policyLedger.lifecycleNotice}
+                {copy.policyLedger.lifecycleNotice}
               </div>
 
               {/* Dynamic Parameter 1: Adverse Escalation Threshold */}
@@ -231,19 +232,19 @@ export function PolicyLedgerDrawer() {
                 <div className="flex items-center justify-between">
                   <div>
                     <label htmlFor="pain-threshold" className="text-sm font-medium">
-                      {COPY.policyLedger.thresholdLabel}
+                      {copy.policyLedger.thresholdLabel}
                     </label>
                     <p className="text-xs text-ink/60">
-                      {COPY.policyLedger.thresholdDesc}
+                      {copy.policyLedger.thresholdDesc}
                     </p>
                   </div>
                   <span className="rounded-full bg-ink px-3 py-1 font-mono text-sm font-medium text-white">
-                    {COPY.policyLedger.thresholdDisplay(threshold)}
+                    {copy.policyLedger.thresholdDisplay(threshold)}
                   </span>
                 </div>
 
                 <div className="mt-4 flex items-center gap-3">
-                  <span className="text-xs text-ink/60">{COPY.policyLedger.mildLabel}</span>
+                  <span className="text-xs text-ink/60">{copy.policyLedger.mildLabel}</span>
                   <input
                     id="pain-threshold"
                     type="range"
@@ -254,7 +255,7 @@ export function PolicyLedgerDrawer() {
                     onChange={(e) => handleThresholdChange(Number(e.target.value))}
                     className="h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-ink/10 accent-ink"
                   />
-                  <span className="text-xs text-ink/60">{COPY.policyLedger.severeLabel}</span>
+                  <span className="text-xs text-ink/60">{copy.policyLedger.severeLabel}</span>
                 </div>
               </div>
 
@@ -263,19 +264,19 @@ export function PolicyLedgerDrawer() {
                 <div className="flex items-center justify-between">
                   <div>
                     <label htmlFor="load-reduction" className="text-sm font-medium">
-                      {COPY.policyLedger.reductionLabel}
+                      {copy.policyLedger.reductionLabel}
                     </label>
                     <p className="text-xs text-ink/60">
-                      {COPY.policyLedger.reductionDesc}
+                      {copy.policyLedger.reductionDesc}
                     </p>
                   </div>
                   <span className="rounded-full bg-ink px-3 py-1 font-mono text-sm font-medium text-white">
-                    {COPY.policyLedger.loadReductionDisplay(loadReduction)}
+                    {copy.policyLedger.loadReductionDisplay(loadReduction)}
                   </span>
                 </div>
 
                 <div className="mt-4 flex items-center gap-3">
-                  <span className="text-xs text-ink/60">{COPY.policyLedger.reductionMinLabel}</span>
+                  <span className="text-xs text-ink/60">{copy.policyLedger.reductionMinLabel}</span>
                   <input
                     id="load-reduction"
                     type="range"
@@ -286,15 +287,15 @@ export function PolicyLedgerDrawer() {
                     onChange={(e) => handleReductionChange(Number(e.target.value))}
                     className="h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-ink/10 accent-ink"
                   />
-                  <span className="text-xs text-ink/60">{COPY.policyLedger.reductionMaxLabel}</span>
+                  <span className="text-xs text-ink/60">{copy.policyLedger.reductionMaxLabel}</span>
                 </div>
               </div>
 
               {/* Gatekeeper Banned Criteria */}
               <div className="rounded-card border border-ink/10 bg-white p-4">
-                <p className="text-sm font-medium">{COPY.policyLedger.bannedLabel}</p>
+                <p className="text-sm font-medium">{copy.policyLedger.bannedLabel}</p>
                 <p className="text-xs text-ink/60">
-                  {COPY.policyLedger.bannedDesc}
+                  {copy.policyLedger.bannedDesc}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {(policy?.bannedKeywords || []).map((keyword) => (
@@ -314,17 +315,17 @@ export function PolicyLedgerDrawer() {
                   <div>
                     <p className="flex items-center gap-1.5 text-sm font-medium text-ink">
                       <AIIcon size="xs" />
-                      <span>{COPY.policyLedger.pendingWidgetsLabel}</span>
+                      <span>{copy.policyLedger.pendingWidgetsLabel}</span>
                     </p>
                     <p className="mt-0.5 text-xs text-ink/60">
-                      {COPY.policyLedger.pendingWidgetsDesc}
+                      {copy.policyLedger.pendingWidgetsDesc}
                     </p>
                   </div>
                 </div>
 
                 {widgetProposals.length === 0 ? (
                   <p className="rounded-tile bg-canvas px-3 py-2.5 text-xs text-ink/60">
-                    {COPY.policyLedger.noPendingWidgets}
+                    {copy.policyLedger.noPendingWidgets}
                   </p>
                 ) : (
                   <ul className="space-y-2.5">
@@ -357,7 +358,7 @@ export function PolicyLedgerDrawer() {
                             {isApproved ? (
                               <span className="inline-flex items-center gap-1 rounded-full bg-mint px-2.5 py-1 text-2xs font-semibold text-ink">
                                 <Icon icon={CheckIcon} size="xs" />
-                                {COPY.policyLedger.approvedWidgetStatus}
+                                {copy.policyLedger.approvedWidgetStatus}
                               </span>
                             ) : (
                               <PillButton
@@ -366,7 +367,7 @@ export function PolicyLedgerDrawer() {
                                 disabled={isApproving}
                                 onClick={() => handleApproveWidget(proposal)}
                               >
-                                {COPY.policyLedger.approveWidgetButton}
+                                {copy.policyLedger.approveWidgetButton}
                               </PillButton>
                             )}
                           </div>
@@ -387,8 +388,8 @@ export function PolicyLedgerDrawer() {
                   )}
                   <span className="text-ink/70">
                     {isLiveFirestore
-                      ? COPY.policyLedger.syncActive
-                      : COPY.policyLedger.syncFallback(firestoreStatus)}
+                      ? copy.policyLedger.syncActive
+                      : copy.policyLedger.syncFallback(firestoreStatus)}
                   </span>
                 </div>
                 <button
@@ -397,7 +398,7 @@ export function PolicyLedgerDrawer() {
                   className="inline-flex items-center gap-1 text-2xs font-medium text-ink/60 hover:text-ink underline"
                 >
                   <Icon icon={RestartAltOutlinedIcon} size="xs" />
-                  {COPY.policyLedger.resetBaseline}
+                  {copy.policyLedger.resetBaseline}
                 </button>
               </div>
             </div>
@@ -409,7 +410,7 @@ export function PolicyLedgerDrawer() {
                 onClick={closePolicyDrawer}
                 className="text-xs text-ink/60 hover:text-ink transition-colors"
               >
-                {COPY.policyLedger.cancel}
+                {copy.policyLedger.cancel}
               </button>
 
               <PillButton
@@ -418,7 +419,7 @@ export function PolicyLedgerDrawer() {
                 variant="primary"
                 className="text-xs"
               >
-                {isLoading ? COPY.policyLedger.syncing : hasChanges ? COPY.policyLedger.saveSync : COPY.policyLedger.upToDate}
+                {isLoading ? copy.policyLedger.syncing : hasChanges ? copy.policyLedger.saveSync : copy.policyLedger.upToDate}
               </PillButton>
             </div>
           </motion.div>

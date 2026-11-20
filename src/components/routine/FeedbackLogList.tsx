@@ -1,11 +1,12 @@
 import React from 'react';
 import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined';
 import { useRoutine } from '../../contexts/RoutineContext';
-import { COPY } from '../../data/copy';
 import { EmptyState } from '../feedback/EmptyState';
 import { FeedbackLogItem } from './FeedbackLogItem';
 
+import { useLocale } from '../../contexts/LocaleContext';
 export function FeedbackLogList() {
+  const { copy } = useLocale();
   const { feedbackLogs, feedbackMetric } = useRoutine();
 
   if (feedbackLogs.length === 0) {
@@ -13,8 +14,8 @@ export function FeedbackLogList() {
       <EmptyState
         className="mt-4"
         icon={MonitorHeartOutlinedIcon}
-        title={COPY.routine.emptyMetricTitle(feedbackMetric?.name)}
-        description={COPY.routine.emptyFeedbackBody}
+        title={copy.routine.emptyMetricTitle(feedbackMetric?.name)}
+        description={copy.routine.emptyFeedbackBody}
       />
     );
   }

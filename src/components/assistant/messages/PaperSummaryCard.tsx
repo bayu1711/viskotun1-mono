@@ -1,25 +1,26 @@
 import React from 'react';
 import { useRoutine } from '../../../contexts/RoutineContext';
-import { COPY } from '../../../data/copy';
 import { isRandomizedTrial } from '../../../utils/routineMetrics';
 import { EvidenceBadgeChip } from '../../ui/EvidenceBadgeChip';
 import { MetaItem } from './MetaItem';
 
+import { useLocale } from '../../../contexts/LocaleContext';
 interface PaperSummaryCardProps {
   intro: string;
 }
 
 export function PaperSummaryCard({ intro }: PaperSummaryCardProps) {
+  const { copy } = useLocale();
   const { routine } = useRoutine();
   if (!routine) return null;
   const { paper } = routine;
   const meta = [
-  { label: COPY.assistant.meta.sample, value: COPY.assistant.meta.sampleValue(paper.sampleSize) },
+  { label: copy.assistant.meta.sample, value: copy.assistant.meta.sampleValue(paper.sampleSize) },
   {
-    label: COPY.assistant.meta.design,
-    value: isRandomizedTrial(paper) ? COPY.evidence.rctShort : COPY.evidence.pilotShort
+    label: copy.assistant.meta.design,
+    value: isRandomizedTrial(paper) ? copy.evidence.rctShort : copy.evidence.pilotShort
   },
-  { label: COPY.assistant.meta.year, value: String(paper.year) }];
+  { label: copy.assistant.meta.year, value: String(paper.year) }];
 
 
   return (

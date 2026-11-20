@@ -163,8 +163,8 @@ export function DoseModeModal() {
                     type="button"
                     onClick={() => handleSelectMode(opt.id)}
                     className={cn(
-                      'flex w-full items-start gap-3 rounded-xl border p-3.5 text-left transition-all cursor-pointer',
-                      isRtl && 'text-right',
+                      'flex w-full items-start gap-3 rounded-xl border p-3.5 text-start transition-all cursor-pointer',
+                      isRtl && 'text-end',
                       isSelected
                         ? 'border-ink bg-white shadow-sm ring-1 ring-ink/10'
                         : 'border-ink/10 bg-white/60 hover:border-ink/30 hover:bg-white'

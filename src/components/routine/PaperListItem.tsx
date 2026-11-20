@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { COPY } from '../../data/copy';
 import type { RoutineSummary } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { IconTile } from '../ui/IconTile';
@@ -9,6 +8,7 @@ import { ProgressRing } from '../ui/ProgressRing';
 import { StepIcon } from '../ui/StepIcon';
 import { PaperRowText } from './PaperRowText';
 
+import { useLocale } from '../../contexts/LocaleContext';
 interface PaperListItemProps {
   routine: RoutineSummary;
   active: boolean;
@@ -16,6 +16,7 @@ interface PaperListItemProps {
 }
 
 export function PaperListItem({ routine, active, onOpen }: PaperListItemProps) {
+  const { copy } = useLocale();
   const item = routine;
   return (
     <li>
@@ -24,7 +25,7 @@ export function PaperListItem({ routine, active, onOpen }: PaperListItemProps) {
         onClick={() => onOpen(item.id)}
         aria-current={active ? 'true' : undefined}
         className={cn(
-          'flex w-full items-center gap-3 rounded-tile border p-2.5 pr-4 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30',
+          'flex w-full items-center gap-3 rounded-tile border p-2.5 pe-4 text-start transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30',
           active ? 'border-orange bg-orange/5 ring-1 ring-orange/30' : 'border-ink/15 hover:border-ink/40 bg-white'
         )}
       >
@@ -35,8 +36,8 @@ export function PaperListItem({ routine, active, onOpen }: PaperListItemProps) {
           title={item.title}
           meta={
             <>
-              {COPY.dashboard.paperMeta(item.currentDay, item.totalDays)}
-              {active && COPY.dashboard.activeSuffix}
+              {copy.dashboard.paperMeta(item.currentDay, item.totalDays)}
+              {active && copy.dashboard.activeSuffix}
             </>
           }
         />
@@ -44,7 +45,7 @@ export function PaperListItem({ routine, active, onOpen }: PaperListItemProps) {
         <ProgressRing value={item.todayFraction} size={36} tone={active ? 'orange' : 'ink'}>
           <span className="text-3xs tabular-nums">
             {item.todayPercent}
-            {COPY.common.percentSign}
+            {copy.common.percentSign}
           </span>
         </ProgressRing>
       </button>

@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { ONBOARDING_DISMISSED_KEY, useAuth } from '../../contexts/AuthContext';
 import { useRoutine } from '../../contexts/RoutineContext';
-import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
 import { useFileDrop } from '../../hooks/useFileDrop';
 import { isPdfFile } from '../../utils/files';
@@ -27,11 +26,13 @@ import { MobileTabBar } from './MobileTabBar';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 
+import { useLocale } from '../../contexts/LocaleContext';
 interface AppShellProps {
   children: React.ReactNode;
 }
 
 export function AppShell({ children }: AppShellProps) {
+  const { copy } = useLocale();
   const pathname = usePathname();
   const { uploadPaper, hasHydrated } = useRoutine();
   const { openAssistant, openLifestyleTuning, isOpen: isAssistantOpen } = useAssistant();
@@ -41,7 +42,7 @@ export function AppShell({ children }: AppShellProps) {
 
   const isDragging = useFileDrop((file) => {
     if (!isPdfFile(file)) {
-      toast.error(COPY.upload.invalidType);
+      toast.error(copy.upload.invalidType);
       return;
     }
     openAssistant('upload');

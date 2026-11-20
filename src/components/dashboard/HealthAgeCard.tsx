@@ -72,7 +72,7 @@ export function HealthAgeCard() {
             </span>
           </div>
           <span className="mt-2 text-2xs font-medium text-ink/70">
-            {t.baselineAgeLabel(projection.chronologicalAge)} · Based on {projection.sustainedStreak} day sustained habit loop
+            {t.baselineAgeLabel(projection.chronologicalAge)} · {t.sustainedBasis(projection.sustainedStreak)}
             {!userProfile?.age && (
               <>
                 {' · '}

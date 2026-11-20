@@ -8,7 +8,6 @@ import NorthEastIcon from '@mui/icons-material/NorthEast';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { DOI_BASE_URL } from '../../data/config';
-import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
 import { EmptyState } from '../feedback/EmptyState';
 import { PaperListItem } from '../routine/PaperListItem';
@@ -20,7 +19,9 @@ import { Panel } from '../ui/Panel';
 import { PillButton } from '../ui/PillButton';
 import { SectionHeading } from '../ui/SectionHeading';
 
+import { useLocale } from '../../contexts/LocaleContext';
 export function PapersPanel() {
+  const { copy } = useLocale();
   const { routine, routines, queuedPapers, activeRoutineId, setActiveRoutine } = useRoutine();
   const { openAssistant } = useAssistant();
   const router = useRouter();
@@ -38,10 +39,10 @@ export function PapersPanel() {
     <Panel aria-labelledby={headingId}>
       <SectionHeading
         id={headingId}
-        eyebrow={COPY.dashboard.papersEyebrow}
-        title={COPY.dashboard.papersTitle}
+        eyebrow={copy.dashboard.papersEyebrow}
+        title={copy.dashboard.papersTitle}
         action={
-          <CircleButton label={COPY.shell.addPaper} onClick={openUpload}>
+          <CircleButton label={copy.shell.addPaper} onClick={openUpload}>
             <Icon icon={AddIcon} size="md" />
           </CircleButton>
         }
@@ -51,11 +52,11 @@ export function PapersPanel() {
         <EmptyState
           className="mt-5"
           icon={DescriptionOutlinedIcon}
-          title={COPY.dashboard.emptyPapersTitle}
-          description={COPY.dashboard.emptyPapersBody}
+          title={copy.dashboard.emptyPapersTitle}
+          description={copy.dashboard.emptyPapersBody}
           action={
             <PillButton size="sm" onClick={openUpload}>
-              {COPY.switcher.addPaper}
+              {copy.switcher.addPaper}
             </PillButton>
           }
         />
@@ -84,11 +85,11 @@ export function PapersPanel() {
             href={`${DOI_BASE_URL}${routine.paper.doi}`}
             target="_blank"
             rel="noreferrer"
-            className="ml-auto flex min-h-11 items-center gap-1 text-xs text-ink/60 transition-colors hover:text-ink focus:outline-none focus-visible:underline"
+            className="ms-auto flex min-h-11 items-center gap-1 text-xs text-ink/60 transition-colors hover:text-ink focus:outline-none focus-visible:underline"
           >
-            {COPY.dashboard.sourcePaper}
-            <Icon icon={NorthEastIcon} size="xs" />
-            <span className="sr-only">{COPY.common.opensInNewTab}</span>
+            {copy.dashboard.sourcePaper}
+            <Icon icon={NorthEastIcon} size="xs" className="rtl:-scale-x-100" />
+            <span className="sr-only">{copy.common.opensInNewTab}</span>
           </a>
         </div>
       )}

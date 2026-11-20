@@ -1,6 +1,5 @@
 import React from 'react';
 import CheckIcon from '@mui/icons-material/Check';
-import { COPY } from '../../data/copy';
 import type { RoutineSummary } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { Icon } from '../ui/Icon';
@@ -8,6 +7,7 @@ import { ProgressRing } from '../ui/ProgressRing';
 import { StepIcon } from '../ui/StepIcon';
 import { PaperRowText } from './PaperRowText';
 
+import { useLocale } from '../../contexts/LocaleContext';
 interface RoutineOptionProps {
   routine: RoutineSummary;
   active: boolean;
@@ -15,6 +15,7 @@ interface RoutineOptionProps {
 }
 
 export function RoutineOption({ routine, active, onSelect }: RoutineOptionProps) {
+  const { copy } = useLocale();
   const item = routine;
   if (!item) return null;
 
@@ -26,7 +27,7 @@ export function RoutineOption({ routine, active, onSelect }: RoutineOptionProps)
         aria-selected={active}
         onClick={() => onSelect(item.id)}
         className={cn(
-          'flex w-full items-center gap-3 rounded-tile p-2.5 text-left transition-colors hover:bg-canvas focus:outline-none focus-visible:bg-canvas',
+          'flex w-full items-center gap-3 rounded-tile p-2.5 text-start transition-colors hover:bg-canvas focus:outline-none focus-visible:bg-canvas',
           active && 'bg-canvas'
         )}
       >
@@ -35,7 +36,7 @@ export function RoutineOption({ routine, active, onSelect }: RoutineOptionProps)
         </ProgressRing>
         <PaperRowText
           title={item.title}
-          meta={COPY.switcher.meta(item.currentDay, item.totalDays, item.todayPercent)}
+          meta={copy.switcher.meta(item.currentDay, item.totalDays, item.todayPercent)}
         />
         {active && <Icon icon={CheckIcon} size="md" className="text-orange" />}
       </button>

@@ -171,6 +171,15 @@ input[type='range'].feedback-slider:focus-visible::-webkit-slider-thumb {
   letter-spacing: normal !important;
 }
 
+/*
+ * Paper content (step names, study notes, safety messages) stays in English inside the
+ * Arabic layout. plaintext lets each block take its direction from its first letter, so an
+ * English sentence keeps its full stop at the end instead of jumping to the left edge.
+ */
+[dir='rtl'] :is(p, h1, h2, h3, h4, li, blockquote, label, dt, dd) {
+  unicode-bidi: plaintext;
+}
+
 /* Mirror icons that indicate directional navigation in RTL */
 [dir='rtl'] .rtl-mirror {
   transform: scaleX(-1);

@@ -4,11 +4,11 @@ import React from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import HistoryIcon from '@mui/icons-material/History';
 import VerifiedUserOutlinedIcon from '@mui/icons-material/VerifiedUserOutlined';
-import { COPY } from '../../data/copy';
 import type { RoutineChangelogEntry } from '../../types/routine';
 import { AIIcon } from '../ui/AIIcon';
 import { Icon } from '../ui/Icon';
 
+import { useLocale } from '../../contexts/LocaleContext';
 interface VersionHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -24,6 +24,7 @@ export function VersionHistoryModal({
   currentVersion = '1.0',
   changelog = []
 }: VersionHistoryModalProps) {
+  const { copy } = useLocale();
   if (!isOpen) return null;
 
   const entries = changelog && changelog.length > 0 ? changelog : [
@@ -59,11 +60,11 @@ export function VersionHistoryModal({
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-mint/50 border border-mint px-2 py-0.5 text-3xs font-medium text-ink">
                 <Icon icon={VerifiedUserOutlinedIcon} size="xs" />
-                <span>{COPY.community.versionApprovedBadge}</span>
+                <span>{copy.community.versionApprovedBadge}</span>
               </span>
             </div>
             <h2 id="version-history-title" className="text-base font-semibold text-ink leading-snug">
-              {COPY.community.versionHistoryTitle}
+              {copy.community.versionHistoryTitle}
             </h2>
             <p className="text-xs text-ink/65 line-clamp-1">{paperTitle}</p>
           </div>
@@ -72,14 +73,14 @@ export function VersionHistoryModal({
             type="button"
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-full border border-ink/15 text-ink/60 transition-colors hover:border-ink hover:text-ink focus:outline-none"
-            aria-label={COPY.community.closeVersionModal}
+            aria-label={copy.community.closeVersionModal}
           >
             <Icon icon={CloseIcon} size="xs" />
           </button>
         </div>
 
         {/* Changelog Timeline */}
-        <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+        <div className="flex-1 overflow-y-auto space-y-3 pe-1">
           {entries.map((entry, idx) => {
             const isLatest = idx === 0;
             return (
@@ -98,7 +99,7 @@ export function VersionHistoryModal({
                     </span>
                     {isLatest && (
                       <span className="rounded bg-mint px-1.5 py-0.5 text-3xs font-semibold text-ink">
-                        {COPY.community.versionCurrentBadge}
+                        {copy.community.versionCurrentBadge}
                       </span>
                     )}
                   </div>
@@ -118,7 +119,7 @@ export function VersionHistoryModal({
                 {(entry.addedFields || entry.updatedFields) && (
                   <div className="space-y-1 pt-1 border-t border-ink/5">
                     <p className="text-3xs font-semibold text-ink/60">
-                      {COPY.community.versionChangesLabel}
+                      {copy.community.versionChangesLabel}
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {entry.addedFields?.map((f, i) => (
@@ -144,7 +145,7 @@ export function VersionHistoryModal({
                 {entry.author && (
                   <div className="flex items-center gap-1 text-3xs text-ink/70 pt-1">
                     <AIIcon size="xs" />
-                    <span>{COPY.community.versionAuthorLabel(entry.author)}</span>
+                    <span>{copy.community.versionAuthorLabel(entry.author)}</span>
                   </div>
                 )}
               </div>
@@ -159,7 +160,7 @@ export function VersionHistoryModal({
             onClick={onClose}
             className="rounded-full bg-ink px-4 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90"
           >
-            {COPY.community.closeVersionModal}
+            {copy.community.closeVersionModal}
           </button>
         </div>
       </div>

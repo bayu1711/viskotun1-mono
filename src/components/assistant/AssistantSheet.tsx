@@ -11,7 +11,6 @@ import { useLocale } from '../../contexts/LocaleContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import type { RoutineSchedulePreference } from '../../types/schedule';
 import { MOTION } from '../../data/config';
-import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
 import { PRECALIBRATED_SAMPLE_ROUTINES } from '../../data/samplePapers';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
@@ -109,7 +108,7 @@ export function AssistantSheet() {
 
   const handleFile = (file: File) => {
     if (!isPdfFile(file)) {
-      toast.error(COPY.upload.invalidType);
+      toast.error(copy.upload.invalidType);
       return;
     }
     addPaper(file);
@@ -285,11 +284,11 @@ export function AssistantSheet() {
         .map((m) => m.content.trim().toLowerCase())
     );
     return [
-      COPY.assistant.rejection.suggestions.why,
-      COPY.assistant.rejection.suggestions.whatToUpload,
-      COPY.assistant.rejection.suggestions.nonHuman
+      copy.assistant.rejection.suggestions.why,
+      copy.assistant.rejection.suggestions.whatToUpload,
+      copy.assistant.rejection.suggestions.nonHuman
     ].filter((s) => !asked.has(s.toLowerCase()));
-  }, [stagingError, stagingMessages]);
+  }, [stagingError, stagingMessages, copy]);
 
   const isUnrecognizedError = Boolean(stagingError && isUnrecognizedLinkReason(stagingError));
 
@@ -364,15 +363,15 @@ export function AssistantSheet() {
           >
             <AssistantHeader
               mode={mode}
-              routineTitle={routine ? formatRoutineTitle(routine.shortTitle) : COPY.assistant.noActiveRoutineForAskTitle}
+              routineTitle={routine ? formatRoutineTitle(routine.shortTitle) : copy.assistant.noActiveRoutineForAskTitle}
               customTitle={
                 !isAsk && !isLifestyle && stagingRoutine
-                  ? COPY.assistant.stagingTitle
+                  ? copy.assistant.stagingTitle
                   : undefined
               }
               customEyebrow={
                 !isAsk && !isLifestyle && stagingRoutine
-                  ? COPY.assistant.stagingEyebrow
+                  ? copy.assistant.stagingEyebrow
                   : undefined
               }
               titleId={titleId}
@@ -407,8 +406,8 @@ export function AssistantSheet() {
                     ) : (
                       <EmptyState
                         icon={ChatBubbleOutlineIcon}
-                        title={COPY.assistant.emptyTitle}
-                        description={COPY.assistant.emptyBody}
+                        title={copy.assistant.emptyTitle}
+                        description={copy.assistant.emptyBody}
                       />
                     )}
                     {assistantTyping && <TypingIndicator />}
@@ -417,15 +416,15 @@ export function AssistantSheet() {
                   <div className="py-8 text-center space-y-4">
                     <EmptyState
                       icon={ChatBubbleOutlineIcon}
-                      title={COPY.assistant.noActiveRoutineForAskTitle}
-                      description={COPY.assistant.noActiveRoutineForAskBody}
+                      title={copy.assistant.noActiveRoutineForAskTitle}
+                      description={copy.assistant.noActiveRoutineForAskBody}
                     />
                     <button
                       type="button"
                       onClick={() => setMode('upload')}
                       className="rounded-full bg-ink px-4 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90"
                     >
-                      {COPY.assistant.switchToUpload}
+                      {copy.assistant.switchToUpload}
                     </button>
                   </div>
                 )
@@ -448,7 +447,7 @@ export function AssistantSheet() {
                           if (step.id === 'improvement') {
                             askStagingQuestion(step.action);
                           } else {
-                            askStagingQuestion(COPY.task.taskQuestionPrompt(step.action));
+                            askStagingQuestion(copy.task.taskQuestionPrompt(step.action));
                           }
                         }}
                       />
@@ -477,10 +476,10 @@ export function AssistantSheet() {
                         <>
                           <div className="rounded-card border border-ink/10 bg-white p-4 space-y-2">
                             <h3 className="text-sm font-semibold text-ink">
-                              {COPY.assistant.intakeInstructionTitle}
+                              {copy.assistant.intakeInstructionTitle}
                             </h3>
                             <p className="text-xs text-ink/65 leading-relaxed">
-                              {COPY.assistant.intakeInstructionBody}
+                              {copy.assistant.intakeInstructionBody}
                             </p>
                           </div>
 
@@ -547,8 +546,8 @@ export function AssistantSheet() {
                     onAsk={askStagingQuestion}
                     onAddPaper={addPaper}
                     onFile={handleFile}
-                    placeholder={COPY.assistant.placeholderStaging}
-                    ariaLabel={COPY.assistant.inputStaging}
+                    placeholder={copy.assistant.placeholderStaging}
+                    ariaLabel={copy.assistant.inputStaging}
                   />
                 </>
               ) : isExtractingPaper ? null : stagingError ? (
@@ -571,9 +570,9 @@ export function AssistantSheet() {
                     placeholder={
                       isUnrecognizedError
                         ? copy.assistant.rejection.placeholderGuidance
-                        : COPY.assistant.rejection.placeholder
+                        : copy.assistant.rejection.placeholder
                     }
-                    ariaLabel={COPY.assistant.rejection.inputLabel}
+                    ariaLabel={copy.assistant.rejection.inputLabel}
                   />
                 </>
               ) : (
@@ -583,8 +582,8 @@ export function AssistantSheet() {
                   onAsk={askQuestion}
                   onAddPaper={addPaper}
                   onFile={handleFile}
-                  placeholder={COPY.assistant.placeholderUpload}
-                  ariaLabel={COPY.assistant.inputUpload}
+                  placeholder={copy.assistant.placeholderUpload}
+                  ariaLabel={copy.assistant.inputUpload}
                 />
               )}
             </footer>

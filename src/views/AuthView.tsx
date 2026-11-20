@@ -10,16 +10,17 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
-import { COPY } from '../data/copy';
 import { ROUTES } from '../data/navigation';
 import { Icon } from '../components/ui/Icon';
 import { PillButton } from '../components/ui/PillButton';
 
+import { useLocale } from '../contexts/LocaleContext';
 interface AuthViewProps {
   mode: 'login' | 'signup';
 }
 
 export function AuthView({ mode }: AuthViewProps) {
+  const { copy } = useLocale();
   const [activeMode, setActiveMode] = useState<'login' | 'signup'>(mode);
   const isLogin = activeMode === 'login';
   const fieldId = useId();
@@ -48,25 +49,25 @@ export function AuthView({ mode }: AuthViewProps) {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      toast.error(COPY.auth.toastValidEmail);
+      toast.error(copy.auth.toastValidEmail);
       return;
     }
     if (!password) {
-      toast.error(COPY.auth.toastPasswordRequired);
+      toast.error(copy.auth.toastPasswordRequired);
       return;
     }
     setIsSubmitting(true);
     try {
       if (isLogin) {
         await loginWithEmail(email, password);
-        toast.success(email.toLowerCase().includes('admin') ? COPY.auth.toastAdminEntered : COPY.auth.toastWelcomeBack);
+        toast.success(email.toLowerCase().includes('admin') ? copy.auth.toastAdminEntered : copy.auth.toastWelcomeBack);
       } else {
         await signupWithEmail(name, email, password);
-        toast.success(email.toLowerCase().includes('admin') ? COPY.auth.toastAdminEntered : COPY.auth.toastAccountCreated);
+        toast.success(email.toLowerCase().includes('admin') ? copy.auth.toastAdminEntered : copy.auth.toastAccountCreated);
       }
       router.push(ROUTES.routine);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : COPY.auth.toastAuthFailed;
+      const message = err instanceof Error ? err.message : copy.auth.toastAuthFailed;
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -77,10 +78,10 @@ export function AuthView({ mode }: AuthViewProps) {
     setIsSubmitting(true);
     try {
       await loginWithGoogle();
-      toast.success(COPY.auth.toastGoogleSuccess);
+      toast.success(copy.auth.toastGoogleSuccess);
       router.push(ROUTES.routine);
     } catch {
-      toast.error(COPY.auth.toastGoogleFailed);
+      toast.error(copy.auth.toastGoogleFailed);
     } finally {
       setIsSubmitting(false);
     }
@@ -88,13 +89,13 @@ export function AuthView({ mode }: AuthViewProps) {
 
   const handleAdminContinue = () => {
     loginAsAdmin();
-    toast.success(COPY.auth.toastAdminEntered);
+    toast.success(copy.auth.toastAdminEntered);
     router.push(ROUTES.routine);
   };
 
   const handleGuestContinue = () => {
     loginAsGuest();
-    toast.info(COPY.auth.toastGuestEntered);
+    toast.info(copy.auth.toastGuestEntered);
     router.push(ROUTES.routine);
   };
 
@@ -103,8 +104,8 @@ export function AuthView({ mode }: AuthViewProps) {
       {/* Brand logo */}
       <Link href={ROUTES.landing} className="mb-8 flex min-h-11 items-center transition-opacity hover:opacity-85">
         <Image
-          src={COPY.brand.logoUrl}
-          alt={COPY.brand.name}
+          src={copy.brand.logoUrl}
+          alt={copy.brand.name}
           width={160}
           height={39}
           priority
@@ -123,7 +124,7 @@ export function AuthView({ mode }: AuthViewProps) {
               isLogin ? 'bg-white text-ink' : 'text-ink/70 hover:text-ink'
             )}
           >
-            {COPY.auth.tabSignIn}
+            {copy.auth.tabSignIn}
           </button>
           <button
             type="button"
@@ -133,16 +134,16 @@ export function AuthView({ mode }: AuthViewProps) {
               !isLogin ? 'bg-white text-ink' : 'text-ink/70 hover:text-ink'
             )}
           >
-            {COPY.auth.tabCreateAccount}
+            {copy.auth.tabCreateAccount}
           </button>
         </div>
 
         <div className="text-center">
           <h1 className="text-balance text-3xl font-bold tracking-tight">
-            {isLogin ? COPY.auth.loginTitle : COPY.auth.signupTitle}
+            {isLogin ? copy.auth.loginTitle : copy.auth.signupTitle}
           </h1>
           <p className="mt-2 text-pretty text-base leading-relaxed text-ink/75">
-            {isLogin ? COPY.auth.loginSubtitle : COPY.auth.signupSubtitle}
+            {isLogin ? copy.auth.loginSubtitle : copy.auth.signupSubtitle}
           </p>
         </div>
 
@@ -154,14 +155,14 @@ export function AuthView({ mode }: AuthViewProps) {
           className="mt-6 flex min-h-12 w-full items-center justify-center gap-2.5 rounded-full border border-ink bg-white text-base font-semibold text-ink transition-colors hover:bg-ink/5 disabled:opacity-50"
         >
           <Icon icon={GoogleIcon} size="sm" />
-          <span>{COPY.auth.googleButton}</span>
+          <span>{copy.auth.googleButton}</span>
         </button>
 
         <div className="relative my-6 text-center">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-ink/15" />
           </div>
-          <span className="relative bg-canvas px-3 text-sm text-ink/70">{COPY.auth.orWithEmail}</span>
+          <span className="relative bg-canvas px-3 text-sm text-ink/70">{copy.auth.orWithEmail}</span>
         </div>
 
         {/* Email/Password Form */}
@@ -169,7 +170,7 @@ export function AuthView({ mode }: AuthViewProps) {
           {!isLogin && (
             <div>
               <label htmlFor={`${fieldId}-name`} className="block text-sm font-semibold text-ink">
-                {COPY.auth.nameLabel}
+                {copy.auth.nameLabel}
               </label>
               <input
                 id={`${fieldId}-name`}
@@ -177,7 +178,7 @@ export function AuthView({ mode }: AuthViewProps) {
                 autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder={COPY.auth.namePlaceholder}
+                placeholder={copy.auth.namePlaceholder}
                 className="mt-1.5 min-h-12 w-full rounded-xl border border-ink/40 bg-white px-4 text-base text-ink placeholder:text-ink/60 focus:border-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
               />
             </div>
@@ -185,7 +186,7 @@ export function AuthView({ mode }: AuthViewProps) {
 
           <div>
             <label htmlFor={`${fieldId}-email`} className="block text-sm font-semibold text-ink">
-              {COPY.auth.emailLabel}
+              {copy.auth.emailLabel}
             </label>
             <input
               id={`${fieldId}-email`}
@@ -193,7 +194,7 @@ export function AuthView({ mode }: AuthViewProps) {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder={COPY.auth.emailPlaceholder}
+              placeholder={copy.auth.emailPlaceholder}
               required
               className="mt-1.5 min-h-12 w-full rounded-xl border border-ink/40 bg-white px-4 text-base text-ink placeholder:text-ink/60 focus:border-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
             />
@@ -201,7 +202,7 @@ export function AuthView({ mode }: AuthViewProps) {
 
           <div>
             <label htmlFor={`${fieldId}-password`} className="block text-sm font-semibold text-ink">
-              {COPY.auth.passwordLabel}
+              {copy.auth.passwordLabel}
             </label>
             <input
               id={`${fieldId}-password`}
@@ -209,7 +210,7 @@ export function AuthView({ mode }: AuthViewProps) {
               autoComplete={isLogin ? 'current-password' : 'new-password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder={COPY.auth.passwordPlaceholder}
+              placeholder={copy.auth.passwordPlaceholder}
               required
               minLength={6}
               className="mt-1.5 min-h-12 w-full rounded-xl border border-ink/40 bg-white px-4 text-base text-ink placeholder:text-ink/60 focus:border-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
@@ -218,7 +219,7 @@ export function AuthView({ mode }: AuthViewProps) {
 
 
           <PillButton type="submit" size="md" fullWidth loading={isSubmitting} className="mt-2 min-h-12 text-base font-semibold">
-            {isLogin ? COPY.auth.loginButton : COPY.auth.signupButton}
+            {isLogin ? copy.auth.loginButton : copy.auth.signupButton}
           </PillButton>
         </form>
 
@@ -231,10 +232,10 @@ export function AuthView({ mode }: AuthViewProps) {
               className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-ink/75 underline underline-offset-4 transition-colors hover:text-ink"
             >
               <Icon icon={ShieldOutlinedIcon} size="xs" />
-              <span>{COPY.auth.adminButton}</span>
+              <span>{copy.auth.adminButton}</span>
             </button>
             <p className="mt-1 text-pretty text-2xs leading-relaxed text-ink/60">
-              {COPY.auth.adminLifecycleNotice}
+              {copy.auth.adminLifecycleNotice}
             </p>
           </div>
 
@@ -244,11 +245,11 @@ export function AuthView({ mode }: AuthViewProps) {
               onClick={handleGuestContinue}
               className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink underline underline-offset-4 hover:text-ink/80"
             >
-              <span>{COPY.auth.guestButton}</span>
-              <Icon icon={ArrowForwardIcon} size="xs" />
+              <span>{copy.auth.guestButton}</span>
+              <Icon icon={ArrowForwardIcon} size="xs" className="rtl:-scale-x-100" />
             </button>
             <p className="text-pretty text-sm leading-relaxed text-ink/70">
-              {COPY.auth.guestNotice}
+              {copy.auth.guestNotice}
             </p>
           </div>
         </div>
@@ -262,7 +263,7 @@ export function AuthView({ mode }: AuthViewProps) {
             onClick={() => setActiveMode('signup')}
             className="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-ink"
           >
-            {COPY.auth.needAccount}
+            {copy.auth.needAccount}
           </button>
         ) : (
           <button
@@ -270,7 +271,7 @@ export function AuthView({ mode }: AuthViewProps) {
             onClick={() => setActiveMode('login')}
             className="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-ink"
           >
-            {COPY.auth.haveAccount}
+            {copy.auth.haveAccount}
           </button>
         )}
       </p>

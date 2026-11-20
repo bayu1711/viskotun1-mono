@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -25,7 +25,7 @@ import WbSunnyOutlinedIcon from '@mui/icons-material/WbSunnyOutlined';
 import type { SvgIconComponent } from '@mui/icons-material';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
-import { COPY } from '../data/copy';
+import type { LocaleCopy } from '../data/locales/types';
 import { ROUTES } from '../data/navigation';
 import { Avatar } from '../components/ui/Avatar';
 import { Icon } from '../components/ui/Icon';
@@ -35,6 +35,7 @@ import type { Tone } from '../types/routine';
 import { toneStyles } from '../utils/tones';
 import { cn } from '../utils/cn';
 
+import { useLocale } from '../contexts/LocaleContext';
 const DOMAIN_ICONS: Record<string, SvgIconComponent> = {
   rehab: FitnessCenterOutlinedIcon,
   cognitive: PsychologyOutlinedIcon,
@@ -139,6 +140,7 @@ export interface LandingShowcaseProps {
 
 /** Hero demo of a day in the app: tap a step to check it off and watch progress update. */
 function RoutinePreview({ preview }: { preview: LandingPreviewConfig }) {
+  const { copy } = useLocale();
   const steps = [
     { action: preview.step1Action, detail: preview.step1Detail, meta: preview.step1Meta, done: true },
     { action: preview.step2Action, detail: preview.step2Detail, meta: preview.step2Meta, done: false }
@@ -154,7 +156,7 @@ function RoutinePreview({ preview }: { preview: LandingPreviewConfig }) {
   return (
     <section
       aria-label={preview.title}
-      className="relative mx-4 -mt-10 animate-rise rounded-callout bg-white p-5 shadow-popover sm:ml-auto sm:mr-6 sm:w-[22rem]"
+      className="relative mx-4 -mt-10 animate-rise rounded-callout bg-white p-5 shadow-popover sm:ms-auto sm:me-6 sm:w-[22rem]"
     >
       <div className="flex items-center justify-between gap-3">
         <p className="font-display text-base font-bold text-ink">{preview.title}</p>
@@ -165,7 +167,7 @@ function RoutinePreview({ preview }: { preview: LandingPreviewConfig }) {
         <span>{preview.progressLabel}</span>
         <span className="font-semibold tabular-nums text-ink">
           {percent}
-          {COPY.common.percentSign}
+          {copy.common.percentSign}
         </span>
       </div>
       {/* Outer layer plays the first-load fill; inner layer follows the user's taps */}
@@ -240,6 +242,7 @@ export function LandingShowcase({
   footerExtraLink,
   dir = 'ltr'
 }: LandingShowcaseProps) {
+  const { copy } = useLocale();
   const router = useRouter();
   const { user, isLoading, loginAsGuest, logout } = useAuth();
   const [isNavigating, setIsNavigating] = useState(false);
@@ -262,7 +265,7 @@ export function LandingShowcase({
     setIsNavigating(true);
     if (!user) {
       loginAsGuest();
-      toast.info(COPY.auth.toastGuestEntered);
+      toast.info(copy.auth.toastGuestEntered);
     }
     router.push(ROUTES.routine);
   };
@@ -283,8 +286,8 @@ export function LandingShowcase({
           <div className="flex items-center gap-8">
             <Link href={headerLogoHref} className="flex min-h-11 items-center gap-2.5 transition-opacity hover:opacity-85">
               <Image
-                src={COPY.brand.logoUrl}
-                alt={COPY.brand.name}
+                src={copy.brand.logoUrl}
+                alt={copy.brand.name}
                 width={140}
                 height={34}
                 priority
@@ -612,7 +615,7 @@ export function LandingShowcase({
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 sm:flex-row lg:px-8">
           <div className="flex items-center gap-2">
             <Image
-              src={COPY.brand.iconUrl}
+              src={copy.brand.iconUrl}
               alt=""
               width={20}
               height={20}
@@ -661,77 +664,82 @@ export function LandingShowcase({
   );
 }
 
-const GLOBAL_CONTENT: LandingShowcaseContent = {
-  heroTitle: COPY.landing.heroTitle,
-  heroSubtitle: COPY.landing.heroSubtitle,
-  heroCtaPrimary: COPY.landing.heroCtaPrimary,
-  heroCtaSecondary: COPY.landing.heroCtaSecondary,
-  heroTrustPoints: COPY.landing.heroTrustPoints,
-  heroImageAlt: COPY.landing.heroImageAlt,
-  headerCtaGuest: COPY.landing.ctaGuest,
-  ctaGoToApp: COPY.landing.ctaGoToApp,
-  ctaLogin: COPY.landing.ctaLogin,
-  ctaSignOut: COPY.auth.signOut,
-  ctaStats: COPY.nav.stats,
-  loggedInBadge: COPY.landing.loggedInBadge,
-  nav: COPY.landing.nav,
-  interactivePreview: COPY.landing.interactivePreview,
-  domainsTitle: COPY.landing.domainsTitle,
-  domainsSubtitle: COPY.landing.domainsSubtitle,
-  domains: COPY.landing.domains,
-  architectureTitle: COPY.landing.architectureTitle,
+/** Built per locale so the landing page follows the language switcher. */
+function buildGlobalContent(copy: LocaleCopy): LandingShowcaseContent {
+  return {
+  heroTitle: copy.landing.heroTitle,
+  heroSubtitle: copy.landing.heroSubtitle,
+  heroCtaPrimary: copy.landing.heroCtaPrimary,
+  heroCtaSecondary: copy.landing.heroCtaSecondary,
+  heroTrustPoints: copy.landing.heroTrustPoints,
+  heroImageAlt: copy.landing.heroImageAlt,
+  headerCtaGuest: copy.landing.ctaGuest,
+  ctaGoToApp: copy.landing.ctaGoToApp,
+  ctaLogin: copy.landing.ctaLogin,
+  ctaSignOut: copy.auth.signOut,
+  ctaStats: copy.nav.stats,
+  loggedInBadge: copy.landing.loggedInBadge,
+  nav: copy.landing.nav,
+  interactivePreview: copy.landing.interactivePreview,
+  domainsTitle: copy.landing.domainsTitle,
+  domainsSubtitle: copy.landing.domainsSubtitle,
+  domains: copy.landing.domains,
+  architectureTitle: copy.landing.architectureTitle,
   steps: [
-    { number: COPY.landing.steps.step1Number, title: COPY.landing.steps.step1Title, body: COPY.landing.steps.step1Body },
-    { number: COPY.landing.steps.step2Number, title: COPY.landing.steps.step2Title, body: COPY.landing.steps.step2Body },
-    { number: COPY.landing.steps.step3Number, title: COPY.landing.steps.step3Title, body: COPY.landing.steps.step3Body },
-    { number: COPY.landing.steps.step4Number, title: COPY.landing.steps.step4Title, body: COPY.landing.steps.step4Body },
-    { number: COPY.landing.steps.step5Number, title: COPY.landing.steps.step5Title, body: COPY.landing.steps.step5Body }
+    { number: copy.landing.steps.step1Number, title: copy.landing.steps.step1Title, body: copy.landing.steps.step1Body },
+    { number: copy.landing.steps.step2Number, title: copy.landing.steps.step2Title, body: copy.landing.steps.step2Body },
+    { number: copy.landing.steps.step3Number, title: copy.landing.steps.step3Title, body: copy.landing.steps.step3Body },
+    { number: copy.landing.steps.step4Number, title: copy.landing.steps.step4Title, body: copy.landing.steps.step4Body },
+    { number: copy.landing.steps.step5Number, title: copy.landing.steps.step5Title, body: copy.landing.steps.step5Body }
   ],
-  scopeBadge: COPY.landing.scopeBadge,
-  rigorTitle: COPY.landing.rigorTitle,
-  rigorSubtitle: COPY.landing.rigorSubtitle,
-  scopeNote: COPY.landing.scopeNote,
-  capabilitiesTitle: COPY.landing.capabilitiesTitle,
+  scopeBadge: copy.landing.scopeBadge,
+  rigorTitle: copy.landing.rigorTitle,
+  rigorSubtitle: copy.landing.rigorSubtitle,
+  scopeNote: copy.landing.scopeNote,
+  capabilitiesTitle: copy.landing.capabilitiesTitle,
   features: [
-    { icon: ShieldOutlinedIcon, title: COPY.landing.features.gatekeeperTitle, body: COPY.landing.features.gatekeeperBody },
-    { icon: ScienceOutlinedIcon, title: COPY.landing.features.auditingTitle, body: COPY.landing.features.auditingBody },
-    { icon: HealthAndSafetyOutlinedIcon, title: COPY.landing.features.safetyTitle, body: COPY.landing.features.safetyBody },
-    { icon: DescriptionOutlinedIcon, title: COPY.landing.features.summaryTitle, body: COPY.landing.features.summaryBody }
+    { icon: ShieldOutlinedIcon, title: copy.landing.features.gatekeeperTitle, body: copy.landing.features.gatekeeperBody },
+    { icon: ScienceOutlinedIcon, title: copy.landing.features.auditingTitle, body: copy.landing.features.auditingBody },
+    { icon: HealthAndSafetyOutlinedIcon, title: copy.landing.features.safetyTitle, body: copy.landing.features.safetyBody },
+    { icon: DescriptionOutlinedIcon, title: copy.landing.features.summaryTitle, body: copy.landing.features.summaryBody }
   ],
-  demoTitle: COPY.landing.demoTitle,
-  demoSubtitle: COPY.landing.demoSubtitle,
-  demoCtaPrimary: COPY.landing.heroCtaPrimary,
-  footerTagline: COPY.landing.footerTagline,
-  footerSignIn: COPY.landing.footerSignIn,
-  footerCreateAccount: COPY.landing.footerCreateAccount,
-  footerGithub: COPY.landing.footerGithub
+  demoTitle: copy.landing.demoTitle,
+  demoSubtitle: copy.landing.demoSubtitle,
+  demoCtaPrimary: copy.landing.heroCtaPrimary,
+  footerTagline: copy.landing.footerTagline,
+  footerSignIn: copy.landing.footerSignIn,
+  footerCreateAccount: copy.landing.footerCreateAccount,
+  footerGithub: copy.landing.footerGithub
 };
+}
 
 export function LandingPage() {
+  const { copy } = useLocale();
+  const globalContent = useMemo(() => buildGlobalContent(copy), [copy]);
   return (
     <LandingShowcase
-      content={GLOBAL_CONTENT}
+      content={globalContent}
       topBanner={
         <div className="bg-yellow text-ink">
           <Link
             href={ROUTES.uae}
             className="group mx-auto flex min-h-11 max-w-6xl items-center justify-center gap-2 text-pretty px-5 py-2 text-center text-sm font-medium"
           >
-            <span className="rounded-full bg-ink px-2 py-0.5 text-2xs font-bold text-white">Abu Dhabi 2026</span>
+            <span className="rounded-full bg-ink px-2 py-0.5 text-2xs font-bold text-white">{copy.landing.uaeBannerBadge}</span>
             <span className="underline-offset-4 group-hover:underline">
-              Future Health Challenge: Sustaining Healthy Behaviors in the UAE
+              {copy.landing.uaeBannerText}
             </span>
             <Icon
               icon={ArrowForwardIcon}
               size="xs"
-              className="inline-block transition-transform duration-200 ease-out-strong group-hover:translate-x-0.5"
+              className="rtl:-scale-x-100 inline-block transition-transform duration-200 ease-out-strong group-hover:translate-x-0.5"
             />
           </Link>
         </div>
       }
       footerExtraLink={
         <Link href={ROUTES.uae} className="inline-flex min-h-11 items-center font-medium text-ink transition-colors hover:underline">
-          {COPY.landing.uaeEditionLink}
+          {copy.landing.uaeEditionLink}
         </Link>
       }
     />

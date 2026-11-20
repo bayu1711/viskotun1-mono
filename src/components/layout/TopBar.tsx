@@ -13,7 +13,6 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLocale } from '../../contexts/LocaleContext';
 import { usePolicyLedger } from '../../contexts/PolicyLedgerContext';
 import { useRoutine } from '../../contexts/RoutineContext';
-import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
 import { greeting } from '../../utils/time';
 import { Avatar } from '../ui/Avatar';
@@ -35,8 +34,8 @@ export function TopBar() {
   // The server clock is not in the viewer's timezone, so the greeting is only computed in the browser
   const [greetingText, setGreetingText] = useState<string | null>(null);
   useEffect(() => {
-    setGreetingText(locale === 'ar' ? 'مرحباً بك،' : greeting());
-  }, [locale]);
+    setGreetingText(greeting(new Date(), copy.greeting));
+  }, [copy]);
 
   return (
     <header className="mx-auto w-full max-w-6xl px-5 pt-5 lg:px-10 lg:pt-8">
@@ -44,7 +43,7 @@ export function TopBar() {
         {/* Hidden on phones: the bottom tab bar handles navigation and the header needs the room. */}
         <Link href={ROUTES.landing} className="hidden min-h-11 min-w-11 items-center justify-center transition-opacity hover:opacity-85 sm:flex lg:hidden" aria-label={copy.brand.name}>
           <Image
-            src={COPY.brand.iconUrl}
+            src={copy.brand.iconUrl}
             alt=""
             width={28}
             height={28}
@@ -58,7 +57,7 @@ export function TopBar() {
             href={ROUTES.profile}
             aria-label={copy.shell.openProfile}
             title={copy.shell.openProfile}
-            className={`group flex min-w-0 shrink-0 items-center gap-2.5 rounded-full transition-opacity hover:opacity-85 sm:shrink sm:pr-4 ${
+            className={`group flex min-w-0 shrink-0 items-center gap-2.5 rounded-full transition-opacity hover:opacity-85 sm:shrink sm:pe-4 ${
               pathname === ROUTES.profile ? 'ring-2 ring-ink ring-offset-2 ring-offset-canvas' : ''
             }`}
           >
@@ -86,7 +85,7 @@ export function TopBar() {
           ) : null}
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ms-auto flex items-center gap-2">
           <LanguageSwitcher variant="topbar" />
 
           {streak > 0 && (

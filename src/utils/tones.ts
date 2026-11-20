@@ -66,9 +66,10 @@ export function severityLevel(score: number): SeverityLevel {
   return 'severe';
 }
 
-export function severityTone(score: number) {
+/** Pass `copy.severityLevels` from `useLocale()` for a localized label (defaults to English). */
+export function severityTone(score: number, labels: Record<SeverityLevel, string> = COPY.severityLevels) {
   const level = severityLevel(score);
-  return { level, label: COPY.severityLevels[level], ...SEVERITY_TONES[level] };
+  return { level, label: labels[level], ...SEVERITY_TONES[level] };
 }
 
 export type SeverityTone = ReturnType<typeof severityTone>;

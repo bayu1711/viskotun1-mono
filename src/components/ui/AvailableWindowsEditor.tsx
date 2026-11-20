@@ -143,7 +143,7 @@ export function AvailableWindowsEditor({
         )}
 
         {presets.length > 0 && presetsHeading && !compact && (
-          <span className="ml-1 text-2xs text-ink/70">{presetsHeading}:</span>
+          <span className="ms-1 text-2xs text-ink/70">{presetsHeading}:</span>
         )}
 
         {presets.map((preset) => {

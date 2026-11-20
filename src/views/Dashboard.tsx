@@ -12,9 +12,9 @@ import { PageContainer } from '../components/layout/PageContainer';
 import { PageHeader } from '../components/layout/PageHeader';
 import { EmptyRoutineView } from '../components/routine/EmptyRoutineView';
 import { useRoutine } from '../contexts/RoutineContext';
-import { COPY } from '../data/copy';
-
+import { useLocale } from '../contexts/LocaleContext';
 export function DashboardPage() {
+  const { copy } = useLocale();
   const { routine, hasHydrated } = useRoutine();
 
   if (!hasHydrated) {
@@ -38,7 +38,7 @@ export function DashboardPage() {
 
   return (
     <PageContainer>
-      <PageHeader eyebrow={COPY.dashboard.eyebrow} title={COPY.dashboard.title} />
+      <PageHeader eyebrow={copy.dashboard.eyebrow} title={copy.dashboard.title} />
       <KeyMetrics />
       <div className="mt-2.5 grid grid-cols-1 gap-2.5 xl:grid-cols-main-aside">
         <div className="space-y-2.5">

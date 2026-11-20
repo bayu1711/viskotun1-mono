@@ -4,11 +4,11 @@ import React from 'react';
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined';
 import { CHART_BAR_RADIUS, CHART_MARGIN, CHART_TICK_FONT_SIZE, DROP_OFF_HIGH_MIN } from '../../data/config';
-import { COPY } from '../../data/copy';
 import type { DropOffPoint, DropOffUnit } from '../../types/routine';
 import { EmptyState } from '../feedback/EmptyState';
 import { DropOffTooltip } from './DropOffTooltip';
 
+import { useLocale } from '../../contexts/LocaleContext';
 interface DropOffChartProps {
   data: DropOffPoint[];
   peakPeriod: number;
@@ -16,8 +16,9 @@ interface DropOffChartProps {
 }
 
 export function DropOffChart({ data, peakPeriod, unit }: DropOffChartProps) {
+  const { copy } = useLocale();
   if (data.length === 0) {
-    return <EmptyState className="mt-5" icon={InsightsOutlinedIcon} title={COPY.community.emptyChart} />;
+    return <EmptyState className="mt-5" icon={InsightsOutlinedIcon} title={copy.community.emptyChart} />;
   }
 
   return (

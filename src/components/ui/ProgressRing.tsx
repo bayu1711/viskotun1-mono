@@ -1,8 +1,8 @@
 import React from 'react';
-import { COPY } from '../../data/copy';
 import { cn } from '../../utils/cn';
 import { clamp, toPercent } from '../../utils/math';
 
+import { useLocale } from '../../contexts/LocaleContext';
 type RingSize = 36 | 38 | 40;
 type RingTone = 'ink' | 'ink-bare' | 'light' | 'light-bare' | 'orange';
 type RingWeight = 'thin' | 'regular';
@@ -52,6 +52,7 @@ export function ProgressRing({
   className,
   children
 }: ProgressRingProps) {
+  const { copy } = useLocale();
   const stroke = STROKE_WIDTH[weight];
   const radius = (VIEWBOX - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -62,7 +63,7 @@ export function ProgressRing({
     <div
       role={decorative ? undefined : 'img'}
       aria-hidden={decorative || undefined}
-      aria-label={decorative ? undefined : label ?? COPY.common.percentComplete(toPercent(clamped))}
+      aria-label={decorative ? undefined : label ?? copy.common.percentComplete(toPercent(clamped))}
       className={cn('relative inline-flex shrink-0 items-center justify-center', SIZE_CLASS[size], className)}>
       
       <svg viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`} className="absolute inset-0 h-full w-full -rotate-90" aria-hidden="true">

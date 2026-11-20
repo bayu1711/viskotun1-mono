@@ -3,11 +3,11 @@
 import React from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import { COPY } from '../../../data/copy';
 import type { DataCollectionField } from '../../../types/routine';
 import { cn } from '../../../utils/cn';
 import { Icon } from '../../ui/Icon';
 
+import { useLocale } from '../../../contexts/LocaleContext';
 interface BooleanWidgetProps {
   field: DataCollectionField;
   value: boolean;
@@ -15,6 +15,7 @@ interface BooleanWidgetProps {
 }
 
 export function BooleanWidget({ field, value, onChange }: BooleanWidgetProps) {
+  const { copy } = useLocale();
   const currentVal = Boolean(value);
 
   return (
@@ -31,7 +32,7 @@ export function BooleanWidget({ field, value, onChange }: BooleanWidgetProps) {
           )}
         >
           <Icon icon={CloseIcon} size="sm" />
-          <span>{COPY.morphing.widgets.boolean.no}</span>
+          <span>{copy.morphing.widgets.boolean.no}</span>
         </button>
 
         <button
@@ -45,13 +46,13 @@ export function BooleanWidget({ field, value, onChange }: BooleanWidgetProps) {
           )}
         >
           <Icon icon={CheckIcon} size="sm" />
-          <span>{COPY.morphing.widgets.boolean.yes}</span>
+          <span>{copy.morphing.widgets.boolean.yes}</span>
         </button>
       </div>
 
       {field.instructions && (
-        <p className="mt-4 rounded-tile bg-ink/5 p-3 text-2xs text-ink/75 leading-relaxed text-left">
-          <strong className="text-ink font-medium">{COPY.morphing.widgets.evaluationRule}</strong>
+        <p className="mt-4 rounded-tile bg-ink/5 p-3 text-2xs text-ink/75 leading-relaxed text-start">
+          <strong className="text-ink font-medium">{copy.morphing.widgets.evaluationRule}</strong>
           {field.instructions}
         </p>
       )}

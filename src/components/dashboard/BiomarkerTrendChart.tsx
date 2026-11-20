@@ -6,7 +6,6 @@ import ShowChartOutlinedIcon from '@mui/icons-material/ShowChartOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useRoutine } from '../../contexts/RoutineContext';
-import { COPY } from '../../data/copy';
 import type { DataCollectionField } from '../../types/routine';
 import {
   isFieldScheduledForDay,
@@ -21,6 +20,7 @@ import { PillButton } from '../ui/PillButton';
 import { SectionHeading } from '../ui/SectionHeading';
 import type { BiomarkerDataPoint } from './BiomarkerChartContent';
 
+import { useLocale } from '../../contexts/LocaleContext';
 const BiomarkerChartContent = dynamic(
   () => import('./BiomarkerChartContent').then((mod) => mod.BiomarkerChartContent),
   {
@@ -30,6 +30,7 @@ const BiomarkerChartContent = dynamic(
 );
 
 export function BiomarkerTrendChart() {
+  const { copy } = useLocale();
   const { routine, morphingLogs, feedbackLogs, currentDay, openFeedbackDrawer } = useRoutine();
   const headingId = useId();
 
@@ -61,20 +62,20 @@ export function BiomarkerTrendChart() {
     <Panel aria-labelledby={headingId}>
       <SectionHeading
         id={headingId}
-        eyebrow={COPY.morphing.dashboard.biomarkerTitle}
+        eyebrow={copy.morphing.dashboard.biomarkerTitle}
         title={activeField.label}
         action={
           <div className="flex items-center gap-2">
             <span className="rounded-full bg-mint px-2.5 py-1 text-xs font-medium text-ink">
               {latestPoint
-                ? COPY.morphing.dashboard.currentReading(latestPoint.value, activeField.unit)
-                : COPY.morphing.dashboard.noReadingsBadge}
+                ? copy.morphing.dashboard.currentReading(latestPoint.value, activeField.unit)
+                : copy.morphing.dashboard.noReadingsBadge}
             </span>
             <CircleButton
               label={
                 isScheduledToday
-                  ? COPY.morphing.saveEntry
-                  : COPY.morphing.dashboard.notScheduledBiomarkerTooltip
+                  ? copy.morphing.saveEntry
+                  : copy.morphing.dashboard.notScheduledBiomarkerTooltip
               }
               onClick={() => openFeedbackDrawer(activeField.id)}
               disabled={!isScheduledToday}
@@ -90,9 +91,9 @@ export function BiomarkerTrendChart() {
           <Icon icon={InfoOutlinedIcon} size="sm" className="mt-0.5 shrink-0 text-ink/60" />
           <div className="flex-1 leading-relaxed">
             <span className="font-medium text-ink">
-              {COPY.morphing.dashboard.notScheduledBadge}:
+              {copy.morphing.dashboard.notScheduledBadge}:
             </span>{' '}
-            {COPY.morphing.dashboard.notScheduledBiomarkerNote(activeField.name, currentDay)}
+            {copy.morphing.dashboard.notScheduledBiomarkerNote(activeField.name, currentDay)}
           </div>
         </div>
       )}
@@ -133,12 +134,12 @@ export function BiomarkerTrendChart() {
         <EmptyState
           className="mt-4"
           icon={ShowChartOutlinedIcon}
-          title={COPY.morphing.dashboard.emptyBiomarkerTitle}
-          description={COPY.morphing.dashboard.emptyBiomarkerBody(activeField.label)}
+          title={copy.morphing.dashboard.emptyBiomarkerTitle}
+          description={copy.morphing.dashboard.emptyBiomarkerBody(activeField.label)}
           action={
             isScheduledToday ? (
               <PillButton size="sm" onClick={() => openFeedbackDrawer(activeField.id)}>
-                {COPY.morphing.dashboard.logFirstReading}
+                {copy.morphing.dashboard.logFirstReading}
               </PillButton>
             ) : undefined
           }
@@ -148,11 +149,11 @@ export function BiomarkerTrendChart() {
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-ink/10 pt-3 text-xs text-ink/60">
         <div className="flex items-center gap-2">
           <span className="inline-block h-3 w-5 rounded bg-mint opacity-85 shadow-2xs" />
-          <span>{COPY.morphing.dashboard.targetZone}</span>
+          <span>{copy.morphing.dashboard.targetZone}</span>
         </div>
         <div className="flex items-center gap-1">
           <Icon icon={ShowChartOutlinedIcon} size="xs" />
-          <span>{COPY.morphing.dashboard.biomarkerSubtitle}</span>
+          <span>{copy.morphing.dashboard.biomarkerSubtitle}</span>
         </div>
       </div>
     </Panel>

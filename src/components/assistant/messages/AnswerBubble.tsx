@@ -1,11 +1,11 @@
 import React from 'react';
-import { COPY } from '../../../data/copy';
 import type { AIEngineType } from '../../../types/routine';
 import { stripClinicalDisclaimer } from '../../../utils/disclaimer';
 import { Icon } from '../../ui/Icon';
 import { MarkdownContent } from '../../ui/MarkdownContent';
 import { getEngineMeta } from '../engineMeta';
 
+import { useLocale } from '../../../contexts/LocaleContext';
 interface AnswerBubbleProps {
   content: string;
   engine?: AIEngineType;
@@ -13,19 +13,20 @@ interface AnswerBubbleProps {
 }
 
 export function AnswerBubble({ content, engine, source }: AnswerBubbleProps) {
+  const { copy } = useLocale();
   const cleanContent = stripClinicalDisclaimer(content);
   const isCloudGemini = engine === 'cloud-gemini';
   const engineMeta = engine && !isCloudGemini ? getEngineMeta(engine) : null;
 
-  let badgeLabel: string = source || COPY.assistant.answerSource;
+  let badgeLabel: string = source || copy.assistant.answerSource;
   if (engine === 'on-device-gemma' && engineMeta) {
-    badgeLabel = `${engineMeta.label} · ${COPY.assistant.engines.onDeviceBadge}`;
+    badgeLabel = `${engineMeta.label} · ${copy.assistant.engines.onDeviceBadge}`;
   } else if (engine === 'server-gemma' && engineMeta) {
     badgeLabel = engineMeta.label;
   } else if (engine === 'local-rules' && engineMeta) {
-    badgeLabel = `${engineMeta.label} · ${source || COPY.assistant.answerSource}`;
+    badgeLabel = `${engineMeta.label} · ${source || copy.assistant.answerSource}`;
   } else if (isCloudGemini) {
-    badgeLabel = source || COPY.assistant.answerSource;
+    badgeLabel = source || copy.assistant.answerSource;
   }
 
   return (

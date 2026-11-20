@@ -11,7 +11,6 @@ import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useRoutine } from '../../contexts/RoutineContext';
-import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
 import { PRECALIBRATED_SAMPLE_ROUTINES, type SamplePaper } from '../../data/samplePapers';
 import type { StepIconKey } from '../../types/routine';
@@ -22,6 +21,7 @@ import { Icon } from '../ui/Icon';
 import { PillButton } from '../ui/PillButton';
 import { StepIcon } from '../ui/StepIcon';
 
+import { useLocale } from '../../contexts/LocaleContext';
 export interface TrendingPaperCardProps {
   paper: SamplePaper;
   rank: number;
@@ -80,6 +80,7 @@ export function TrendingPaperCard({
   onSelectCategory,
   onViewVersionHistory
 }: TrendingPaperCardProps) {
+  const { copy } = useLocale();
   const router = useRouter();
   const { openAssistant } = useAssistant();
   const {
@@ -159,7 +160,7 @@ export function TrendingPaperCard({
                   : 'bg-canvas text-ink/75 font-medium border border-ink/10'
               )}
             >
-              {COPY.howTo.trendingRankBadge(rank)}
+              {copy.howTo.trendingRankBadge(rank)}
             </span>
             {onSelectCategory ? (
               <button
@@ -167,15 +168,16 @@ export function TrendingPaperCard({
                 onClick={() =>
                   onSelectCategory(selectedCategory === paper.category ? 'all' : paper.category)
                 }
+                aria-pressed={selectedCategory === paper.category}
                 className={cn(
                   'relative rounded-full px-2.5 py-0.5 text-2xs font-semibold transition-colors before:absolute before:-inset-y-3 before:inset-x-0',
                   selectedCategory === paper.category
                     ? 'bg-ink text-white'
                     : getCategoryBadgeClass(paper.category)
                 )}
-                title={`${COPY.howTo.filterByTopic} ${paper.category}`}
+                title={`${copy.howTo.filterByTopic} ${copy.community.categoryLabels[paper.category] ?? paper.category}`}
               >
-                {paper.category}
+                {copy.community.categoryLabels[paper.category] ?? paper.category}
               </button>
             ) : (
               <span
@@ -184,7 +186,7 @@ export function TrendingPaperCard({
                   getCategoryBadgeClass(paper.category)
                 )}
               >
-                {paper.category}
+                {copy.community.categoryLabels[paper.category] ?? paper.category}
               </span>
             )}
             {onViewVersionHistory ? (
@@ -192,13 +194,13 @@ export function TrendingPaperCard({
                 type="button"
                 onClick={() => onViewVersionHistory(paper)}
                 className="relative rounded-full bg-cream border border-ink/15 px-2 py-0.5 text-3xs font-semibold text-ink hover:bg-mint/40 hover:border-ink transition-colors before:absolute before:-inset-y-3 before:inset-x-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
-                title={COPY.community.versionHistoryTitle}
+                title={copy.community.versionHistoryTitle}
               >
-                {COPY.community.versionPill(paper.version || '1.0')}
+                {copy.community.versionPill(paper.version || '1.0')}
               </button>
             ) : (
               <span className="rounded-full bg-cream border border-ink/15 px-2 py-0.5 text-3xs font-semibold text-ink">
-                {COPY.community.versionPill(paper.version || '1.0')}
+                {copy.community.versionPill(paper.version || '1.0')}
               </span>
             )}
           </div>
@@ -233,9 +235,9 @@ export function TrendingPaperCard({
 
         {/* Community Telemetry Badges */}
         <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-ink/5 pt-2 text-2xs text-ink/60">
-          <span>{COPY.howTo.activeTrackersBadge(trackers ?? 0)}</span>
+          <span>{copy.howTo.activeTrackersBadge(trackers ?? 0)}</span>
           <span>·</span>
-          <span>{COPY.howTo.totalLogsBadge(logs ?? 0)}</span>
+          <span>{copy.howTo.totalLogsBadge(logs ?? 0)}</span>
         </div>
       </div>
 
@@ -265,10 +267,10 @@ export function TrendingPaperCard({
             />
             <span>
               {isCompleted
-                ? COPY.howTo.redoButton
+                ? copy.howTo.redoButton
                 : isInRoutine
-                ? COPY.howTo.inProgressButton
-                : COPY.onboarding.quickLoadButton}
+                ? copy.howTo.inProgressButton
+                : copy.onboarding.quickLoadButton}
             </span>
           </PillButton>
 
@@ -281,10 +283,10 @@ export function TrendingPaperCard({
                 }
               }}
               className="inline-flex min-h-11 items-center gap-1 rounded-full border border-ink/20 bg-cream/70 px-3 text-2xs font-semibold text-ink transition-colors hover:bg-mint"
-              title={COPY.community.goToRoutine}
+              title={copy.community.goToRoutine}
             >
-              <span>{COPY.community.trackButton}</span>
-              <Icon icon={ArrowForwardIcon} size="xs" />
+              <span>{copy.community.trackButton}</span>
+              <Icon icon={ArrowForwardIcon} size="xs" className="rtl:-scale-x-100" />
             </Link>
           )}
         </div>
@@ -299,7 +301,7 @@ export function TrendingPaperCard({
               className="inline-flex min-h-11 items-center gap-1 hover:text-ink underline-offset-2 hover:underline"
             >
               <Icon icon={DownloadOutlinedIcon} size="xs" />
-              <span>{COPY.howTo.downloadPdfButton}</span>
+              <span>{copy.howTo.downloadPdfButton}</span>
             </a>
           ) : (
             <span />
@@ -312,8 +314,8 @@ export function TrendingPaperCard({
               rel="noreferrer"
               className="inline-flex min-h-11 items-center gap-1 hover:text-ink underline-offset-2 hover:underline"
             >
-              <span>{COPY.howTo.doiLabel}</span>
-              <Icon icon={NorthEastIcon} size="xs" />
+              <span>{copy.howTo.doiLabel}</span>
+              <Icon icon={NorthEastIcon} size="xs" className="rtl:-scale-x-100" />
             </a>
           )}
         </div>

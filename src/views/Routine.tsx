@@ -25,7 +25,6 @@ import { SectionHeading } from '../components/ui/SectionHeading';
 import { EmptyRoutineView } from '../components/routine/EmptyRoutineView';
 import { useLocale } from '../contexts/LocaleContext';
 import { useRoutine } from '../contexts/RoutineContext';
-import { COPY } from '../data/copy';
 import { ROUTES } from '../data/navigation';
 import { cn } from '../utils/cn';
 import { stopRuleOf } from '../utils/routineMetrics';
@@ -92,8 +91,8 @@ export function RoutinePage() {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-main-aside xl:gap-10">
         <div>
           <PageHeader
-            eyebrow={COPY.routine.eyebrow(currentDay, totalDays)}
-            title={COPY.routine.title(todayPercent)}
+            eyebrow={copy.routine.eyebrow(currentDay, totalDays)}
+            title={copy.routine.title(todayPercent)}
             switcherExtra={
               <div className="flex flex-wrap items-center gap-2">
                 {/* Adaptive Lifestyle & Location Popup Button */}
@@ -156,8 +155,8 @@ export function RoutinePage() {
                   {pendingReEntryCheckin && (
                     <span
                       className="h-2 w-2 rounded-full bg-orange animate-pulse"
-                      title={COPY.task.pendingCheckinTitle}
-                      aria-label={COPY.task.pendingCheckinTitle}
+                      title={copy.task.pendingCheckinTitle}
+                      aria-label={copy.task.pendingCheckinTitle}
                       role="img"
                     />
                   )}
@@ -168,10 +167,10 @@ export function RoutinePage() {
                   type="button"
                   onClick={openShareModal}
                   className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 hover:bg-cream px-3.5 text-xs font-semibold text-ink transition-colors cursor-pointer"
-                  title={COPY.shareModal.openShareTitle}
+                  title={copy.shareModal.openShareTitle}
                 >
                   <Icon icon={ShareOutlinedIcon} size="xs" />
-                  <span>{COPY.shareModal.openShareButton}</span>
+                  <span>{copy.shareModal.openShareButton}</span>
                 </button>
               </div>
             }
@@ -183,7 +182,7 @@ export function RoutinePage() {
             <MilestoneBanner />
             {escalationPaused && (
               <Callout tone="blush" role="alert">
-                {COPY.safety.dynamicEscalationAlert(feedbackMetric.name, feedbackMetric.escalationMessage)}
+                {copy.safety.dynamicEscalationAlert(feedbackMetric.name, feedbackMetric.escalationMessage)}
               </Callout>
             )}
             <VoiceCoachBar
@@ -221,11 +220,11 @@ export function RoutinePage() {
           <Panel aria-labelledby={historyHeadingId}>
             <SectionHeading
               id={historyHeadingId}
-              eyebrow={COPY.routine.historyEyebrow}
-              title={COPY.routine.historyTitle}
+              eyebrow={copy.routine.historyEyebrow}
+              title={copy.routine.historyTitle}
               action={
-                <CircleButton label={COPY.routine.openDashboard} href={ROUTES.dashboard}>
-                  <Icon icon={NorthEastIcon} size="md" />
+                <CircleButton label={copy.routine.openDashboard} href={ROUTES.dashboard}>
+                  <Icon icon={NorthEastIcon} size="md" className="rtl:-scale-x-100" />
                 </CircleButton>
               }
             />
@@ -238,8 +237,8 @@ export function RoutinePage() {
           <Panel aria-labelledby={feedbackHeadingId}>
             <SectionHeading
               id={feedbackHeadingId}
-              eyebrow={COPY.routine.metricEyebrow(feedbackMetric.eyebrow ?? feedbackMetric.name)}
-              title={COPY.routine.metricTitle(feedbackMetric.logTitle)}
+              eyebrow={copy.routine.metricEyebrow(feedbackMetric.eyebrow ?? feedbackMetric.name)}
+              title={copy.routine.metricTitle(feedbackMetric.logTitle)}
             />
             <FeedbackLogList />
           </Panel>

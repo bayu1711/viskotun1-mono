@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { COPY } from '../../data/copy';
 import type { DataCollectionField } from '../../types/routine';
 import { AIIcon } from '../ui/AIIcon';
 import { BooleanWidget } from './widgets/BooleanWidget';
@@ -12,6 +11,7 @@ import { PhotoWidget } from './widgets/PhotoWidget';
 import { ScaleWidget } from './widgets/ScaleWidget';
 import { TimerWidget } from './widgets/TimerWidget';
 
+import { useLocale } from '../../contexts/LocaleContext';
 type MorphingValue = number | string | boolean;
 
 interface DynamicFieldRendererProps {
@@ -40,6 +40,7 @@ function renderBaseWidget({ field, value, onChange }: DynamicFieldRendererProps)
 }
 
 export function DynamicFieldRenderer({ field, value, onChange }: DynamicFieldRendererProps) {
+  const { copy } = useLocale();
   if (field.proposedWidget?.status === 'approved') {
     return <CustomGeneratedWidget field={field} value={value} onChange={onChange} />;
   }
@@ -51,16 +52,16 @@ export function DynamicFieldRenderer({ field, value, onChange }: DynamicFieldRen
       <div className="space-y-4">
         <div
           role="status"
-          className="mt-3 rounded-card border border-ink/15 bg-mint/40 p-3.5 text-left space-y-1.5"
+          className="mt-3 rounded-card border border-ink/15 bg-mint/40 p-3.5 text-start space-y-1.5"
         >
           <div className="flex items-center gap-2">
             <AIIcon size="xs" />
             <p className="text-xs font-semibold text-ink">
-              {COPY.morphing.widgets.custom.pendingNotice}
+              {copy.morphing.widgets.custom.pendingNotice}
             </p>
           </div>
           <p className="text-2xs text-ink/70 leading-relaxed">
-            {COPY.morphing.widgets.custom.pendingSubtext}
+            {copy.morphing.widgets.custom.pendingSubtext}
           </p>
         </div>
         {baseWidget}

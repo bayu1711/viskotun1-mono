@@ -68,7 +68,7 @@ describe('BCT Taxonomy Placement Architecture', () => {
     // Check Landing.tsx registers 5 steps
     const landingPath = path.resolve(__dirname, '../../views/Landing.tsx');
     const landingContent = fs.readFileSync(landingPath, 'utf-8');
-    expect(landingContent).toContain('COPY.landing.steps.step4Number');
-    expect(landingContent).toContain('COPY.landing.steps.step5Number');
+    expect(landingContent).toContain('copy.landing.steps.step4Number');
+    expect(landingContent).toContain('copy.landing.steps.step5Number');
   });
 });

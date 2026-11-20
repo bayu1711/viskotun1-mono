@@ -177,14 +177,14 @@ export function PaperGuidanceCard({ content }: PaperGuidanceCardProps) {
             value={searchDraft}
             onChange={(e) => setSearchDraft(e.target.value)}
             placeholder={t.customSearchPlaceholder}
-            className="w-full rounded-full border border-ink/15 bg-white py-2 pl-9 pr-8 text-xs text-ink placeholder:text-ink/60 focus:border-ink/40 focus:outline-none"
+            className="w-full rounded-full border border-ink/15 bg-white py-2 ps-9 pe-8 text-xs text-ink placeholder:text-ink/60 focus:border-ink/40 focus:outline-none"
           />
-          <SearchOutlinedIcon className="pointer-events-none absolute left-2.5 h-4 w-4 text-ink/70" />
+          <SearchOutlinedIcon className="pointer-events-none absolute start-2.5 h-4 w-4 text-ink/70" />
           {searchDraft && (
             <button
               type="button"
               onClick={handleClearSearch}
-              className="absolute right-2.5 text-ink/65 hover:text-ink"
+              className="absolute end-2.5 text-ink/65 hover:text-ink"
               aria-label={t.clearSearch}
             >
               <CloseOutlinedIcon className="h-4 w-4" />
@@ -264,7 +264,7 @@ export function PaperGuidanceCard({ content }: PaperGuidanceCardProps) {
                     onClick={() => handleLoadCommunityRoutine(paper)}
                     className="h-7 px-3 text-2xs"
                   >
-                    <Icon icon={AutoAwesomeOutlinedIcon} size="xs" className="mr-1" />
+                    <Icon icon={AutoAwesomeOutlinedIcon} size="xs" className="me-1" />
                     {t.loadRoutine}
                   </PillButton>
                 </div>
@@ -350,7 +350,7 @@ export function PaperGuidanceCard({ content }: PaperGuidanceCardProps) {
       </div>
 
       {/* 5. DOI Tips Box */}
-      <div className="rounded-tile border border-ink/10 bg-cream/50 p-3 text-left">
+      <div className="rounded-tile border border-ink/10 bg-cream/50 p-3 text-start">
         <p className="flex items-center gap-1.5 text-2xs font-medium tracking-wide text-ink/80">
           <Icon icon={LightbulbOutlinedIcon} size="xs" className="text-amber-700" />
           {t.doiTipTitle}

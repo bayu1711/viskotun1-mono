@@ -149,7 +149,7 @@ export function ReEntryModal() {
                         onClick={() => setSelectedBarrier(key)}
                         className={cn(
                           'flex items-start gap-3 rounded-xl border p-3 transition-all cursor-pointer',
-                          isRtl ? 'text-right' : 'text-left',
+                          isRtl ? 'text-end' : 'text-start',
                           isSelected
                             ? 'border-ink bg-white shadow-sm ring-1 ring-ink'
                             : 'border-ink/10 bg-white/40 hover:bg-white/80'
@@ -195,7 +195,7 @@ export function ReEntryModal() {
                         onClick={() => setSelectedDose(mode)}
                         className={cn(
                           'flex w-full items-start gap-3.5 rounded-xl border p-3.5 transition-all cursor-pointer',
-                          isRtl ? 'text-right' : 'text-left',
+                          isRtl ? 'text-end' : 'text-start',
                           isSelected
                             ? 'border-ink bg-white shadow-sm ring-2 ring-ink/80'
                             : 'border-ink/10 bg-white/40 hover:bg-white/80'

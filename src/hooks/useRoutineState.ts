@@ -4,6 +4,7 @@ import { AuthContext } from '../contexts/AuthContext';
 import { DEFAULT_CONFIRMATION_SCORE, FEEDBACK_ESCALATION_THRESHOLD } from '../data/config';
 import { COPY } from '../data/copy';
 import { getLocaleCopy } from '../data/locales';
+import { useLocale } from '../contexts/LocaleContext';
 import type { AppLocale, LocaleCopy } from '../data/locales/types';
 import { initialQueuedPapers, routines as initialRoutines, sampleRoutines } from '../data/routines';
 import { PRECALIBRATED_SAMPLE_ROUTINES, SAMPLE_PAPERS, type SamplePaper } from '../data/samplePapers';
@@ -119,6 +120,13 @@ function getStorageKeys(userId?: string) {
 
 /** All routine session state + actions. Only raw state is stored; metrics are derived on render. */
 export function useRoutineState() {
+  // Toasts and chat confirmations follow the app language. A ref keeps the many callbacks
+  // below stable instead of re-creating them whenever the locale changes.
+  const { copy } = useLocale();
+  const copyRef = useRef(copy);
+  useEffect(() => {
+    copyRef.current = copy;
+  }, [copy]);
   const auth = useContext(AuthContext);
   const isAuthLoading = auth?.isLoading ?? false;
   const isAuthenticated = auth?.isAuthenticated;
@@ -609,7 +617,7 @@ export function useRoutineState() {
       }).catch(() => {});
     }
 
-    toast.success(COPY.demo.resetSuccess);
+    toast.success(copyRef.current.demo.resetSuccess);
   }, [isAuthenticated, userId, isAdmin]);
 
   const clearAllUserData = useCallback(async () => {
@@ -639,7 +647,7 @@ export function useRoutineState() {
         body: JSON.stringify({ action: 'clear_data', userId })
       });
       if (!res.ok) {
-        throw new Error(COPY.profile.actionErrorToast);
+        throw new Error(copyRef.current.profile.actionErrorToast);
       }
     }
   }, [auth, isAuthenticated, userId]);
@@ -770,8 +778,8 @@ export function useRoutineState() {
       setIsHowToOpen(false);
       const displayTitle = formatRoutineTitle(cleanRoutine.shortTitle) || cleanRoutine.title;
       const toastMessage = options?.forceRestart
-        ? COPY.howTo.redoToast(displayTitle)
-        : COPY.howTo.loadedToast(displayTitle);
+        ? copyRef.current.howTo.redoToast(displayTitle)
+        : copyRef.current.howTo.loadedToast(displayTitle);
       toast.success(toastMessage);
     },
     [sampleRoutinesMap, routineList, isAuthenticated, userId]
@@ -820,7 +828,7 @@ export function useRoutineState() {
       if (localFound) {
         if (activeRoutineId !== targetId) {
           setActiveRoutine(targetId);
-          toast.success(COPY.shareModal.deepLinkToast(formatRoutineTitle(localFound.shortTitle) || localFound.title));
+          toast.success(copyRef.current.shareModal.deepLinkToast(formatRoutineTitle(localFound.shortTitle) || localFound.title));
         }
       } else {
         const sampleFound =
@@ -829,7 +837,7 @@ export function useRoutineState() {
           sampleRoutines.find((r) => r.id === targetId);
         if (sampleFound) {
           loadSampleRoutine(targetId);
-          toast.success(COPY.shareModal.deepLinkToast(formatRoutineTitle(sampleFound.shortTitle) || sampleFound.title));
+          toast.success(copyRef.current.shareModal.deepLinkToast(formatRoutineTitle(sampleFound.shortTitle) || sampleFound.title));
         }
       }
 
@@ -1038,7 +1046,7 @@ export function useRoutineState() {
     }));
 
     if (currentDoseMode === 'micro') {
-      toast.success(COPY.reEntry.microDoseCompletedToast);
+      toast.success(copyRef.current.reEntry.microDoseCompletedToast);
     }
   }, [routine, state.excludedStepIds, currentDoseMode, updateRuntime]);
 
@@ -1083,10 +1091,10 @@ export function useRoutineState() {
     pushMessages(routine.id, {
       role: 'ai',
       kind: 'confirmation',
-      content: COPY.assistant.dayAdvancedConfirmation(prevDay, nextDay)
+      content: copyRef.current.assistant.dayAdvancedConfirmation(prevDay, nextDay)
     });
 
-    toast.success(COPY.dayActions.advancedToast(nextDay));
+    toast.success(copyRef.current.dayActions.advancedToast(nextDay));
   }, [routine, state.setsDone, state.excludedStepIds, currentDoseMode, updateRuntime, pushMessages]);
 
   const setDoseMode = useCallback(
@@ -1103,7 +1111,7 @@ export function useRoutineState() {
   const logBarrier = useCallback(
     (barrier: BarrierType, selectedDose: DoseMode, note?: string) => {
       if (!routine) return;
-      const barrierLabel = COPY.reEntry.barriers[barrier]?.label || barrier;
+      const barrierLabel = copyRef.current.reEntry.barriers[barrier]?.label || barrier;
       const newLog: BarrierLog = {
         id: createId('barr'),
         day: routine.currentDay,
@@ -1123,14 +1131,14 @@ export function useRoutineState() {
 
       setIsReEntryOpen(false);
 
-      const doseLabel = COPY.reEntry.doseModes[selectedDose]?.title || selectedDose;
+      const doseLabel = copyRef.current.reEntry.doseModes[selectedDose]?.title || selectedDose;
       pushMessages(routine.id, {
         role: 'ai',
         kind: 'confirmation',
-        content: COPY.assistant.barrierLoggedConfirmation(barrierLabel, doseLabel)
+        content: copyRef.current.assistant.barrierLoggedConfirmation(barrierLabel, doseLabel)
       });
 
-      toast.success(COPY.reEntry.barrierLoggedToast(doseLabel));
+      toast.success(copyRef.current.reEntry.barrierLoggedToast(doseLabel));
     },
     [routine, updateRuntime, pushMessages]
   );
@@ -1189,7 +1197,7 @@ export function useRoutineState() {
       pushMessages(routine.id, {
         role: 'ai',
         kind: 'confirmation',
-        content: COPY.assistant.reEntryWelcome(missedCount, nextDay)
+        content: copyRef.current.assistant.reEntryWelcome(missedCount, nextDay)
       });
 
       toast.info(`Simulated ${missedCount}-day lapse. Compassionate re-entry activated.`);
@@ -1297,10 +1305,10 @@ export function useRoutineState() {
       pushMessages(routine.id, {
         role: 'ai',
         kind: 'confirmation',
-        content: COPY.assistant.simulatedHistoryConfirmation(count, targetDay)
+        content: copyRef.current.assistant.simulatedHistoryConfirmation(count, targetDay)
       });
 
-      toast.success(COPY.dayActions.simulatedToast(count));
+      toast.success(copyRef.current.dayActions.simulatedToast(count));
     },
     [routine, updateRuntime, pushMessages]
   );
@@ -1500,14 +1508,14 @@ export function useRoutineState() {
     pushMessages(routine.id, {
       role: 'ai',
       kind: 'confirmation',
-      content: COPY.assistant.simulatedFullCompletionConfirmation(
+      content: copyRef.current.assistant.simulatedFullCompletionConfirmation(
         displayTitle,
         totalDays
       )
     });
 
     toast.success(
-      COPY.dayActions.simulateFullCompletionToast(displayTitle, totalDays)
+      copyRef.current.dayActions.simulateFullCompletionToast(displayTitle, totalDays)
     );
   }, [routine, state.excludedStepIds, updateRuntime, pushMessages]);
 
@@ -1586,8 +1594,8 @@ export function useRoutineState() {
         role: 'ai',
         kind: 'confirmation',
         content: item.isMultiDayLapse
-          ? COPY.assistant.reEntryWelcome(item.daysPassed, item.nextDay)
-          : COPY.assistant.dayRolloverNotification(item.nextDay)
+          ? copyRef.current.assistant.reEntryWelcome(item.daysPassed, item.nextDay)
+          : copyRef.current.assistant.dayRolloverNotification(item.nextDay)
       });
     }
   }, [updateRuntime, pushMessages]);
@@ -1649,9 +1657,9 @@ export function useRoutineState() {
           ? {
               role: 'ai',
               kind: 'alert',
-              content: COPY.safety.dynamicEscalationAlert(metric.name, metric.escalationMessage)
+              content: copyRef.current.safety.dynamicEscalationAlert(metric.name, metric.escalationMessage)
             }
-          : { role: 'ai', kind: 'confirmation', content: COPY.assistant.confirmSafe(routine.currentDay, score) }
+          : { role: 'ai', kind: 'confirmation', content: copyRef.current.assistant.confirmSafe(routine.currentDay, score) }
       );
     },
     [routine, updateRuntime, pushMessages]
@@ -1698,10 +1706,10 @@ export function useRoutineState() {
       const displayVal =
         typeof value === 'boolean'
           ? value
-            ? COPY.morphing.values.present
-            : COPY.morphing.values.absent
+            ? copyRef.current.morphing.values.present
+            : copyRef.current.morphing.values.absent
           : typeof value === 'string' && value.startsWith('data:')
-          ? COPY.morphing.values.photoAttached
+          ? copyRef.current.morphing.values.photoAttached
           : `${value}${field.unit ? ' ' + field.unit : ''}`;
 
       pushMessages(
@@ -1710,12 +1718,12 @@ export function useRoutineState() {
           ? {
               role: 'ai',
               kind: 'alert',
-              content: COPY.safety.dynamicEscalationAlert(field.name, field.escalationMessage)
+              content: copyRef.current.safety.dynamicEscalationAlert(field.name, field.escalationMessage)
             }
           : {
               role: 'ai',
               kind: 'confirmation',
-              content: COPY.morphing.values.fieldConfirmation(field.name, routine.currentDay, displayVal)
+              content: copyRef.current.morphing.values.fieldConfirmation(field.name, routine.currentDay, displayVal)
             }
       );
     },
@@ -1725,7 +1733,7 @@ export function useRoutineState() {
   const askQuestion = useCallback(
     async (text: string) => {
       if (!routine) {
-        toast.info(COPY.errors.noRoutinesBody);
+        toast.info(copyRef.current.errors.noRoutinesBody);
         return;
       }
       const target = routine;
@@ -1744,7 +1752,7 @@ export function useRoutineState() {
                 kind: 'answer',
                 content: edgeAnswer,
                 engine: 'on-device-gemma',
-                source: COPY.assistant.engines.onDeviceGemmaSource
+                source: copyRef.current.assistant.engines.onDeviceGemmaSource
               });
               return;
             }
@@ -1783,7 +1791,7 @@ export function useRoutineState() {
                 kind: 'answer',
                 content: stripClinicalDisclaimer(data.answer),
                 engine: data.engine ?? 'cloud-gemini',
-                source: data.source ?? COPY.assistant.methodsSectionSource
+                source: data.source ?? copyRef.current.assistant.methodsSectionSource
               });
               return;
             }
@@ -1795,7 +1803,7 @@ export function useRoutineState() {
             kind: 'answer',
             content: stripClinicalDisclaimer(answerFor(target, text)),
             engine: 'local-rules',
-            source: COPY.assistant.methodsSectionSource
+            source: copyRef.current.assistant.methodsSectionSource
           });
         } catch {
           pushMessages(target.id, {
@@ -1803,7 +1811,7 @@ export function useRoutineState() {
             kind: 'answer',
             content: stripClinicalDisclaimer(answerFor(target, text)),
             engine: 'local-rules',
-            source: COPY.assistant.methodsSectionSource
+            source: copyRef.current.assistant.methodsSectionSource
           });
         }
       } finally {
@@ -1815,7 +1823,7 @@ export function useRoutineState() {
 
   const askAboutStep = useCallback(
     (step: RoutineStep) => {
-      askQuestion(COPY.task.taskQuestionPrompt(step.action));
+      askQuestion(copyRef.current.task.taskQuestionPrompt(step.action));
     },
     [askQuestion]
   );
@@ -1931,7 +1939,7 @@ export function useRoutineState() {
         });
 
         if (!res.ok) {
-          throw new Error(COPY.extraction.failedWithStatus(res.status));
+          throw new Error(copyRef.current.extraction.failedWithStatus(res.status));
         }
 
         const result = await res.json();
@@ -1949,10 +1957,10 @@ export function useRoutineState() {
               timestamp: nowLabel()
             }
           ]);
-          toast.success(COPY.processing.ready);
+          toast.success(copyRef.current.processing.ready);
           return { success: true, eligible: true, routine: extractedRoutine };
         } else {
-          const reason = result.rejectionReason || COPY.extraction.declinedNonHuman;
+          const reason = result.rejectionReason || copyRef.current.extraction.declinedNonHuman;
           const isUnrecognized = isUnrecognizedLinkReason(reason) || result.errorType === 'unrecognized';
           setStagingError(reason);
           setStagingMessages((prev) => [
@@ -1972,7 +1980,7 @@ export function useRoutineState() {
             }
           ]);
           if (isUnrecognized) {
-            toast.info(COPY.extraction.linkGuidanceToast || reason);
+            toast.info(copyRef.current.extraction.linkGuidanceToast || reason);
           } else {
             toast.error(reason);
           }
@@ -1980,7 +1988,7 @@ export function useRoutineState() {
         }
       } catch (err) {
         console.error('[uploadPaper] Extraction failed:', err);
-        const errorMsg = COPY.extraction.errorGeneral;
+        const errorMsg = copyRef.current.extraction.errorGeneral;
         setStagingError(errorMsg);
         setStagingMessages((prev) => [
           ...prev,
@@ -2048,7 +2056,7 @@ export function useRoutineState() {
     setStagingRoutine(null);
     setStagingMessages([]);
     setStagingError(null);
-    toast.success(COPY.assistant.confirmedToast(displayTitle));
+    toast.success(copyRef.current.assistant.confirmedToast(displayTitle));
   }, [stagingRoutine, addRoutine, userId]);
 
   const discardStagingRoutine = useCallback(() => {
@@ -2056,7 +2064,7 @@ export function useRoutineState() {
     setStagingMessages([]);
     setStagingError(null);
     setIsExtractingPaper(false);
-    toast.info(COPY.assistant.discardedToast);
+    toast.info(copyRef.current.assistant.discardedToast);
   }, []);
 
   const askStagingQuestion = useCallback(
@@ -2097,7 +2105,7 @@ export function useRoutineState() {
                     kind: 'answer',
                     content: stripClinicalDisclaimer(data.answer),
                     engine: data.engine ?? 'local-rules',
-                    source: data.source ?? COPY.assistant.rejection.source,
+                    source: data.source ?? copyRef.current.assistant.rejection.source,
                     timestamp: nowLabel()
                   }
                 ]);
@@ -2113,7 +2121,7 @@ export function useRoutineState() {
                 kind: 'answer',
                 content: answerForRejection(stagingError, text),
                 engine: 'local-rules',
-                source: COPY.assistant.rejection.source,
+                source: copyRef.current.assistant.rejection.source,
                 timestamp: nowLabel()
               }
             ]);
@@ -2126,7 +2134,7 @@ export function useRoutineState() {
                 kind: 'answer',
                 content: answerForRejection(stagingError, text),
                 engine: 'local-rules',
-                source: COPY.assistant.rejection.source,
+                source: copyRef.current.assistant.rejection.source,
                 timestamp: nowLabel()
               }
             ]);
@@ -2149,7 +2157,7 @@ export function useRoutineState() {
                   kind: 'answer',
                   content: edgeAnswer,
                   engine: 'on-device-gemma',
-                  source: COPY.assistant.engines.onDeviceGemmaSource,
+                  source: copyRef.current.assistant.engines.onDeviceGemmaSource,
                   timestamp: nowLabel()
                 }
               ]);
@@ -2192,7 +2200,7 @@ export function useRoutineState() {
                   kind: 'answer',
                   content: stripClinicalDisclaimer(data.answer),
                   engine: data.engine ?? 'cloud-gemini',
-                  source: data.source ?? COPY.assistant.methodsSectionSource,
+                  source: data.source ?? copyRef.current.assistant.methodsSectionSource,
                   timestamp: nowLabel()
                 }
               ]);
@@ -2208,7 +2216,7 @@ export function useRoutineState() {
               kind: 'answer',
               content: stripClinicalDisclaimer(answerFor(target, text)),
               engine: 'local-rules',
-              source: COPY.assistant.methodsSectionSource,
+              source: copyRef.current.assistant.methodsSectionSource,
               timestamp: nowLabel()
             }
           ]);
@@ -2221,7 +2229,7 @@ export function useRoutineState() {
               kind: 'answer',
               content: stripClinicalDisclaimer(answerFor(target, text)),
               engine: 'local-rules',
-              source: COPY.assistant.methodsSectionSource,
+              source: copyRef.current.assistant.methodsSectionSource,
               timestamp: nowLabel()
             }
           ]);
@@ -2317,12 +2325,12 @@ export function useRoutineState() {
               };
             })
           );
-          toast.success(COPY.community.reviewSuccessToast);
+          toast.success(copyRef.current.community.reviewSuccessToast);
           closeReviewDrawer();
         }
       } catch (err) {
         console.error('[submitCommunityReview] Error:', err);
-        toast.error(COPY.community.reviewErrorToast);
+        toast.error(copyRef.current.community.reviewErrorToast);
       }
     },
     [routine, adherenceRate, userId, closeReviewDrawer]

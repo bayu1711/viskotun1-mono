@@ -1,21 +1,22 @@
 import React from 'react';
-import { COPY } from '../../data/copy';
 import type { RoutineStep } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import type { StepDisplay } from '../../utils/steps';
 import { toneStyles } from '../../utils/tones';
 
+import { useLocale } from '../../contexts/LocaleContext';
 interface TaskStatListProps {
   step: RoutineStep;
   display: StepDisplay;
 }
 
 export function TaskStatList({ step, display }: TaskStatListProps) {
+  const { copy } = useLocale();
   const styles = toneStyles[step.tone];
   const stats = [
-  { term: display.statLabel, value: `${display.statValue}${step.inferred ? COPY.task.inferredMarker : ''}` },
-  { term: COPY.task.frequency, value: step.frequency },
-  { term: COPY.task.source, value: step.inferred ? COPY.task.sourceDefaulted : COPY.task.sourcePaper }];
+  { term: display.statLabel, value: `${display.statValue}${step.inferred ? copy.task.inferredMarker : ''}` },
+  { term: copy.task.frequency, value: step.frequency },
+  { term: copy.task.source, value: step.inferred ? copy.task.sourceDefaulted : copy.task.sourcePaper }];
 
 
   return (
