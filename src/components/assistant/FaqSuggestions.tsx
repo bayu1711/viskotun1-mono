@@ -59,7 +59,7 @@ export function FaqSuggestions({
             type="button"
             disabled={disabled}
             onClick={onConfirm}
-            className="sticky left-0 z-10 shrink-0 inline-flex items-center gap-1.5 rounded-full border border-ink bg-ink px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-ink/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink cursor-pointer shadow-md"
+            className="sticky left-0 rtl:right-0 rtl:left-auto z-10 shrink-0 inline-flex items-center gap-1.5 rounded-full border border-ink bg-ink px-3.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-ink/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink cursor-pointer shadow-md"
           >
             <Icon icon={CheckIcon} size="xs" className="text-mint" />
             <span>{confirmLabel || `Continue (${selected.length})`}</span>

@@ -121,12 +121,18 @@ export function AssistantSheet() {
   }, [lifestyleInterviewStage, isOpen]);
 
   const isMultiSelectStage =
-    isLifestyle && (lifestyleInterviewStage === 'rhythm' || lifestyleInterviewStage === 'cautions');
+    isLifestyle &&
+    (lifestyleInterviewStage === 'availability' ||
+      lifestyleInterviewStage === 'age_time' ||
+      lifestyleInterviewStage === 'rhythm' ||
+      lifestyleInterviewStage === 'cautions');
 
   const isNoneOption = useCallback(
     (item: string) =>
       item === copy.lifestyleTuning.onboarding.quickNoCautions ||
-      item === copy.lifestyleTuning.onboarding.quickStandardRhythm,
+      item === copy.lifestyleTuning.onboarding.quickStandardRhythm ||
+      item === copy.lifestyleTuning.onboarding.quickAnytime ||
+      item === copy.lifestyleTuning.onboarding.quickSkipAge,
     [copy]
   );
 

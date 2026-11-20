@@ -2353,20 +2353,25 @@ export function useRoutineState() {
           buildMessage({
             role: 'ai',
             kind: 'answer',
-            content: localeCopy.lifestyleTuning.onboarding.greetingRegion(regionLabel),
+            content: regionLabel
+              ? localeCopy.lifestyleTuning.onboarding.greetingRegion(regionLabel)
+              : localeCopy.lifestyleTuning.unknownLocationGreeting,
             source
           })
         ];
       }
 
       setLifestyleInterviewStage('complete');
-      setAnsweredLifestyleStages(['region', 'age_time', 'rhythm', 'cautions']);
+      setAnsweredLifestyleStages(['region', 'age', 'availability', 'age_time', 'rhythm', 'cautions']);
       const summary = formatProfileSummary(lp, up, localeCopy);
       return [
         buildMessage({
           role: 'ai',
           kind: 'answer',
-          content: localeCopy.lifestyleTuning.onboarding.returningGreeting(regionLabel, summary),
+          content: localeCopy.lifestyleTuning.onboarding.returningGreeting(
+            regionLabel || 'your area',
+            summary
+          ),
           source
         })
       ];
@@ -2382,7 +2387,9 @@ export function useRoutineState() {
       buildMessage({
         role: 'ai',
         kind: 'answer',
-        content: localeCopy.lifestyleTuning.onboarding.rerunGreeting(regionLabel),
+        content: regionLabel
+          ? localeCopy.lifestyleTuning.onboarding.rerunGreeting(regionLabel)
+          : localeCopy.lifestyleTuning.unknownLocationGreeting,
         source: localeCopy.lifestyleTuning.onboarding.answerSource
       })
     ]);
@@ -2400,7 +2407,7 @@ export function useRoutineState() {
       const localeCopy = options?.localeCopy ?? getLocaleCopy(locale);
       const currentProf = lifestyleProfileRef.current;
       const currentUserProf = userProfileRef.current;
-      const country = currentProf?.region?.countryCode || 'AE';
+      const country = currentProf?.region?.countryCode || '';
       const currentStage = lifestyleInterviewStageRef.current;
       const answeredStages = answeredLifestyleStagesRef.current;
       const isInterviewTurn = currentStage !== 'complete';
@@ -2500,7 +2507,7 @@ export function useRoutineState() {
       // Deterministic offline fallback so the conversation never stalls
       const currentRegion = currentProf?.region ?? {
         countryCode: country,
-        countryName: 'United Arab Emirates',
+        countryName: '',
         detectedBy: 'default_global' as const,
         confirmed: false
       };
