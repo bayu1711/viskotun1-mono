@@ -465,7 +465,8 @@ export const COPY = {
     tabs: {
       ariaLabel: 'Profile sections',
       account: 'Account',
-      lifestyle: 'Lifestyle'
+      lifestyle: 'Lifestyle',
+      data: 'Data & Account Controls'
     },
     saveButton: 'Save profile',
     saveAccountButton: 'Save account',

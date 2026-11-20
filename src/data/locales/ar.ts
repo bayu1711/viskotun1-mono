@@ -136,7 +136,8 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     tabs: {
       ariaLabel: 'أقسام الملف الشخصي',
       account: 'الحساب',
-      lifestyle: 'نمط الحياة'
+      lifestyle: 'نمط الحياة',
+      data: 'البيانات وإدارة الحساب'
     },
     saveButton: 'حفظ الملف الشخصي',
     saveAccountButton: 'حفظ إعدادات الحساب',
