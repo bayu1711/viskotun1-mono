@@ -243,4 +243,13 @@ describe('UserProfile and UserLifestyleProfile utilities & wiring', () => {
     expect(profileSource).toContain('variant="pills"');
     expect(topBarSource).toContain('pathname !== ROUTES.profile');
   });
+
+  it('scopes regional smoking options so Midwakh and Shisha are not forced on international locales', () => {
+    const profileSource = fs.readFileSync(
+      path.resolve(__dirname, '../../views/Profile.tsx'),
+      'utf-8'
+    );
+    expect(profileSource).toContain('visibleSmokingKeys');
+    expect(profileSource).toContain('options={visibleSmokingKeys}');
+  });
 });

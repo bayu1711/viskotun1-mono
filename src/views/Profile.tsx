@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
@@ -270,6 +270,39 @@ export function ProfilePage() {
     undefined,
     locale
   );
+
+  const visibleSmokingKeys: SmokingStatus[] = useMemo(() => {
+    const isUae = resolvedCountryCodeForUi === 'AE';
+    const isGccOrArab = ['AE', 'SA', 'QA', 'KW', 'BH', 'OM', 'EG', 'JO', 'LB', 'IQ', 'SY'].includes(
+      resolvedCountryCodeForUi
+    );
+
+    if (isUae) {
+      return SMOKING_KEYS;
+    }
+
+    if (isGccOrArab) {
+      return [
+        'non_smoker',
+        'shisha_waterpipe',
+        'cigarettes',
+        'vape',
+        'former_smoker',
+        ...(smokingStatus === 'midwakh_dokha' ? (['midwakh_dokha'] as const) : []),
+        'other'
+      ];
+    }
+
+    return [
+      'non_smoker',
+      'former_smoker',
+      'cigarettes',
+      'vape',
+      ...(smokingStatus === 'midwakh_dokha' ? (['midwakh_dokha'] as const) : []),
+      ...(smokingStatus === 'shisha_waterpipe' ? (['shisha_waterpipe'] as const) : []),
+      'other'
+    ];
+  }, [resolvedCountryCodeForUi, smokingStatus]);
 
   const toggleCulturalRhythm = (item: CulturalRhythmId) => {
     setCulturalRhythms((prev) =>
@@ -775,7 +808,7 @@ export function ProfilePage() {
 
               <OptionChipGroup
                 label={t.smokingLabel}
-                options={SMOKING_KEYS}
+                options={visibleSmokingKeys}
                 value={smokingStatus}
                 labels={t.smokingOptions}
                 onChange={setSmokingStatus}

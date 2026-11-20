@@ -256,4 +256,69 @@ describe('Conversational Adaptive Lifestyle Interview', () => {
     expect(rhythmCombined.culturalRhythms).toContain('intermittent_fasting');
     expect(rhythmCombined.climateSensitivity).toBe('summer_heat');
   });
+
+  it('dynamically adapts caution chips based on region and dynamic suggestions without leaking Midwakh to Colombo', () => {
+    const copyEn = getLocaleCopy('en');
+
+    // 1. Colombo, Sri Lanka (LK) with dynamic suggestions
+    const colomboRegion: RegionContext = {
+      countryCode: 'LK',
+      countryName: 'Sri Lanka',
+      city: 'Colombo',
+      detectedBy: 'user_selected',
+      confirmed: true
+    };
+
+    const colomboSuggestions = [
+      { id: '1', label: 'Joint & Mobility Sensitivity', category: 'physical' as const, countryCode: 'LK', popularityCount: 10 },
+      { id: '2', label: 'Tobacco Tapering', category: 'substance' as const, countryCode: 'LK', popularityCount: 8 }
+    ];
+
+    const colomboChips = getQuickRepliesForStage({
+      stage: 'cautions',
+      lifestyleProfile: { region: colomboRegion, activeTags: [] },
+      suggestions: colomboSuggestions,
+      copy: copyEn
+    });
+
+    expect(colomboChips.some((chip) => chip.toLowerCase().includes('midwakh'))).toBe(false);
+    expect(colomboChips.some((chip) => chip.toLowerCase().includes('dokha'))).toBe(false);
+    expect(colomboChips.some((chip) => chip.toLowerCase().includes('shisha'))).toBe(false);
+    expect(colomboChips).toContain('Joint & Mobility Sensitivity');
+    expect(colomboChips).toContain('Tobacco Tapering');
+
+    // 2. Colombo, Sri Lanka without suggestions (fallbacks)
+    const colomboFallbackChips = getQuickRepliesForStage({
+      stage: 'cautions',
+      lifestyleProfile: { region: colomboRegion, activeTags: [] },
+      suggestions: [],
+      copy: copyEn
+    });
+
+    expect(colomboFallbackChips.some((chip) => chip.toLowerCase().includes('midwakh'))).toBe(false);
+    expect(colomboFallbackChips.some((chip) => chip.toLowerCase().includes('dokha'))).toBe(false);
+    expect(colomboFallbackChips.some((chip) => chip.toLowerCase().includes('shisha'))).toBe(false);
+    expect(colomboFallbackChips).toContain(copyEn.profile.smokingOptions.cigarettes);
+
+    // 3. UAE (AE) correctly presents Midwakh / Dokha
+    const uaeChips = getQuickRepliesForStage({
+      stage: 'cautions',
+      lifestyleProfile: { region: DEFAULT_REGION, activeTags: [] },
+      suggestions: [],
+      copy: copyEn
+    });
+
+    expect(uaeChips).toContain(copyEn.profile.smokingOptions.midwakh_dokha);
+    expect(uaeChips).toContain(copyEn.profile.smokingOptions.shisha_waterpipe);
+  });
+
+  it('recognizes Colombo in the region question without freeform country code degradation', () => {
+    const parsed = parseConversationalLifestyleAnswer('Colombo', 'region', {
+      currentRegion: DEFAULT_REGION
+    });
+    expect(parsed.answeredRegion).toBe(true);
+    expect(parsed.region?.city).toBe('Colombo');
+    expect(parsed.region?.countryCode).toBe('LK');
+    expect(parsed.region?.countryName).toBe('Sri Lanka');
+  });
 });

@@ -14,6 +14,7 @@ import { formatLifestyleTagLabel } from './lifestyleTags';
 import {
   deriveClinicalFocus,
   getRegionalAvailabilityPresets,
+  isFastingContextRegion,
   resolveCulturalRhythms,
   sanitizeAge,
   syncLifestyleActiveTags
@@ -99,7 +100,11 @@ const KNOWN_CITIES: readonly CityPreset[] = [
   { city: 'Buenos Aires', countryCode: 'AR', countryName: 'Argentina' },
   { city: 'Nairobi', countryCode: 'KE', countryName: 'Kenya' },
   { city: 'Lagos', countryCode: 'NG', countryName: 'Nigeria' },
-  { city: 'Johannesburg', countryCode: 'ZA', countryName: 'South Africa' }
+  { city: 'Johannesburg', countryCode: 'ZA', countryName: 'South Africa' },
+  { city: 'Colombo', countryCode: 'LK', countryName: 'Sri Lanka' },
+  { city: 'Kandy', countryCode: 'LK', countryName: 'Sri Lanka' },
+  { city: 'Dhaka', countryCode: 'BD', countryName: 'Bangladesh' },
+  { city: 'Kuala Lumpur', countryCode: 'MY', countryName: 'Malaysia' }
 ];
 
 const QUICK_REGION_PRESETS = [
@@ -1034,26 +1039,64 @@ export function getQuickRepliesForStage(options: {
         .map((s) => formatLifestyleTagLabel(s.label))
         .filter((label) => !activeTagSet.has(label.toLowerCase()));
 
+      const isFastingRegion = isFastingContextRegion(countryCode) || culturalRhythms.includes('ramadan_fasting');
+      const isExtremeHeatRegion = ['AE', 'SA', 'QA', 'KW', 'BH', 'OM', 'EG', 'IQ'].includes(countryCode);
+      const isColdRegion = ['GB', 'SE', 'NO', 'FI', 'CA', 'RU', 'IS', 'DK'].includes(countryCode);
+
       const fallbackLabels = [
         pCopy.workPatterns.desk_sedentary,
         pCopy.workPatterns.shift_work,
-        pCopy.culturalRhythmOptions.ramadan_fasting,
-        pCopy.culturalRhythmOptions.intermittent_fasting,
-        pCopy.climateOptions.summer_heat
+        isFastingRegion ? pCopy.culturalRhythmOptions.ramadan_fasting : pCopy.culturalRhythmOptions.intermittent_fasting,
+        isExtremeHeatRegion
+          ? pCopy.climateOptions.summer_heat
+          : isColdRegion
+            ? pCopy.climateOptions.cold_climate
+            : pCopy.culturalRhythmOptions.early_dawn_riser,
+        pCopy.culturalRhythmOptions.intermittent_fasting
       ];
 
       const merged = Array.from(new Set([...regionalLabels, ...fallbackLabels])).slice(0, 4);
       return [...merged, t.quickStandardRhythm];
     }
     case 'cautions': {
-      const base = [
-        t.quickNoCautions,
-        pCopy.cautionPresets[0],
-        pCopy.cautionPresets[1],
-        pCopy.smokingOptions.shisha_waterpipe,
-        pCopy.smokingOptions.midwakh_dokha
-      ].filter(Boolean);
-      return Array.from(new Set(base)).slice(0, 5);
+      // 1. Dynamic physical and substance caution tags derived by the regional engine
+      const regionalCautionLabels = suggestions
+        .filter((s) => s.category === 'physical' || s.category === 'substance')
+        .map((s) => formatLifestyleTagLabel(s.label))
+        .filter((label) => !activeTagSet.has(label.toLowerCase()));
+
+      // 2. Physical caution fallbacks
+      const physicalFallbacks = [pCopy.cautionPresets[0], pCopy.cautionPresets[1]].filter(Boolean);
+
+      // 3. Country-aware substance / smoking fallbacks
+      const isUae = countryCode === 'AE';
+      const isGccOrArab = ['AE', 'SA', 'QA', 'KW', 'BH', 'OM', 'EG', 'JO', 'LB', 'IQ', 'SY'].includes(countryCode);
+
+      const substanceFallbacks: string[] = [];
+      if (lifestyleProfile?.smokingStatus && lifestyleProfile.smokingStatus !== 'non_smoker') {
+        const currentSmokingLabel = pCopy.smokingOptions[lifestyleProfile.smokingStatus];
+        if (currentSmokingLabel) substanceFallbacks.push(currentSmokingLabel);
+      }
+
+      if (isUae) {
+        substanceFallbacks.push(pCopy.smokingOptions.midwakh_dokha, pCopy.smokingOptions.shisha_waterpipe);
+      } else if (isGccOrArab) {
+        substanceFallbacks.push(pCopy.smokingOptions.shisha_waterpipe, pCopy.smokingOptions.cigarettes);
+      } else {
+        // Global default (e.g. Sri Lanka / Colombo, UK, US, etc.): never show Midwakh or Shisha by default
+        substanceFallbacks.push(pCopy.smokingOptions.cigarettes, pCopy.smokingOptions.vape);
+      }
+
+      const merged = Array.from(
+        new Set([
+          t.quickNoCautions,
+          ...regionalCautionLabels,
+          ...physicalFallbacks,
+          ...substanceFallbacks
+        ])
+      ).slice(0, 5);
+
+      return merged;
     }
     case 'complete': {
       const hasRamadan = culturalRhythms.includes('ramadan_fasting');
