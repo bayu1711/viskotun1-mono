@@ -922,11 +922,21 @@ export const COPY = {
     rejection: {
       inputLabel: 'Ask why this paper was declined',
       placeholder: 'Ask why it was declined, or paste a DOI to try another…',
+      placeholderGuidance: 'Ask what you are looking for, or paste a paper DOI…',
       source: 'Source · Gatekeeper policy',
+      guidanceSource: 'Source · TrialN1 Library & Discovery',
       suggestions: {
         why: 'Why was this paper declined?',
         whatToUpload: 'What kind of paper can I upload instead?',
         nonHuman: 'Can findings from animal studies still be used?'
+      },
+      guidanceSuggestions: {
+        browseCommunity: 'Browse community routine papers',
+        searchPubmed: 'Search PubMed for clinical trials',
+        achilles: 'Achilles tendinopathy rehab',
+        hairLoss: 'Alopecia & hair regrowth',
+        creatine: 'Creatine & cognitive fatigue',
+        fasting: 'Early time-restricted fasting'
       },
       answers: {
         whyPrefix: "Here is the gatekeeper's reasoning: ",
@@ -938,6 +948,45 @@ export const COPY = {
         outOfScope:
           "I can only explain why this paper wasn't suitable for TrialN1. I can't discuss the study's methods or findings. Upload a human interventional paper and I can help with its routine."
       }
+    },
+    linkGuidance: {
+      title: "Couldn't find a paper identifier in that link",
+      subtitle: "Most article links, blog posts, or journal pages don't include the direct open-access paper DOI.",
+      askPrompt: 'What health goal, condition, or intervention are you looking for?',
+      communityTitle: 'Available Community Routines (Pre-Calibrated & Ready)',
+      communitySubtitle: 'Load a verified human interventional routine right now:',
+      loadRoutine: 'Load Routine',
+      previewRoutine: 'Preview',
+      browseCommunity: 'Browse all community papers',
+      externalTitle: 'Search External Research Databases',
+      externalSubtitle: 'Find open-access clinical trials with verifiable DOIs:',
+      pubmedSearch: 'Search PubMed (NIH)',
+      europePmcSearch: 'Search Europe PMC',
+      googleScholarSearch: 'Search Google Scholar',
+      doiTipTitle: 'How to get a paper from PubMed or Europe PMC:',
+      doiTipSteps: [
+        '1. Search for your topic on PubMed or Europe PMC using the buttons above.',
+        '2. Select an interventional human study (RCT or clinical trial).',
+        '3. Copy the DOI (e.g. 10.1177/1941738116631498) or the PubMed URL and paste it here — or download the PDF and drop it in.'
+      ],
+      suggestions: [
+        'Achilles Tendonitis Rehab',
+        'Hair Regrowth (Alopecia)',
+        'Creatine & Cognitive Fatigue',
+        'Early Time-Restricted Fasting',
+        'Bright Light Circadian Therapy',
+        'Midwakh & Nicotine Tapering'
+      ],
+      customSearchPlaceholder: 'Type a condition or topic (e.g. knee rehab, creatine, fasting)...',
+      searchAction: 'Search Research Papers',
+      searchingEuropePmc: 'Searching Europe PMC for open-access trials…',
+      extractRoutine: 'Extract with N1 AI',
+      noSearchResults: 'No open-access papers found matching that term in Europe PMC. Try the direct PubMed search link above.',
+      openInNewTab: 'Open search in new tab',
+      directDoiPrompt: 'Already have a DOI or PDF?',
+      pasteDoiPlaceholder: 'Paste DOI (e.g. 10.1177/1941738116631498) or PubMed link…',
+      queryPill: (q: string) => `Looking for: "${q}"`,
+      clearSearch: 'Clear search'
     },
     suggestionsLabel: 'Suggested questions',
     suggestions: {
@@ -1086,7 +1135,9 @@ export const COPY = {
     routineReady: (title: string) => `Routine ready: ${title}`,
     failedWithStatus: (status: number) => `Extraction failed with HTTP ${status}`,
     linkNotRecognized:
-      'No DOI, PubMed or PMC ID found in that link. Paste the paper DOI (for example 10.1177/1941738116631498) or upload the PDF.',
+      'No DOI, PubMed or PMC ID found in that link. To build an executable routine, TrialN1 needs a direct research paper identifier (e.g. DOI 10.1177/1941738116631498) or the paper PDF.',
+    linkGuidanceToast:
+      "Couldn't find a paper identifier in that link. Explore community routines or search research databases below.",
     paperNotFound: 'No paper with that DOI or ID was found in Europe PMC. Check the identifier or upload the PDF.',
     fullTextUnavailable:
       'This paper is not open access, so its methods cannot be read from the link. Upload the PDF to extract the routine.',
