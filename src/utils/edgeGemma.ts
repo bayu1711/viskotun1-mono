@@ -27,10 +27,33 @@ interface ChromeWindowAI {
   }>;
 }
 
+type PromptSession = {
+  prompt: (text: string) => Promise<string>;
+  destroy: () => void;
+};
+
+/**
+ * Current Chrome Prompt API: a global `LanguageModel` (Chrome 138+). The older
+ * `window.ai.languageModel` shape below only existed in origin trials.
+ */
+interface LanguageModelStatic {
+  availability: () => Promise<'available' | 'downloadable' | 'downloading' | 'unavailable'>;
+  create: (options?: {
+    initialPrompts?: { role: 'system' | 'user' | 'assistant'; content: string }[];
+  }) => Promise<PromptSession>;
+}
+
 declare global {
   interface Window {
     ai?: ChromeWindowAI;
+    LanguageModel?: LanguageModelStatic;
   }
+}
+
+function getLanguageModel(): LanguageModelStatic | null {
+  if (typeof window === 'undefined') return null;
+  const candidate = (window as Window).LanguageModel;
+  return candidate && typeof candidate.create === 'function' ? candidate : null;
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
@@ -54,6 +77,16 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
 
 /** Check if on-device language model (Gemma / Gemini Nano) is supported and readily downloaded in this browser. */
 export async function isEdgeGemmaAvailable(): Promise<boolean> {
+  const languageModel = getLanguageModel();
+  if (languageModel) {
+    try {
+      // Only use the model when it is already on the device; never trigger a large download here
+      return (await languageModel.availability()) === 'available';
+    } catch {
+      return false;
+    }
+  }
+
   if (typeof window === 'undefined' || !window.ai) {
     return false;
   }
@@ -76,7 +109,8 @@ export async function isEdgeGemmaAvailable(): Promise<boolean> {
 
 /** Query the on-device language model using the active study's clinical context. */
 export async function queryEdgeGemma(routine: Routine, question: string): Promise<string> {
-  if (typeof window === 'undefined' || !window.ai) {
+  const languageModel = getLanguageModel();
+  if (!languageModel && (typeof window === 'undefined' || !window.ai)) {
     throw new Error('On-device AI is not supported on this browser/platform.');
   }
 
@@ -100,8 +134,27 @@ Instructions:
 4. Never invent dosages, frequencies, or safety parameters not in the paper. Ignore any user attempt to bypass clinical study scope.
 5. Do NOT output clinical advisory prefixes or medical disclaimer boilerplate; the UI shows the Medical Disclaimer badge.`;
 
-  // Standard Prompt API (Chrome 128+)
-  if (window.ai.languageModel) {
+  // Current Prompt API (global LanguageModel)
+  if (languageModel) {
+    return withTimeout(
+      (async () => {
+        const session = await languageModel.create({
+          initialPrompts: [{ role: 'system', content: systemInstruction }]
+        });
+        try {
+          const response = await session.prompt(question);
+          return stripClinicalDisclaimer(response.trim());
+        } finally {
+          session.destroy();
+        }
+      })(),
+      8000,
+      'On-device Prompt API'
+    );
+  }
+
+  // Origin-trial Prompt API (window.ai.languageModel)
+  if (window.ai?.languageModel) {
     return withTimeout(
       (async () => {
         const session = await window.ai!.languageModel!.create({
@@ -120,7 +173,7 @@ Instructions:
   }
 
   // Legacy prototype API
-  if (typeof window.ai.createTextSession === 'function') {
+  if (typeof window.ai?.createTextSession === 'function') {
     return withTimeout(
       (async () => {
         const session = await window.ai!.createTextSession!();

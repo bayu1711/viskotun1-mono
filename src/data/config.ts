@@ -46,11 +46,10 @@ export const ASSISTANT_REPLY_DELAY_MS = 900;
 export const SCROLL_TO_LATEST_DELAY_MS = 120;
 export const EXTRACTION_STAGE_MS = 1300;
 export const EXTRACTION_TICK_MS = 250;
-/** Client wait for /api/extract: two Gemini keys at 40 s each, plus screening and upload time. */
+/** Client wait for /api/extract. The server caps the whole Gemini call at 85 s (EXTRACTION_TOTAL_DEADLINE_MS). */
 export const EXTRACTION_CLIENT_TIMEOUT_MS = 95_000;
 /** After this long the progress card tells the user a long paper is still being read. */
 export const EXTRACTION_SLOW_HINT_MS = 15_000;
-export const EXPORT_SIMULATED_DELAY_MS = 1600;
 
 /** Files & links */
 export const PDF_MIME_TYPE = 'application/pdf';
