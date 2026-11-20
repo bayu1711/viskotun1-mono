@@ -36,6 +36,13 @@ describe('regionalRegistry', () => {
       expect(labels.some((l) => l.includes('Late Family Dinner'))).toBe(true);
     });
 
+    it('returns prepopulated tags for Sri Lanka (LK)', () => {
+      const suggestions = getRegionalSuggestions('LK');
+      expect(suggestions.length).toBeGreaterThanOrEqual(5);
+      expect(suggestions.some((s) => s.label.includes('Humidity'))).toBe(true);
+      expect(suggestions.some((s) => s.label.includes('Tobacco Tapering'))).toBe(true);
+    });
+
     it('falls back gracefully to GLOBAL presets for unrecognized country codes', () => {
       const suggestions = getRegionalSuggestions('ZZ');
       expect(suggestions.length).toBeGreaterThan(0);
@@ -112,6 +119,13 @@ describe('regionalRegistry', () => {
         expect.arrayContaining(['late_family_dinner', 'sabbath_weekly_rest'])
       );
       expect(result.extractedTags).toContain('Late Family Dinner (21:00+)');
+    });
+
+    it('correctly classifies non-smoker without falling into cigarette smoking', () => {
+      const result = parseLifestyleDeterministically('I am a non-smoker and exercise daily');
+      expect(result.profileUpdates.smokingStatus).toBe('non_smoker');
+      expect(result.extractedTags).toContain('Non-Smoker');
+      expect(result.extractedTags).not.toContain('Cigarettes');
     });
   });
 });

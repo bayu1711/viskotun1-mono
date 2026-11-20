@@ -97,6 +97,13 @@ export function resolveCountryCodeFromInput(countryInput: string): string {
   if (lower.includes('united states') || lower === 'usa') return 'US';
   if (lower.includes('united kingdom') || lower === 'uk' || lower.includes('britain')) return 'GB';
 
+  // Check known cities in timezone mapping (e.g. Colombo -> LK, Tokyo -> JP, Sydney -> AU)
+  for (const entry of Object.values(TIMEZONE_TO_REGION)) {
+    if (entry.city && entry.city.toLowerCase() === lower) {
+      return entry.countryCode;
+    }
+  }
+
   try {
     const displayNames = new Intl.DisplayNames(['en'], { type: 'region' });
     for (let i = 65; i <= 90; i++) {

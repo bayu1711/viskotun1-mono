@@ -38,6 +38,8 @@ describe('Global Geo & Guardrail-Protected Adaptive Lifestyle Engine', () => {
       expect(resolveCountryCodeFromInput('Japan')).toBe('JP');
       expect(resolveCountryCodeFromInput('Brazil')).toBe('BR');
       expect(resolveCountryCodeFromInput('United Arab Emirates')).toBe('AE');
+      expect(resolveCountryCodeFromInput('Colombo')).toBe('LK');
+      expect(resolveCountryCodeFromInput('Tokyo')).toBe('JP');
       expect(resolveCountryName('JP')).toBe('Japan');
     });
   });

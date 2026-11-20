@@ -158,6 +158,57 @@ export const PREPOPULATED_REGIONAL_TAGS: Record<string, RegionalLifestyleTag[]> 
       popularityCount: 650
     }
   ],
+  LK: [
+    {
+      id: 'tag-lk-humidity',
+      label: 'Tropical Monsoon Humidity',
+      category: 'environment',
+      countryCode: 'LK',
+      popularityCount: 880
+    },
+    {
+      id: 'tag-lk-earlydawn',
+      label: 'Early Dawn Riser',
+      category: 'culture',
+      countryCode: 'LK',
+      popularityCount: 820
+    },
+    {
+      id: 'tag-lk-caffeine',
+      label: 'Tea / Caffeine Routine',
+      category: 'substance',
+      countryCode: 'LK',
+      popularityCount: 770
+    },
+    {
+      id: 'tag-lk-transit',
+      label: 'Daily Public Transit Commute',
+      category: 'schedule',
+      countryCode: 'LK',
+      popularityCount: 710
+    },
+    {
+      id: 'tag-lk-desksedentary',
+      label: 'Desk-bound Work (>8 hrs)',
+      category: 'schedule',
+      countryCode: 'LK',
+      popularityCount: 640
+    },
+    {
+      id: 'tag-lk-joint',
+      label: 'Joint & Mobility Sensitivity',
+      category: 'physical',
+      countryCode: 'LK',
+      popularityCount: 610
+    },
+    {
+      id: 'tag-lk-tobacco',
+      label: 'Tobacco Tapering',
+      category: 'substance',
+      countryCode: 'LK',
+      popularityCount: 520
+    }
+  ],
   GLOBAL: [
     {
       id: 'tag-gl-fasting',
@@ -338,8 +389,28 @@ export function parseLifestyleDeterministically(
     explanations.push('Hotel-friendly bodyweight variations enabled');
   }
 
-  // 2. Tobacco / Nicotine
-  if (text.includes('dokha') || text.includes('midwakh') || text.includes('medwakh')) {
+  // 2. Tobacco / Nicotine (check non-smoker / former smoker first to avoid false-positive on 'smoke')
+  if (
+    text.includes('non-smoker') ||
+    text.includes('nonsmoker') ||
+    text.includes("don't smoke") ||
+    text.includes('do not smoke') ||
+    text.includes('never smoke') ||
+    text.includes('no smoking')
+  ) {
+    profileUpdates.smokingStatus = 'non_smoker';
+    extractedTags.push('Non-Smoker');
+    explanations.push('Standard non-smoker tissue healing velocity applied');
+  } else if (
+    text.includes('former smoker') ||
+    text.includes('ex-smoker') ||
+    text.includes('quit smoking') ||
+    text.includes('stopped smoking')
+  ) {
+    profileUpdates.smokingStatus = 'former_smoker';
+    extractedTags.push('Former Smoker');
+    explanations.push('Vascular tone recovery metrics calibrated for cessation recovery');
+  } else if (text.includes('dokha') || text.includes('midwakh') || text.includes('medwakh')) {
     profileUpdates.smokingStatus = 'midwakh_dokha';
     extractedTags.push('Midwakh / Dokha Tobacco');
     explanations.push('Cardiorespiratory recovery parameters adjusted for episodic nicotine elevation');
@@ -355,10 +426,6 @@ export function parseLifestyleDeterministically(
     profileUpdates.smokingStatus = 'vape';
     extractedTags.push('Vape / E-cigarette');
     explanations.push('Vascular tone recovery metrics calibrated');
-  } else if (text.includes('non-smoker') || text.includes("don't smoke") || text.includes('never smoke')) {
-    profileUpdates.smokingStatus = 'non_smoker';
-    extractedTags.push('Non-Smoker');
-    explanations.push('Standard non-smoker tissue healing velocity applied');
   }
 
   // 3. Diverse cultural, fasting & household meal rhythms (country-independent)
