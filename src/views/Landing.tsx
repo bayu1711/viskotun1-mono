@@ -684,7 +684,8 @@ const GLOBAL_CONTENT: LandingShowcaseContent = {
     { number: COPY.landing.steps.step1Number, title: COPY.landing.steps.step1Title, body: COPY.landing.steps.step1Body },
     { number: COPY.landing.steps.step2Number, title: COPY.landing.steps.step2Title, body: COPY.landing.steps.step2Body },
     { number: COPY.landing.steps.step3Number, title: COPY.landing.steps.step3Title, body: COPY.landing.steps.step3Body },
-    { number: COPY.landing.steps.step4Number, title: COPY.landing.steps.step4Title, body: COPY.landing.steps.step4Body }
+    { number: COPY.landing.steps.step4Number, title: COPY.landing.steps.step4Title, body: COPY.landing.steps.step4Body },
+    { number: COPY.landing.steps.step5Number, title: COPY.landing.steps.step5Title, body: COPY.landing.steps.step5Body }
   ],
   scopeBadge: COPY.landing.scopeBadge,
   rigorTitle: COPY.landing.rigorTitle,
