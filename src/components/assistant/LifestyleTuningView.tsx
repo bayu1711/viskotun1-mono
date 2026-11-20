@@ -13,8 +13,18 @@ import type {
 } from '../../types/auth';
 import type { ChatMessage } from '../../types/routine';
 import { formatRegionLabel, type LifestyleInterviewStage } from '../../utils/lifestyleInterview';
-import { formatLifestyleTagLabel, getLifestyleTagIcon } from '../../utils/lifestyleTags';
-import { resolveCulturalRhythms } from '../../utils/profile';
+import HealingOutlinedIcon from '@mui/icons-material/HealingOutlined';
+import {
+  getCautionDisplayLabel,
+  getLifestyleTagDisplayLabel,
+  getLifestyleTagIcon
+} from '../../utils/lifestyleTags';
+import {
+  MANAGED_LIFESTYLE_TAGS,
+  normalizePhysicalCautions,
+  resolveCulturalRhythms,
+  syncLifestyleActiveTags
+} from '../../utils/profile';
 import { formatAvailabilitySummary } from '../../utils/schedule';
 import { Icon } from '../ui/Icon';
 import { AssistantMessage } from './AssistantMessage';
@@ -88,9 +98,21 @@ export function LifestyleTuningView({
     };
   }, [countryCode, countryName, city, culturalRhythmParam, onSuggestionsLoaded]);
 
+  const cautions = normalizePhysicalCautions(lifestyleProfile?.physicalCautions);
+
+  // Only custom habits are removable here; managed tags follow their /profile field.
   const handleRemoveTag = (tagToRemove: string) => {
     if (!onUpdateProfile) return;
     onUpdateProfile({ activeTags: activeTags.filter((tag) => tag !== tagToRemove) });
+  };
+
+  const handleRemoveCaution = (cautionToRemove: string) => {
+    if (!onUpdateProfile || !lifestyleProfile) return;
+    const nextCautions = cautions.filter((c) => c !== cautionToRemove);
+    onUpdateProfile({
+      physicalCautions: nextCautions,
+      activeTags: syncLifestyleActiveTags({ ...lifestyleProfile, physicalCautions: nextCautions })
+    });
   };
 
   const t = copy.lifestyleTuning.onboarding;
@@ -105,7 +127,8 @@ export function LifestyleTuningView({
   const hasContextChips =
     hasConfirmedRegion ||
     Boolean(availabilityLabel) ||
-    activeTags.length > 0;
+    activeTags.length > 0 ||
+    cautions.length > 0;
 
   return (
     <div className="space-y-4">
@@ -128,21 +151,45 @@ export function LifestyleTuningView({
             )}
 
             {activeTags.map((tag) => {
-              const displayLabel = formatLifestyleTagLabel(tag);
+              const displayLabel = getLifestyleTagDisplayLabel(tag, copy);
               const TagIcon = getLifestyleTagIcon(tag);
+              const canRemove = Boolean(onUpdateProfile) && !MANAGED_LIFESTYLE_TAGS.has(tag);
               return (
                 <span
                   key={tag}
-                  className="inline-flex items-center gap-1 rounded-full border border-mint bg-mint/35 pl-2.5 pr-1.5 py-1 text-2xs font-medium text-ink"
+                  className={`inline-flex items-center gap-1 rounded-full border border-mint bg-mint/35 py-1 text-2xs font-medium text-ink ${canRemove ? 'pl-2.5 pr-1.5' : 'px-2.5'}`}
                 >
                   <Icon icon={TagIcon} size="xs" className="text-ink/75" />
                   <span>{displayLabel}</span>
-                  {onUpdateProfile && (
+                  {canRemove && (
                     <button
                       type="button"
                       onClick={() => handleRemoveTag(tag)}
                       className="rounded-full p-0.5 text-ink/70 hover:bg-ink/10 hover:text-ink transition-colors cursor-pointer"
-                      aria-label={`Remove ${displayLabel}`}
+                      aria-label={copy.profile.removeTagAria(displayLabel)}
+                    >
+                      <Icon icon={CloseIcon} size="xs" />
+                    </button>
+                  )}
+                </span>
+              );
+            })}
+
+            {cautions.map((caution) => {
+              const displayLabel = getCautionDisplayLabel(caution, copy);
+              return (
+                <span
+                  key={`caution-${caution}`}
+                  className="inline-flex items-center gap-1 rounded-full border border-blush bg-blush/40 pl-2.5 pr-1.5 py-1 text-2xs font-medium text-ink"
+                >
+                  <Icon icon={HealingOutlinedIcon} size="xs" className="text-ink/75" />
+                  <span>{displayLabel}</span>
+                  {onUpdateProfile && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveCaution(caution)}
+                      className="rounded-full p-0.5 text-ink/70 hover:bg-ink/10 hover:text-ink transition-colors cursor-pointer"
+                      aria-label={copy.profile.removeCautionAria(displayLabel)}
                     >
                       <Icon icon={CloseIcon} size="xs" />
                     </button>

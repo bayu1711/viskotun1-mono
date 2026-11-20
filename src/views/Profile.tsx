@@ -4,14 +4,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
+import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 import KeyOutlinedIcon from '@mui/icons-material/KeyOutlined';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined';
 import NorthEastIcon from '@mui/icons-material/NorthEast';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import TranslateOutlinedIcon from '@mui/icons-material/TranslateOutlined';
-import TuneIcon from '@mui/icons-material/Tune';
 import { toast } from 'sonner';
 import { PageContainer } from '../components/layout/PageContainer';
 import { PageHeader } from '../components/layout/PageHeader';
@@ -47,10 +48,19 @@ import type { AvailabilityMode, AvailableTimeWindow } from '../types/schedule';
 import { cn } from '../utils/cn';
 import { resolveCountryCodeFromInput } from '../utils/geo';
 import {
+  getCautionDisplayLabel,
+  getLifestyleTagDisplayLabel,
+  getLifestyleTagIcon
+} from '../utils/lifestyleTags';
+import {
+  CAUTION_PRESET_KEYS,
   CULTURAL_RHYTHM_KEYS,
+  MANAGED_LIFESTYLE_TAGS,
+  canonicalizeCaution,
   deriveClinicalFocus,
   deriveLifestyleCohort,
   getRegionalAvailabilityPresets,
+  normalizePhysicalCautions,
   resolveCulturalRhythms,
   sanitizeAge,
   syncLifestyleActiveTags
@@ -195,6 +205,8 @@ export function ProfilePage() {
     useState<NonNullable<UserLifestyleProfile['climateSensitivity']>>('moderate');
   const [culturalRhythms, setCulturalRhythms] = useState<CulturalRhythmId[]>([]);
   const [cautions, setCautions] = useState<string[]>([]);
+  const [customCautionInput, setCustomCautionInput] = useState('');
+  const [activeTagsDraft, setActiveTagsDraft] = useState<string[]>([]);
 
   // Hydrate form state whenever stored profile loads/updates externally (e.g., via AI tuning or sync)
   useEffect(() => {
@@ -229,12 +241,14 @@ export function ProfilePage() {
     setSmokingStatus(lifestyleProfile.smokingStatus || 'non_smoker');
     setClimateSensitivity(lifestyleProfile.climateSensitivity || 'moderate');
     setCulturalRhythms(resolveCulturalRhythms(lifestyleProfile));
-    setCautions(lifestyleProfile.physicalCautions || []);
+    setCautions(normalizePhysicalCautions(lifestyleProfile.physicalCautions));
+    setActiveTagsDraft(lifestyleProfile.activeTags || []);
   }, [lifestyleProfile]);
 
   const isRamadanObserver = culturalRhythms.includes('ramadan_fasting');
   const draftLifestyle: Partial<UserLifestyleProfile> = {
     ...lifestyleProfile,
+    activeTags: activeTagsDraft,
     workPattern,
     activityBaseline,
     smokingStatus,
@@ -312,6 +326,23 @@ export function ProfilePage() {
     );
   };
 
+  const addCustomCaution = () => {
+    const label = canonicalizeCaution(customCautionInput);
+    if (!label) return;
+    setCautions((prev) => normalizePhysicalCautions([...prev, label]));
+    setCustomCautionInput('');
+  };
+
+  const removeCustomTag = (tag: string) => {
+    setActiveTagsDraft((prev) => prev.filter((t) => t !== tag));
+  };
+
+  // Presets first, then any caution the AI or the user added in their own words.
+  const cautionOptions = [
+    ...CAUTION_PRESET_KEYS,
+    ...cautions.filter((c) => !(CAUTION_PRESET_KEYS as readonly string[]).includes(c))
+  ];
+
   const handleSelectRegion = (preset: (typeof REGION_PRESETS)[number]) => {
     setCountryCode(preset.countryCode);
     setCountryName(preset.countryName);
@@ -351,15 +382,7 @@ export function ProfilePage() {
     });
     setLocale(primaryLanguage);
 
-    const nextTags = syncLifestyleActiveTags({
-      ...lifestyleProfile,
-      workPattern,
-      activityBaseline,
-      smokingStatus,
-      climateSensitivity,
-      culturalRhythms,
-      isRamadanFastingObserver: isRamadanObserver
-    });
+    const nextTags = syncLifestyleActiveTags(draftLifestyle);
 
     const trimmedCountry = countryName.trim();
     const resolvedRegion = trimmedCountry
@@ -380,7 +403,7 @@ export function ProfilePage() {
       climateSensitivity,
       culturalRhythms,
       isRamadanFastingObserver: isRamadanObserver,
-      physicalCautions: cautions,
+      physicalCautions: normalizePhysicalCautions(cautions),
       activeTags: nextTags,
       intakeCompleted: true
     });
@@ -451,7 +474,8 @@ export function ProfilePage() {
           <p className="mt-2 max-w-2xl text-sm text-ink/70">{t.subtitle}</p>
         </PageHeader>
 
-        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-main-aside lg:gap-10">
+        {/* Two columns only from xl: at lg the 380px aside left the form ~270px wide. */}
+        <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-main-aside xl:gap-10">
           {/* Main Column: Account, Adaptive Lifestyle, OR Data & Account Controls */}
           <div className="space-y-6">
             {activeTab !== 'data' && (
@@ -731,6 +755,7 @@ export function ProfilePage() {
                   </button>
                 }
               />
+              <p className="-mt-2 text-xs leading-relaxed text-ink/70">{t.lifestyleSyncNote}</p>
 
               <div>
                 <div className="mb-2 flex items-center justify-between">
@@ -774,8 +799,9 @@ export function ProfilePage() {
                       setCountryName(val);
                       setCountryCode(resolveCountryCodeFromInput(val));
                     }}
-                    placeholder="Country (e.g. Japan, Brazil, UAE, Germany)"
-                    aria-label="Country"
+                    placeholder={t.countryPlaceholder}
+                    aria-label={t.countryAria}
+                    autoComplete="country-name"
                     className="w-full rounded-xl border border-ink/15 bg-canvas/60 px-3.5 py-2 text-sm text-ink outline-none focus:border-ink"
                   />
                   <input
@@ -851,12 +877,14 @@ export function ProfilePage() {
                 </div>
               </div>
 
-              {/* Physical Cautions */}
+              {/* Physical Cautions — same canonical list the AI writes to */}
               <div>
-                <p className="mb-2 text-xs font-semibold text-ink/80">{t.cautionsLabel}</p>
+                <p className="text-xs font-semibold text-ink/80">{t.cautionsLabel}</p>
+                <p className="mb-2 mt-0.5 text-2xs text-ink/60">{t.cautionsHint}</p>
                 <div className="flex flex-wrap gap-2">
-                  {t.cautionPresets.map((item) => {
+                  {cautionOptions.map((item) => {
                     const active = cautions.includes(item);
+                    const label = getCautionDisplayLabel(item, copy);
                     return (
                       <button
                         key={item}
@@ -871,27 +899,71 @@ export function ProfilePage() {
                         )}
                       >
                         {active && <Icon icon={CheckIcon} size="xs" />}
-                        <span>{item}</span>
+                        <span>{label}</span>
                       </button>
                     );
                   })}
                 </div>
+                <div className="mt-2.5 flex gap-2">
+                  <input
+                    type="text"
+                    value={customCautionInput}
+                    onChange={(e) => setCustomCautionInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addCustomCaution();
+                      }
+                    }}
+                    maxLength={60}
+                    placeholder={t.customCautionPlaceholder}
+                    aria-label={t.customCautionAria}
+                    className="min-w-0 flex-1 rounded-xl border border-ink/15 bg-canvas/60 px-3.5 py-2 text-base text-ink outline-none focus:border-ink sm:text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={addCustomCaution}
+                    disabled={!customCautionInput.trim()}
+                    className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-full border border-ink/20 bg-cream/70 px-3.5 text-xs font-semibold text-ink transition-colors hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                  >
+                    <Icon icon={AddIcon} size="xs" />
+                    <span>{t.addCautionBtn}</span>
+                  </button>
+                </div>
               </div>
 
-              {/* Active Adaptation Tags Preview */}
+              {/* Active Adaptation Tags Preview — same labels & icons as the N1 AI chat */}
               <div className="border-t border-ink/10 pt-4">
-                <p className="mb-2 text-xs font-semibold text-ink/80">{t.activeTagsLabel}</p>
+                <p className="text-xs font-semibold text-ink/80">{t.activeTagsLabel}</p>
+                <p className="mb-2 mt-0.5 text-2xs text-ink/60">{t.activeTagsHint}</p>
                 {previewTags.length > 0 ? (
                   <div className="flex flex-wrap gap-1.5">
-                    {previewTags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1 rounded-full border border-ink/15 bg-cream px-2.5 py-1 text-2xs font-mono text-ink"
-                      >
-                        <Icon icon={TuneIcon} size="xs" />
-                        <span>{tag}</span>
-                      </span>
-                    ))}
+                    {previewTags.map((tag) => {
+                      const label = getLifestyleTagDisplayLabel(tag, copy);
+                      const isCustom = !MANAGED_LIFESTYLE_TAGS.has(tag);
+                      return (
+                        <span
+                          key={tag}
+                          className={cn(
+                            'inline-flex items-center gap-1 rounded-full border border-mint bg-mint/35 py-1 text-2xs font-medium text-ink',
+                            isCustom ? 'pl-2.5 pr-1' : 'px-2.5'
+                          )}
+                        >
+                          <Icon icon={getLifestyleTagIcon(tag)} size="xs" className="text-ink/75" />
+                          <span>{label}</span>
+                          {isCustom && (
+                            <button
+                              type="button"
+                              onClick={() => removeCustomTag(tag)}
+                              aria-label={t.removeTagAria(label)}
+                              className="rounded-full p-0.5 text-ink/70 transition-colors hover:bg-ink/10 hover:text-ink cursor-pointer"
+                            >
+                              <Icon icon={CloseIcon} size="xs" />
+                            </button>
+                          )}
+                        </span>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-xs text-ink/55">{t.noTagsYet}</p>
