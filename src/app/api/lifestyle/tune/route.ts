@@ -26,6 +26,8 @@ import { CULTURAL_RHYTHM_KEYS, deriveClinicalFocus } from '@/utils/profile';
 const VALID_RHYTHMS = new Set<string>(CULTURAL_RHYTHM_KEYS);
 const INTERVIEW_STAGES = new Set<LifestyleInterviewStage>([
   'region',
+  'age',
+  'availability',
   'age_time',
   'rhythm',
   'cautions',
@@ -66,7 +68,7 @@ export async function POST(request: Request) {
 
     const {
       message,
-      country = 'AE',
+      country = '',
       currentProfile,
       userProfile,
       interviewStage,
@@ -88,7 +90,7 @@ export async function POST(request: Request) {
     const localeCopy = getLocaleCopy(safeLocale);
     const currentRegion: RegionContext = currentProfile?.region ?? {
       countryCode: country,
-      countryName: resolveCountryName(country),
+      countryName: country ? resolveCountryName(country) : '',
       detectedBy: 'default_global',
       confirmed: false
     };

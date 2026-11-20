@@ -27,14 +27,19 @@ import {
   normalizeAvailableWindows
 } from './schedule';
 
-export type LifestyleInterviewStage = 'region' | 'age_time' | 'rhythm' | 'cautions' | 'complete';
+export type LifestyleInterviewStage =
+  | 'region'
+  | 'age'
+  | 'availability'
+  | 'age_time'
+  | 'rhythm'
+  | 'cautions'
+  | 'complete';
 
-export const INTERVIEW_STAGE_ORDER: readonly Exclude<LifestyleInterviewStage, 'complete'>[] = [
-  'region',
-  'age_time',
-  'rhythm',
-  'cautions'
-];
+export const INTERVIEW_STAGE_ORDER: readonly Exclude<
+  LifestyleInterviewStage,
+  'complete' | 'age_time'
+>[] = ['region', 'age', 'availability', 'rhythm', 'cautions'];
 
 interface CityPreset {
   city: string;
@@ -132,15 +137,18 @@ export interface InterviewParseResult {
   customTags: string[];
   acknowledgments: string[];
   answeredRegion: boolean;
-  answeredAgeTime: boolean;
+  answeredAge: boolean;
+  answeredAvailability: boolean;
+  answeredAgeTime?: boolean;
   answeredRhythm: boolean;
   answeredCautions: boolean;
 }
 
 export function formatRegionLabel(region?: Partial<RegionContext>): string {
-  const countryName = region?.countryName || 'United Arab Emirates';
-  const city = region?.city?.trim();
-  return city ? `${city}, ${countryName}` : countryName;
+  const countryName = region?.countryName?.trim() || '';
+  const city = region?.city?.trim() || '';
+  if (city && countryName) return `${city}, ${countryName}`;
+  return city || countryName;
 }
 
 function escapeRegExp(value: string): string {
@@ -329,8 +337,8 @@ function extractAgeFromMessage(remainingText: string, stage: LifestyleInterviewS
     }
   }
 
-  // On the age_time stage, a bare number like "34" or "34, evenings" is clearly the user's age
-  if (stage === 'age_time') {
+  // On the age stage (or legacy age_time), a bare number like "34" or "34, evenings" is clearly the user's age
+  if (stage === 'age' || stage === 'age_time') {
     // Strip ratios like 16:8 or 9-5 or 12h first
     const cleaned = remainingText
       .replace(/\b\d+\s*[-–]\s*\d+\b/g, ' ')
@@ -377,14 +385,16 @@ function extractRegionFromMessage(
           confirmed: true
         };
       }
-      return {
-        region: {
-          ...currentRegion,
-          detectedBy: currentRegion.detectedBy || 'user_selected',
+      if (currentRegion.countryCode || currentRegion.countryName) {
+        return {
+          region: {
+            ...currentRegion,
+            detectedBy: currentRegion.detectedBy || 'user_selected',
+            confirmed: true
+          },
           confirmed: true
-        },
-        confirmed: true
-      };
+        };
+      }
     }
   }
 
@@ -490,6 +500,8 @@ export function parseConversationalLifestyleAnswer(
     customTags: [],
     acknowledgments: [],
     answeredRegion: false,
+    answeredAge: false,
+    answeredAvailability: false,
     answeredAgeTime: false,
     answeredRhythm: false,
     answeredCautions: false
@@ -506,30 +518,52 @@ export function parseConversationalLifestyleAnswer(
   // 2. Available Time Windows & Age
   const { availabilityMode, availableWindows, remainingText } = extractAvailabilityFromMessage(trimmed);
   const age = extractAgeFromMessage(remainingText, stage);
-  const isSkipAgeTime =
-    stage === 'age_time' &&
-    /(?:skip|prefer not|no preference|either|anytime|flexible|تخطي|لا يهم|في أي وقت)/i.test(trimmed);
+  const isSkipAge =
+    (stage === 'age' || stage === 'age_time') &&
+    /(?:skip|prefer not|no preference|pass|تخطي|لا أفضل|تجاوز)/i.test(trimmed);
+  const isSkipAvailability =
+    (stage === 'availability' || stage === 'age_time') &&
+    /(?:skip|no preference|either|anytime|flexible|whenever|تخطي|لا يهم|في أي وقت|مرن)/i.test(trimmed);
 
   if (age !== undefined) {
     result.age = age;
-    result.answeredAgeTime = true;
+    result.answeredAge = true;
     result.acknowledgments.push(`age ${age}`);
   }
+  if (isSkipAge) {
+    result.answeredAge = true;
+    result.acknowledgments.push('age skipped');
+  }
+
   if (availableWindows && availableWindows.length > 0) {
     result.availabilityMode = 'windows';
     result.availableWindows = availableWindows;
-    result.answeredAgeTime = true;
+    result.answeredAvailability = true;
     result.acknowledgments.push(availableWindows.map(formatWindowRange).join(' & '));
   } else if (availabilityMode === 'anytime') {
     result.availabilityMode = 'anytime';
-    result.answeredAgeTime = true;
+    result.answeredAvailability = true;
     result.acknowledgments.push('flexible anytime schedule');
   }
-  if (isSkipAgeTime) {
-    result.answeredAgeTime = true;
+
+  if (isSkipAvailability) {
+    result.answeredAvailability = true;
     if (!result.availabilityMode && !context.currentUserProfile?.availabilityMode) {
       result.availabilityMode = 'anytime';
+      result.acknowledgments.push('flexible anytime schedule');
     }
+  }
+
+  if (stage === 'age_time') {
+    result.answeredAgeTime = Boolean(
+      result.answeredAge || result.answeredAvailability || isSkipAge || isSkipAvailability
+    );
+    if (result.answeredAgeTime) {
+      result.answeredAge = true;
+      result.answeredAvailability = true;
+    }
+  } else {
+    result.answeredAgeTime = Boolean(result.answeredAge && result.answeredAvailability);
   }
 
   // 3. Work pattern, climate & cultural rhythms
@@ -820,9 +854,19 @@ export function computeNextInterviewStage(
 
   if (currentStage !== 'complete') {
     nextAnswered.add(currentStage);
+    if (currentStage === 'age_time') {
+      nextAnswered.add('age');
+      nextAnswered.add('availability');
+    }
   }
   if (parsed.answeredRegion) nextAnswered.add('region');
-  if (parsed.answeredAgeTime) nextAnswered.add('age_time');
+  if (parsed.answeredAge) nextAnswered.add('age');
+  if (parsed.answeredAvailability) nextAnswered.add('availability');
+  if (parsed.answeredAgeTime || answeredStages.has('age_time')) {
+    nextAnswered.add('age_time');
+    nextAnswered.add('age');
+    nextAnswered.add('availability');
+  }
   if (parsed.answeredRhythm) nextAnswered.add('rhythm');
   if (parsed.answeredCautions) nextAnswered.add('cautions');
 
@@ -911,11 +955,15 @@ export function getStageQuestion(
   const t = copy.lifestyleTuning.onboarding;
   switch (stage) {
     case 'region':
-      return t.greetingRegion(regionLabel);
+      return regionLabel ? t.greetingRegion(regionLabel) : copy.lifestyleTuning.unknownLocationGreeting;
+    case 'age':
+      return t.askAge;
+    case 'availability':
+      return t.askAvailability;
     case 'age_time':
       return t.askAgeTime;
     case 'rhythm':
-      return t.askRhythm(regionLabel);
+      return t.askRhythm(regionLabel || 'your area');
     case 'cautions':
       return t.askCautions;
     case 'complete':
@@ -929,6 +977,10 @@ export function getStagePlaceholder(stage: LifestyleInterviewStage, copy: Locale
   switch (stage) {
     case 'region':
       return t.placeholderRegion;
+    case 'age':
+      return t.placeholderAge;
+    case 'availability':
+      return t.placeholderAvailability;
     case 'age_time':
       return t.placeholderAgeTime;
     case 'rhythm':
@@ -1004,8 +1056,8 @@ export function getQuickRepliesForStage(options: {
   const t = copy.lifestyleTuning.onboarding;
   const pCopy = copy.profile;
   const region = lifestyleProfile?.region;
-  const countryCode = region?.countryCode || 'AE';
-  const countryName = region?.countryName || 'United Arab Emirates';
+  const countryCode = region?.countryCode || '';
+  const countryName = region?.countryName || '';
   const city = region?.city || '';
   const culturalRhythms = resolveCulturalRhythms(lifestyleProfile);
   const activeTagSet = new Set(
@@ -1014,12 +1066,20 @@ export function getQuickRepliesForStage(options: {
 
   switch (stage) {
     case 'region': {
-      const confirmChip = copy.lifestyleTuning.confirmLocationBtn(city || countryName);
+      const detectedLabel = city || countryName;
       const alternates = QUICK_REGION_PRESETS
         .filter((preset) => preset.city.toLowerCase() !== city.toLowerCase())
         .map((preset) => preset.label);
-      return [confirmChip, ...alternates].slice(0, 5);
+      if (detectedLabel) {
+        const confirmChip = copy.lifestyleTuning.confirmLocationBtn(detectedLabel);
+        return [confirmChip, ...alternates].slice(0, 5);
+      }
+      return alternates.slice(0, 5);
     }
+    case 'age': {
+      return [t.quickSkipAge];
+    }
+    case 'availability':
     case 'age_time': {
       const presets = getRegionalAvailabilityPresets({
         countryCode,
@@ -1031,7 +1091,7 @@ export function getQuickRepliesForStage(options: {
         lateDinnerPreset: pCopy.lateDinnerAvailabilityPreset
       });
       const presetLabels = presets.map((p) => `${p.label} ${p.start}–${p.end}`);
-      return [...presetLabels, t.quickSkipAge].slice(0, 5);
+      return [...presetLabels, t.quickAnytime].slice(0, 5);
     }
     case 'rhythm': {
       const regionalLabels = suggestions
