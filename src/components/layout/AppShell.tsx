@@ -19,6 +19,8 @@ import { HowToModal } from '../howto/HowToModal';
 import { ReEntryModal } from '../routine/ReEntryModal';
 import { BctLedgerDrawer } from '../bct/BctLedgerDrawer';
 import { ShareRoutineModal } from '../routine/ShareRoutineModal';
+import { DoseModeModal } from '../routine/DoseModeModal';
+import { AdaptiveLifestyleModal } from '../routine/AdaptiveLifestyleModal';
 import { AssistantFab } from './AssistantFab';
 import { FileDropOverlay } from './FileDropOverlay';
 import { MobileTabBar } from './MobileTabBar';
@@ -127,6 +129,8 @@ export function AppShell({ children }: AppShellProps) {
       <ReEntryModal />
       <BctLedgerDrawer />
       <ShareRoutineModal />
+      <DoseModeModal />
+      <AdaptiveLifestyleModal />
       <FileDropOverlay visible={isDragging} />
     </div>
   );
