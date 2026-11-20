@@ -69,4 +69,13 @@ describe('rejectionAssistant', () => {
     expect(answer).toContain(SAMPLE_REASON);
     expect(answer).toContain(COPY.assistant.rejection.answers.scopeNote);
   });
+
+  it('provides discovery guidance and external links when link is unrecognized', () => {
+    const unrecognizedReason = COPY.extraction.linkNotRecognized;
+    const answer = answerForRejection(unrecognizedReason, 'Where can I find achilles tendinopathy papers?');
+    expect(answer).toContain('Recommended Community Routines');
+    expect(answer).toContain('Achilles Tendinopathy Rehab');
+    expect(answer).toContain('pubmed.ncbi.nlm.nih.gov');
+    expect(answer).toContain('europepmc.org');
+  });
 });

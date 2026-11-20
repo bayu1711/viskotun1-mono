@@ -5,9 +5,6 @@ import Link from 'next/link';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import FitnessCenterOutlinedIcon from '@mui/icons-material/FitnessCenterOutlined';
 import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined';
-import PsychologyOutlinedIcon from '@mui/icons-material/PsychologyOutlined';
-import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined';
-import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 
 import { useLocale } from '../../contexts/LocaleContext';
 import { useRoutine } from '../../contexts/RoutineContext';
@@ -23,8 +20,7 @@ export function HealthAgeCard() {
     currentDay,
     totalDays,
     userProfile,
-    lifestyleProfile,
-    openBctLedger
+    lifestyleProfile
   } = useRoutine();
   const { copy, isRtl } = useLocale();
 
@@ -58,15 +54,6 @@ export function HealthAgeCard() {
             {t.title}
           </h2>
         </div>
-
-        <button
-          type="button"
-          onClick={openBctLedger}
-          className="inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 hover:bg-cream px-3 py-1.5 text-xs font-semibold text-ink transition-colors cursor-pointer"
-        >
-          <Icon icon={ScienceOutlinedIcon} size="xs" />
-          <span>{t.bctLinkText}</span>
-        </button>
       </div>
 
       {/* Hero Numbers */}

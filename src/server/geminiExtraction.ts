@@ -10,6 +10,7 @@ import { findCanonicalRoutine } from './routineRegistry';
 import { validateAndRegisterRoutineWidgets } from './widgetRegistry';
 import { executeWithGeminiFailover, getGeminiApiKeys } from './geminiKeys';
 import { resolvePaperSource, type PaperResolution } from './paperSource';
+import { extractQueryFromInput } from '../utils/paperQuery';
 
 export interface ExtractInput {
   file?: File | null;
@@ -21,6 +22,8 @@ export interface ExtractResult {
   success: boolean;
   eligible: boolean;
   rejectionReason?: string;
+  errorType?: 'unrecognized' | 'not-found' | 'no-full-text' | 'policy-rejection';
+  suggestedQuery?: string;
   routine?: Routine;
   isExistingCanonical?: boolean;
   source: string;
@@ -206,6 +209,7 @@ async function screenPaper(
     return {
       success: true,
       eligible: false,
+      errorType: 'policy-rejection',
       rejectionReason: localCheck.reason,
       source: sourceName
     };
@@ -217,6 +221,7 @@ async function screenPaper(
     return {
       success: true,
       eligible: false,
+      errorType: 'policy-rejection',
       rejectionReason: COPY.extraction.matchedBannedKeyword(matchedBannedKeyword, activePolicy.version),
       source: sourceName
     };
@@ -286,7 +291,9 @@ export async function extractPaperRoutine(input: ExtractInput): Promise<ExtractR
       return {
         success: false,
         eligible: false,
+        errorType: resolution.reason,
         rejectionReason: UNRESOLVED_LINK_REASONS[resolution.reason],
+        suggestedQuery: extractQueryFromInput(input.url),
         source: sourceName
       };
     }

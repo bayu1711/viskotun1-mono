@@ -45,7 +45,7 @@ import {
   type LifestyleInterviewStage,
   parseConversationalLifestyleAnswer
 } from '../utils/lifestyleInterview';
-import { answerForRejection } from '../utils/rejectionAssistant';
+import { answerForRejection, isUnrecognizedLinkReason } from '../utils/rejectionAssistant';
 import { clamp, toPercent } from '../utils/math';
 import {
   adherenceOf,
@@ -1949,18 +1949,29 @@ export function useRoutineState() {
           return { success: true, eligible: true, routine: extractedRoutine };
         } else {
           const reason = result.rejectionReason || COPY.extraction.declinedNonHuman;
+          const isUnrecognized = isUnrecognizedLinkReason(reason) || result.errorType === 'unrecognized';
           setStagingError(reason);
           setStagingMessages((prev) => [
             ...prev,
             {
               id: createId('msg'),
               role: 'ai',
-              kind: 'alert',
-              content: reason,
+              kind: isUnrecognized ? 'paper_guidance' : 'alert',
+              content: isUnrecognized
+                ? JSON.stringify({
+                    reason,
+                    source: fileName,
+                    suggestedQuery: result.suggestedQuery || ''
+                  })
+                : reason,
               timestamp: nowLabel()
             }
           ]);
-          toast.error(reason);
+          if (isUnrecognized) {
+            toast.info(COPY.extraction.linkGuidanceToast || reason);
+          } else {
+            toast.error(reason);
+          }
           return { success: false, eligible: false, reason };
         }
       } catch (err) {

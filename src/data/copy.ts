@@ -931,11 +931,21 @@ export const COPY = {
     rejection: {
       inputLabel: 'Ask why this paper was declined',
       placeholder: 'Ask why it was declined, or paste a DOI to try another…',
+      placeholderGuidance: 'Ask what you are looking for, or paste a paper DOI…',
       source: 'Source · Gatekeeper policy',
+      guidanceSource: 'Source · TrialN1 Library & Discovery',
       suggestions: {
         why: 'Why was this paper declined?',
         whatToUpload: 'What kind of paper can I upload instead?',
         nonHuman: 'Can findings from animal studies still be used?'
+      },
+      guidanceSuggestions: {
+        browseCommunity: 'Browse community routine papers',
+        searchPubmed: 'Search PubMed for clinical trials',
+        achilles: 'Achilles tendinopathy rehab',
+        hairLoss: 'Alopecia & hair regrowth',
+        creatine: 'Creatine & cognitive fatigue',
+        fasting: 'Early time-restricted fasting'
       },
       answers: {
         whyPrefix: "Here is the gatekeeper's reasoning: ",
@@ -947,6 +957,45 @@ export const COPY = {
         outOfScope:
           "I can only explain why this paper wasn't suitable for TrialN1. I can't discuss the study's methods or findings. Upload a human interventional paper and I can help with its routine."
       }
+    },
+    linkGuidance: {
+      title: "Couldn't find a paper identifier in that link",
+      subtitle: "Most article links, blog posts, or journal pages don't include the direct open-access paper DOI.",
+      askPrompt: 'What health goal, condition, or intervention are you looking for?',
+      communityTitle: 'Available Community Routines (Pre-Calibrated & Ready)',
+      communitySubtitle: 'Load a verified human interventional routine right now:',
+      loadRoutine: 'Load Routine',
+      previewRoutine: 'Preview',
+      browseCommunity: 'Browse all community papers',
+      externalTitle: 'Search External Research Databases',
+      externalSubtitle: 'Find open-access clinical trials with verifiable DOIs:',
+      pubmedSearch: 'Search PubMed (NIH)',
+      europePmcSearch: 'Search Europe PMC',
+      googleScholarSearch: 'Search Google Scholar',
+      doiTipTitle: 'How to get a paper from PubMed or Europe PMC:',
+      doiTipSteps: [
+        '1. Search for your topic on PubMed or Europe PMC using the buttons above.',
+        '2. Select an interventional human study (RCT or clinical trial).',
+        '3. Copy the DOI (e.g. 10.1177/1941738116631498) or the PubMed URL and paste it here — or download the PDF and drop it in.'
+      ],
+      suggestions: [
+        'Achilles Tendonitis Rehab',
+        'Hair Regrowth (Alopecia)',
+        'Creatine & Cognitive Fatigue',
+        'Early Time-Restricted Fasting',
+        'Bright Light Circadian Therapy',
+        'Midwakh & Nicotine Tapering'
+      ],
+      customSearchPlaceholder: 'Type a condition or topic (e.g. knee rehab, creatine, fasting)...',
+      searchAction: 'Search Research Papers',
+      searchingEuropePmc: 'Searching Europe PMC for open-access trials…',
+      extractRoutine: 'Extract with N1 AI',
+      noSearchResults: 'No open-access papers found matching that term in Europe PMC. Try the direct PubMed search link above.',
+      openInNewTab: 'Open search in new tab',
+      directDoiPrompt: 'Already have a DOI or PDF?',
+      pasteDoiPlaceholder: 'Paste DOI (e.g. 10.1177/1941738116631498) or PubMed link…',
+      queryPill: (q: string) => `Looking for: "${q}"`,
+      clearSearch: 'Clear search'
     },
     suggestionsLabel: 'Suggested questions',
     suggestions: {
@@ -1095,7 +1144,9 @@ export const COPY = {
     routineReady: (title: string) => `Routine ready: ${title}`,
     failedWithStatus: (status: number) => `Extraction failed with HTTP ${status}`,
     linkNotRecognized:
-      'No DOI, PubMed or PMC ID found in that link. Paste the paper DOI (for example 10.1177/1941738116631498) or upload the PDF.',
+      'No DOI, PubMed or PMC ID found in that link. To build an executable routine, TrialN1 needs a direct research paper identifier (e.g. DOI 10.1177/1941738116631498) or the paper PDF.',
+    linkGuidanceToast:
+      "Couldn't find a paper identifier in that link. Explore community routines or search research databases below.",
     paperNotFound: 'No paper with that DOI or ID was found in Europe PMC. Check the identifier or upload the PDF.',
     fullTextUnavailable:
       'This paper is not open access, so its methods cannot be read from the link. Upload the PDF to extract the routine.',
@@ -1249,8 +1300,11 @@ export const COPY = {
       step3Title: 'Adaptive Daily Routine & Voice Coach',
       step3Body: 'Executes daily sets, progression rules, safety & biofeedback thresholds, and answers questions strictly cited from the Methods.',
       step4Number: '04',
-      step4Title: 'Clinical Adherence Brief',
-      step4Body: 'One-page summary of adherence trends, biomarker improvements, and pain logs formatted for physician review.'
+      step4Title: 'Habit Science & Micro-Dosing (BCT v1)',
+      step4Body: 'Grounded in accredited Behavior Change Techniques: non-punitive re-entry, 2-minute micro-dose fallbacks, and climate substitutions keep habits intact without guilt.',
+      step5Number: '05',
+      step5Title: 'Clinical Adherence Brief',
+      step5Body: 'One-page summary of adherence trends, biomarker improvements, and pain logs formatted for physician review.'
     },
     footerTagline: 'TrialN1 · Interventional human research intelligence',
     footerSignIn: 'Sign in',
@@ -1838,9 +1892,38 @@ export const COPY = {
       'TrialN1 converts dense, peer-reviewed human interventional research into executable daily routines with zero hallucinated gaps and N1 AI, an evidence-grounded safety companion.',
     tabs: {
       guide: 'How it works',
+      science: 'Habit science (BCT)',
       samples: 'Trending papers',
       scope: 'Accepted papers'
     },
+    scienceEyebrow: 'Behavioral Medicine Engine · BCT Taxonomy v1',
+    scienceTitle: 'Why TrialN1 Habits Actually Stick',
+    scienceIntro:
+      'Most fitness apps rely on shame, guilt streaks, or rigid schedules—which inevitably fail when real life happens. TrialN1 maps every routine adaptation to accredited Behavior Change Techniques (Michie et al. 2013) so your momentum never resets to zero.',
+    sciencePillars: [
+      {
+        code: 'BCT 8.7 · Graded Tasks',
+        title: 'Adaptive Micro-Dosing',
+        body: 'When time, shift fatigue, or 48°C extreme summer heat hits, routines automatically contract into a 2–3 min indoor micro-dose to preserve the neural habit loop.',
+        benefit: 'Zero activation friction'
+      },
+      {
+        code: 'BCT 11.2 · Emotion Regulation',
+        title: 'Non-Punitive Re-Entry',
+        body: 'Streaks never reset to zero after a lapse. Missing a day is treated as a clinical data point, extinguishing the guilt-induced "Abstinence Violation Effect".',
+        benefit: 'No streak shame'
+      },
+      {
+        code: 'BCT 1.2 & 8.1 · Problem Solving',
+        title: 'Real-World Barrier Substitution',
+        body: 'Substitutes impossible outdoor sessions for indoor AC corridor steps, syncs hydration around Ramadan schedules, and swaps cravings with tactile alternatives.',
+        benefit: 'Context-resilient'
+      }
+    ],
+    inspectLedgerTitle: 'Clinical Transparency & Audit Trail',
+    inspectLedgerSubtitle:
+      'Explore all accredited Behavior Change Techniques, mechanisms of action, and Gulf barrier targets implemented in TrialN1.',
+    inspectLedgerButton: 'Inspect BCT Taxonomy Ledger',
     steps: [
       {
         step: '01',
