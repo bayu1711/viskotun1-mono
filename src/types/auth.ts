@@ -63,6 +63,7 @@ export interface LifestyleAdaptationSpec {
 }
 
 export type BiologicalSex = 'female' | 'male' | 'other' | 'prefer_not_to_say';
+export type AccountStatus = 'active' | 'deactivated';
 
 export interface UserProfile {
   displayName?: string;
@@ -75,6 +76,10 @@ export interface UserProfile {
   primaryLanguage?: AppLocale;
   /** Optional secondary UI language for quick switching in the top header. */
   secondaryLanguage?: SecondaryLanguage;
+  /** Whether daily routine reminder nudges are enabled. */
+  reminderNotificationsEnabled?: boolean;
+  /** Whether anonymized adherence cohort insights can be shared with Community reviews. */
+  communityCohortOptIn?: boolean;
   updatedAt?: string;
 }
 
@@ -100,6 +105,7 @@ export interface User {
   initials: string;
   isGuest: boolean;
   role?: UserRole;
+  accountStatus?: AccountStatus;
   avatarUrl?: string;
   createdAt: number;
   profile?: UserProfile;
@@ -117,6 +123,10 @@ export interface AuthState {
   lifestyleProfile: UserLifestyleProfile;
   updateLifestyleProfile: (updates: Partial<UserLifestyleProfile>) => void;
   confirmRegion: (countryName: string, city?: string) => void;
+  resetProfileToDefaults: () => void;
+  sendPasswordReset: () => Promise<void>;
+  deactivateAccount: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   loginAsGuest: () => void;
   loginAsAdmin: () => void;
   loginWithEmail: (email: string, password?: string, asAdmin?: boolean) => Promise<void>;
