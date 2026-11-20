@@ -70,15 +70,17 @@ export function calculateHealthAgeProjection(input: HealthAgeEngineInput): Healt
   const projectedHealthAge = Number((chronoAge + healthAgeDelta).toFixed(1));
 
   // 3. Chronic Disease Relative Risk Reduction (%)
+  // The cited benchmarks describe sustained activity, so the reduction ramps in over three
+  // weeks of streak. Before this, one good day showed a -12% cardiovascular claim at streak 0.
+  const sustainedRamp = Math.min(1, streak / 21);
+
   // Cardiovascular disease relative risk reduction (up to -28%)
-  const relativeCVDDelta = -Math.round(
-    Math.min(28, (adherence / 100) * (12 + Math.min(16, streak * 0.7)))
-  );
+  const relativeCVDDelta =
+    -Math.round(Math.min(28, (adherence / 100) * (12 + Math.min(16, streak * 0.7))) * sustainedRamp) + 0;
 
   // Metabolic syndrome relative risk reduction (up to -24%)
-  const relativeMetabolicDelta = -Math.round(
-    Math.min(24, (adherence / 100) * (10 + Math.min(14, streak * 0.6)))
-  );
+  const relativeMetabolicDelta =
+    -Math.round(Math.min(24, (adherence / 100) * (10 + Math.min(14, streak * 0.6))) * sustainedRamp) + 0;
 
   return {
     chronologicalAge: chronoAge,

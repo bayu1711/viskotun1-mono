@@ -20,6 +20,17 @@ describe('Health Age Projection Engine', () => {
     expect(projection.habitResilienceScore).toBeGreaterThan(50);
   });
 
+  it('claims no disease risk reduction before any sustained streak', () => {
+    const firstDay = calculateHealthAgeProjection({
+      adherenceRate: 100,
+      streak: 0,
+      currentDay: 1,
+      totalDays: 84
+    });
+    expect(firstDay.relativeCVDDelta).toBe(0);
+    expect(firstDay.relativeMetabolicDelta).toBe(0);
+  });
+
   it('rewards barrier micro-dose conversion with higher habit resilience', () => {
     const withMicroDosing = calculateHealthAgeProjection({
       adherenceRate: 80,
