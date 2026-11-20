@@ -490,6 +490,20 @@ export function parseLifestyleDeterministically(
     explanations.push(`Progression ramp-up cushioned for ${caution.toLowerCase()}`);
   }
 
+  // 6. Intensity / pacing reduction (lower intensity / micro-dose)
+  if (
+    text.includes('lower intensity') ||
+    text.includes('gentle') ||
+    text.includes('micro') ||
+    text.includes('reduce load') ||
+    text.includes('lighter pace') ||
+    text.includes('easier') ||
+    text.includes('تخفيف')
+  ) {
+    extractedTags.push('Gentle / Micro Pacing');
+    explanations.push('Routine calibrated to gentle micro-dosing to protect recovery and keep adherence effortless');
+  }
+
   // Fallback if no specific keyword matched
   if (extractedTags.length === 0) {
     const customTag = message.trim();

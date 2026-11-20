@@ -208,6 +208,15 @@ export function buildDeterministicAdaptation(params: {
     notes.push(`Protective pacing active for ${lp.physicalCautions.slice(0, 2).join(' & ').toLowerCase()}`);
   }
 
+  const hasGentlePacing = lp?.activeTags?.some((t) => {
+    const lower = t.toLowerCase();
+    return lower.includes('micro') || lower.includes('gentle') || lower.includes('lower intensity');
+  });
+  if (hasGentlePacing) {
+    recommendedDoseMode = 'micro';
+    notes.push('Routine calibrated to gentle micro-dosing to protect recovery');
+  }
+
   const assignmentByStep = new Map(
     (scheduleCompatibility?.stepAssignments ?? []).map((a) => [a.stepId, a])
   );
