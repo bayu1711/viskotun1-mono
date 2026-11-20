@@ -3,7 +3,9 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   createUserWithEmailAndPassword,
+  deleteUser,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut as firebaseSignOut,
@@ -14,6 +16,7 @@ import { COPY } from '../data/copy';
 import { ROUTES } from '../data/navigation';
 import { getFirebaseAuth } from '../lib/firebase';
 import type { AuthState, RegionContext, User, UserLifestyleProfile, UserProfile } from '../types/auth';
+import { clearBrowserStorageForAccount } from '../utils/accountData';
 import { resolveCountryCodeFromInput, resolveCountryName } from '../utils/geo';
 
 const STORAGE_KEY = 'viskotun1_auth_user';
@@ -22,7 +25,11 @@ const LIFESTYLE_STORAGE_KEY = 'viskotun1_lifestyle_profile';
 export const ONBOARDING_DISMISSED_KEY = 'trialn1_lifestyle_onboarding_dismissed';
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
-  preferredReminderTime: '09:00'
+  preferredReminderTime: '09:00',
+  primaryLanguage: 'en',
+  secondaryLanguage: 'ar',
+  reminderNotificationsEnabled: true,
+  communityCohortOptIn: true
 };
 
 export const DEFAULT_LIFESTYLE_PROFILE: UserLifestyleProfile = {
@@ -355,6 +362,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           createdAt: Date.now()
         };
         persistUser(authenticatedUser);
+        fetch('/api/user/account', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'reactivate', userId: authenticatedUser.id })
+        }).catch(() => {});
         return;
       } catch (err: unknown) {
         throw formatFirebaseAuthError(err);
@@ -385,6 +397,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         createdAt: Date.now()
       };
       persistUser(authenticatedUser);
+      fetch('/api/user/account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reactivate', userId: authenticatedUser.id })
+      }).catch(() => {});
       return;
     } catch (err: unknown) {
       throw formatFirebaseAuthError(err);
@@ -438,6 +455,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [persistUser, updateLifestyleProfile]
   );
 
+  const resetProfileToDefaults = useCallback(() => {
+    const freshUserProfile: UserProfile = { ...DEFAULT_USER_PROFILE };
+    const freshLifestyle: UserLifestyleProfile = {
+      ...DEFAULT_LIFESTYLE_PROFILE,
+      region: { ...DEFAULT_LIFESTYLE_PROFILE.region },
+      activeTags: []
+    };
+
+    userProfileRef.current = freshUserProfile;
+    lifestyleProfileRef.current = freshLifestyle;
+    setUserProfile(freshUserProfile);
+    setLifestyleProfile(freshLifestyle);
+
+    try {
+      window.localStorage.removeItem(USER_PROFILE_STORAGE_KEY);
+      window.localStorage.removeItem(LIFESTYLE_STORAGE_KEY);
+      window.sessionStorage.removeItem(ONBOARDING_DISMISSED_KEY);
+    } catch {}
+
+    setUser((current) => {
+      if (!current) return current;
+      const updated: User = {
+        ...current,
+        profile: freshUserProfile,
+        lifestyleProfile: freshLifestyle
+      };
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  }, []);
+
+  const sendPasswordReset = useCallback(async () => {
+    if (!user || user.isGuest || !user.email) {
+      throw new Error(COPY.profile.passwordResetUnavailableToast);
+    }
+    const { auth } = getFirebaseAuth();
+    if (!auth) {
+      throw new Error(COPY.profile.passwordResetUnavailableToast);
+    }
+    await sendPasswordResetEmail(auth, user.email);
+  }, [user]);
+
   const logout = useCallback(async () => {
     const { auth } = getFirebaseAuth();
     if (auth) {
@@ -453,6 +514,79 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     persistUser(null);
     router.push(ROUTES.login);
   }, [persistUser, router]);
+
+  const deactivateAccount = useCallback(async () => {
+    const activeUser = user;
+    if (activeUser && !activeUser.isGuest) {
+      const res = await fetch('/api/user/account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'deactivate', userId: activeUser.id })
+      });
+      if (!res.ok) {
+        throw new Error(COPY.profile.actionErrorToast);
+      }
+    }
+
+    const { auth } = getFirebaseAuth();
+    if (auth) {
+      try {
+        await firebaseSignOut(auth);
+      } catch {
+        // Continue local sign-out
+      }
+    }
+
+    try {
+      window.sessionStorage.removeItem(ONBOARDING_DISMISSED_KEY);
+    } catch {}
+    persistUser(null);
+    router.push(ROUTES.login);
+  }, [user, persistUser, router]);
+
+  const deleteAccount = useCallback(async () => {
+    const activeUser = user;
+    if (activeUser && !activeUser.isGuest) {
+      const res = await fetch('/api/user/account', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: activeUser.id })
+      });
+      if (!res.ok) {
+        throw new Error(COPY.profile.actionErrorToast);
+      }
+    }
+
+    const { auth } = getFirebaseAuth();
+    if (auth?.currentUser) {
+      try {
+        await deleteUser(auth.currentUser);
+      } catch {
+        // If Firebase requires recent login, still sign out cleanly after wiping data
+        try {
+          await firebaseSignOut(auth);
+        } catch {}
+      }
+    }
+
+    clearBrowserStorageForAccount({
+      userId: activeUser && !activeUser.isGuest ? activeUser.id : undefined,
+      includeAuthSession: true
+    });
+
+    const freshUserProfile: UserProfile = { ...DEFAULT_USER_PROFILE };
+    const freshLifestyle: UserLifestyleProfile = {
+      ...DEFAULT_LIFESTYLE_PROFILE,
+      region: { ...DEFAULT_LIFESTYLE_PROFILE.region },
+      activeTags: []
+    };
+    userProfileRef.current = freshUserProfile;
+    lifestyleProfileRef.current = freshLifestyle;
+    setUserProfile(freshUserProfile);
+    setLifestyleProfile(freshLifestyle);
+    persistUser(null);
+    router.push(ROUTES.login);
+  }, [user, persistUser, router]);
 
   const isAdmin = Boolean(
     user &&
@@ -472,6 +606,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       lifestyleProfile,
       updateLifestyleProfile,
       confirmRegion,
+      resetProfileToDefaults,
+      sendPasswordReset,
+      deactivateAccount,
+      deleteAccount,
       loginAsGuest,
       loginAsAdmin,
       loginWithEmail,
@@ -488,6 +626,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       lifestyleProfile,
       updateLifestyleProfile,
       confirmRegion,
+      resetProfileToDefaults,
+      sendPasswordReset,
+      deactivateAccount,
+      deleteAccount,
       loginAsGuest,
       loginAsAdmin,
       loginWithEmail,

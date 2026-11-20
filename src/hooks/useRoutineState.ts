@@ -27,6 +27,10 @@ import type {
   QueuedPaper
 } from '../types/routine';
 import { answerFor } from '../utils/assistant';
+import {
+  clearBrowserStorageForAccount,
+  countStoredUserLogs
+} from '../utils/accountData';
 import { stripClinicalDisclaimer } from '../utils/disclaimer';
 import { isEdgeGemmaAvailable, queryEdgeGemma } from '../utils/edgeGemma';
 import { createId } from '../utils/id';
@@ -597,6 +601,40 @@ export function useRoutineState() {
 
     toast.success(COPY.demo.resetSuccess);
   }, [isAuthenticated, userId, isAdmin]);
+
+  const clearAllUserData = useCallback(async () => {
+    clearBrowserStorageForAccount({
+      userId: isAuthenticated ? userId : undefined,
+      includeAuthSession: false
+    });
+
+    setRoutineList([]);
+    setActiveRoutine('');
+    setQueuedPapers(initialQueuedPapers);
+    setRuntime({});
+    setStagingRoutine(null);
+    setStagingMessages([]);
+    setStagingError(null);
+    setUnboundMessages([]);
+    setLifestyleMessages([]);
+    setAnsweredLifestyleStages([]);
+    setLifestyleInterviewStage('region');
+
+    auth?.resetProfileToDefaults();
+
+    if (isAuthenticated && userId) {
+      const res = await fetch('/api/user/account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'clear_data', userId })
+      });
+      if (!res.ok) {
+        throw new Error(COPY.profile.actionErrorToast);
+      }
+    }
+  }, [auth, isAuthenticated, userId]);
+
+  const storedLogsCount = useMemo(() => countStoredUserLogs(runtime), [runtime]);
 
   const openHowTo = useCallback(() => setIsHowToOpen(true), []);
   const closeHowTo = useCallback(() => setIsHowToOpen(false), []);
@@ -2638,6 +2676,10 @@ export function useRoutineState() {
       initLifestyleConversation,
       restartLifestyleInterview,
       tuneLifestyle,
+      allRoutines: routineList,
+      allRuntime: runtime,
+      storedLogsCount,
+      clearAllUserData,
       resetToDefaults,
       updateGuardrailThreshold,
       approveProposedWidget,
@@ -2647,7 +2689,6 @@ export function useRoutineState() {
       summaries,
       queuedPapers,
       routine,
-      routineList.length,
       state.messages,
       state.setsDone,
       state.feedbackLogs,
@@ -2740,6 +2781,10 @@ export function useRoutineState() {
       initLifestyleConversation,
       restartLifestyleInterview,
       tuneLifestyle,
+      routineList,
+      runtime,
+      storedLogsCount,
+      clearAllUserData,
       resetToDefaults,
       updateGuardrailThreshold,
       approveProposedWidget,

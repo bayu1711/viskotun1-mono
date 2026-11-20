@@ -5,6 +5,8 @@ import Link from 'next/link';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 import CheckIcon from '@mui/icons-material/Check';
+import KeyOutlinedIcon from '@mui/icons-material/KeyOutlined';
+import LogoutIcon from '@mui/icons-material/Logout';
 import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined';
 import NorthEastIcon from '@mui/icons-material/NorthEast';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
@@ -13,6 +15,8 @@ import TuneIcon from '@mui/icons-material/Tune';
 import { toast } from 'sonner';
 import { PageContainer } from '../components/layout/PageContainer';
 import { PageHeader } from '../components/layout/PageHeader';
+import { AccountControlsPanel } from '../components/profile/AccountControlsPanel';
+import { Avatar } from '../components/ui/Avatar';
 import { Icon } from '../components/ui/Icon';
 import { Panel } from '../components/ui/Panel';
 import { PillButton, pillClassName } from '../components/ui/PillButton';
@@ -125,11 +129,13 @@ export function ProfilePage() {
     userProfile,
     updateUserProfile,
     lifestyleProfile,
-    updateLifestyleProfile
+    updateLifestyleProfile,
+    sendPasswordReset,
+    logout
   } = useAuth();
   const { openLifestyleTuning } = useAssistant();
-  const { routine } = useRoutine();
-  const { copy, isRtl, supportedLocales, setLocale } = useLocale();
+  const { routine, allRoutines, storedLogsCount } = useRoutine();
+  const { copy, isRtl, locale, supportedLocales, setLocale } = useLocale();
   const t = copy.profile;
 
   const [displayName, setDisplayName] = useState('');
@@ -140,6 +146,9 @@ export function ProfilePage() {
   const [isGoalsCustom, setIsGoalsCustom] = useState(false);
   const [primaryLanguage, setPrimaryLanguage] = useState<AppLocale>('en');
   const [secondaryLanguage, setSecondaryLanguage] = useState<SecondaryLanguage>('ar');
+  const [reminderNotificationsEnabled, setReminderNotificationsEnabled] = useState(true);
+  const [communityCohortOptIn, setCommunityCohortOptIn] = useState(true);
+  const [isSendingReset, setIsSendingReset] = useState(false);
 
   const [countryCode, setCountryCode] = useState('AE');
   const [countryName, setCountryName] = useState('United Arab Emirates');
@@ -170,6 +179,8 @@ export function ProfilePage() {
     );
     setPrimaryLanguage(resolvedPair.primary);
     setSecondaryLanguage(resolvedPair.secondary ?? 'none');
+    setReminderNotificationsEnabled(userProfile.reminderNotificationsEnabled ?? true);
+    setCommunityCohortOptIn(userProfile.communityCohortOptIn ?? true);
   }, [userProfile, user]);
 
   useEffect(() => {
@@ -253,7 +264,9 @@ export function ProfilePage() {
       preferredReminderTime: reminderTime || '09:00',
       clinicalGoals: effectiveClinicalGoals.trim() || undefined,
       primaryLanguage,
-      secondaryLanguage: normalizedSecondary
+      secondaryLanguage: normalizedSecondary,
+      reminderNotificationsEnabled,
+      communityCohortOptIn
     });
     setLocale(primaryLanguage);
 
@@ -292,6 +305,26 @@ export function ProfilePage() {
     toast.success(t.savedToast);
   };
 
+  const handleSendPasswordReset = async () => {
+    if (!user?.email || isGuest) return;
+    setIsSendingReset(true);
+    try {
+      await sendPasswordReset();
+      toast.success(t.passwordResetSentToast(user.email));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t.passwordResetUnavailableToast);
+    } finally {
+      setIsSendingReset(false);
+    }
+  };
+
+  const memberSinceDate = user?.createdAt
+    ? new Intl.DateTimeFormat(locale === 'ar' ? 'ar-AE' : 'en-US', {
+        month: 'short',
+        year: 'numeric'
+      }).format(new Date(user.createdAt))
+    : null;
+
   if (isLoading) {
     return (
       <PageContainer>
@@ -318,9 +351,10 @@ export function ProfilePage() {
           <p className="mt-2 max-w-2xl text-sm text-ink/70">{t.subtitle}</p>
         </PageHeader>
 
-        <form onSubmit={handleSave} className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-main-aside lg:gap-10">
-          {/* Main Column: UserProfile + UserLifestyleProfile */}
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-main-aside lg:gap-10">
+          {/* Main Column: Editable Profile Form + Account & Data Controls */}
           <div className="space-y-6">
+            <form onSubmit={handleSave} className="space-y-6">
             {/* Section 1: UserProfile */}
             <Panel tone="white" className="space-y-5">
               <SectionHeading eyebrow={t.userProfileEyebrow} title={t.userProfileTitle} />
@@ -501,6 +535,70 @@ export function ProfilePage() {
                   </div>
                 </div>
                 <p className="text-2xs text-ink/60">{t.languageHint}</p>
+              </div>
+
+              {/* Notifications & Privacy Preferences */}
+              <div className="border-t border-ink/10 pt-4 space-y-3">
+                <p className="text-xs font-semibold text-ink/80">{t.privacyPreferencesLabel}</p>
+                <div className="divide-y divide-ink/10 rounded-2xl border border-ink/10 bg-canvas/50 px-4">
+                  <div className="flex items-center justify-between gap-4 py-3">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-ink">{t.reminderNotificationsLabel}</p>
+                      <p className="mt-0.5 text-2xs text-ink/65">{t.reminderNotificationsDesc}</p>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={reminderNotificationsEnabled}
+                      aria-label={t.reminderNotificationsLabel}
+                      onClick={() => setReminderNotificationsEnabled((prev) => !prev)}
+                      className={cn(
+                        'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors cursor-pointer',
+                        reminderNotificationsEnabled
+                          ? 'border-ink bg-ink'
+                          : 'border-ink/25 bg-white'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'inline-block h-4 w-4 rounded-full transition-transform',
+                          reminderNotificationsEnabled
+                            ? 'translate-x-5 bg-white rtl:-translate-x-5'
+                            : 'translate-x-1 bg-ink/50 rtl:-translate-x-1'
+                        )}
+                      />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4 py-3">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-ink">{t.communityCohortOptInLabel}</p>
+                      <p className="mt-0.5 text-2xs text-ink/65">{t.communityCohortOptInDesc}</p>
+                    </div>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={communityCohortOptIn}
+                      aria-label={t.communityCohortOptInLabel}
+                      onClick={() => setCommunityCohortOptIn((prev) => !prev)}
+                      className={cn(
+                        'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors cursor-pointer',
+                        communityCohortOptIn
+                          ? 'border-ink bg-ink'
+                          : 'border-ink/25 bg-white'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'inline-block h-4 w-4 rounded-full transition-transform',
+                          communityCohortOptIn
+                            ? 'translate-x-5 bg-white rtl:-translate-x-5'
+                            : 'translate-x-1 bg-ink/50 rtl:-translate-x-1'
+                        )}
+                      />
+                    </button>
+                  </div>
+                </div>
               </div>
             </Panel>
 
@@ -693,6 +791,10 @@ export function ProfilePage() {
                 {t.saveButton}
               </PillButton>
             </div>
+            </form>
+
+            {/* Section 3: Data Export, Clear All Data, Deactivate & Delete Account */}
+            <AccountControlsPanel />
           </div>
 
           {/* Right / Aside Column: Live Connections & Account */}
@@ -748,8 +850,33 @@ export function ProfilePage() {
               </ul>
             </Panel>
 
-            <Panel tone="mint" className="space-y-3">
-              <h2 className="font-display text-base font-bold text-ink">{t.accountCardTitle}</h2>
+            <Panel tone="mint" className="space-y-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <Avatar initials={user?.initials || 'tn'} />
+                  <div className="min-w-0">
+                    <h2 className="truncate font-display text-base font-bold text-ink">
+                      {displayName.trim() || user?.name || t.accountCardTitle}
+                    </h2>
+                    {user?.email && !isGuest && (
+                      <p className="truncate text-2xs text-ink/75">{user.email}</p>
+                    )}
+                  </div>
+                </div>
+                <span className="shrink-0 rounded-full bg-white/85 px-2.5 py-0.5 text-2xs font-semibold text-ink">
+                  {isGuest || !user?.email ? t.accountStatusGuest : t.accountStatusActive}
+                </span>
+              </div>
+
+              <div className="space-y-1 border-t border-ink/10 pt-3 text-2xs text-ink/75">
+                {memberSinceDate && (
+                  <p>
+                    {t.memberSinceLabel}: <span className="font-semibold text-ink">{memberSinceDate}</span>
+                  </p>
+                )}
+                <p className="tabular-nums">{t.storedDataSummary(allRoutines.length, storedLogsCount)}</p>
+              </div>
+
               {isGuest || !user?.email ? (
                 <>
                   <p className="text-xs leading-relaxed text-ink/80">{t.guestNotice}</p>
@@ -758,13 +885,34 @@ export function ProfilePage() {
                   </Link>
                 </>
               ) : (
-                <p className="text-xs leading-relaxed text-ink/85">
-                  {t.signedInNotice(user.email)}
-                </p>
+                <div className="space-y-2.5">
+                  <p className="text-xs leading-relaxed text-ink/85">
+                    {t.signedInNotice(user.email)}
+                  </p>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleSendPasswordReset}
+                      disabled={isSendingReset}
+                      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-ink/20 bg-white/85 px-3 py-1.5 text-2xs font-semibold text-ink transition-colors hover:bg-white disabled:opacity-50 cursor-pointer"
+                    >
+                      <Icon icon={KeyOutlinedIcon} size="xs" />
+                      <span>{isSendingReset ? t.workingLabel : t.passwordResetBtn}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={logout}
+                      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full bg-ink px-3.5 py-1.5 text-2xs font-semibold text-white transition-opacity hover:opacity-90 cursor-pointer"
+                    >
+                      <Icon icon={LogoutIcon} size="xs" />
+                      <span>{t.signOutBtn}</span>
+                    </button>
+                  </div>
+                </div>
               )}
             </Panel>
           </aside>
-        </form>
+        </div>
       </div>
     </PageContainer>
   );
