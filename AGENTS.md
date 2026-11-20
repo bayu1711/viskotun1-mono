@@ -53,12 +53,31 @@ Every agent working on this codebase must follow these mandatory git practices:
    - Each commit should explain *what* and *why*, enabling clean rollbacks and bisecting if an edge case emerges.
 4. **Push Automatically**:
    - Push completed commit batches to `origin main` to keep the remote GitHub repository in sync.
+5. **Automatic Sandbox Promotion & Merge Protocol**:
+   - To preserve an uninterrupted testing environment for the user, a dedicated **Localhost Sandbox** lives in `../viskotun1-sandbox` (branch `sandbox`, running on port `3020`), while active agent development runs in the main workspace on port `3010` (branch `main`).
+   - Whenever a task, feature slice, or milestone is **finalized and verified** (`npm run build` and `npm run lint` pass with zero errors):
+     1. Commit and push changes to `origin main`.
+     2. **Automatically promote to `sandbox`**: Fast-forward the `sandbox` branch to match `main` and push to remote:
+        ```bash
+        git branch -f sandbox main
+        git push origin sandbox
+        ```
+     3. **Refresh Sandbox Worktree**: If the sibling worktree `../viskotun1-sandbox` exists, fast-forward it and re-compile the sandbox build so the user's sandbox at `http://localhost:3020` updates immediately:
+        ```bash
+        if [ -d "../viskotun1-sandbox" ]; then
+          (cd ../viskotun1-sandbox && git checkout sandbox && git reset --hard main && npm run build)
+        fi
+        ```
+     4. **Integrity Rule**: Never push broken, unverified, or intermediate states to `sandbox`. Only promote code that has passed full build and lint checks.
 
 ---
 
 ## 3. Tech Stack Reference
 
 - **Framework**: Next.js 14.2+ (App Router)
+- **Environments & Ports**:
+  - **Active Dev**: Port `3010` (`viskotun1`, outputs to `.next-dev` to prevent style asset wiping during builds)
+  - **Stable Sandbox**: Port `3020` (`viskotun1-sandbox`, branch `sandbox`, output `.next`)
 - **Language**: TypeScript (Strict mode enabled)
 - **Styling**: Tailwind CSS 3.4+ with custom CSS variable design tokens
 - **Icons**: Material UI Icons (`@mui/icons-material`, imported via root package)
