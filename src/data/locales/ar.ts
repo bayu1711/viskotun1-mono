@@ -373,7 +373,12 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     micro: 'خطوة ميسّرة (~2 د)',
     rest: 'استشفاء نشط',
     activeTooltip: (mode: string) => `النمط النشط حالياً: ${mode}`,
-    microNotice: 'الخطوة الميسّرة مفعلة: أنجز مجموعة واحدة لتحقيق نسبة 100% لإنجاز اليوم.'
+    microNotice: 'الخطوة الميسّرة مفعلة: أنجز مجموعة واحدة لتحقيق نسبة 100% لإنجاز اليوم.',
+    modalTitle: 'نمط إنجاز اليوم',
+    modalSubtitle:
+      'اختر وتيرة إنجاز اليوم. الخطوة الميسّرة تقلل المجموعات المطلوبة للحفاظ على وتيرة الالتزام، والاستشفاء النشط يسجل الراحة دون أي تأثير على تقدمك.',
+    openModalButton: 'نمط إنجاز اليوم',
+    reEntryPrompt: 'تعطل جدولك؟ تكييف الخطة'
   },
   lifestyleTuning: {
     badge: 'التكيف السياقي',
@@ -495,7 +500,10 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     continuousConfirmLabel: 'تم الالتزام اليوم',
     continuousPendingLabel: 'تأكيد نهاية اليوم',
     routineOverrideTitle: 'جدول هذه الخطة',
-    customWindowHint: 'يُطبّق على هذه الخطة فقط — وتحتفظ خططك الأخرى بجداولها المستقلة.'
+    customWindowHint: 'يُطبّق على هذه الخطة فقط — وتحتفظ خططك الأخرى بجداولها المستقلة.',
+    lifestyleButton: 'نمط الحياة والموقع',
+    modalTitle: 'التكييف مع نمط الحياة والموقع',
+    modalSubtitle: 'خطة مخصصة لموقعك ومناخك وعاداتك اليومية ونوافذك الزمنية المتاحة.'
   },
   dayActions: {
     markComplete: 'تحديد اليوم كمكتمل',

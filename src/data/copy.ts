@@ -160,7 +160,12 @@ export const COPY = {
     micro: 'Micro-Dose (~2m)',
     rest: 'Active Recovery',
     activeTooltip: (mode: string) => `Currently in ${mode} mode`,
-    microNotice: 'Micro-Dose active: Complete 1 set to achieve 100% daily completion.'
+    microNotice: 'Micro-Dose active: Complete 1 set to achieve 100% daily completion.',
+    modalTitle: "Today's Dose Mode",
+    modalSubtitle:
+      'Adjust completion intensity for today. Micro-Dose mode reduces sets to a low-friction habit fallback, while active recovery logs rest without breaking your adherence record.',
+    openModalButton: "Today's Dose Mode",
+    reEntryPrompt: 'Life disrupted? Adapt routine'
   },
   lifestyleTuning: {
     badge: 'Context Tuning',
@@ -281,7 +286,11 @@ export const COPY = {
     continuousConfirmLabel: 'Kept today',
     continuousPendingLabel: 'Confirm at end of day',
     routineOverrideTitle: 'Schedule for this routine',
-    customWindowHint: 'Applies only to this routine — your other routines keep their own schedules.'
+    customWindowHint: 'Applies only to this routine — your other routines keep their own schedules.',
+    lifestyleButton: 'Lifestyle & Location',
+    modalTitle: 'Adaptive Lifestyle Context',
+    modalSubtitle:
+      'Tailored to your geographic location, climate conditions, cultural rhythms, and daily schedule availability.'
   },
   dayActions: {
     markComplete: 'Mark today complete',
