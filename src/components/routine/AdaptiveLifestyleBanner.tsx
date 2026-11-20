@@ -2,7 +2,6 @@
 
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
-import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
 import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined';
@@ -21,6 +20,7 @@ import {
   normalizeAvailableWindows,
   resolveProfileAvailability
 } from '../../utils/schedule';
+import { AIIcon } from '../ui/AIIcon';
 import { AvailableWindowsEditor } from '../ui/AvailableWindowsEditor';
 import { Icon } from '../ui/Icon';
 
@@ -173,7 +173,7 @@ export function AdaptiveLifestyleBanner({ className }: { className?: string }) {
             onClick={openLifestyleTuning}
             className="inline-flex items-center gap-1 rounded-full border border-ink/15 bg-white px-2.5 py-1 text-3xs font-semibold text-ink hover:border-ink cursor-pointer"
           >
-            <Icon icon={AutoAwesomeOutlinedIcon} size="xs" />
+            <AIIcon size="xs" />
             <span>{locale === 'ar' ? 'تعديل' : 'Tune'}</span>
           </button>
 

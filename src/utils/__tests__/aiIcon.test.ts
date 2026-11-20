@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { AI_ICON_SIZES, type AIIconSize } from '../../components/ui/AIIcon';
 import { COPY } from '../../data/copy';
@@ -20,5 +22,22 @@ describe('AIIcon component and configuration', () => {
 
   it('uses the centralized brand favicon icon URL as the AI icon source', () => {
     expect(COPY.brand.iconUrl).toBe('/images/viskotun1-icon.png');
+  });
+
+  it('renders AIIcon on Tune with N1 AI action button in Profile instead of sparkle icon', () => {
+    const profileSource = fs.readFileSync(
+      path.resolve(__dirname, '../../views/Profile.tsx'),
+      'utf-8'
+    );
+    expect(profileSource).toContain('<AIIcon size="xs" />');
+    expect(profileSource).toContain('<span>{t.tuneWithAi}</span>');
+    expect(profileSource).not.toMatch(/<Icon\s+icon=\{AutoAwesomeOutlinedIcon\}\s+size="xs"\s*\/>\s*<span>\{t\.tuneWithAi\}<\/span>/);
+
+    const bannerSource = fs.readFileSync(
+      path.resolve(__dirname, '../../components/routine/AdaptiveLifestyleBanner.tsx'),
+      'utf-8'
+    );
+    expect(bannerSource).toContain('<AIIcon size="xs" />');
+    expect(bannerSource).not.toContain('AutoAwesomeOutlinedIcon');
   });
 });

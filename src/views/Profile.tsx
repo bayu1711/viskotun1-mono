@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { PageContainer } from '../components/layout/PageContainer';
 import { PageHeader } from '../components/layout/PageHeader';
 import { AccountControlsPanel } from '../components/profile/AccountControlsPanel';
+import { AIIcon } from '../components/ui/AIIcon';
 import { Avatar } from '../components/ui/Avatar';
 import { AvailableWindowsEditor } from '../components/ui/AvailableWindowsEditor';
 import { Icon } from '../components/ui/Icon';
@@ -693,7 +694,7 @@ export function ProfilePage() {
                     onClick={openLifestyleTuning}
                     className="inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3 py-1.5 text-xs font-semibold text-ink transition-colors hover:bg-cream cursor-pointer"
                   >
-                    <Icon icon={AutoAwesomeOutlinedIcon} size="xs" />
+                    <AIIcon size="xs" />
                     <span>{t.tuneWithAi}</span>
                   </button>
                 }
