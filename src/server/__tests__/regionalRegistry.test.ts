@@ -127,5 +127,29 @@ describe('regionalRegistry', () => {
       expect(result.extractedTags).toContain('Non-Smoker');
       expect(result.extractedTags).not.toContain('Cigarettes');
     });
+
+    it('does not capture imperative commands or questions as custom lifestyle tags', () => {
+      const commandResult = parseLifestyleDeterministically(
+        'change my region to colombo sri lanka',
+        { activeTags: [] }
+      );
+      expect(commandResult.extractedTags).not.toContain('change my region to colombo sri lanka');
+      expect(commandResult.profileUpdates.activeTags).not.toContain('change my region to colombo sri lanka');
+
+      const questionResult = parseLifestyleDeterministically(
+        'how do I change my schedule?',
+        { activeTags: ['Early Dawn Riser'] }
+      );
+      expect(questionResult.extractedTags).toHaveLength(0);
+      expect(questionResult.profileUpdates.activeTags).toEqual(['Early Dawn Riser']);
+    });
+
+    it('captures genuine personal custom habits when no specific keyword matches', () => {
+      const customHabit = parseLifestyleDeterministically('Morning green tea meditation', {
+        activeTags: []
+      });
+      expect(customHabit.extractedTags).toContain('Morning green tea meditation');
+      expect(customHabit.profileUpdates.activeTags).toContain('Morning green tea meditation');
+    });
   });
 });
