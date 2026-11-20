@@ -918,6 +918,7 @@ export const COPY = {
     cancel: 'Cancel',
     reviewSuccessToast: 'Outcome published to community registry',
     reviewErrorToast: 'Could not submit outcome. Please try again.',
+    reviewSignInToast: 'Sign in to share your outcome with the community.',
     /** Display names for paper category ids; unknown ids fall back to the raw id. */
     categoryLabels: {
       rehab: 'Rehab',
@@ -1867,11 +1868,13 @@ export const COPY = {
     },
     assistant: {
       questionRequired: 'Question is required',
+      questionTooLong: (max: number) => `Question is too long. Keep it under ${max} characters.`,
       invalidJson: 'Invalid JSON payload',
       internalError: 'Internal Server Error'
     },
     extract: {
       inputRequired: 'PDF file or paper URL/DOI is required',
+      textTooLong: (max: number) => `Pasted text is too long. Keep it under ${max} characters or upload the PDF.`,
       fileSizeExceeded: 'File size exceeds maximum limit of 20MB',
       invalidFormat: 'Invalid file format. Only PDF files are supported.',
       internalError: 'Internal Server Error during extraction'
@@ -1884,6 +1887,8 @@ export const COPY = {
     },
     userSync: {
       userIdRequired: 'User ID is required',
+      conflict: 'Your data changed on another device. Merge the latest copy and try again.',
+      invalidAction: 'Valid account action is required',
       internalError: 'Internal Server Error during user sync',
       fetchError: 'Internal Server Error fetching user sync'
     },
@@ -1898,6 +1903,8 @@ export const COPY = {
       fetchError: 'Internal Server Error fetching papers',
       saveError: 'Internal Server Error saving paper',
       paperRequired: 'Paper object is required',
+      candidateRequired: 'candidateId is required',
+      candidateNotFound: 'This extraction has expired. Add the paper again to confirm it.',
       seedSuccess: 'Sample papers seeded successfully',
       saveSuccess: 'Paper saved to Firestore papers collection'
     },
@@ -1905,6 +1912,7 @@ export const COPY = {
       routineIdRequired: 'Routine ID is required',
       invalidOutcome: 'Outcome must be one of: improved, adjusted, paused',
       textRequired: 'Review text is required',
+      textTooLong: (max: number) => `Review text is too long. Keep it under ${max} characters.`,
       saveSuccess: 'Community review recorded',
       fetchError: 'Failed to retrieve community data',
       saveError: 'Failed to save community review'
