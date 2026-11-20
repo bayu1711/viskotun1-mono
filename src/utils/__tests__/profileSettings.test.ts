@@ -214,8 +214,16 @@ describe('UserProfile and UserLifestyleProfile utilities & wiring', () => {
       'utf-8'
     );
 
+    const switcherSource = fs.readFileSync(
+      path.resolve(__dirname, '../../components/layout/LanguageSwitcher.tsx'),
+      'utf-8'
+    );
+
     expect(topBarSource).toContain('<LanguageSwitcher');
     expect(uaeLandingSource).toContain('<LanguageSwitcher');
+    expect(switcherSource).toContain('aria-haspopup="listbox"');
+    expect(switcherSource).toContain('role="listbox"');
+    expect(switcherSource).toContain('useDismissable');
     expect(profileSource).toContain('primaryLanguage');
     expect(profileSource).toContain('secondaryLanguage');
     expect(profileSource).toContain('setLocale(primaryLanguage)');

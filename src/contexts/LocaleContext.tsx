@@ -1,12 +1,26 @@
 'use client';
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { type AppLocale, type LocaleCopy, getLocaleCopy } from '../data/locales';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type AppLocale,
+  type LocaleCopy,
+  type LocaleMeta,
+  SUPPORTED_LOCALES,
+  getLocaleCopy,
+  getLocaleMeta,
+  isSupportedLocale,
+  resolveLanguagePair
+} from '../data/locales';
+import { AuthContext } from './AuthContext';
 
 const STORAGE_KEY = 'viskotun1_locale';
 
 export interface LocaleContextValue {
   locale: AppLocale;
+  localeMeta: LocaleMeta;
+  primaryLocale: AppLocale;
+  secondaryLocale: AppLocale | null;
+  supportedLocales: readonly LocaleMeta[];
   isRtl: boolean;
   copy: LocaleCopy;
   setLocale: (locale: AppLocale) => void;
@@ -22,17 +36,27 @@ export function LocaleProvider({
   children: React.ReactNode;
   initialLocale?: AppLocale;
 }) {
+  const authContext = useContext(AuthContext);
   const [locale, setLocaleState] = useState<AppLocale>(initialLocale);
+
+  const { primary: primaryLocale, secondary: secondaryLocale } = useMemo(
+    () =>
+      resolveLanguagePair(
+        authContext?.userProfile?.primaryLanguage,
+        authContext?.userProfile?.secondaryLanguage
+      ),
+    [authContext?.userProfile?.primaryLanguage, authContext?.userProfile?.secondaryLanguage]
+  );
 
   // Initialize from localStorage or browser preferences
   useEffect(() => {
     try {
-      const stored = window.localStorage.getItem(STORAGE_KEY) as AppLocale | null;
-      if (stored === 'en' || stored === 'ar') {
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      if (isSupportedLocale(stored)) {
         setLocaleState(stored);
         return;
       }
-      // If browser prefers Arabic, adopt it
+      // If browser prefers a supported non-default locale (e.g., Arabic), adopt it
       const browserPref = window.navigator.language?.toLowerCase();
       if (browserPref && browserPref.startsWith('ar')) {
         setLocaleState('ar');
@@ -42,7 +66,24 @@ export function LocaleProvider({
     }
   }, []);
 
-  const isRtl = locale === 'ar';
+  // Keep active locale valid when the user updates their primary/secondary language pair in Profile
+  const prevPairRef = useRef({ primary: primaryLocale, secondary: secondaryLocale });
+  useEffect(() => {
+    const prev = prevPairRef.current;
+    const pairChanged = prev.primary !== primaryLocale || prev.secondary !== secondaryLocale;
+    prevPairRef.current = { primary: primaryLocale, secondary: secondaryLocale };
+    if (pairChanged && locale !== primaryLocale && locale !== secondaryLocale) {
+      setLocaleState(primaryLocale);
+      try {
+        window.localStorage.setItem(STORAGE_KEY, primaryLocale);
+      } catch {
+        // Storage access blocked
+      }
+    }
+  }, [locale, primaryLocale, secondaryLocale]);
+
+  const localeMeta = useMemo(() => getLocaleMeta(locale), [locale]);
+  const isRtl = localeMeta.dir === 'rtl';
 
   // Synchronize document dir and lang attributes for browser and accessibility
   useEffect(() => {
@@ -58,6 +99,7 @@ export function LocaleProvider({
   }, [locale, isRtl]);
 
   const setLocale = useCallback((nextLocale: AppLocale) => {
+    if (!isSupportedLocale(nextLocale)) return;
     setLocaleState(nextLocale);
     try {
       window.localStorage.setItem(STORAGE_KEY, nextLocale);
@@ -67,20 +109,28 @@ export function LocaleProvider({
   }, []);
 
   const toggleLocale = useCallback(() => {
-    setLocale(locale === 'en' ? 'ar' : 'en');
-  }, [locale, setLocale]);
+    if (!secondaryLocale) {
+      setLocale(primaryLocale);
+      return;
+    }
+    setLocale(locale === primaryLocale ? secondaryLocale : primaryLocale);
+  }, [locale, primaryLocale, secondaryLocale, setLocale]);
 
   const copy = useMemo(() => getLocaleCopy(locale), [locale]);
 
   const value = useMemo<LocaleContextValue>(
     () => ({
       locale,
+      localeMeta,
+      primaryLocale,
+      secondaryLocale,
+      supportedLocales: SUPPORTED_LOCALES,
       isRtl,
       copy,
       setLocale,
       toggleLocale
     }),
-    [locale, isRtl, copy, setLocale, toggleLocale]
+    [locale, localeMeta, primaryLocale, secondaryLocale, isRtl, copy, setLocale, toggleLocale]
   );
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;

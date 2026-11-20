@@ -118,7 +118,7 @@ export function BctLedgerDrawer() {
                     : 'bg-white text-ink/75 hover:bg-ink/5 border border-ink/15'
                 )}
               >
-                {locale === 'ar' ? '🇦🇪 مرونة بيئة الخليج (6)' : '🇦🇪 Gulf Resilience (6)'}
+                {locale === 'ar' ? 'مرونة بيئة الخليج (6)' : 'Gulf Resilience (6)'}
               </button>
 
               <button

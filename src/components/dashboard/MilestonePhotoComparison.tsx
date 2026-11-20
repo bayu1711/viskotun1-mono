@@ -2,6 +2,7 @@
 
 import React, { useId, useState } from 'react';
 import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
+import CheckIcon from '@mui/icons-material/Check';
 import CompareArrowsOutlinedIcon from '@mui/icons-material/CompareArrowsOutlined';
 import GridOnOutlinedIcon from '@mui/icons-material/GridOnOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -128,13 +129,14 @@ export function MilestonePhotoComparison() {
               key={day}
               type="button"
               onClick={() => setSelectedMilestoneDay(day)}
-              className={`rounded-full px-3 py-1 text-xs transition-colors ${
+              className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs transition-colors ${
                 isSelected
                   ? 'bg-orange font-medium text-white shadow-2xs'
                   : 'bg-canvas text-ink/70 hover:bg-ink/10'
               }`}
             >
-              {COPY.morphing.dashboard.dayPill(day, hasLog)}
+              <span>{COPY.morphing.dashboard.dayPill(day)}</span>
+              {hasLog && <Icon icon={CheckIcon} size="xs" />}
             </button>
           );
         })}

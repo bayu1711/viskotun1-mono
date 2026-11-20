@@ -2,6 +2,7 @@
 
 import React from 'react';
 import NorthEastIcon from '@mui/icons-material/NorthEast';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
@@ -51,8 +52,12 @@ export function RoutineCard() {
       )}
 
       {stopRule && (
-        <Callout tone="cream" className="mt-3 rounded-tile">
-          {COPY.common.warningPrefix} {stopRule.text}
+        <Callout
+          tone="cream"
+          icon={<Icon icon={WarningAmberOutlinedIcon} size="sm" className="mt-0.5 text-ink/75" />}
+          className="mt-3 rounded-tile"
+        >
+          {stopRule.text}
         </Callout>
       )}
 

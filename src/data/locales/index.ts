@@ -1,9 +1,52 @@
 import { COPY } from '../copy';
 import { COPY_AR_OVERRIDE } from './ar';
-import type { AppLocale, DeepPartial, LocaleCopy } from './types';
+import type { AppLocale, DeepPartial, LocaleCopy, LocaleMeta, SecondaryLanguage } from './types';
 
 export * from './types';
 export * from './glossary';
+
+export const SUPPORTED_LOCALES: readonly LocaleMeta[] = [
+  {
+    code: 'en',
+    shortLabel: 'EN',
+    nativeLabel: 'English',
+    englishName: 'English',
+    dir: 'ltr'
+  },
+  {
+    code: 'ar',
+    shortLabel: 'العربية',
+    nativeLabel: 'العربية',
+    englishName: 'Arabic',
+    dir: 'rtl'
+  }
+] as const;
+
+export function isSupportedLocale(value: unknown): value is AppLocale {
+  return typeof value === 'string' && SUPPORTED_LOCALES.some((item) => item.code === value);
+}
+
+export function getLocaleMeta(locale: AppLocale): LocaleMeta {
+  return SUPPORTED_LOCALES.find((item) => item.code === locale) ?? SUPPORTED_LOCALES[0];
+}
+
+export function resolveLanguagePair(
+  primaryLanguage?: AppLocale,
+  secondaryLanguage?: SecondaryLanguage
+): { primary: AppLocale; secondary: AppLocale | null } {
+  const primary: AppLocale = isSupportedLocale(primaryLanguage) ? primaryLanguage : 'en';
+  if (secondaryLanguage === 'none') {
+    return { primary, secondary: null };
+  }
+  if (secondaryLanguage && isSupportedLocale(secondaryLanguage)) {
+    return {
+      primary,
+      secondary: secondaryLanguage === primary ? null : secondaryLanguage
+    };
+  }
+  const fallbackSecondary = SUPPORTED_LOCALES.find((item) => item.code !== primary)?.code ?? null;
+  return { primary, secondary: fallbackSecondary };
+}
 
 function isObject(item: unknown): item is Record<string, unknown> {
   return Boolean(item && typeof item === 'object' && !Array.isArray(item));

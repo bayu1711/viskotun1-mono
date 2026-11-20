@@ -2,8 +2,11 @@
 
 import React, { useRef } from 'react';
 import Image from 'next/image';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CloseIcon from '@mui/icons-material/Close';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
+import ScheduleOutlinedIcon from '@mui/icons-material/ScheduleOutlined';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
@@ -200,12 +203,31 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
                 </div>
                 <div className="rounded-tile border border-ink/10 bg-canvas/40 p-3 print:bg-white">
                   <p className="text-2xs text-ink/60">{COPY.shareableSummary.progressionGate}</p>
-                  <p className="mt-1 text-sm font-semibold capitalize text-ink">
-                    {status === 'paused'
-                      ? COPY.shareableSummary.statusPaused
-                      : status === 'ready'
-                      ? COPY.shareableSummary.statusReady
-                      : COPY.shareableSummary.statusHolding}
+                  <p className="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold capitalize text-ink">
+                    <Icon
+                      icon={
+                        status === 'paused'
+                          ? WarningAmberOutlinedIcon
+                          : status === 'ready'
+                          ? CheckCircleOutlineIcon
+                          : ScheduleOutlinedIcon
+                      }
+                      size="xs"
+                      className={
+                        status === 'paused'
+                          ? 'text-danger'
+                          : status === 'ready'
+                          ? 'text-ink'
+                          : 'text-ink/60'
+                      }
+                    />
+                    <span>
+                      {status === 'paused'
+                        ? COPY.shareableSummary.statusPaused
+                        : status === 'ready'
+                        ? COPY.shareableSummary.statusReady
+                        : COPY.shareableSummary.statusHolding}
+                    </span>
                   </p>
                 </div>
               </div>

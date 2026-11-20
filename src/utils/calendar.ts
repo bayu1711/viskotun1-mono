@@ -101,7 +101,7 @@ export function buildRoutineCalendarDescription(routine: Routine): string {
   const stopRule = stopRuleOf(routine);
   if (stopRule) {
     lines.push('');
-    lines.push(`⚠️ Stop Rule: ${stopRule.text}`);
+    lines.push(`Stop Rule: ${stopRule.text}`);
   }
 
   lines.push('');

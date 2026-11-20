@@ -20,3 +20,12 @@ export type DeepPartial<T> = T extends (...args: infer P) => infer R
 
 export type LocaleCopy = DeepString<typeof COPY>;
 export type AppLocale = 'en' | 'ar';
+export type SecondaryLanguage = AppLocale | 'none';
+
+export interface LocaleMeta {
+  code: AppLocale;
+  shortLabel: string;
+  nativeLabel: string;
+  englishName: string;
+  dir: 'ltr' | 'rtl';
+}

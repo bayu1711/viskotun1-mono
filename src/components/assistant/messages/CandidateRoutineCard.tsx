@@ -4,6 +4,7 @@ import React from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import { COPY } from '../../../data/copy';
 import type { Routine, RoutineStep } from '../../../types/routine';
 import { cn } from '../../../utils/cn';
@@ -193,8 +194,12 @@ export function CandidateRoutineCard({
       )}
 
       {stopRule && (
-        <Callout tone="cream" className="rounded-tile text-xs">
-          {COPY.common.warningPrefix} {stopRule.text}
+        <Callout
+          tone="cream"
+          icon={<Icon icon={WarningAmberOutlinedIcon} size="sm" className="mt-0.5 text-ink/75" />}
+          className="rounded-tile text-xs"
+        >
+          {stopRule.text}
         </Callout>
       )}
 

@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CloudDoneOutlinedIcon from '@mui/icons-material/CloudDoneOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
@@ -129,8 +130,9 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
               </div>
             )}
           </div>
-          <p className="mt-2 text-2xs text-ink/60">
-            {COPY.morphing.widgets.photo.attached}
+          <p className="mt-2 flex items-center gap-1.5 text-2xs text-ink/60">
+            <Icon icon={CheckCircleOutlineIcon} size="xs" className="text-ink/70" />
+            <span>{COPY.morphing.widgets.photo.attached}</span>
           </p>
         </div>
       ) : (

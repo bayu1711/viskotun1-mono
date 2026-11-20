@@ -5,7 +5,9 @@ import { usePathname } from 'next/navigation';
 import AddIcon from '@mui/icons-material/Add';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import LocalFireDepartmentOutlinedIcon from '@mui/icons-material/LocalFireDepartmentOutlined';
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { useAssistant } from '../../contexts/AssistantContext';
@@ -19,6 +21,7 @@ import { greeting } from '../../utils/time';
 import { Avatar } from '../ui/Avatar';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 export function TopBar() {
   const pathname = usePathname();
@@ -26,22 +29,12 @@ export function TopBar() {
   const { openAssistant, openLifestyleTuning } = useAssistant();
   const { user, isGuest, isAdmin, logout } = useAuth();
   const { openPolicyDrawer, isLiveFirestore } = usePolicyLedger();
-  const { locale, toggleLocale, copy } = useLocale();
+  const { locale, copy } = useLocale();
 
   const displayName = user?.name || copy.auth.defaultGuestName;
   const displayInitials = user?.initials || copy.brand.initials;
 
-  const flagEmoji =
-    lifestyleProfile?.region?.countryCode === 'AE'
-      ? '🇦🇪'
-      : lifestyleProfile?.region?.countryCode === 'SA'
-      ? '🇸🇦'
-      : lifestyleProfile?.region?.countryCode === 'GB'
-      ? '🇬🇧'
-      : lifestyleProfile?.region?.countryCode === 'US'
-      ? '🇺🇸'
-      : '🌐';
-
+  const countryCode = lifestyleProfile?.region?.countryCode || 'AE';
   const regionLabel =
     lifestyleProfile?.region?.city || lifestyleProfile?.region?.countryName || 'Abu Dhabi';
   const tagCount = lifestyleProfile?.activeTags?.length ?? 0;
@@ -97,18 +90,7 @@ export function TopBar() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          {/* Language Switcher */}
-          <button
-            type="button"
-            onClick={toggleLocale}
-            className="inline-flex items-center gap-1 rounded-full border border-ink/20 bg-cream/70 hover:bg-cream px-2.5 py-1 text-xs font-semibold text-ink transition-colors cursor-pointer"
-            title={locale === 'en' ? 'التحويل إلى اللغة العربية' : 'Switch to English'}
-            aria-label={locale === 'en' ? 'التحويل إلى اللغة العربية' : 'Switch to English'}
-          >
-            <span className={locale === 'en' ? 'font-bold text-ink' : 'text-ink/60 font-normal'}>EN</span>
-            <span className="text-ink/30" aria-hidden="true">|</span>
-            <span className={locale === 'ar' ? 'font-bold text-ink' : 'text-ink/60 font-normal'}>العربية</span>
-          </button>
+          <LanguageSwitcher variant="topbar" />
 
           <button
             type="button"
@@ -117,8 +99,13 @@ export function TopBar() {
             title={copy.lifestyleTuning.tuneButton}
             aria-label={copy.lifestyleTuning.tuneButton}
           >
-            <span className="text-xs leading-none" aria-hidden="true">
-              {flagEmoji}
+            <Icon
+              icon={lifestyleProfile?.region?.countryCode ? LocationOnOutlinedIcon : PublicOutlinedIcon}
+              size="xs"
+              className="text-ink/70"
+            />
+            <span className="font-mono text-3xs font-semibold uppercase sm:hidden">
+              {countryCode}
             </span>
             <span className="hidden sm:inline font-semibold">
               {regionLabel}

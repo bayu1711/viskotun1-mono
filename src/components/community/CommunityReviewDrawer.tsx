@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { MOTION } from '../../data/config';
 import { COPY } from '../../data/copy';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
+import { Icon } from '../ui/Icon';
 import { PillButton } from '../ui/PillButton';
 import { Spinner } from '../feedback/Spinner';
 import type { ReviewOutcome } from '../../types/routine';
@@ -119,7 +121,7 @@ export function CommunityReviewDrawer({ open, onClose }: CommunityReviewDrawerPr
                   className="rounded-full p-1 text-ink/60 hover:bg-ink/5 hover:text-ink transition-colors"
                   aria-label={COPY.community.cancel}
                 >
-                  ✕
+                  <Icon icon={CloseIcon} size="sm" />
                 </button>
               </div>
 

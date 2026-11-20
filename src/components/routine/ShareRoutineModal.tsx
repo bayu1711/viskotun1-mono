@@ -11,6 +11,7 @@ import IosShareOutlinedIcon from '@mui/icons-material/IosShareOutlined';
 import OpenInNewOutlinedIcon from '@mui/icons-material/OpenInNewOutlined';
 import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import XIcon from '@mui/icons-material/X';
 import { toast } from 'sonner';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
@@ -239,7 +240,7 @@ export function ShareRoutineModal() {
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-1.5 rounded-xl border border-ink/20 bg-white hover:bg-cream/70 py-2 px-3 text-xs font-semibold text-ink transition-colors cursor-pointer"
               >
-                <span className="font-bold text-xs">𝕏</span>
+                <Icon icon={XIcon} size="xs" />
                 <span>{COPY.shareModal.socialX}</span>
               </a>
 

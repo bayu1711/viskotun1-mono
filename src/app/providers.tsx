@@ -17,8 +17,8 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <MotionConfig reducedMotion="user">
-      <LocaleProvider>
-        <AuthProvider>
+      <AuthProvider>
+        <LocaleProvider>
           <RoutineProvider missingDataFlagEnabled={true}>
             <AssistantProvider>
               <PolicyLedgerProvider>
@@ -27,8 +27,8 @@ export function Providers({ children }: ProvidersProps) {
               </PolicyLedgerProvider>
             </AssistantProvider>
           </RoutineProvider>
-        </AuthProvider>
-      </LocaleProvider>
+        </LocaleProvider>
+      </AuthProvider>
     </MotionConfig>
   );
 }

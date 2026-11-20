@@ -1,9 +1,11 @@
 'use client';
 
 import React from 'react';
+import CheckIcon from '@mui/icons-material/Check';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { cn } from '../../utils/cn';
+import { Icon } from '../ui/Icon';
 import { PillButton } from '../ui/PillButton';
 
 interface DayActionsProps {
@@ -38,7 +40,14 @@ export function DayActions({ onLogFeedback, size = 'lg', className }: DayActions
           onClick={markTodayComplete}
           disabled={dayIsComplete}
         >
-          {dayIsComplete ? COPY.dayActions.dayLogged(currentDay) : COPY.dayActions.markComplete}
+          {dayIsComplete ? (
+            <>
+              <Icon icon={CheckIcon} size="xs" />
+              <span>{COPY.dayActions.dayLogged(currentDay)}</span>
+            </>
+          ) : (
+            COPY.dayActions.markComplete
+          )}
         </PillButton>
         <PillButton size={size} variant="outline" onClick={() => handleLog()} aria-haspopup="dialog">
           {COPY.dayActions.logFeedback(feedbackMetric?.name)}

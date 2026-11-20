@@ -11,13 +11,7 @@ import { isEdgeGemmaAvailable } from '../../utils/edgeGemma';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
 import { SegmentedTabs } from '../ui/SegmentedTabs';
-
-const ENGINE_LABELS: Record<AIEngineType, string> = {
-  'on-device-gemma': COPY.assistant.engines.onDeviceGemma,
-  'server-gemma': COPY.assistant.engines.serverGemma,
-  'cloud-gemini': COPY.assistant.engines.cloudGemini,
-  'local-rules': COPY.assistant.engines.localRules
-};
+import { getEngineMeta } from './engineMeta';
 
 const MODE_OPTIONS: { id: AssistantMode; label: string }[] = [
   { id: 'ask', label: COPY.assistant.modes.ask },
@@ -115,15 +109,19 @@ export function AssistantHeader({
               <span>{COPY.assistant.medicalDisclaimerChip}</span>
             </button>
 
-            {isAsk && engine && (
-              <span
-                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-3xs font-medium ${
-                  engine === 'on-device-gemma' ? 'bg-mint text-ink' : 'bg-cream text-ink/80'
-                }`}
-              >
-                {ENGINE_LABELS[engine]}
-              </span>
-            )}
+            {(isAsk || mode === 'lifestyle') && engine && (() => {
+              const engineMeta = getEngineMeta(engine);
+              return (
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-3xs font-medium ${
+                    engine === 'on-device-gemma' ? 'bg-mint text-ink' : 'bg-cream text-ink/80'
+                  }`}
+                >
+                  <Icon icon={engineMeta.icon} size="xs" />
+                  <span>{engineMeta.label}</span>
+                </span>
+              );
+            })()}
 
             <AnimatePresence>
               {isDisclaimerOpen && (
