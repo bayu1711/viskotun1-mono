@@ -172,7 +172,7 @@ Rules:
 2. Briefly acknowledge what the participant just shared without judgment.
 3. ${
             nextStage === 'complete'
-              ? 'Warmly confirm their adaptive profile is ready and state their derived focus in plain language.'
+              ? 'Warmly confirm their adaptive profile is ready, state their derived focus in plain language, and recommend exploring routines tailored to their focus.'
               : 'Naturally ask the next question above so the conversation flows smoothly.'
           }`;
 
