@@ -7,7 +7,7 @@
     "dev:sandbox": "next dev -p 3020",
     "build": "next build",
     "start": "next start",
-    "start:sandbox": "PORT=3020 node .next/standalone/server.js",
+    "start:sandbox": "mkdir -p .next/standalone/.next && rm -rf .next/standalone/.next/static .next/standalone/public && cp -R .next/static .next/standalone/.next/static && cp -R public .next/standalone/public && PORT=3020 node .next/standalone/server.js",
     "lint": "next lint",
     "test": "vitest run --pool=forks"
   },

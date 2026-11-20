@@ -7,6 +7,9 @@ const configFunction = (phase) => {
   return {
     reactStrictMode: true,
     output: 'standalone',
+    images: {
+      unoptimized: true
+    },
     distDir: process.env.NEXT_DIST_DIR || (isDev ? '.next-dev' : '.next'),
     transpilePackages: ['@mui/icons-material'],
     experimental: {
