@@ -33,7 +33,26 @@ declare global {
   }
 }
 
-/** Check if on-device language model (Gemma / Gemini Nano) is supported in this browser. */
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`${label} timed out after ${ms}ms`));
+    }, ms);
+
+    promise.then(
+      (val) => {
+        clearTimeout(timer);
+        resolve(val);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      }
+    );
+  });
+}
+
+/** Check if on-device language model (Gemma / Gemini Nano) is supported and readily downloaded in this browser. */
 export async function isEdgeGemmaAvailable(): Promise<boolean> {
   if (typeof window === 'undefined' || !window.ai) {
     return false;
@@ -42,7 +61,8 @@ export async function isEdgeGemmaAvailable(): Promise<boolean> {
   try {
     if (window.ai.languageModel) {
       const caps = await window.ai.languageModel.capabilities();
-      return caps.available !== 'no';
+      // Only return true when the model is already downloaded and readily available
+      return caps.available === 'readily';
     }
     if (typeof window.ai.createTextSession === 'function') {
       return true;
@@ -82,27 +102,39 @@ Instructions:
 
   // Standard Prompt API (Chrome 128+)
   if (window.ai.languageModel) {
-    const session = await window.ai.languageModel.create({
-      systemPrompt: systemInstruction
-    });
-    try {
-      const response = await session.prompt(question);
-      return stripClinicalDisclaimer(response.trim());
-    } finally {
-      session.destroy();
-    }
+    return withTimeout(
+      (async () => {
+        const session = await window.ai!.languageModel!.create({
+          systemPrompt: systemInstruction
+        });
+        try {
+          const response = await session.prompt(question);
+          return stripClinicalDisclaimer(response.trim());
+        } finally {
+          session.destroy();
+        }
+      })(),
+      8000,
+      'On-device Prompt API'
+    );
   }
 
   // Legacy prototype API
   if (typeof window.ai.createTextSession === 'function') {
-    const session = await window.ai.createTextSession();
-    try {
-      const promptText = `${systemInstruction}\n\nPatient Question: ${question}\nClinical Assistant Response:`;
-      const response = await session.prompt(promptText);
-      return stripClinicalDisclaimer(response.trim());
-    } finally {
-      session.destroy();
-    }
+    return withTimeout(
+      (async () => {
+        const session = await window.ai!.createTextSession!();
+        try {
+          const promptText = `${systemInstruction}\n\nPatient Question: ${question}\nClinical Assistant Response:`;
+          const response = await session.prompt(promptText);
+          return stripClinicalDisclaimer(response.trim());
+        } finally {
+          session.destroy();
+        }
+      })(),
+      8000,
+      'Legacy on-device Prompt API'
+    );
   }
 
   throw new Error('No compatible on-device Prompt API detected.');

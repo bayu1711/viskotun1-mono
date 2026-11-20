@@ -1732,77 +1732,80 @@ export function useRoutineState() {
       pushMessages(target.id, { role: 'user', kind: 'question', content: text });
       updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: true }));
 
-      // Tier 1: Try Edge Gemma (Chrome Built-in AI on-device)
       try {
-        const canUseEdgeGemma = await isEdgeGemmaAvailable();
-        if (canUseEdgeGemma) {
-          const edgeAnswer = await queryEdgeGemma(target, text);
-          if (edgeAnswer) {
-            pushMessages(target.id, {
-              role: 'ai',
-              kind: 'answer',
-              content: edgeAnswer,
-              engine: 'on-device-gemma',
-              source: COPY.assistant.engines.onDeviceGemmaSource
-            });
-            return;
+        // Tier 1: Try Edge Gemma (Chrome Built-in AI on-device)
+        try {
+          const canUseEdgeGemma = await isEdgeGemmaAvailable();
+          if (canUseEdgeGemma) {
+            const edgeAnswer = await queryEdgeGemma(target, text);
+            if (edgeAnswer) {
+              pushMessages(target.id, {
+                role: 'ai',
+                kind: 'answer',
+                content: edgeAnswer,
+                engine: 'on-device-gemma',
+                source: COPY.assistant.engines.onDeviceGemmaSource
+              });
+              return;
+            }
           }
-        }
-      } catch (edgeErr) {
-        console.info('[useRoutineState] Edge Gemma bypassed, routing to API:', edgeErr);
-      }
-
-      // Tier 2: Cloud Gemini / Server Gemma Route Handler
-      try {
-        const res = await fetch('/api/assistant', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            question: text,
-            routineTitle: target.title,
-            shortTitle: target.shortTitle,
-            faqs: target.faqs,
-            contraindications: target.contraindications,
-            steps: target.steps,
-            progressionRules: target.progressionRules,
-            feedbackMetric: target.feedbackMetric,
-            paper: target.paper,
-            missingDataFlags: target.missingDataFlags,
-            userProfile: userProfileRef.current,
-            lifestyleProfile: lifestyleProfileRef.current
-          })
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data?.answer) {
-            pushMessages(target.id, {
-              role: 'ai',
-              kind: 'answer',
-              content: stripClinicalDisclaimer(data.answer),
-              engine: data.engine ?? 'cloud-gemini',
-              source: data.source ?? COPY.assistant.methodsSectionSource
-            });
-            return;
-          }
+        } catch (edgeErr) {
+          console.info('[useRoutineState] Edge Gemma bypassed, routing to API:', edgeErr);
         }
 
-        // Tier 3: Deterministic Local Paper Rule Engine
-        pushMessages(target.id, {
-          role: 'ai',
-          kind: 'answer',
-          content: stripClinicalDisclaimer(answerFor(target, text)),
-          engine: 'local-rules',
-          source: COPY.assistant.methodsSectionSource
-        });
-      } catch {
-        pushMessages(target.id, {
-          role: 'ai',
-          kind: 'answer',
-          content: stripClinicalDisclaimer(answerFor(target, text)),
-          engine: 'local-rules',
-          source: COPY.assistant.methodsSectionSource
-        });
+        // Tier 2: Cloud Gemini / Server Gemma Route Handler
+        try {
+          const res = await fetch('/api/assistant', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              question: text,
+              routineTitle: target.title,
+              shortTitle: target.shortTitle,
+              faqs: target.faqs,
+              contraindications: target.contraindications,
+              steps: target.steps,
+              progressionRules: target.progressionRules,
+              feedbackMetric: target.feedbackMetric,
+              paper: target.paper,
+              missingDataFlags: target.missingDataFlags,
+              userProfile: userProfileRef.current,
+              lifestyleProfile: lifestyleProfileRef.current
+            }),
+            signal: AbortSignal.timeout(10000)
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            if (data?.answer) {
+              pushMessages(target.id, {
+                role: 'ai',
+                kind: 'answer',
+                content: stripClinicalDisclaimer(data.answer),
+                engine: data.engine ?? 'cloud-gemini',
+                source: data.source ?? COPY.assistant.methodsSectionSource
+              });
+              return;
+            }
+          }
+
+          // Tier 3: Deterministic Local Paper Rule Engine
+          pushMessages(target.id, {
+            role: 'ai',
+            kind: 'answer',
+            content: stripClinicalDisclaimer(answerFor(target, text)),
+            engine: 'local-rules',
+            source: COPY.assistant.methodsSectionSource
+          });
+        } catch {
+          pushMessages(target.id, {
+            role: 'ai',
+            kind: 'answer',
+            content: stripClinicalDisclaimer(answerFor(target, text)),
+            engine: 'local-rules',
+            source: COPY.assistant.methodsSectionSource
+          });
+        }
       } finally {
         updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: false }));
       }
@@ -1923,7 +1926,8 @@ export function useRoutineState() {
 
         const res = await fetch('/api/extract', {
           method: 'POST',
-          body: formData
+          body: formData,
+          signal: AbortSignal.timeout(45000)
         });
 
         if (!res.ok) {
@@ -2068,16 +2072,113 @@ export function useRoutineState() {
       setStagingMessages((prev) => [...prev, userMsg]);
       setIsStagingAssistantTyping(true);
 
-      if (!stagingRoutine && stagingError) {
+      try {
+        if (!stagingRoutine && stagingError) {
+          try {
+            const res = await fetch('/api/assistant', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                question: text,
+                rejectionReason: stagingError,
+                rejectedFileName: extractingSourceName
+              }),
+              signal: AbortSignal.timeout(10000)
+            });
+
+            if (res.ok) {
+              const data = await res.json();
+              if (data?.answer) {
+                setStagingMessages((prev) => [
+                  ...prev,
+                  {
+                    id: createId('msg'),
+                    role: 'ai',
+                    kind: 'answer',
+                    content: stripClinicalDisclaimer(data.answer),
+                    engine: data.engine ?? 'local-rules',
+                    source: data.source ?? COPY.assistant.rejection.source,
+                    timestamp: nowLabel()
+                  }
+                ]);
+                return;
+              }
+            }
+
+            setStagingMessages((prev) => [
+              ...prev,
+              {
+                id: createId('msg'),
+                role: 'ai',
+                kind: 'answer',
+                content: answerForRejection(stagingError, text),
+                engine: 'local-rules',
+                source: COPY.assistant.rejection.source,
+                timestamp: nowLabel()
+              }
+            ]);
+          } catch {
+            setStagingMessages((prev) => [
+              ...prev,
+              {
+                id: createId('msg'),
+                role: 'ai',
+                kind: 'answer',
+                content: answerForRejection(stagingError, text),
+                engine: 'local-rules',
+                source: COPY.assistant.rejection.source,
+                timestamp: nowLabel()
+              }
+            ]);
+          }
+          return;
+        }
+
+        const target = stagingRoutine!;
+
+        try {
+          const canUseEdgeGemma = await isEdgeGemmaAvailable();
+          if (canUseEdgeGemma) {
+            const edgeAnswer = await queryEdgeGemma(target, text);
+            if (edgeAnswer) {
+              setStagingMessages((prev) => [
+                ...prev,
+                {
+                  id: createId('msg'),
+                  role: 'ai',
+                  kind: 'answer',
+                  content: edgeAnswer,
+                  engine: 'on-device-gemma',
+                  source: COPY.assistant.engines.onDeviceGemmaSource,
+                  timestamp: nowLabel()
+                }
+              ]);
+              return;
+            }
+          }
+        } catch (edgeErr) {
+          console.info('[askStagingQuestion] Edge Gemma bypassed:', edgeErr);
+        }
+
         try {
           const res = await fetch('/api/assistant', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               question: text,
-              rejectionReason: stagingError,
-              rejectedFileName: extractingSourceName
-            })
+              routineTitle: target.title,
+              shortTitle: target.shortTitle,
+              faqs: target.faqs,
+              contraindications: target.contraindications,
+              steps: target.steps,
+              progressionRules: target.progressionRules,
+              feedbackMetric: target.feedbackMetric,
+              paper: target.paper,
+              missingDataFlags: target.missingDataFlags,
+              userProfile: userProfileRef.current,
+              lifestyleProfile: lifestyleProfileRef.current
+            }),
+            signal: AbortSignal.timeout(10000)
           });
 
           if (res.ok) {
@@ -2090,8 +2191,8 @@ export function useRoutineState() {
                   role: 'ai',
                   kind: 'answer',
                   content: stripClinicalDisclaimer(data.answer),
-                  engine: data.engine ?? 'local-rules',
-                  source: data.source ?? COPY.assistant.rejection.source,
+                  engine: data.engine ?? 'cloud-gemini',
+                  source: data.source ?? COPY.assistant.methodsSectionSource,
                   timestamp: nowLabel()
                 }
               ]);
@@ -2105,9 +2206,9 @@ export function useRoutineState() {
               id: createId('msg'),
               role: 'ai',
               kind: 'answer',
-              content: answerForRejection(stagingError, text),
+              content: stripClinicalDisclaimer(answerFor(target, text)),
               engine: 'local-rules',
-              source: COPY.assistant.rejection.source,
+              source: COPY.assistant.methodsSectionSource,
               timestamp: nowLabel()
             }
           ]);
@@ -2118,108 +2219,13 @@ export function useRoutineState() {
               id: createId('msg'),
               role: 'ai',
               kind: 'answer',
-              content: answerForRejection(stagingError, text),
+              content: stripClinicalDisclaimer(answerFor(target, text)),
               engine: 'local-rules',
-              source: COPY.assistant.rejection.source,
+              source: COPY.assistant.methodsSectionSource,
               timestamp: nowLabel()
             }
           ]);
-        } finally {
-          setIsStagingAssistantTyping(false);
         }
-        return;
-      }
-
-      const target = stagingRoutine!;
-
-      try {
-        const canUseEdgeGemma = await isEdgeGemmaAvailable();
-        if (canUseEdgeGemma) {
-          const edgeAnswer = await queryEdgeGemma(target, text);
-          if (edgeAnswer) {
-            setStagingMessages((prev) => [
-              ...prev,
-              {
-                id: createId('msg'),
-                role: 'ai',
-                kind: 'answer',
-                content: edgeAnswer,
-                engine: 'on-device-gemma',
-                source: COPY.assistant.engines.onDeviceGemmaSource,
-                timestamp: nowLabel()
-              }
-            ]);
-            return;
-          }
-        }
-      } catch (edgeErr) {
-        console.info('[askStagingQuestion] Edge Gemma bypassed:', edgeErr);
-      }
-
-      try {
-        const res = await fetch('/api/assistant', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            question: text,
-            routineTitle: target.title,
-            shortTitle: target.shortTitle,
-            faqs: target.faqs,
-            contraindications: target.contraindications,
-            steps: target.steps,
-            progressionRules: target.progressionRules,
-            feedbackMetric: target.feedbackMetric,
-            paper: target.paper,
-            missingDataFlags: target.missingDataFlags,
-            userProfile: userProfileRef.current,
-            lifestyleProfile: lifestyleProfileRef.current
-          })
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data?.answer) {
-            setStagingMessages((prev) => [
-              ...prev,
-              {
-                id: createId('msg'),
-                role: 'ai',
-                kind: 'answer',
-                content: stripClinicalDisclaimer(data.answer),
-                engine: data.engine ?? 'cloud-gemini',
-                source: data.source ?? COPY.assistant.methodsSectionSource,
-                timestamp: nowLabel()
-              }
-            ]);
-            return;
-          }
-        }
-
-        setStagingMessages((prev) => [
-          ...prev,
-          {
-            id: createId('msg'),
-            role: 'ai',
-            kind: 'answer',
-            content: stripClinicalDisclaimer(answerFor(target, text)),
-            engine: 'local-rules',
-            source: COPY.assistant.methodsSectionSource,
-            timestamp: nowLabel()
-          }
-        ]);
-      } catch {
-        setStagingMessages((prev) => [
-          ...prev,
-          {
-            id: createId('msg'),
-            role: 'ai',
-            kind: 'answer',
-            content: stripClinicalDisclaimer(answerFor(target, text)),
-            engine: 'local-rules',
-            source: COPY.assistant.methodsSectionSource,
-            timestamp: nowLabel()
-          }
-        ]);
       } finally {
         setIsStagingAssistantTyping(false);
       }
@@ -2531,6 +2537,18 @@ export function useRoutineState() {
         }
       };
 
+      let turnPayload: {
+        reply: string;
+        engine?: AIEngineType;
+        profileUpdates?: Partial<typeof currentProf>;
+        userProfileUpdates?: Partial<typeof currentUserProf>;
+        extractedTags?: string[];
+        suggestedFocus?: string;
+        suggestions?: RegionalLifestyleTag[];
+        nextStage?: LifestyleInterviewStage;
+        answeredStages?: LifestyleInterviewStage[];
+      } | null = null;
+
       try {
         const res = await fetch('/api/lifestyle/tune', {
           method: 'POST',
@@ -2544,18 +2562,25 @@ export function useRoutineState() {
             answeredStages,
             activeRoutineTitle: routine?.shortTitle || routine?.title,
             locale
-          })
+          }),
+          signal: AbortSignal.timeout(12000)
         });
 
         if (res.ok) {
           const data = await res.json();
-          applyTurnResult(data);
-          return data;
+          if (data && data.reply) {
+            turnPayload = data;
+          }
         }
       } catch (err) {
-        console.warn('[useRoutineState] Lifestyle tune failed, using local fallback:', err);
+        console.warn('[useRoutineState] Lifestyle tune failed or timed out, using local fallback:', err);
       } finally {
         setIsLifestyleTyping(false);
+      }
+
+      if (turnPayload) {
+        applyTurnResult(turnPayload);
+        return turnPayload;
       }
 
       // Deterministic offline fallback so the conversation never stalls
