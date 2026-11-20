@@ -3,6 +3,7 @@ import { COPY } from '../data/copy';
 import { useLocale } from '../contexts/LocaleContext';
 import type { RoutineStep } from '../types/routine';
 import { formatVoiceName, getCuratedNaturalVoices } from '../utils/voice';
+import { apiFetch } from '../lib/apiClient';
 
 interface UseVoiceCoachOptions {
   steps: RoutineStep[];
@@ -213,7 +214,7 @@ export function useVoiceCoach({ steps, onStepComplete, safetyRule, isDayComplete
       };
 
       // Query server for Google Cloud TTS audio if configured
-      fetch('/api/tts', {
+      apiFetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

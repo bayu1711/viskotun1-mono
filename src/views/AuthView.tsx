@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import GoogleIcon from '@mui/icons-material/Google';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { toast } from 'sonner';
 import { useAuth } from '../contexts/AuthContext';
 import { ROUTES } from '../data/navigation';
@@ -25,7 +24,7 @@ export function AuthView({ mode }: AuthViewProps) {
   const isLogin = activeMode === 'login';
   const fieldId = useId();
   const router = useRouter();
-  const { isAuthenticated, loginWithEmail, loginWithGoogle, signupWithEmail, loginAsGuest, loginAsAdmin } = useAuth();
+  const { isAuthenticated, loginWithEmail, loginWithGoogle, signupWithEmail, loginAsGuest } = useAuth();
 
   useEffect(() => {
     setActiveMode(mode);
@@ -85,12 +84,6 @@ export function AuthView({ mode }: AuthViewProps) {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleAdminContinue = () => {
-    loginAsAdmin();
-    toast.success(copy.auth.toastAdminEntered);
-    router.push(ROUTES.routine);
   };
 
   const handleGuestContinue = () => {
@@ -225,20 +218,6 @@ export function AuthView({ mode }: AuthViewProps) {
 
         {/* Quick Access Modes */}
         <div className="mt-6 space-y-4 border-t border-ink/15 pt-5 text-center">
-          <div>
-            <button
-              type="button"
-              onClick={handleAdminContinue}
-              className="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-ink/75 underline underline-offset-4 transition-colors hover:text-ink"
-            >
-              <Icon icon={ShieldOutlinedIcon} size="xs" />
-              <span>{copy.auth.adminButton}</span>
-            </button>
-            <p className="mt-1 text-pretty text-2xs leading-relaxed text-ink/60">
-              {copy.auth.adminLifecycleNotice}
-            </p>
-          </div>
-
           <div>
             <button
               type="button"

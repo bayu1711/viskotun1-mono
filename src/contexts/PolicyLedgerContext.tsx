@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { COPY } from '../data/copy';
+import { apiFetch, apiPostJson } from '../lib/apiClient';
 import type {
   GuardrailPolicy,
   GuardrailUpdateRequest,
@@ -71,11 +72,7 @@ export function PolicyLedgerProvider({ children }: { children: React.ReactNode }
     async (updates: GuardrailUpdateRequest): Promise<boolean> => {
       try {
         setIsLoading(true);
-        const res = await fetch('/api/admin/guardrails', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updates)
-        });
+        const res = await apiPostJson('/api/admin/guardrails', updates);
 
         if (res.ok) {
           const data = await res.json();
@@ -104,7 +101,7 @@ export function PolicyLedgerProvider({ children }: { children: React.ReactNode }
   const resetPolicy = useCallback(async (): Promise<boolean> => {
     try {
       setIsLoading(true);
-      const res = await fetch('/api/admin/guardrails', { method: 'DELETE' });
+      const res = await apiFetch('/api/admin/guardrails', { method: 'DELETE' });
       if (res.ok) {
         const data = await res.json();
         setPolicy(data.policy);

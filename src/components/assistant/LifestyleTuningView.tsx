@@ -29,6 +29,7 @@ import { formatAvailabilitySummary } from '../../utils/schedule';
 import { Icon } from '../ui/Icon';
 import { AssistantMessage } from './AssistantMessage';
 import { TypingIndicator } from './TypingIndicator';
+import { apiFetch } from '../../lib/apiClient';
 
 interface LifestyleTuningViewProps {
   lifestyleProfile?: UserLifestyleProfile;
@@ -81,7 +82,7 @@ export function LifestyleTuningView({
         if (countryName) params.set('countryName', countryName);
         if (city) params.set('city', city);
         if (culturalRhythmParam) params.set('rhythms', culturalRhythmParam);
-        const res = await fetch(`/api/lifestyle/tune?${params.toString()}`);
+        const res = await apiFetch(`/api/lifestyle/tune?${params.toString()}`);
         if (res.ok) {
           const data = await res.json();
           if (active && Array.isArray(data.suggestions) && data.suggestions.length > 0) {

@@ -38,6 +38,8 @@ import {
   countStoredUserLogs
 } from '../utils/accountData';
 import { stripClinicalDisclaimer } from '../utils/disclaimer';
+import { apiFetch, apiPostJson } from '../lib/apiClient';
+import { fetchCloudState, mergeRuntimeRecords, pushCloudState } from '../utils/cloudSync';
 import { isEdgeGemmaAvailable, queryEdgeGemma } from '../utils/edgeGemma';
 import { createId } from '../utils/id';
 import {
@@ -214,7 +216,7 @@ export function useRoutineState() {
     let isMounted = true;
     async function fetchFirebaseSamplePapers() {
       try {
-        const res = await fetch('/api/papers?type=trending', { cache: 'no-store' });
+        const res = await apiFetch('/api/papers?type=trending', { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           if (isMounted) {
@@ -394,149 +396,96 @@ export function useRoutineState() {
       setHasRemoteHydrated(false);
       return;
     }
+    const syncUserId = userId;
 
     async function fetchRemoteState() {
       try {
-        const res = await fetch(`/api/user/sync?userId=${encodeURIComponent(userId!)}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (isMounted) {
-            if (data.found) {
-              if (data.profile && typeof data.profile === 'object') {
-                updateUserProfileRef.current?.(data.profile);
-              }
-              if (data.lifestyleProfile && typeof data.lifestyleProfile === 'object') {
-                updateLifestyleProfileRef.current?.(data.lifestyleProfile);
-              }
-            }
-            if (data.found && Array.isArray(data.routines) && data.routines.length > 0) {
-              // Sanitize legacy auto-synced default papers if user never made active progress on them
-              const isLegacyAutoSynced =
-                data.routines.length === 3 &&
-                data.routines.every((p: Routine) =>
-                  ['achilles', 'hair-loss', 'creatine-sleep'].includes(p.id)
-                ) &&
-                (!data.runtime ||
-                  Object.keys(data.runtime).every((k) => {
-                    const r = data.runtime[k];
-                    return !r?.feedbackLogs?.length && !r?.morphingLogs?.length;
-                  }));
+        const remote = await fetchCloudState(syncUserId);
+        if (!remote || !isMounted) return;
 
-              if (isLegacyAutoSynced) {
-                // If local state is also empty or legacy, clean up remote record
-                setRoutineList((currentLocal) => {
-                  if (
-                    currentLocal.length === 0 ||
-                    currentLocal.every((p) => ['achilles', 'hair-loss', 'creatine-sleep'].includes(p.id))
-                  ) {
-                    fetch('/api/user/sync', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        userId,
-                        activeRoutineId: '',
-                        routines: [],
-                        runtime: {}
-                      })
-                    }).catch(() => {});
-                    setActiveRoutine('');
-                    setRuntime({});
-                    return [];
-                  }
-                  return currentLocal;
-                });
-              } else {
-                setRoutineList((currentLocal) => {
-                  const remoteList: Routine[] = data.routines;
-                  // If local state already has routines not present in remote, merge and preserve them
-                  const missingFromRemote = currentLocal.filter(
-                    (lp) => !remoteList.some((rp) => rp.id === lp.id)
-                  );
-                  if (missingFromRemote.length > 0) {
-                    const merged = [...remoteList, ...missingFromRemote];
-                    fetch('/api/user/sync', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        userId,
-                        activeRoutineId: data.activeRoutineId || merged[0]?.id || '',
-                        routines: merged,
-                        runtime: { ...(data.runtime || {}), ...runtimeRef.current }
-                      })
-                    }).catch(() => {});
-                    return merged;
-                  }
-                  return remoteList;
-                });
-
-                const targetActiveId = data.activeRoutineId || data.routines?.[0]?.id;
-                if (targetActiveId) {
-                  setActiveRoutine((curr) => curr || targetActiveId);
-                }
-
-                if (data.runtime && typeof data.runtime === 'object') {
-                  setRuntime((prev) => {
-                    const merged: Record<string, RoutineRuntime> = { ...prev };
-                    for (const [id, remoteRt] of Object.entries(data.runtime)) {
-                      const remote = remoteRt as RoutineRuntime;
-                      if (!merged[id]) {
-                        merged[id] = remote;
-                      } else {
-                        const local = merged[id];
-                        // Deduplicate feedback logs by ID
-                        const seenLogIds = new Set((remote.feedbackLogs || []).map((l) => l.id));
-                        const extraLocalLogs = (local.feedbackLogs || []).filter((l) => !seenLogIds.has(l.id));
-                        const mergedFeedback = [...(remote.feedbackLogs || []), ...extraLocalLogs];
-
-                        // Deduplicate morphing logs by ID
-                        const seenMorphIds = new Set((remote.morphingLogs || []).map((m) => m.id));
-                        const extraLocalMorph = (local.morphingLogs || []).filter((m) => !seenMorphIds.has(m.id));
-                        const mergedMorph = [...(remote.morphingLogs || []), ...extraLocalMorph];
-
-                        // Prefer remote setsDone if local is empty or remote has records
-                        const localSetsCount = Object.keys(local.setsDone || {}).length;
-                        const remoteSetsCount = Object.keys(remote.setsDone || {}).length;
-                        const resolvedSetsDone = remoteSetsCount > 0 && localSetsCount === 0 ? remote.setsDone : local.setsDone;
-
-                        merged[id] = {
-                          ...local,
-                          ...remote,
-                          setsDone: resolvedSetsDone,
-                          feedbackLogs: mergedFeedback,
-                          morphingLogs: mergedMorph,
-                          messages: remote.messages?.length ? remote.messages : local.messages,
-                          lastActiveDate: remote.lastActiveDate || local.lastActiveDate
-                        };
-                      }
-                    }
-                    return merged;
-                  });
-                }
-              }
-            } else {
-              // Remote returned found=false or empty routines list
-              // DO NOT wipe local state! If the user already has routines locally, sync them to remote!
-              setRoutineList((currentLocal) => {
-                if (currentLocal.length > 0) {
-                  fetch('/api/user/sync', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      userId,
-                      activeRoutineId: activeRoutineIdRef.current,
-                      routines: currentLocal,
-                      runtime: runtimeRef.current,
-                      profile: userProfileRef.current,
-                      lifestyleProfile: lifestyleProfileRef.current
-                    })
-                  }).catch(() => {});
-                  return currentLocal;
-                }
-                return [];
-              });
-            }
+        if (remote.found) {
+          if (remote.profile && typeof remote.profile === 'object') {
+            updateUserProfileRef.current?.(remote.profile);
+          }
+          if (remote.lifestyleProfile && typeof remote.lifestyleProfile === 'object') {
+            updateLifestyleProfileRef.current?.(remote.lifestyleProfile);
           }
         }
+
+        if (remote.found && remote.routines.length > 0) {
+          // Sanitize legacy auto-synced default papers if user never made active progress on them
+          const isLegacyAutoSynced =
+            remote.routines.length === 3 &&
+            remote.routines.every((p: Routine) =>
+              ['achilles', 'hair-loss', 'creatine-sleep'].includes(p.id)
+            ) &&
+            Object.keys(remote.runtime).every((k) => {
+              const r = remote.runtime[k];
+              return !r?.feedbackLogs?.length && !r?.morphingLogs?.length;
+            });
+
+          if (isLegacyAutoSynced) {
+            // If local state is also empty or legacy, clean up remote record
+            setRoutineList((currentLocal) => {
+              if (
+                currentLocal.length === 0 ||
+                currentLocal.every((p) => ['achilles', 'hair-loss', 'creatine-sleep'].includes(p.id))
+              ) {
+                pushCloudState(
+                  syncUserId,
+                  { activeRoutineId: '', routines: [], runtime: {} },
+                  { force: true }
+                ).catch(() => {});
+                setActiveRoutine('');
+                setRuntime({});
+                return [];
+              }
+              return currentLocal;
+            });
+            return;
+          }
+
+          setRoutineList((currentLocal) => {
+            const remoteList = remote.routines;
+            // If local state already has routines not present in remote, merge and preserve them
+            const missingFromRemote = currentLocal.filter(
+              (lp) => !remoteList.some((rp) => rp.id === lp.id)
+            );
+            if (missingFromRemote.length > 0) {
+              const merged = [...remoteList, ...missingFromRemote];
+              pushCloudState(syncUserId, {
+                activeRoutineId: remote.activeRoutineId || merged[0]?.id || '',
+                routines: merged,
+                runtime: mergeRuntimeRecords(runtimeRef.current, remote.runtime)
+              }).catch(() => {});
+              return merged;
+            }
+            return remoteList;
+          });
+
+          const targetActiveId = remote.activeRoutineId || remote.routines[0]?.id;
+          if (targetActiveId) {
+            setActiveRoutine((curr) => curr || targetActiveId);
+          }
+
+          setRuntime((prev) => mergeRuntimeRecords(prev, remote.runtime));
+          return;
+        }
+
+        // Remote has nothing yet. Do not wipe local state: upload what this device has.
+        setRoutineList((currentLocal) => {
+          if (currentLocal.length > 0) {
+            pushCloudState(syncUserId, {
+              activeRoutineId: activeRoutineIdRef.current,
+              routines: currentLocal,
+              runtime: runtimeRef.current,
+              profile: userProfileRef.current,
+              lifestyleProfile: lifestyleProfileRef.current
+            }).catch(() => {});
+            return currentLocal;
+          }
+          return [];
+        });
       } catch (err) {
         console.error('[useRoutineState] Cloud fetch error:', err);
       } finally {
@@ -556,22 +505,26 @@ export function useRoutineState() {
   // Outbound sync to backend once remote state is confirmed/hydrated
   useEffect(() => {
     if (!hasHydrated || isAuthLoading || !isAuthenticated || !userId || !hasRemoteHydrated) return;
+    const syncUserId = userId;
 
     const timer = window.setTimeout(() => {
-      fetch('/api/user/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          activeRoutineId,
-          routines: routineList,
-          runtime,
-          profile: auth?.userProfile,
-          lifestyleProfile: auth?.lifestyleProfile
+      pushCloudState(syncUserId, {
+        activeRoutineId,
+        routines: routineList,
+        runtime,
+        profile: auth?.userProfile,
+        lifestyleProfile: auth?.lifestyleProfile
+      })
+        .then((result) => {
+          if (result.status === 'merged') {
+            // Another device saved in between: show the combined routines and logs
+            setRoutineList(result.state.routines);
+            setRuntime(result.state.runtime);
+          }
         })
-      }).catch((err) => {
-        console.error('[useRoutineState] Cloud sync error:', err);
-      });
+        .catch((err) => {
+          console.error('[useRoutineState] Cloud sync error:', err);
+        });
     }, 1000);
 
     return () => window.clearTimeout(timer);
@@ -609,16 +562,9 @@ export function useRoutineState() {
     setRuntime({});
 
     if (isAuthenticated && userId) {
-      fetch('/api/user/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          activeRoutineId: '',
-          routines: [],
-          runtime: {}
-        })
-      }).catch(() => {});
+      pushCloudState(userId, { activeRoutineId: '', routines: [], runtime: {} }, { force: true }).catch(
+        () => {}
+      );
     }
 
     toast.success(copyRef.current.demo.resetSuccess);
@@ -645,11 +591,7 @@ export function useRoutineState() {
     auth?.resetProfileToDefaults();
 
     if (isAuthenticated && userId) {
-      const res = await fetch('/api/user/account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'clear_data', userId })
-      });
+      const res = await apiPostJson('/api/user/account', { action: 'clear_data' });
       if (!res.ok) {
         throw new Error(copyRef.current.profile.actionErrorToast);
       }
@@ -765,15 +707,10 @@ export function useRoutineState() {
 
       // Immediate outbound sync to backend if signed in
       if (isAuthenticated && userId) {
-        fetch('/api/user/sync', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId,
-            activeRoutineId: cleanRoutine.id,
-            routines: updatedList.length > 0 ? updatedList : [cleanRoutine],
-            runtime: Object.keys(updatedRuntime).length > 0 ? updatedRuntime : { [cleanRoutine.id]: initialRuntimeEntry }
-          })
+        pushCloudState(userId, {
+          activeRoutineId: cleanRoutine.id,
+          routines: updatedList.length > 0 ? updatedList : [cleanRoutine],
+          runtime: Object.keys(updatedRuntime).length > 0 ? updatedRuntime : { [cleanRoutine.id]: initialRuntimeEntry }
         }).catch((err) => {
           console.warn('[loadSampleRoutine] Cloud sync error:', err);
         });
@@ -1767,11 +1704,12 @@ export function useRoutineState() {
 
         // Tier 2: Cloud Gemini / Server Gemma Route Handler
         try {
-          const res = await fetch('/api/assistant', {
+          const res = await apiFetch('/api/assistant', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               question: text,
+              routineId: target.id,
               routineTitle: target.title,
               shortTitle: target.shortTitle,
               faqs: target.faqs,
@@ -1874,15 +1812,10 @@ export function useRoutineState() {
     setActiveRoutine(newRoutine.id);
 
     if (isAuthenticated && userId) {
-      fetch('/api/user/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          activeRoutineId: newRoutine.id,
-          routines: updatedList.length > 0 ? updatedList : [newRoutine],
-          runtime: Object.keys(updatedRuntime).length > 0 ? updatedRuntime : { [newRoutine.id]: newRuntimeEntry }
-        })
+      pushCloudState(userId, {
+        activeRoutineId: newRoutine.id,
+        routines: updatedList.length > 0 ? updatedList : [newRoutine],
+        runtime: Object.keys(updatedRuntime).length > 0 ? updatedRuntime : { [newRoutine.id]: newRuntimeEntry }
       }).catch((err) => {
         console.warn('[addRoutine] Cloud sync error:', err);
       });
@@ -1936,7 +1869,7 @@ export function useRoutineState() {
           formData.append('file', source);
         }
 
-        const res = await fetch('/api/extract', {
+        const res = await apiFetch('/api/extract', {
           method: 'POST',
           body: formData,
           signal: AbortSignal.timeout(EXTRACTION_CLIENT_TIMEOUT_MS)
@@ -1947,7 +1880,13 @@ export function useRoutineState() {
         }
 
         const result = await res.json();
-        const extractedRoutine = result.routine;
+        const extractedRoutine: Routine | undefined = result.routine
+          ? {
+              ...result.routine,
+              // The server keeps its own copy of this extraction; confirming sends only this id
+              ...(typeof result.candidateId === 'string' ? { extractionCandidateId: result.candidateId } : {})
+            }
+          : undefined;
 
         if (result.eligible && extractedRoutine) {
           setStagingRoutine(extractedRoutine);
@@ -2022,46 +1961,26 @@ export function useRoutineState() {
 
   const confirmStagingRoutine = useCallback((scheduleOverride?: RoutineSchedulePreference) => {
     if (!stagingRoutine) return;
+    const { extractionCandidateId, ...stagedRoutine } = stagingRoutine;
     const target: Routine = scheduleOverride
-      ? { ...stagingRoutine, initialSchedule: scheduleOverride }
-      : stagingRoutine;
+      ? { ...stagedRoutine, initialSchedule: scheduleOverride }
+      : stagedRoutine;
     addRoutine(target);
 
-    // Persist uploaded paper to unified Firebase papers collection
-    fetch('/api/papers', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        paper: {
-          id: target.id,
-          title: target.paper?.title || target.title,
-          shortTitle: target.shortTitle,
-          domain: target.phase || 'Clinical Research',
-          category: 'rehab',
-          authors: target.paper?.authors || 'Unknown Authors',
-          journal: target.paper?.journal || 'Clinical Trial',
-          year: target.paper?.year || new Date().getFullYear(),
-          doi: target.paper?.doi || '',
-          openAccessUrl: target.paper?.doi ? `https://doi.org/${target.paper?.doi}` : '',
-          pdfUrl: '',
-          summary: target.steps?.map((s: RoutineStep) => s.action).join('. ') || '',
-          featuresTested: target.steps?.map((s: RoutineStep) => s.action) || [],
-          routineId: target.id,
-          isSample: false,
-          userId: userId || 'guest'
-        },
-        routine: target
-      })
-    }).catch((err) => {
-      console.warn('[confirmStagingRoutine] Could not persist to Firebase papers collection:', err);
-    });
+    // Record the confirmation on the server. Only the candidate id is sent: the server
+    // registers its own stored copy of the extraction, never routine content from the browser.
+    if (isAuthenticated && extractionCandidateId) {
+      apiPostJson('/api/papers', { candidateId: extractionCandidateId }).catch((err) => {
+        console.warn('[confirmStagingRoutine] Could not record the confirmed paper:', err);
+      });
+    }
 
     const displayTitle = formatRoutineTitle(target.shortTitle) || target.title;
     setStagingRoutine(null);
     setStagingMessages([]);
     setStagingError(null);
     toast.success(copyRef.current.assistant.confirmedToast(displayTitle));
-  }, [stagingRoutine, addRoutine, userId]);
+  }, [stagingRoutine, addRoutine, isAuthenticated]);
 
   const discardStagingRoutine = useCallback(() => {
     setStagingRoutine(null);
@@ -2087,7 +2006,7 @@ export function useRoutineState() {
       try {
         if (!stagingRoutine && stagingError) {
           try {
-            const res = await fetch('/api/assistant', {
+            const res = await apiFetch('/api/assistant', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -2173,11 +2092,12 @@ export function useRoutineState() {
         }
 
         try {
-          const res = await fetch('/api/assistant', {
+          const res = await apiFetch('/api/assistant', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               question: text,
+              routineId: target.id,
               routineTitle: target.title,
               shortTitle: target.shortTitle,
               faqs: target.faqs,
@@ -2299,12 +2219,16 @@ export function useRoutineState() {
       };
 
       try {
-        const res = await fetch('/api/community/reviews', {
+        const res = await apiFetch('/api/community/reviews', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
+        if (res.status === 401) {
+          toast.info(copyRef.current.community.reviewSignInToast);
+          return;
+        }
         if (!res.ok) {
           throw new Error('Failed to submit review');
         }
@@ -2349,7 +2273,7 @@ export function useRoutineState() {
 
       setIsAdaptingLifestyle(true);
       try {
-        const res = await fetch('/api/lifestyle/adapt', {
+        const res = await apiFetch('/api/lifestyle/adapt', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -2562,7 +2486,7 @@ export function useRoutineState() {
       } | null = null;
 
       try {
-        const res = await fetch('/api/lifestyle/tune', {
+        const res = await apiFetch('/api/lifestyle/tune', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

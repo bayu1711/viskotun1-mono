@@ -8,6 +8,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import { toast } from 'sonner';
 import { COPY } from '../../../data/copy';
+import { apiFetch } from '../../../lib/apiClient';
 import type { DataCollectionField } from '../../../types/routine';
 import { Spinner } from '../../feedback/Spinner';
 import { CircleButton } from '../../ui/CircleButton';
@@ -48,7 +49,7 @@ export function PhotoWidget({ field, value, onChange }: PhotoWidgetProps) {
       formData.append('file', file);
       formData.append('category', 'photos');
 
-      const response = await fetch('/api/upload', {
+      const response = await apiFetch('/api/upload', {
         method: 'POST',
         body: formData
       });
