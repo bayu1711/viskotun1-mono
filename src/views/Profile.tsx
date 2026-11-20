@@ -392,9 +392,11 @@ export function ProfilePage() {
         <PageHeader
           eyebrow={t.eyebrow}
           title={t.title}
+          hideRoutineSwitcher
           switcherExtra={
             <div className="flex flex-wrap items-center gap-2.5">
               <SegmentedTabs
+                variant="pills"
                 options={[
                   { id: 'account' as const, label: t.tabs.account },
                   { id: 'lifestyle' as const, label: t.tabs.lifestyle }
@@ -403,7 +405,10 @@ export function ProfilePage() {
                 onChange={handleTabChange}
                 ariaLabel={t.tabs.ariaLabel}
               />
-              <Link href={ROUTES.routine} className={pillClassName('outline', 'sm')}>
+              <Link
+                href={ROUTES.routine}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-ink/20 bg-cream/70 px-3.5 text-xs font-medium text-ink transition-colors hover:border-ink hover:bg-mint"
+              >
                 <span>{t.backToRoutine}</span>
                 <Icon icon={NorthEastIcon} size="xs" />
               </Link>
