@@ -112,7 +112,14 @@ describe('Global Geo & Guardrail-Protected Adaptive Lifestyle Engine', () => {
   describe('generateLifestyleAdaptation deterministic fallback', () => {
     it('adapts routines sensibly for global profiles (e.g. cold Berlin shift worker or Dubai summer heat)', async () => {
       const berlinResult = await generateLifestyleAdaptation({
-        userProfile: { age: 42, preferredReminderTime: '18:00' },
+        userProfile: {
+          age: 42,
+          availabilityMode: 'windows',
+          availableWindows: [
+            { id: 'morning', label: 'Morning', start: '07:30', end: '09:00' },
+            { id: 'evening', label: 'Evening', start: '18:00', end: '19:30' }
+          ]
+        },
         lifestyleProfile: {
           region: {
             countryCode: 'DE',
@@ -136,7 +143,14 @@ describe('Global Geo & Guardrail-Protected Adaptive Lifestyle Engine', () => {
       expect(Object.keys(berlinResult.stepTips).length).toBeGreaterThan(0);
 
       const usLateDinnerResult = await generateLifestyleAdaptation({
-        userProfile: { age: 35, preferredReminderTime: '21:30' },
+        userProfile: {
+          age: 35,
+          availabilityMode: 'windows',
+          availableWindows: [
+            { id: 'morning', label: 'Morning', start: '07:30', end: '09:00' },
+            { id: 'post-dinner', label: 'Post-Dinner', start: '21:30', end: '22:30' }
+          ]
+        },
         lifestyleProfile: {
           region: {
             countryCode: 'US',

@@ -6,11 +6,11 @@ import { ROUTES } from '../../data/navigation';
 import {
   deriveClinicalFocus,
   deriveLifestyleCohort,
-  getRegionalReminderPresets,
-  parseReminderTime,
+  getRegionalAvailabilityPresets,
   sanitizeAge,
   syncLifestyleActiveTags
 } from '../profile';
+import { parseClockTime } from '../schedule';
 import { calculateHealthAgeProjection } from '../healthAgeEngine';
 
 describe('UserProfile and UserLifestyleProfile utilities & wiring', () => {
@@ -24,11 +24,11 @@ describe('UserProfile and UserLifestyleProfile utilities & wiring', () => {
     expect(sanitizeAge(undefined)).toBeUndefined();
   });
 
-  it('parses preferred reminder HH:mm strings cleanly with 09:00 fallback', () => {
-    expect(parseReminderTime('20:30')).toEqual({ hour: 20, minute: 30 });
-    expect(parseReminderTime('07:05')).toEqual({ hour: 7, minute: 5 });
-    expect(parseReminderTime('invalid')).toEqual({ hour: 9, minute: 0 });
-    expect(parseReminderTime(undefined)).toEqual({ hour: 9, minute: 0 });
+  it('parses HH:mm clock strings cleanly with 09:00 fallback', () => {
+    expect(parseClockTime('20:30')).toEqual({ hour: 20, minute: 30 });
+    expect(parseClockTime('07:05')).toEqual({ hour: 7, minute: 5 });
+    expect(parseClockTime('invalid')).toEqual({ hour: 9, minute: 0 });
+    expect(parseClockTime(undefined)).toEqual({ hour: 9, minute: 0 });
   });
 
   it('synchronizes structured lifestyle settings into activeTags while preserving custom tags', () => {
@@ -139,43 +139,43 @@ describe('UserProfile and UserLifestyleProfile utilities & wiring', () => {
     expect(tuningViewSource).not.toContain('t.badge(');
   });
 
-  it('adapts daily reminder time preset chips to the selected region and fasting status', () => {
-    const usPresets = getRegionalReminderPresets({
+  it('adapts available time window preset chips to the selected region and fasting status', () => {
+    const usPresets = getRegionalAvailabilityPresets({
       countryCode: 'US',
       isRamadanFastingObserver: false,
-      basePresets: COPY.profile.reminderPresets,
-      fastingPreset: COPY.profile.fastingReminderPreset
+      basePresets: COPY.profile.availabilityPresets,
+      fastingPreset: COPY.profile.fastingAvailabilityPreset
     });
-    expect(usPresets.map((p) => p.label)).not.toContain(COPY.profile.fastingReminderPreset.label);
-    expect(usPresets.some((p) => p.value === '18:00')).toBe(true);
+    expect(usPresets.map((p) => p.label)).not.toContain(COPY.profile.fastingAvailabilityPreset.label);
+    expect(usPresets.some((p) => p.start === '19:00' && p.end === '21:00')).toBe(true);
 
-    const uaePresets = getRegionalReminderPresets({
+    const uaePresets = getRegionalAvailabilityPresets({
       countryCode: 'AE',
       isRamadanFastingObserver: false,
-      basePresets: COPY.profile.reminderPresets,
-      fastingPreset: COPY.profile.fastingReminderPreset
+      basePresets: COPY.profile.availabilityPresets,
+      fastingPreset: COPY.profile.fastingAvailabilityPreset
     });
-    expect(uaePresets.map((p) => p.label)).toContain(COPY.profile.fastingReminderPreset.label);
+    expect(uaePresets.map((p) => p.label)).toContain(COPY.profile.fastingAvailabilityPreset.label);
 
-    const usRamadanPresets = getRegionalReminderPresets({
+    const usRamadanPresets = getRegionalAvailabilityPresets({
       countryCode: 'US',
       isRamadanFastingObserver: true,
-      basePresets: COPY.profile.reminderPresets,
-      fastingPreset: COPY.profile.fastingReminderPreset
+      basePresets: COPY.profile.availabilityPresets,
+      fastingPreset: COPY.profile.fastingAvailabilityPreset
     });
-    expect(usRamadanPresets.map((p) => p.label)).toContain(COPY.profile.fastingReminderPreset.label);
+    expect(usRamadanPresets.map((p) => p.label)).toContain(COPY.profile.fastingAvailabilityPreset.label);
 
-    const multiculturalUsPresets = getRegionalReminderPresets({
+    const multiculturalUsPresets = getRegionalAvailabilityPresets({
       countryCode: 'US',
       culturalRhythms: ['early_dawn_riser', 'late_family_dinner'],
-      basePresets: COPY.profile.reminderPresets,
-      fastingPreset: COPY.profile.fastingReminderPreset,
-      dawnPreset: COPY.profile.dawnReminderPreset,
-      lateDinnerPreset: COPY.profile.lateDinnerReminderPreset
+      basePresets: COPY.profile.availabilityPresets,
+      fastingPreset: COPY.profile.fastingAvailabilityPreset,
+      dawnPreset: COPY.profile.dawnAvailabilityPreset,
+      lateDinnerPreset: COPY.profile.lateDinnerAvailabilityPreset
     });
-    expect(multiculturalUsPresets.map((p) => p.label)).toContain(COPY.profile.dawnReminderPreset.label);
-    expect(multiculturalUsPresets.map((p) => p.label)).toContain(COPY.profile.lateDinnerReminderPreset.label);
-    expect(multiculturalUsPresets.map((p) => p.label)).not.toContain(COPY.profile.fastingReminderPreset.label);
+    expect(multiculturalUsPresets.map((p) => p.label)).toContain(COPY.profile.dawnAvailabilityPreset.label);
+    expect(multiculturalUsPresets.map((p) => p.label)).toContain(COPY.profile.lateDinnerAvailabilityPreset.label);
+    expect(multiculturalUsPresets.map((p) => p.label)).not.toContain(COPY.profile.fastingAvailabilityPreset.label);
   });
 
   it('syncs and synthesizes clinical focus across diverse culturalRhythms regardless of country', () => {
@@ -227,5 +227,20 @@ describe('UserProfile and UserLifestyleProfile utilities & wiring', () => {
     expect(profileSource).toContain('primaryLanguage');
     expect(profileSource).toContain('secondaryLanguage');
     expect(profileSource).toContain('setLocale(primaryLanguage)');
+  });
+
+  it('aligns Profile header pills with Explore Trending style and hides Add New Paper controls on /profile', () => {
+    const profileSource = fs.readFileSync(
+      path.resolve(__dirname, '../../views/Profile.tsx'),
+      'utf-8'
+    );
+    const topBarSource = fs.readFileSync(
+      path.resolve(__dirname, '../../components/layout/TopBar.tsx'),
+      'utf-8'
+    );
+
+    expect(profileSource).toContain('hideRoutineSwitcher');
+    expect(profileSource).toContain('variant="pills"');
+    expect(topBarSource).toContain('pathname !== ROUTES.profile');
   });
 });

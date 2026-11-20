@@ -45,38 +45,49 @@ describe('Conversational Adaptive Lifestyle Interview', () => {
     expect(customCity.region?.countryCode).toBe('JP');
   });
 
-  it('extracts age and reminder time without confusing clock digits for age', () => {
-    const both = parseConversationalLifestyleAnswer("I'm 34, mornings around 7:30am", 'age_time', {
+  it('extracts age and available time windows (ranges, multiple windows, single times, or anytime) without confusing clock digits for age', () => {
+    const both = parseConversationalLifestyleAnswer("I'm 34, free 7:30–9am & 7–9pm", 'age_time', {
       currentRegion: DEFAULT_REGION
     });
     expect(both.age).toBe(34);
-    expect(both.preferredReminderTime).toBe('07:30');
+    expect(both.availabilityMode).toBe('windows');
+    expect(both.availableWindows).toHaveLength(2);
+    expect(both.availableWindows?.[0]).toMatchObject({ start: '07:30', end: '09:00' });
+    expect(both.availableWindows?.[1]).toMatchObject({ start: '19:00', end: '21:00' });
     expect(both.answeredAgeTime).toBe(true);
 
-    const timeOnly = parseConversationalLifestyleAnswer('Post-Iftar · 20:30', 'age_time', {
+    const timeOnly = parseConversationalLifestyleAnswer('Post-Iftar · 20:30–22:00', 'age_time', {
       currentRegion: DEFAULT_REGION
     });
     expect(timeOnly.age).toBeUndefined();
-    expect(timeOnly.preferredReminderTime).toBe('20:30');
+    expect(timeOnly.availableWindows?.[0]).toMatchObject({ start: '20:30', end: '22:00' });
     expect(timeOnly.answeredAgeTime).toBe(true);
 
     const pmTime = parseConversationalLifestyleAnswer('8pm', 'age_time', {
       currentRegion: DEFAULT_REGION
     });
     expect(pmTime.age).toBeUndefined();
-    expect(pmTime.preferredReminderTime).toBe('20:00');
+    expect(pmTime.availableWindows?.[0]).toMatchObject({ start: '20:00', end: '21:00' });
+
+    const anytimeReply = parseConversationalLifestyleAnswer('38, flexible anytime works for me', 'age_time', {
+      currentRegion: DEFAULT_REGION
+    });
+    expect(anytimeReply.age).toBe(38);
+    expect(anytimeReply.availabilityMode).toBe('anytime');
+    expect(anytimeReply.answeredAgeTime).toBe(true);
   });
 
   it('handles multi-answer turns and skips already-answered interview stages automatically', () => {
     const parsed = parseConversationalLifestyleAnswer(
-      "I'm 31 in Dubai, prefer 7am, desk job and observe Ramadan fasting",
+      "I'm 31 in Dubai, free 7am-8:30am, desk job and observe Ramadan fasting",
       'region',
       { currentRegion: DEFAULT_REGION }
     );
 
     expect(parsed.region?.city).toBe('Dubai');
     expect(parsed.age).toBe(31);
-    expect(parsed.preferredReminderTime).toBe('07:00');
+    expect(parsed.availabilityMode).toBe('windows');
+    expect(parsed.availableWindows?.[0]).toMatchObject({ start: '07:00', end: '08:30' });
     expect(parsed.workPattern).toBe('desk_sedentary');
     expect(parsed.culturalRhythms).toContain('ramadan_fasting');
 
