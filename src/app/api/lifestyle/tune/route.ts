@@ -1,27 +1,28 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { getLocaleCopy } from '@/data/locales';
-import type { AppLocale } from '@/data/locales/types';
-import { executeWithGeminiFailover, getGeminiApiKeys } from '@/server/geminiKeys';
-import { deriveGlobalRegionalSuggestions } from '@/server/lifestyleEngine';
-import { validateRegionalTagsWithGuardrails } from '@/server/lifestyleGuardrails';
+import { getLocaleCopy } from '../../../../data/locales';
+import type { AppLocale } from '../../../../data/locales/types';
+import { executeWithGeminiFailover, getGeminiApiKeys } from '../../../../server/geminiKeys';
+import { deriveGlobalRegionalSuggestions } from '../../../../server/lifestyleEngine';
+import { validateRegionalTagsWithGuardrails } from '../../../../server/lifestyleGuardrails';
 import {
   parseLifestyleDeterministically,
   recordCrowdsourcedTag
-} from '@/server/regionalRegistry';
-import type { CulturalRhythmId, RegionContext, UserLifestyleProfile, UserProfile } from '@/types/auth';
-import type { AIEngineType } from '@/types/routine';
-import { resolveCountryName } from '@/utils/geo';
+} from '../../../../server/regionalRegistry';
+import type { CulturalRhythmId, RegionContext, UserLifestyleProfile, UserProfile } from '../../../../types/auth';
+import type { AIEngineType } from '../../../../types/routine';
+import { resolveCountryName } from '../../../../utils/geo';
 import {
   buildConversationalLifestyleReply,
   buildProfileUpdatesFromParse,
   computeNextInterviewStage,
   formatRegionLabel,
   getStageQuestion,
+  isLifestyleCommandOrQuestion,
   type LifestyleInterviewStage,
   parseConversationalLifestyleAnswer
-} from '@/utils/lifestyleInterview';
-import { CULTURAL_RHYTHM_KEYS, deriveClinicalFocus } from '@/utils/profile';
+} from '../../../../utils/lifestyleInterview';
+import { CULTURAL_RHYTHM_KEYS, deriveClinicalFocus } from '../../../../utils/profile';
 
 const VALID_RHYTHMS = new Set<string>(CULTURAL_RHYTHM_KEYS);
 const INTERVIEW_STAGES = new Set<LifestyleInterviewStage>([
@@ -250,41 +251,128 @@ Rules:
         : {})
     };
 
-    const resolvedCountry = mergedProfileUpdates.region?.countryCode || country;
+    // If deterministic parsing updated the region, formulate a concise acknowledgment
+    if (conversationalExtra.region) {
+      const regionLabel = formatRegionLabel(conversationalExtra.region);
+      deterministicResult.reply = `Region updated to ${regionLabel}. Your daily routine and pacing now adapt to your local climate and regional patterns.`;
+    }
+
+    let resolvedCountry = mergedProfileUpdates.region?.countryCode || country;
     let engine: AIEngineType = 'local-rules';
 
-    // If Gemini keys are available, enhance reply with Gemini
+    // AI-First Semantic Extraction (Add Paper & Ask parity): when Gemini is available, understand intent & extract structured JSON
     const keys = getGeminiApiKeys();
     if (keys.length > 0) {
       try {
         const languageInstruction =
           safeLocale === 'ar'
-            ? 'Reply in warm, concise Modern Standard Arabic.'
+            ? 'Reply strictly in warm, concise Modern Standard Arabic.'
             : 'Reply in warm, concise English.';
+
         const prompt = `You are N1 AI, TrialN1's clinical habit-formation and research adherence companion.
-${languageInstruction}
-A user tracking an interventional clinical routine in ${resolvedCountry} just provided their daily schedule, habits, or constraints:
+A participant provided this natural language message to configure or update their profile/routine:
 "${message}"
 
-Extracted structured factors:
-${JSON.stringify({ ...mergedProfileUpdates, ...userProfileUpdates })}
+Current Context:
+- Region: ${JSON.stringify(currentRegion)}
+- Age: ${userProfile?.age ?? 'unset'}
+- Availability: ${userProfile?.availabilityMode ?? 'unset'}
+- Active lifestyle factors: ${JSON.stringify(currentProfile?.activeTags ?? [])}
 
 Task:
-Respond in 2-3 warm, professional sentences (like an expert physiotherapist or clinical trial coordinator):
-1. Acknowledge their specific constraints (e.g., shift work, Dokha/shisha, fasting, sedentary office work, location or reminder time changes).
-2. Plainly explain how their routine pacing, timing windows, or recovery tracking are adapted without any judgment or guilt.
-3. Keep it concise, friendly, and empowering.`;
+Analyze their semantic intent and extract structured updates.
+Output strictly JSON matching this schema:
+{
+  "region": {
+    "countryCode": string | null,
+    "countryName": string | null,
+    "city": string | null
+  } | null,
+  "age": number | null,
+  "availabilityMode": "windows" | "anytime" | null,
+  "availableWindows": [{"start": number, "end": number}] | null,
+  "workPattern": "shift_work" | "desk_sedentary" | "frequent_travel" | "standard" | null,
+  "climateSensitivity": "summer_heat" | "high_humidity" | "winter_cold" | "moderate" | null,
+  "smokingStatus": "non_smoker" | "former_smoker" | "cigarettes" | "midwakh_dokha" | "shisha_waterpipe" | "vape" | null,
+  "isRamadanFastingObserver": boolean | null,
+  "culturalRhythms": string[] | null,
+  "physicalCautions": string[] | null,
+  "lifestyleTags": string[] | null,
+  "reply": string
+}
 
-        const geminiReply = await executeWithGeminiFailover(async (apiKey) => {
+Guidelines:
+1. If the user asks to change, set, or update their region/location (e.g. "change my region to colombo sri lanka"), extract city, countryName, and countryCode into "region".
+2. If the user mentions age or available schedule windows, extract them.
+3. If the user mentions work pattern, smoking, climate sensitivity, or injuries/cautions, extract them.
+4. "lifestyleTags": ONLY include specific personal daily habits (e.g. "Early Dawn Riser"), NEVER action commands or questions.
+5. In "reply", write a natural 1-2 sentence response explaining how their routine adapts without judgment. ${languageInstruction}`;
+
+        const geminiJson = await executeWithGeminiFailover(async (apiKey) => {
           const genAI = new GoogleGenerativeAI(apiKey);
-          const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-1.5-flash' });
+          const model = genAI.getGenerativeModel({
+            model: process.env.GEMINI_MODEL || 'gemini-1.5-flash',
+            generationConfig: {
+              responseMimeType: 'application/json'
+            }
+          });
           const res = await model.generateContent(prompt);
           return res.response.text().trim();
         });
 
-        if (geminiReply) {
-          deterministicResult.reply = geminiReply;
-          engine = 'cloud-gemini';
+        if (geminiJson) {
+          try {
+            const cleanJson = geminiJson.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+            const parsed = JSON.parse(cleanJson);
+            if (parsed.region && (parsed.region.city || parsed.region.countryCode || parsed.region.countryName)) {
+              const countryCode = parsed.region.countryCode || currentRegion.countryCode;
+              const countryName = parsed.region.countryName || (countryCode ? resolveCountryName(countryCode) : currentRegion.countryName);
+              mergedProfileUpdates.region = {
+                countryCode,
+                countryName,
+                city: parsed.region.city || undefined,
+                detectedBy: 'user_selected',
+                confirmed: true
+              };
+              resolvedCountry = countryCode;
+            }
+            if (typeof parsed.age === 'number' && Number.isFinite(parsed.age) && parsed.age >= 10 && parsed.age <= 120) {
+              userProfileUpdates.age = parsed.age;
+            }
+            if (parsed.availabilityMode === 'windows' || parsed.availabilityMode === 'anytime') {
+              userProfileUpdates.availabilityMode = parsed.availabilityMode;
+            }
+            if (Array.isArray(parsed.availableWindows) && parsed.availableWindows.length > 0) {
+              userProfileUpdates.availableWindows = parsed.availableWindows;
+              userProfileUpdates.availabilityMode = 'windows';
+            }
+            if (parsed.workPattern) mergedProfileUpdates.workPattern = parsed.workPattern;
+            if (parsed.climateSensitivity) mergedProfileUpdates.climateSensitivity = parsed.climateSensitivity;
+            if (parsed.smokingStatus) mergedProfileUpdates.smokingStatus = parsed.smokingStatus;
+            if (typeof parsed.isRamadanFastingObserver === 'boolean') {
+              mergedProfileUpdates.isRamadanFastingObserver = parsed.isRamadanFastingObserver;
+            }
+            if (Array.isArray(parsed.culturalRhythms) && parsed.culturalRhythms.length > 0) {
+              mergedProfileUpdates.culturalRhythms = parsed.culturalRhythms;
+            }
+            if (Array.isArray(parsed.physicalCautions) && parsed.physicalCautions.length > 0) {
+              mergedProfileUpdates.physicalCautions = parsed.physicalCautions;
+            }
+            if (Array.isArray(parsed.lifestyleTags) && parsed.lifestyleTags.length > 0) {
+              const safeCustom = parsed.lifestyleTags.filter(
+                (t: string) => typeof t === 'string' && !isLifestyleCommandOrQuestion(t) && t.trim().length <= 48
+              );
+              mergedProfileUpdates.activeTags = Array.from(
+                new Set([...(currentProfile?.activeTags || []), ...safeCustom])
+              );
+            }
+            if (parsed.reply && typeof parsed.reply === 'string') {
+              deterministicResult.reply = parsed.reply;
+            }
+            engine = 'cloud-gemini';
+          } catch (jsonErr) {
+            console.warn('[LifestyleTuneAPI] Failed to parse Gemini extraction JSON:', jsonErr);
+          }
         }
       } catch (err) {
         console.warn('[LifestyleTuneAPI] Gemini call failed, using deterministic response:', err);
