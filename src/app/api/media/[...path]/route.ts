@@ -24,10 +24,10 @@ const MEDIA_SECURITY_HEADERS = {
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const rawSegments = params?.path;
+    const rawSegments = (await params)?.path;
     if (!rawSegments || !Array.isArray(rawSegments) || rawSegments.length === 0) {
       return new NextResponse('Media path not specified', { status: 400 });
     }
