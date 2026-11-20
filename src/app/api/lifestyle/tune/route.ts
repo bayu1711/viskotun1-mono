@@ -6,6 +6,7 @@ import { executeWithGeminiFailover, getGeminiApiKeys } from '../../../../server/
 import { deriveGlobalRegionalSuggestions } from '../../../../server/lifestyleEngine';
 import { validateRegionalTagsWithGuardrails } from '../../../../server/lifestyleGuardrails';
 import {
+  getRegionalSuggestions,
   parseLifestyleDeterministically,
   recordCrowdsourcedTag
 } from '../../../../server/regionalRegistry';
@@ -147,7 +148,8 @@ export async function POST(request: Request) {
       let engine: AIEngineType = 'local-rules';
 
       const keys = getGeminiApiKeys();
-      if (keys.length > 0) {
+      const replyPromise = (async (): Promise<{ reply: string; engine: AIEngineType } | null> => {
+        if (keys.length === 0) return null;
         try {
           const nextQuestion = getStageQuestion(nextStage, resolvedRegionLabel, localeCopy, {
             suggestedFocus
@@ -196,15 +198,35 @@ Rules:
             });
             const res = await model.generateContent(prompt);
             return res.response.text().trim();
-          });
+          }, 8000);
 
           if (geminiReply) {
-            reply = geminiReply;
-            engine = 'cloud-gemini';
+            return { reply: geminiReply, engine: 'cloud-gemini' };
           }
         } catch (err) {
           console.warn('[LifestyleTuneAPI] Gemini interview reply failed, using deterministic response:', err);
         }
+        return null;
+      })();
+
+      const suggestionsPromise = deriveGlobalRegionalSuggestions({
+        countryCode: resolvedRegion.countryCode,
+        countryName: resolvedRegion.countryName,
+        city: resolvedRegion.city,
+        culturalRhythms: profileUpdates.culturalRhythms ?? currentProfile?.culturalRhythms
+      }).catch((err) => {
+        console.warn('[LifestyleTuneAPI] Secondary suggestions failed, using registry fallback:', err);
+        return {
+          suggestions: getRegionalSuggestions(resolvedRegion.countryCode),
+          source: 'registry-fallback' as const
+        };
+      });
+
+      const [aiReplyResult, suggestionsResult] = await Promise.all([replyPromise, suggestionsPromise]);
+
+      if (aiReplyResult) {
+        reply = aiReplyResult.reply;
+        engine = aiReplyResult.engine;
       }
 
       const safeTags = validateRegionalTagsWithGuardrails(
@@ -215,13 +237,6 @@ Rules:
         recordCrowdsourcedTag(resolvedRegion.countryCode, tag.label, tag.category);
       }
 
-      const { suggestions: updatedSuggestions } = await deriveGlobalRegionalSuggestions({
-        countryCode: resolvedRegion.countryCode,
-        countryName: resolvedRegion.countryName,
-        city: resolvedRegion.city,
-        culturalRhythms: profileUpdates.culturalRhythms ?? currentProfile?.culturalRhythms
-      });
-
       return NextResponse.json({
         reply,
         engine,
@@ -229,7 +244,7 @@ Rules:
         userProfileUpdates,
         extractedTags: safeTags.map((t) => t.label),
         suggestedFocus,
-        suggestions: updatedSuggestions,
+        suggestions: suggestionsResult.suggestions,
         nextStage,
         answeredStages: updatedAnswered
       });
@@ -411,12 +426,20 @@ Guidelines:
       recordCrowdsourcedTag(resolvedCountry, tag.label, tag.category);
     }
 
-    const { suggestions: updatedSuggestions } = await deriveGlobalRegionalSuggestions({
-      countryCode: resolvedCountry,
-      countryName: mergedProfileUpdates.region?.countryName ?? currentProfile?.region?.countryName,
-      city: mergedProfileUpdates.region?.city ?? currentProfile?.region?.city,
-      culturalRhythms: mergedProfileUpdates.culturalRhythms ?? currentProfile?.culturalRhythms
-    });
+    let updatedSuggestions = getRegionalSuggestions(resolvedCountry);
+    try {
+      const res = await deriveGlobalRegionalSuggestions({
+        countryCode: resolvedCountry,
+        countryName: mergedProfileUpdates.region?.countryName ?? currentProfile?.region?.countryName,
+        city: mergedProfileUpdates.region?.city ?? currentProfile?.region?.city,
+        culturalRhythms: mergedProfileUpdates.culturalRhythms ?? currentProfile?.culturalRhythms
+      });
+      if (res && res.suggestions && res.suggestions.length > 0) {
+        updatedSuggestions = res.suggestions;
+      }
+    } catch (err) {
+      console.warn('[LifestyleTuneAPI] Secondary suggestions failed, using registry fallback:', err);
+    }
     // Recompute tags from the merged fields so chips match /profile and stale copies drop.
     mergedProfileUpdates.activeTags = syncLifestyleActiveTags({
       ...currentProfile,

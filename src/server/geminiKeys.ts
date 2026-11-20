@@ -70,16 +70,38 @@ export function isRateLimitOrQuotaError(err: unknown): boolean {
     message.includes('resource_exhausted') ||
     message.includes('quota') ||
     message.includes('rate limit') ||
-    message.includes('too many requests')
+    message.includes('too many requests') ||
+    message.includes('timed out') ||
+    message.includes('timeout')
   );
+}
+
+function runWithTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`${label} timed out after ${ms}ms`));
+    }, ms);
+
+    promise.then(
+      (val) => {
+        clearTimeout(timer);
+        resolve(val);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      }
+    );
+  });
 }
 
 /**
  * Executes a Gemini operation with automatic rotation and failover across the key pool.
- * If a key hits 429 / quota limit, it immediately attempts the next key in the pool.
+ * If a key hits 429 / quota limit or times out, it immediately attempts the next key in the pool.
  */
 export async function executeWithGeminiFailover<T>(
-  action: (apiKey: string, keyIndex: number, totalKeys: number) => Promise<T>
+  action: (apiKey: string, keyIndex: number, totalKeys: number) => Promise<T>,
+  perKeyTimeoutMs = 15000
 ): Promise<T> {
   const keys = getGeminiApiKeys();
   if (keys.length === 0) {
@@ -99,13 +121,17 @@ export async function executeWithGeminiFailover<T>(
     const maskedKey = `${apiKey.slice(0, 8)}...${apiKey.slice(-4)}`;
 
     try {
-      return await action(apiKey, targetIdx, keys.length);
+      return await runWithTimeout(
+        action(apiKey, targetIdx, keys.length),
+        perKeyTimeoutMs,
+        `Gemini API operation [key #${targetIdx + 1}]`
+      );
     } catch (err: unknown) {
       lastError = err;
 
       if (isRateLimitOrQuotaError(err)) {
         console.warn(
-          `[GeminiKeyManager] Key #${targetIdx + 1} (${maskedKey}) hit quota/rate limit (429). Attempting failover to next key...`
+          `[GeminiKeyManager] Key #${targetIdx + 1} (${maskedKey}) hit quota/rate limit or timeout. Attempting failover to next key...`
         );
         continue;
       }
@@ -115,6 +141,6 @@ export async function executeWithGeminiFailover<T>(
     }
   }
 
-  console.error('[GeminiKeyManager] All configured Gemini API keys exhausted their rate limits.');
+  console.error('[GeminiKeyManager] All configured Gemini API keys exhausted their rate limits or timed out.');
   throw lastError;
 }
