@@ -4,6 +4,7 @@ import React from 'react';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { cn } from '../../utils/cn';
+import { formatRoutineTitle } from '../../utils/text';
 import { ProgressRing } from '../ui/ProgressRing';
 
 interface TodaySummaryCardProps {
@@ -27,7 +28,7 @@ export function TodaySummaryCard({ className }: TodaySummaryCardProps) {
   return (
     <section aria-label={COPY.shell.todaySummaryLabel} className={cn('rounded-card bg-ink p-5 text-white', className)}>
       <div className="flex items-center justify-between gap-2">
-        <p className="truncate text-sm text-white/60 font-medium">{routine.shortTitle}</p>
+        <p className="truncate text-sm text-white/60 font-medium">{formatRoutineTitle(routine.shortTitle)}</p>
         <ProgressRing value={todayFraction} size={36} tone="orange" decorative />
       </div>
       <p className="mt-3 text-4xl font-light tabular-nums">

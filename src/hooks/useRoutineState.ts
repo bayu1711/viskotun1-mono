@@ -63,6 +63,7 @@ import {
   targetSetsForStep
 } from '../utils/routineMetrics';
 import { isOnDemandStep } from '../utils/schedule';
+import { formatRoutineTitle } from '../utils/text';
 import { getDaysDifference, getLocalTodayDateString, getMsUntilNextLocalMidnight, nowLabel } from '../utils/time';
 
 function createInitialRuntime(items: Routine[]): Record<string, RoutineRuntime> {
@@ -758,9 +759,10 @@ export function useRoutineState() {
       }
 
       setIsHowToOpen(false);
+      const displayTitle = formatRoutineTitle(cleanRoutine.shortTitle) || cleanRoutine.title;
       const toastMessage = options?.forceRestart
-        ? COPY.howTo.redoToast(cleanRoutine.shortTitle || cleanRoutine.title)
-        : COPY.howTo.loadedToast(cleanRoutine.shortTitle || cleanRoutine.title);
+        ? COPY.howTo.redoToast(displayTitle)
+        : COPY.howTo.loadedToast(displayTitle);
       toast.success(toastMessage);
     },
     [sampleRoutinesMap, routineList, isAuthenticated, userId]
@@ -809,7 +811,7 @@ export function useRoutineState() {
       if (localFound) {
         if (activeRoutineId !== targetId) {
           setActiveRoutine(targetId);
-          toast.success(COPY.shareModal.deepLinkToast(localFound.shortTitle || localFound.title));
+          toast.success(COPY.shareModal.deepLinkToast(formatRoutineTitle(localFound.shortTitle) || localFound.title));
         }
       } else {
         const sampleFound =
@@ -818,7 +820,7 @@ export function useRoutineState() {
           sampleRoutines.find((r) => r.id === targetId);
         if (sampleFound) {
           loadSampleRoutine(targetId);
-          toast.success(COPY.shareModal.deepLinkToast(sampleFound.shortTitle || sampleFound.title));
+          toast.success(COPY.shareModal.deepLinkToast(formatRoutineTitle(sampleFound.shortTitle) || sampleFound.title));
         }
       }
 
@@ -1485,17 +1487,18 @@ export function useRoutineState() {
       lastActiveDate: todayStr
     }));
 
+    const displayTitle = formatRoutineTitle(routine.shortTitle) || routine.title;
     pushMessages(routine.id, {
       role: 'ai',
       kind: 'confirmation',
       content: COPY.assistant.simulatedFullCompletionConfirmation(
-        routine.shortTitle || routine.title,
+        displayTitle,
         totalDays
       )
     });
 
     toast.success(
-      COPY.dayActions.simulateFullCompletionToast(routine.shortTitle || routine.title, totalDays)
+      COPY.dayActions.simulateFullCompletionToast(displayTitle, totalDays)
     );
   }, [routine, state.excludedStepIds, updateRuntime, pushMessages]);
 
@@ -2017,7 +2020,7 @@ export function useRoutineState() {
       console.warn('[confirmStagingRoutine] Could not persist to Firebase papers collection:', err);
     });
 
-    const displayTitle = target.shortTitle || target.title;
+    const displayTitle = formatRoutineTitle(target.shortTitle) || target.title;
     setStagingRoutine(null);
     setStagingMessages([]);
     setStagingError(null);

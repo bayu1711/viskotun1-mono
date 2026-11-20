@@ -9,6 +9,7 @@ import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
 import { SAMPLE_PAPERS, type SamplePaper } from '../../data/samplePapers';
+import { formatRoutineTitle } from '../../utils/text';
 import { TrendingPaperCard } from '../community/TrendingPaperCard';
 import { VersionHistoryModal } from '../community/VersionHistoryModal';
 import { PageContainer } from '../layout/PageContainer';
@@ -128,7 +129,7 @@ export function EmptyRoutineView() {
         onClose={() => setViewingVersionPaper(null)}
         paperTitle={
           viewingVersionPaper?.title ||
-          viewingVersionPaper?.shortTitle ||
+          formatRoutineTitle(viewingVersionPaper?.shortTitle) ||
           COPY.community.defaultRoutineTitle
         }
         currentVersion={viewingVersionPaper?.version || '1.0'}

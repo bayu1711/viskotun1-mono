@@ -24,6 +24,7 @@ import {
   getSocialShareUrls,
   triggerNativeShare
 } from '../../utils/sharing';
+import { formatRoutineTitle } from '../../utils/text';
 import { Icon } from '../ui/Icon';
 
 export function ShareRoutineModal() {
@@ -35,7 +36,7 @@ export function ShareRoutineModal() {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [isGeneratingQr, setIsGeneratingQr] = useState(false);
 
-  const displayTitle = routine?.shortTitle || routine?.title || 'Clinical Routine';
+  const displayTitle = formatRoutineTitle(routine?.shortTitle) || routine?.title || 'Clinical Routine';
   const shareUrl = useMemo(
     () => (routine ? getRoutineShareUrl(routine.id) : ''),
     [routine]

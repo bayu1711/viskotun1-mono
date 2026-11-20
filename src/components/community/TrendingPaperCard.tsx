@@ -17,6 +17,7 @@ import { PRECALIBRATED_SAMPLE_ROUTINES, type SamplePaper } from '../../data/samp
 import type { StepIconKey } from '../../types/routine';
 import { cn } from '../../utils/cn';
 import { resolvePaperRoutineStatus } from '../../utils/routineMetrics';
+import { formatRoutineTitle } from '../../utils/text';
 import { Icon } from '../ui/Icon';
 import { PillButton } from '../ui/PillButton';
 import { StepIcon } from '../ui/StepIcon';
@@ -205,7 +206,7 @@ export function TrendingPaperCard({
 
         {/* Title & Meta */}
         <h3 className="mt-3.5 text-sm font-medium leading-snug text-ink">
-          {paper.shortTitle || paper.title}
+          {formatRoutineTitle(paper.shortTitle) || paper.title}
         </h3>
         <p className="mt-1 text-2xs text-ink/60 line-clamp-1">
           {paper.authors} · <em>{paper.journal}</em> ({paper.year})

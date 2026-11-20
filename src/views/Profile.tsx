@@ -59,6 +59,7 @@ import {
   formatAvailabilitySummary,
   normalizeAvailableWindows
 } from '../utils/schedule';
+import { formatRoutineTitle } from '../utils/text';
 
 const REGION_PRESETS = [
   { countryCode: 'AE', countryName: 'United Arab Emirates', defaultCity: 'Abu Dhabi' },
@@ -250,7 +251,7 @@ export function ProfilePage() {
   const parsedAge = sanitizeAge(ageInput);
   const generatedFocus = deriveClinicalFocus(draftLifestyle, {
     age: parsedAge,
-    routineTitle: routine?.shortTitle || routine?.title
+    routineTitle: formatRoutineTitle(routine?.shortTitle) || routine?.title
   });
   const effectiveClinicalGoals = isGoalsCustom ? clinicalGoals : generatedFocus;
   const resolvedCountryCodeForUi = resolveCountryCodeFromInput(countryName || countryCode);

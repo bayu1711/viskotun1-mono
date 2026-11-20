@@ -2,6 +2,7 @@ import React from 'react';
 import { useAssistant } from '../../contexts/AssistantContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
+import { formatRoutineTitle } from '../../utils/text';
 import { AIIcon } from '../ui/AIIcon';
 import { IconTile } from '../ui/IconTile';
 
@@ -11,7 +12,7 @@ export function AssistantFab() {
   const { openAssistant, isOpen } = useAssistant();
 
   const label = routine
-    ? COPY.shell.assistantFab(routine.shortTitle)
+    ? COPY.shell.assistantFab(formatRoutineTitle(routine.shortTitle))
     : COPY.shell.openAssistant;
 
   return (

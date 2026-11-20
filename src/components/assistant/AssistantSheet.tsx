@@ -19,6 +19,7 @@ import {
   getStagePlaceholder
 } from '../../utils/lifestyleInterview';
 import { getDynamicSuggestions } from '../../utils/suggestions';
+import { formatRoutineTitle } from '../../utils/text';
 import { EmptyState } from '../feedback/EmptyState';
 import { MissingDataBanner } from '../routine/MissingDataBanner';
 import { AssistantComposer } from './AssistantComposer';
@@ -196,7 +197,7 @@ export function AssistantSheet() {
           >
             <AssistantHeader
               mode={mode}
-              routineTitle={routine ? routine.shortTitle : COPY.assistant.noActiveRoutineForAskTitle}
+              routineTitle={routine ? formatRoutineTitle(routine.shortTitle) : COPY.assistant.noActiveRoutineForAskTitle}
               customTitle={
                 !isAsk && !isLifestyle && stagingRoutine
                   ? COPY.assistant.stagingTitle

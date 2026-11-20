@@ -4,6 +4,7 @@ import React, { useId, useState } from 'react';
 import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
+import { formatRoutineTitle } from '../../utils/text';
 import { Icon } from '../ui/Icon';
 import { Panel } from '../ui/Panel';
 import { PillButton } from '../ui/PillButton';
@@ -24,7 +25,7 @@ export function ShareableSummaryPanel() {
           {COPY.shareableSummary.title}
         </h2>
         <p className="mt-3 text-sm text-white/55">
-          {COPY.shareableSummary.body(routine.shortTitle)}
+          {COPY.shareableSummary.body(formatRoutineTitle(routine.shortTitle))}
         </p>
 
         <PillButton

@@ -10,6 +10,7 @@ import {
   isRandomizedTrial,
   progressionStatus
 } from '../../utils/routineMetrics';
+import { formatPhaseLabel, formatRoutineTitle } from '../../utils/text';
 import { StatCard, type StatCardProps } from './StatCard';
 
 export function KeyMetrics() {
@@ -20,7 +21,7 @@ export function KeyMetrics() {
   const metrics: StatCardProps[] = [
     {
       label: COPY.dashboard.activeRoutine,
-      value: routine.shortTitle,
+      value: formatRoutineTitle(routine.shortTitle),
       caption: COPY.shell.dayOfTotal(currentDay, totalDays),
       tone: 'orange',
       icon: AssignmentOutlinedIcon
@@ -34,7 +35,7 @@ export function KeyMetrics() {
     },
     {
       label: COPY.dashboard.currentPhase,
-      value: routine.phaseLabel,
+      value: formatPhaseLabel(routine.phaseLabel),
       caption: COPY.dashboard.phase[status],
       tone: status === 'paused' ? 'peach' : 'mint',
       icon: TimelineIcon

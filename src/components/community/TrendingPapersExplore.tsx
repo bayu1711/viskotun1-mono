@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { useRoutine } from '../../contexts/RoutineContext';
 import { COPY } from '../../data/copy';
 import { SAMPLE_PAPERS, type SamplePaper } from '../../data/samplePapers';
+import { formatRoutineTitle } from '../../utils/text';
 import { TrendingPaperCard } from './TrendingPaperCard';
 import { VersionHistoryModal } from './VersionHistoryModal';
 
@@ -69,7 +70,7 @@ export function TrendingPapersExplore() {
         onClose={() => setViewingVersionPaper(null)}
         paperTitle={
           viewingVersionPaper?.title ||
-          viewingVersionPaper?.shortTitle ||
+          formatRoutineTitle(viewingVersionPaper?.shortTitle) ||
           COPY.community.defaultRoutineTitle
         }
         currentVersion={viewingVersionPaper?.version || '1.0'}

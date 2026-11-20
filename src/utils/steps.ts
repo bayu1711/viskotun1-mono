@@ -1,5 +1,6 @@
 import { COPY } from '../data/copy';
 import type { RoutineStep } from '../types/routine';
+import { formatStatLabel } from './text';
 
 export interface StepDisplay {
   setLabel: string;
@@ -41,7 +42,7 @@ export function getStepDisplay(step: RoutineStep): StepDisplay {
   return {
     setLabel,
     perSet: step.perSetLabel ?? defaultPerSet,
-    statLabel: step.statLabel ?? defaultStatLabel,
+    statLabel: formatStatLabel(step.statLabel ?? defaultStatLabel),
     statValue: step.statValue ?? defaultStatValue,
     summary: `${step.sets} ${setLabel} · ${summaryValue}`
   };
