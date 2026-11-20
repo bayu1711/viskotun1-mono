@@ -41,6 +41,7 @@ import {
   computeNextInterviewStage,
   formatProfileSummary,
   formatRegionLabel,
+  getStageQuestion,
   type LifestyleInterviewStage,
   parseConversationalLifestyleAnswer
 } from '../utils/lifestyleInterview';
@@ -2395,6 +2396,36 @@ export function useRoutineState() {
     ]);
   }, []);
 
+  const jumpToLifestyleStage = useCallback(
+    (stage: LifestyleInterviewStage, localeCopy: LocaleCopy, userPrompt?: string) => {
+      setLifestyleInterviewStage(stage);
+      const lp = lifestyleProfileRef.current;
+      const regionLabel = formatRegionLabel(lp?.region);
+      const source = localeCopy.lifestyleTuning.onboarding.answerSource;
+      const questionText = getStageQuestion(stage, regionLabel, localeCopy);
+
+      setLifestyleMessages((prev) => [
+        ...prev,
+        ...(userPrompt
+          ? [
+              buildMessage({
+                role: 'user',
+                kind: 'question',
+                content: userPrompt
+              })
+            ]
+          : []),
+        buildMessage({
+          role: 'ai',
+          kind: 'answer',
+          content: questionText,
+          source
+        })
+      ]);
+    },
+    []
+  );
+
   const tuneLifestyle = useCallback(
     async (
       message: string,
@@ -2722,6 +2753,8 @@ export function useRoutineState() {
       lifestyleMessages,
       isLifestyleTyping,
       lifestyleInterviewStage,
+      setLifestyleInterviewStage,
+      jumpToLifestyleStage,
       lifestyleSuggestions,
       setLifestyleSuggestions,
       initLifestyleConversation,
@@ -2830,6 +2863,8 @@ export function useRoutineState() {
       lifestyleMessages,
       isLifestyleTyping,
       lifestyleInterviewStage,
+      setLifestyleInterviewStage,
+      jumpToLifestyleStage,
       lifestyleSuggestions,
       initLifestyleConversation,
       restartLifestyleInterview,

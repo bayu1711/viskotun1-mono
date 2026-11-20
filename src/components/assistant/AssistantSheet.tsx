@@ -61,6 +61,8 @@ export function AssistantSheet() {
     lifestyleMessages,
     isLifestyleTyping,
     lifestyleInterviewStage,
+    jumpToLifestyleStage,
+    setDoseMode,
     lifestyleSuggestions,
     setLifestyleSuggestions,
     initLifestyleConversation,
@@ -177,6 +179,41 @@ export function AssistantSheet() {
         restartLifestyleInterview(copy);
         return;
       }
+      if (
+        trimmed === copy.lifestyleTuning.onboarding.quickChangeSchedule ||
+        /^(?:adjust|change|update)\s+(?:my\s+)?schedule|change\s+availability|change\s+time\s+windows?|تعديل الجدول/i.test(trimmed)
+      ) {
+        setSelectedChips([]);
+        jumpToLifestyleStage('availability', copy, trimmed);
+        return;
+      }
+      if (
+        trimmed === copy.lifestyleTuning.onboarding.quickAddCaution ||
+        /^(?:add|have)\s+(?:a\s+)?(?:physical\s+)?caution|joint sensitivity|إضافة احتياط/i.test(trimmed)
+      ) {
+        setSelectedChips([]);
+        jumpToLifestyleStage('cautions', copy, trimmed);
+        return;
+      }
+      if (
+        trimmed === copy.lifestyleTuning.onboarding.quickChangeRhythm ||
+        /^(?:change|update)\s+(?:work|daily|rhythm|pattern)|نمط العمل/i.test(trimmed)
+      ) {
+        setSelectedChips([]);
+        jumpToLifestyleStage('rhythm', copy, trimmed);
+        return;
+      }
+      if (
+        trimmed === copy.lifestyleTuning.onboarding.quickLowerIntensity ||
+        /^(?:lower|reduce|decrease|gentle|micro)\s+(?:the\s+)?(?:intensity|load|pace|pacing|difficulty)|micro-?dose|تخفيف الشدة/i.test(trimmed)
+      ) {
+        setSelectedChips([]);
+        if (routine) {
+          setDoseMode('micro');
+        }
+        tuneLifestyle(trimmed, { locale, localeCopy: copy });
+        return;
+      }
 
       let finalMessage = input;
       if (selectedChips.length > 0 && !isNoneOption(trimmed) && !selectedChips.includes(trimmed)) {
@@ -185,7 +222,19 @@ export function AssistantSheet() {
       setSelectedChips([]);
       tuneLifestyle(finalMessage, { locale, localeCopy: copy });
     },
-    [copy, closeAssistant, router, routine, selectedChips, isNoneOption, tuneLifestyle, locale, restartLifestyleInterview]
+    [
+      copy,
+      closeAssistant,
+      router,
+      routine,
+      selectedChips,
+      isNoneOption,
+      tuneLifestyle,
+      locale,
+      restartLifestyleInterview,
+      jumpToLifestyleStage,
+      setDoseMode
+    ]
   );
 
   const handleConfirmChips = useCallback(() => {

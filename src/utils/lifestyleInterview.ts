@@ -1161,26 +1161,18 @@ export function getQuickRepliesForStage(options: {
     }
     case 'complete': {
       const hasRamadan = culturalRhythms.includes('ramadan_fasting');
-      const hasHeat = lifestyleProfile?.climateSensitivity === 'summer_heat';
-      const hasShift = lifestyleProfile?.workPattern === 'shift_work';
-      const hasDesk = lifestyleProfile?.workPattern === 'desk_sedentary';
-
-      const remainingSuggestions = suggestions
-        .map((s) => formatLifestyleTagLabel(s.label))
-        .filter((label) => {
-          const lower = label.toLowerCase();
-          if (activeTagSet.has(lower)) return false;
-          if (hasRamadan && (lower.includes('ramadan') || lower.includes('fasting'))) return false;
-          if (hasHeat && (lower.includes('heat') || lower.includes('thermal') || lower.includes('summer'))) return false;
-          if (hasShift && lower.includes('shift')) return false;
-          if (hasDesk && (lower.includes('desk') || lower.includes('sedentary'))) return false;
-          return true;
-        })
-        .slice(0, 3);
       const actionChips = hasActiveRoutine
         ? [t.quickExploreRoutines, t.quickDone]
         : [t.quickExploreRoutines];
-      return [...actionChips, ...remainingSuggestions];
+
+      const changeChips = [
+        t.quickChangeSchedule,
+        t.quickLowerIntensity,
+        t.quickAddCaution,
+        hasRamadan ? t.quickAdjustFasting : t.quickChangeRhythm
+      ];
+
+      return [...actionChips, ...changeChips];
     }
   }
 }
