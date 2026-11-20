@@ -13,7 +13,7 @@ This document establishes the architectural principles, engineering standards, a
 - **Centralized Design Tokens & Tones**: Use the established semantic palette (`ink`, `mint`, `cream`, `blush`, `white`). Do not invent ad-hoc hex colors or duplicate variant dictionaries across components without using the shared utilities in `src/utils/tones.ts`.
 - **Centralized UI Copy**: All user-facing strings, button labels, and system messages must be declared in [`src/data/copy.ts`](file:///src/data/copy.ts) for consistency and future localization.
 
-### B. Full-Stack Next.js 14 (App Router) Architecture
+### B. Full-Stack Next.js 16 (App Router) Architecture
 - **Unified Codebase (No Separate Backend Repositories)**: Next.js Route Handlers (`src/app/api/...`) are our backend. Do not propose spinning up a separate server.
 - **Client vs. Server Component Boundaries**:
   - Keep `src/app/layout.tsx` a Server Component for SEO and metadata.
@@ -62,7 +62,7 @@ Every agent working on this codebase must follow these streamlined git practices
 
 ## 3. Tech Stack Reference
 
-- **Framework**: Next.js 14.2+ (App Router)
+- **Framework**: Next.js 16.4+ (App Router), React 19
 - **Environments & Ports**:
   - **Local Dev**: Port `3010` (`viskotun1`, outputs to `.next-dev` to prevent style asset wiping)
 - **Language**: TypeScript (Strict mode enabled)

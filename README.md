@@ -2,7 +2,7 @@
 
 An AI-powered digital experience transforming complex peer-reviewed research papers into executable, adaptive, and personalized health and rehabilitation routines.
 
-Built with **Next.js 14 (App Router)**, **TypeScript**, and **Tailwind CSS**, designed for deployment to **Google Cloud Run** and integration with the **Gemini API** (Google AI Studio keys via `@google/generative-ai`).
+Built with **Next.js 16 (App Router)**, **TypeScript**, and **Tailwind CSS**, designed for deployment to **Google Cloud Run** and integration with the **Gemini API** (Google AI Studio keys via `@google/generative-ai`).
 
 ---
 
@@ -212,7 +212,7 @@ Paper Omission Detected (e.g., Calf Stretch hold duration missing)
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 (App Router, Server & Client Components)
+- **Framework**: Next.js 16 (App Router, Server & Client Components)
 - **Language**: TypeScript (Strict mode)
 - **Styling**: Tailwind CSS, CSS variables with alpha-channel support
 - **UI & Animation**: Framer Motion, Material UI Icons (`@mui/icons-material`)
@@ -316,7 +316,7 @@ TrialN1 offers multiple authentication and testing pathways designed for evaluat
 
 ### Google Cloud Run Deployment
 
-TrialN1 uses Next.js 14 `output: 'standalone'` and a multi-stage Dockerfile producing a minimal (<150MB) production container image.
+TrialN1 uses Next.js 16 `output: 'standalone'` and a multi-stage Dockerfile producing a minimal (<150MB) production container image.
 
 #### 1. One-Click Deploy via Google Cloud Run
 Deploy directly from local source to Google Cloud Run using Cloud Build:
@@ -373,7 +373,7 @@ cp .env.example .env.local
 
 ```text
 ├── src/
-│   ├── app/                        # Next.js 14 App Router
+│   ├── app/                        # Next.js 16 App Router
 │   │   ├── api/                    # Server Route Handlers
 │   │   │   ├── admin/
 │   │   │   │   ├── guardrails/     # Dynamic Firestore policy ledger API
