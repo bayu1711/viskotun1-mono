@@ -137,9 +137,8 @@ export interface AuthState {
   deactivateAccount: () => Promise<void>;
   deleteAccount: () => Promise<void>;
   loginAsGuest: () => void;
-  loginAsAdmin: () => void;
-  loginWithEmail: (email: string, password?: string, asAdmin?: boolean) => Promise<void>;
+  loginWithEmail: (email: string, password?: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
-  signupWithEmail: (name: string, email: string, password?: string, asAdmin?: boolean) => Promise<void>;
+  signupWithEmail: (name: string, email: string, password?: string) => Promise<void>;
   logout: () => void;
 }
