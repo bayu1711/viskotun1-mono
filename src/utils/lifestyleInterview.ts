@@ -395,6 +395,7 @@ function extractRegionFromMessage(
           confirmed: true
         };
       }
+      return { confirmed: false };
     }
   }
 

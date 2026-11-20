@@ -385,4 +385,31 @@ describe('Conversational Adaptive Lifestyle Interview', () => {
     const nextStep = computeNextInterviewStage('availability', anytimeAnswer, new Set(step.updatedAnswered));
     expect(nextStep.nextStage).toBe('rhythm');
   });
+
+  it('keeps unknown region neutral without fabricating Abu Dhabi or United Arab Emirates', () => {
+    const copyEn = getLocaleCopy('en');
+    const unknownRegion: RegionContext = {
+      countryCode: '',
+      countryName: '',
+      detectedBy: 'default_global',
+      confirmed: false
+    };
+
+    expect(formatRegionLabel(unknownRegion)).toBe('');
+    expect(formatRegionLabel(undefined)).toBe('');
+
+    const regionChips = getQuickRepliesForStage({
+      stage: 'region',
+      lifestyleProfile: { region: unknownRegion, activeTags: [] },
+      suggestions: [],
+      copy: copyEn
+    });
+    expect(regionChips.every((chip) => !chip.startsWith('Yes,'))).toBe(true);
+
+    const yesOnUnknown = parseConversationalLifestyleAnswer('Yes', 'region', {
+      currentRegion: unknownRegion
+    });
+    expect(yesOnUnknown.answeredRegion).toBe(false);
+    expect(yesOnUnknown.region).toBeUndefined();
+  });
 });

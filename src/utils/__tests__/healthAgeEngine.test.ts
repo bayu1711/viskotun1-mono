@@ -66,7 +66,7 @@ describe('Health Age Projection Engine', () => {
     );
   });
 
-  it('handles zero streak gracefully', () => {
+  it('handles zero streak gracefully without fabricating a health age reduction or resilience score', () => {
     const zeroState = calculateHealthAgeProjection({
       adherenceRate: 0,
       streak: 0,
@@ -76,7 +76,9 @@ describe('Health Age Projection Engine', () => {
     });
 
     expect(zeroState.chronologicalAge).toBe(35);
-    expect(zeroState.projectedHealthAge).toBeLessThanOrEqual(35);
+    expect(zeroState.projectedHealthAge).toBe(35);
+    expect(zeroState.healthAgeDelta).toBe(0);
+    expect(zeroState.habitResilienceScore).toBe(0);
     expect(zeroState.sustainedStreak).toBe(0);
   });
 });
