@@ -32,7 +32,9 @@ jobs:
         run: npm run lint
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: |
+          npx next typegen
+          npx tsc --noEmit
 
       - name: Unit tests
         run: npm test
@@ -44,4 +46,3 @@ jobs:
 
       - name: Dependency audit (production, high and above)
         run: npm audit --omit=dev --audit-level=high
-        continue-on-error: true
