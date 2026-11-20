@@ -13,9 +13,11 @@ import type { RoutineSchedulePreference } from '../../types/schedule';
 import { MOTION } from '../../data/config';
 import { COPY } from '../../data/copy';
 import { ROUTES } from '../../data/navigation';
+import { PRECALIBRATED_SAMPLE_ROUTINES } from '../../data/samplePapers';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useScrollToLatest } from '../../hooks/useScrollToLatest';
 import { isPdfFile } from '../../utils/files';
+import { isUnrecognizedLinkReason } from '../../utils/rejectionAssistant';
 import {
   getQuickRepliesForStage,
   getStagePlaceholder
@@ -101,9 +103,9 @@ export function AssistantSheet() {
     inputRef.current?.focus();
   };
 
-  const addPaper = (source: string | File) => {
+  const addPaper = useCallback((source: string | File) => {
     uploadPaper(source);
-  };
+  }, [uploadPaper]);
 
   const handleFile = (file: File) => {
     if (!isPdfFile(file)) {
@@ -289,6 +291,50 @@ export function AssistantSheet() {
     ].filter((s) => !asked.has(s.toLowerCase()));
   }, [stagingError, stagingMessages]);
 
+  const isUnrecognizedError = Boolean(stagingError && isUnrecognizedLinkReason(stagingError));
+
+  const guidanceSuggestions = useMemo(() => {
+    if (!isUnrecognizedError) return [];
+    const asked = new Set(
+      stagingMessages
+        .filter((m) => m.role === 'user' && m.kind === 'question')
+        .map((m) => m.content.trim().toLowerCase())
+    );
+    const g = copy.assistant.rejection.guidanceSuggestions;
+    return [
+      g.browseCommunity,
+      g.achilles,
+      g.hairLoss,
+      g.creatine,
+      g.searchPubmed
+    ].filter((s) => !asked.has(s.toLowerCase()));
+  }, [isUnrecognizedError, stagingMessages, copy]);
+
+  const handleGuidanceSelect = useCallback(
+    (suggestion: string) => {
+      const g = copy.assistant.rejection.guidanceSuggestions;
+      if (suggestion === g.browseCommunity) {
+        closeAssistant();
+        router.push(`${ROUTES.community}?tab=explore`);
+        return;
+      }
+      if (suggestion === g.achilles) {
+        addPaper('Achilles Tendinopathy Rehab');
+        return;
+      }
+      if (suggestion === g.hairLoss) {
+        addPaper('Alopecia Hair Regrowth');
+        return;
+      }
+      if (suggestion === g.creatine) {
+        addPaper('Creatine & Cognitive Fatigue');
+        return;
+      }
+      askStagingQuestion(suggestion);
+    },
+    [copy, closeAssistant, router, addPaper, askStagingQuestion]
+  );
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -427,16 +473,20 @@ export function AssistantSheet() {
                         </div>
                       )}
 
-                      <div className="rounded-card border border-ink/10 bg-white p-4 space-y-2">
-                        <h3 className="text-sm font-semibold text-ink">
-                          {COPY.assistant.intakeInstructionTitle}
-                        </h3>
-                        <p className="text-xs text-ink/65 leading-relaxed">
-                          {COPY.assistant.intakeInstructionBody}
-                        </p>
-                      </div>
+                      {!stagingError && (
+                        <>
+                          <div className="rounded-card border border-ink/10 bg-white p-4 space-y-2">
+                            <h3 className="text-sm font-semibold text-ink">
+                              {COPY.assistant.intakeInstructionTitle}
+                            </h3>
+                            <p className="text-xs text-ink/65 leading-relaxed">
+                              {COPY.assistant.intakeInstructionBody}
+                            </p>
+                          </div>
 
-                      <UploadDropzone onFile={addPaper} />
+                          <UploadDropzone onFile={addPaper} />
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
@@ -504,8 +554,12 @@ export function AssistantSheet() {
               ) : isExtractingPaper ? null : stagingError ? (
                 <>
                   <FaqSuggestions
-                    suggestions={rejectionSuggestions}
-                    onSelect={askStagingQuestion}
+                    suggestions={
+                      isUnrecognizedError ? guidanceSuggestions : rejectionSuggestions
+                    }
+                    onSelect={
+                      isUnrecognizedError ? handleGuidanceSelect : askStagingQuestion
+                    }
                     disabled={isStagingAssistantTyping}
                   />
                   <AssistantComposer
@@ -514,7 +568,11 @@ export function AssistantSheet() {
                     onAsk={askStagingQuestion}
                     onAddPaper={addPaper}
                     onFile={handleFile}
-                    placeholder={COPY.assistant.rejection.placeholder}
+                    placeholder={
+                      isUnrecognizedError
+                        ? copy.assistant.rejection.placeholderGuidance
+                        : COPY.assistant.rejection.placeholder
+                    }
                     ariaLabel={COPY.assistant.rejection.inputLabel}
                   />
                 </>
