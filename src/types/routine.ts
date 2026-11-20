@@ -225,7 +225,8 @@ export type ChatKind =
   | 'question'
   | 'answer'
   | 'lifestyle_tuning'
-  | 'processing';
+  | 'processing'
+  | 'paper_guidance';
 
 export type AIEngineType = 'on-device-gemma' | 'cloud-gemini' | 'server-gemma' | 'local-rules';
 
