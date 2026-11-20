@@ -198,40 +198,70 @@ describe('Conversational Adaptive Lifestyle Interview', () => {
     }
   });
 
-  it('provides "Explore routines" on completion and does NOT suggest restarting with "Update my full profile"', () => {
+  it('provides "Explore routines" on completion with chips to change routine (schedule, intensity, cautions, rhythm) instead of listing other routines', () => {
     const copyEn = getLocaleCopy('en');
     const copyAr = getLocaleCopy('ar');
+
+    const dummySuggestions: RegionalLifestyleTag[] = [
+      { id: 'tag-1', label: 'Gentle fasting-day recovery', category: 'culture', countryCode: 'AE', popularityCount: 10 },
+      { id: 'tag-2', label: 'Quick home-based movement', category: 'schedule', countryCode: 'AE', popularityCount: 9 },
+      { id: 'tag-3', label: 'Protecting your sleep', category: 'schedule', countryCode: 'AE', popularityCount: 8 }
+    ];
 
     const completeChipsWithoutRoutine = getQuickRepliesForStage({
       stage: 'complete',
       lifestyleProfile: { region: DEFAULT_REGION, activeTags: [] },
-      suggestions: [],
+      suggestions: dummySuggestions,
       copy: copyEn,
       hasActiveRoutine: false
     });
     expect(completeChipsWithoutRoutine[0]).toBe(copyEn.lifestyleTuning.onboarding.quickExploreRoutines);
+    expect(completeChipsWithoutRoutine).toContain(copyEn.lifestyleTuning.onboarding.quickChangeSchedule);
+    expect(completeChipsWithoutRoutine).toContain(copyEn.lifestyleTuning.onboarding.quickLowerIntensity);
+    expect(completeChipsWithoutRoutine).toContain(copyEn.lifestyleTuning.onboarding.quickAddCaution);
+    expect(completeChipsWithoutRoutine).toContain(copyEn.lifestyleTuning.onboarding.quickChangeRhythm);
+    // Crucial: other routines/suggestions must NOT be listed
+    expect(completeChipsWithoutRoutine).not.toContain('Gentle fasting-day recovery');
+    expect(completeChipsWithoutRoutine).not.toContain('Quick home-based movement');
+    expect(completeChipsWithoutRoutine).not.toContain('Protecting your sleep');
     expect(completeChipsWithoutRoutine).not.toContain(copyEn.lifestyleTuning.onboarding.quickUpdateProfile);
     expect(completeChipsWithoutRoutine).not.toContain(copyEn.lifestyleTuning.onboarding.quickDone);
 
     const completeChipsWithRoutine = getQuickRepliesForStage({
       stage: 'complete',
       lifestyleProfile: { region: DEFAULT_REGION, activeTags: [] },
-      suggestions: [],
+      suggestions: dummySuggestions,
       copy: copyEn,
       hasActiveRoutine: true
     });
     expect(completeChipsWithRoutine[0]).toBe(copyEn.lifestyleTuning.onboarding.quickExploreRoutines);
     expect(completeChipsWithRoutine[1]).toBe(copyEn.lifestyleTuning.onboarding.quickDone);
-    expect(completeChipsWithRoutine).not.toContain(copyEn.lifestyleTuning.onboarding.quickUpdateProfile);
+    expect(completeChipsWithRoutine).toContain(copyEn.lifestyleTuning.onboarding.quickChangeSchedule);
+    expect(completeChipsWithRoutine).toContain(copyEn.lifestyleTuning.onboarding.quickLowerIntensity);
+    expect(completeChipsWithRoutine).toContain(copyEn.lifestyleTuning.onboarding.quickAddCaution);
+
+    const fastingChips = getQuickRepliesForStage({
+      stage: 'complete',
+      lifestyleProfile: { region: DEFAULT_REGION, culturalRhythms: ['ramadan_fasting'], activeTags: [] },
+      suggestions: dummySuggestions,
+      copy: copyEn,
+      hasActiveRoutine: true
+    });
+    expect(fastingChips).toContain(copyEn.lifestyleTuning.onboarding.quickAdjustFasting);
+    expect(fastingChips).not.toContain(copyEn.lifestyleTuning.onboarding.quickChangeRhythm);
 
     const completeChipsAr = getQuickRepliesForStage({
       stage: 'complete',
       lifestyleProfile: { region: DEFAULT_REGION, activeTags: [] },
-      suggestions: [],
+      suggestions: dummySuggestions,
       copy: copyAr,
       hasActiveRoutine: false
     });
     expect(completeChipsAr[0]).toBe(copyAr.lifestyleTuning.onboarding.quickExploreRoutines);
+    expect(completeChipsAr).toContain(copyAr.lifestyleTuning.onboarding.quickChangeSchedule);
+    expect(completeChipsAr).toContain(copyAr.lifestyleTuning.onboarding.quickLowerIntensity);
+    expect(completeChipsAr).toContain(copyAr.lifestyleTuning.onboarding.quickAddCaution);
+    expect(completeChipsAr).toContain(copyAr.lifestyleTuning.onboarding.quickChangeRhythm);
     expect(completeChipsAr).not.toContain(copyAr.lifestyleTuning.onboarding.quickUpdateProfile);
   });
 
