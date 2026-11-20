@@ -1300,8 +1300,11 @@ export const COPY = {
       step3Title: 'Adaptive Daily Routine & Voice Coach',
       step3Body: 'Executes daily sets, progression rules, safety & biofeedback thresholds, and answers questions strictly cited from the Methods.',
       step4Number: '04',
-      step4Title: 'Clinical Adherence Brief',
-      step4Body: 'One-page summary of adherence trends, biomarker improvements, and pain logs formatted for physician review.'
+      step4Title: 'Habit Science & Micro-Dosing (BCT v1)',
+      step4Body: 'Grounded in accredited Behavior Change Techniques: non-punitive re-entry, 2-minute micro-dose fallbacks, and climate substitutions keep habits intact without guilt.',
+      step5Number: '05',
+      step5Title: 'Clinical Adherence Brief',
+      step5Body: 'One-page summary of adherence trends, biomarker improvements, and pain logs formatted for physician review.'
     },
     footerTagline: 'TrialN1 · Interventional human research intelligence',
     footerSignIn: 'Sign in',
@@ -1889,9 +1892,38 @@ export const COPY = {
       'TrialN1 converts dense, peer-reviewed human interventional research into executable daily routines with zero hallucinated gaps and N1 AI, an evidence-grounded safety companion.',
     tabs: {
       guide: 'How it works',
+      science: 'Habit science (BCT)',
       samples: 'Trending papers',
       scope: 'Accepted papers'
     },
+    scienceEyebrow: 'Behavioral Medicine Engine · BCT Taxonomy v1',
+    scienceTitle: 'Why TrialN1 Habits Actually Stick',
+    scienceIntro:
+      'Most fitness apps rely on shame, guilt streaks, or rigid schedules—which inevitably fail when real life happens. TrialN1 maps every routine adaptation to accredited Behavior Change Techniques (Michie et al. 2013) so your momentum never resets to zero.',
+    sciencePillars: [
+      {
+        code: 'BCT 8.7 · Graded Tasks',
+        title: 'Adaptive Micro-Dosing',
+        body: 'When time, shift fatigue, or 48°C extreme summer heat hits, routines automatically contract into a 2–3 min indoor micro-dose to preserve the neural habit loop.',
+        benefit: 'Zero activation friction'
+      },
+      {
+        code: 'BCT 11.2 · Emotion Regulation',
+        title: 'Non-Punitive Re-Entry',
+        body: 'Streaks never reset to zero after a lapse. Missing a day is treated as a clinical data point, extinguishing the guilt-induced "Abstinence Violation Effect".',
+        benefit: 'No streak shame'
+      },
+      {
+        code: 'BCT 1.2 & 8.1 · Problem Solving',
+        title: 'Real-World Barrier Substitution',
+        body: 'Substitutes impossible outdoor sessions for indoor AC corridor steps, syncs hydration around Ramadan schedules, and swaps cravings with tactile alternatives.',
+        benefit: 'Context-resilient'
+      }
+    ],
+    inspectLedgerTitle: 'Clinical Transparency & Audit Trail',
+    inspectLedgerSubtitle:
+      'Explore all accredited Behavior Change Techniques, mechanisms of action, and Gulf barrier targets implemented in TrialN1.',
+    inspectLedgerButton: 'Inspect BCT Taxonomy Ledger',
     steps: [
       {
         step: '01',
