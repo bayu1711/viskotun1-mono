@@ -138,6 +138,7 @@ export function useRoutineState() {
   const [runtime, setRuntime] = useState<Record<string, RoutineRuntime>>({});
   const [hasHydrated, setHasHydrated] = useState(false);
   const [hasRemoteHydrated, setHasRemoteHydrated] = useState(false);
+  const hydratedScopeRef = useRef<string | null>(null);
 
   const activeRoutineIdRef = useRef(activeRoutineId);
   activeRoutineIdRef.current = activeRoutineId;
@@ -346,6 +347,7 @@ export function useRoutineState() {
       console.error('[useRoutineState] Hydration error:', err);
     } finally {
       if (isMounted) {
+        hydratedScopeRef.current = isAuthenticated && userId ? `user:${userId}` : 'guest';
         setHasHydrated(true);
       }
     }
@@ -355,9 +357,10 @@ export function useRoutineState() {
     };
   }, [isAuthLoading, isAuthenticated, userId]);
 
-  // Persist changes to scoped localStorage once hydrated
+  // Persist changes to scoped localStorage once hydrated for the current account scope
   useEffect(() => {
-    if (!hasHydrated || isAuthLoading) return;
+    const currentScope = isAuthenticated && userId ? `user:${userId}` : 'guest';
+    if (!hasHydrated || isAuthLoading || hydratedScopeRef.current !== currentScope) return;
     const keys = getStorageKeys(isAuthenticated ? userId : undefined);
     try {
       window.localStorage.setItem(keys.routines, JSON.stringify(routineList));

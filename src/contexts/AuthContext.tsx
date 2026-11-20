@@ -655,7 +655,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const deleteAccount = useCallback(async () => {
     const activeUser = user;
     if (activeUser && !activeUser.isGuest) {
-      const res = await fetch('/api/user/account', {
+      const res = await fetch(`/api/user/account?userId=${encodeURIComponent(activeUser.id)}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: activeUser.id })
@@ -682,18 +682,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       includeAuthSession: true
     });
 
-    const freshUserProfile: UserProfile = { ...DEFAULT_USER_PROFILE };
-    const freshLifestyle: UserLifestyleProfile = {
-      ...DEFAULT_LIFESTYLE_PROFILE,
-      region: { ...DEFAULT_LIFESTYLE_PROFILE.region },
-      activeTags: []
-    };
-    userProfileRef.current = freshUserProfile;
-    lifestyleProfileRef.current = freshLifestyle;
-    setUserProfile(freshUserProfile);
-    setLifestyleProfile(freshLifestyle);
     persistUser(null);
-    router.push(ROUTES.login);
+    router.replace(ROUTES.landing);
   }, [user, persistUser, router]);
 
   const isAdmin = Boolean(

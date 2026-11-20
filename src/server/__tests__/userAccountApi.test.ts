@@ -229,5 +229,26 @@ describe('User Account Lifecycle API & Data Utilities', () => {
     expect(authSource).toContain('getProfileStorageKeys');
     expect(authSource).toContain('loadScopedProfilesForUser');
     expect(authSource).toContain('freshAccount: true');
+    expect(authSource).toContain('router.replace(ROUTES.landing)');
+  });
+
+  it('supports deleting a user account via query param without a JSON body', async () => {
+    await saveUserRecord({
+      userId: `${TEST_USER_ID}-query`,
+      activeRoutineId: 'achilles-test',
+      routines: [SAMPLE_ROUTINE],
+      runtime: SAMPLE_RUNTIME,
+      updatedAt: Date.now()
+    });
+
+    const deleteRes = await DELETE(
+      new Request(`http://localhost/api/user/account?userId=${encodeURIComponent(`${TEST_USER_ID}-query`)}`, {
+        method: 'DELETE'
+      })
+    );
+    expect(deleteRes.status).toBe(200);
+    const body = await deleteRes.json();
+    expect(body.deleted).toBe(true);
+    expect(memoryUserStorage.has(`${TEST_USER_ID}-query`)).toBe(false);
   });
 });
