@@ -57,7 +57,7 @@ export function TopBar() {
             href={ROUTES.profile}
             aria-label={copy.shell.openProfile}
             title={copy.shell.openProfile}
-            className={`group flex min-w-0 items-center gap-2.5 rounded-full pr-1 transition-opacity hover:opacity-85 ${
+            className={`group flex min-w-0 items-center gap-2.5 rounded-full pr-4 transition-opacity hover:opacity-85 ${
               pathname === ROUTES.profile ? 'ring-2 ring-ink ring-offset-2 ring-offset-canvas' : ''
             }`}
           >
