@@ -29,7 +29,7 @@ export function FilterChips<T extends string>({ options, value, onChange, ariaLa
             className={cn(
               'shrink-0 rounded-full px-4 py-1.5 text-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30',
               selected
-                ? 'bg-orange text-white font-medium shadow-2xs'
+                ? 'bg-orange text-ink font-medium shadow-2xs'
                 : 'border border-ink/15 bg-white text-ink/65 hover:border-ink/40 hover:bg-canvas'
             )}>
             

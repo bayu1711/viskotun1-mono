@@ -33,7 +33,7 @@ export function TodaySummaryCard({ className }: TodaySummaryCardProps) {
       </div>
       <p className="mt-3 text-4xl font-light tabular-nums">
         {todayPercent}
-        <span className="text-white/40">{COPY.common.percentSign}</span>
+        <span className="text-white/65">{COPY.common.percentSign}</span>
       </p>
       <div className="mt-2 flex items-center justify-between">
         <p className="text-xs text-white/50">{COPY.shell.dayOfTotal(currentDay, totalDays)}</p>

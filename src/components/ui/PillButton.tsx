@@ -6,8 +6,8 @@ type Variant = 'primary' | 'orange' | 'ink' | 'outline' | 'success' | 'inverse';
 type Size = 'sm' | 'md' | 'lg';
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-orange text-white hover:bg-orange/90 font-medium shadow-sm active:bg-orange/95',
-  orange: 'bg-orange text-white hover:bg-orange/90 font-medium shadow-sm active:bg-orange/95',
+  primary: 'bg-orange text-ink hover:bg-orange/90 font-medium shadow-sm active:bg-orange/95',
+  orange: 'bg-orange text-ink hover:bg-orange/90 font-medium shadow-sm active:bg-orange/95',
   ink: 'bg-ink text-white hover:bg-ink/85',
   outline: 'border border-ink text-ink hover:bg-ink hover:text-white',
   success: 'bg-mint text-ink',

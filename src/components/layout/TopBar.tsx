@@ -40,11 +40,12 @@ export function TopBar() {
 
   return (
     <header className="mx-auto w-full max-w-6xl px-5 pt-5 lg:px-10 lg:pt-8">
-      <div className="flex items-center gap-3 border-b border-ink pb-4">
-        <Link href={ROUTES.landing} className="flex min-h-11 min-w-11 items-center justify-center hover:opacity-85 transition-opacity lg:hidden" aria-label={copy.brand.name}>
+      <div className="flex items-center gap-2 border-b border-ink pb-4 sm:gap-3">
+        {/* Hidden on phones: the bottom tab bar handles navigation and the header needs the room. */}
+        <Link href={ROUTES.landing} className="hidden min-h-11 min-w-11 items-center justify-center transition-opacity hover:opacity-85 sm:flex lg:hidden" aria-label={copy.brand.name}>
           <Image
             src={COPY.brand.iconUrl}
-            alt={copy.brand.name}
+            alt=""
             width={28}
             height={28}
             priority
@@ -52,18 +53,21 @@ export function TopBar() {
             className="h-7 w-7 object-contain"
           />
         </Link>
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <Link
             href={ROUTES.profile}
             aria-label={copy.shell.openProfile}
             title={copy.shell.openProfile}
-            className={`group flex min-w-0 items-center gap-2.5 rounded-full pr-4 transition-opacity hover:opacity-85 ${
+            className={`group flex min-w-0 shrink-0 items-center gap-2.5 rounded-full transition-opacity hover:opacity-85 sm:shrink sm:pr-4 ${
               pathname === ROUTES.profile ? 'ring-2 ring-ink ring-offset-2 ring-offset-canvas' : ''
             }`}
           >
-            <Avatar initials={displayInitials} />
-            <div className="min-w-0 leading-tight">
-              <p className="hidden text-xs text-ink/60 sm:block">{greetingText ?? '\u00a0'}</p>
+            <span className="shrink-0">
+              <Avatar initials={displayInitials} />
+            </span>
+            {/* Phones show the avatar only; the name would collide with the header actions at 375px. */}
+            <div className="hidden min-w-0 leading-tight sm:block">
+              <p className="text-xs text-ink/70">{greetingText ?? '\u00a0'}</p>
               <p className="truncate text-sm font-medium group-hover:underline">{displayName}</p>
             </div>
           </Link>

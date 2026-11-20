@@ -8,7 +8,7 @@ type TileSize = 24 | 28 | 32 | 36 | 40 | 48 | 64;
 const VARIANTS: Record<TileVariant, string> = {
   solid: 'bg-ink text-white',
   inverse: 'bg-white text-ink',
-  orange: 'bg-orange text-white',
+  orange: 'bg-orange text-ink',
   muted: 'bg-canvas text-ink/60',
   outline: 'border border-ink',
   'outline-light': 'border border-white/30',

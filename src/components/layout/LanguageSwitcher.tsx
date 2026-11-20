@@ -69,7 +69,7 @@ export function LanguageSwitcher({ variant = 'topbar', forcePair }: LanguageSwit
           'inline-flex items-center gap-1.5 rounded-full border border-ink/20 text-xs font-semibold text-ink transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30 cursor-pointer',
           variant === 'banner'
             ? 'bg-white/80 px-2.5 py-0.5 hover:bg-white'
-            : 'bg-cream/70 px-2.5 py-1 hover:bg-cream'
+            : 'relative bg-cream/70 px-2.5 py-1 hover:bg-cream before:absolute before:-inset-y-2.5 before:inset-x-0'
         )}
       >
         <Icon icon={TranslateOutlinedIcon} size="xs" className="text-ink/70" />
@@ -90,7 +90,7 @@ export function LanguageSwitcher({ variant = 'topbar', forcePair }: LanguageSwit
             transition={MOTION.fade}
             className="absolute end-0 top-full z-popover mt-2 w-56 rounded-card border border-ink/10 bg-white p-2 shadow-popover"
           >
-            <p id={headingId} className="px-2 py-1 text-2xs font-medium uppercase tracking-wider text-ink/55">
+            <p id={headingId} className="px-2 py-1 text-2xs font-medium uppercase tracking-wider text-ink/70">
               {copy.shell.languageMenuLabel}
             </p>
             <ul id={listId} role="listbox" aria-labelledby={headingId} className="space-y-1">
@@ -104,14 +104,14 @@ export function LanguageSwitcher({ variant = 'topbar', forcePair }: LanguageSwit
                       aria-selected={active}
                       onClick={() => handleSelect(opt.code)}
                       className={cn(
-                        'flex w-full items-center justify-between gap-2 rounded-tile px-2.5 py-2 text-start text-xs transition-colors cursor-pointer',
+                        'flex w-full items-center justify-between gap-2 rounded-tile px-2.5 py-2 text-start text-xs coarse:min-h-11 transition-colors cursor-pointer',
                         active
                           ? 'bg-cream font-semibold text-ink'
                           : 'text-ink/80 hover:bg-canvas hover:text-ink'
                       )}
                     >
                       <span className="flex min-w-0 items-center gap-2">
-                        <span className="font-mono text-2xs uppercase text-ink/55">{opt.code}</span>
+                        <span className="font-mono text-2xs uppercase text-ink/70">{opt.code}</span>
                         <span className="truncate">{opt.meta.nativeLabel}</span>
                       </span>
                       <span className="flex shrink-0 items-center gap-1.5">

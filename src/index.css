@@ -40,6 +40,25 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/*
+ * Keyboard focus fallback. About half the components set their own focus-visible ring;
+ * the rest relied on the browser default, which disappears on rounded pills in some
+ * browsers. :where() keeps specificity at zero so any component ring still wins.
+ */
+:where(a, button, [role='button'], [role='tab'], [role='switch'], [role='option'], summary):focus-visible {
+  outline: 2px solid rgb(var(--color-ink));
+  outline-offset: 2px;
+}
+
+/* iOS zooms into any field under 16px on focus; touch screens always get 16px fields. */
+@media (pointer: coarse) {
+  input:not([type='range']):not([type='checkbox']):not([type='radio']),
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+}
+
 /* Page and section titles use the display face; smaller headings stay in the body face. */
 h1,
 h2 {

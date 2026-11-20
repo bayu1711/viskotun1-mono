@@ -13,7 +13,7 @@ interface ToneStyle {
 }
 
 const LIGHT_SURFACE: Omit<ToneStyle, 'card'> = {
-  muted: 'text-ink/60',
+  muted: 'text-ink/80',
   minus: 'border border-ink text-ink hover:bg-ink/5',
   plus: 'bg-ink text-white hover:bg-ink/85',
   checkOn: 'bg-ink text-white',
@@ -24,7 +24,7 @@ const LIGHT_SURFACE: Omit<ToneStyle, 'card'> = {
 export const toneStyles: Record<Tone, ToneStyle> = {
   ink: {
     card: 'bg-ink text-white',
-    muted: 'text-white/45',
+    muted: 'text-white/75',
     minus: 'border border-white/50 text-white hover:bg-white/10',
     plus: 'bg-white text-ink hover:bg-white/90',
     checkOn: 'bg-white text-ink',

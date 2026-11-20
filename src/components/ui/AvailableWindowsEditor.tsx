@@ -102,7 +102,7 @@ export function AvailableWindowsEditor({
                     compact ? 'py-1 text-2xs' : 'py-1.5 text-xs'
                   )}
                 />
-                <span className="text-2xs text-ink/50">–</span>
+                <span className="text-2xs text-ink/70">–</span>
                 <input
                   type="time"
                   value={win.end}
@@ -143,7 +143,7 @@ export function AvailableWindowsEditor({
         )}
 
         {presets.length > 0 && presetsHeading && !compact && (
-          <span className="ml-1 text-2xs text-ink/50">{presetsHeading}:</span>
+          <span className="ml-1 text-2xs text-ink/70">{presetsHeading}:</span>
         )}
 
         {presets.map((preset) => {
