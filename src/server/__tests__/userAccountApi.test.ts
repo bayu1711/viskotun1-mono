@@ -185,6 +185,10 @@ describe('User Account Lifecycle API & Data Utilities', () => {
       path.resolve(__dirname, '../../views/Profile.tsx'),
       'utf-8'
     );
+    expect(profileSource).toContain('<SegmentedTabs');
+    expect(profileSource.indexOf('<SegmentedTabs')).toBeLessThan(
+      profileSource.indexOf('t.backToRoutine')
+    );
     expect(profileSource).toContain('<AccountControlsPanel />');
     expect(profileSource.indexOf('</form>')).toBeLessThan(
       profileSource.indexOf('<AccountControlsPanel />')
