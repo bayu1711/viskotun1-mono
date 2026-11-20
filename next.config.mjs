@@ -1,18 +1,21 @@
+import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
+
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  reactStrictMode: true,
-  output: 'standalone',
-  distDir: process.env.NEXT_DIST_DIR || '.next',
-  transpilePackages: ['@mui/icons-material'],
-  experimental: {
-    serverComponentsExternalPackages: ['@google-cloud/firestore']
-  },
-  webpack: (config, { dev }) => {
-    if (dev) {
-      config.cache = false;
+const configFunction = (phase) => {
+  const isDev = phase === PHASE_DEVELOPMENT_SERVER;
+
+  return {
+    reactStrictMode: true,
+    output: 'standalone',
+    distDir: process.env.NEXT_DIST_DIR || (isDev ? '.next-dev' : '.next'),
+    transpilePackages: ['@mui/icons-material'],
+    experimental: {
+      serverComponentsExternalPackages: ['@google-cloud/firestore']
+    },
+    webpack: (config) => {
+      return config;
     }
-    return config;
-  }
+  };
 };
 
-export default nextConfig;
+export default configFunction;
