@@ -29,6 +29,7 @@ import {
   type PaperIdentifierInput
 } from '../utils/paperFingerprint';
 import { getLiveUserStats } from './userStorage';
+import { assertDurableWrite } from './persistence';
 
 const ROUTINES_COLLECTION = 'routines';
 const REVIEWS_SUBCOLLECTION = 'reviews';
@@ -292,17 +293,11 @@ export async function saveCanonicalRoutine(
   const canonicalRoutine: Routine = { ...toCanonicalRoutine(routine), isCanonical: true };
   const canonicalId = canonicalRoutine.id;
 
-  // Update in-memory registry
-  memoryRoutines.set(canonicalId, canonicalRoutine);
-
-  // Initialize reviews cache
-  if (routine.community?.reviews) {
-    memoryReviews.set(canonicalId, [...routine.community.reviews]);
-  }
-
-  // Persist to Cloud Firestore if connected
+  // Persist to Cloud Firestore; in production a missing or failed store throws
   const db = getFirestore();
-  if (db) {
+  if (!db) {
+    assertDurableWrite('Firestore routine registry');
+  } else {
     try {
       const docRef = db.collection(ROUTINES_COLLECTION).doc(canonicalId);
       await docRef.set({
@@ -323,8 +318,14 @@ export async function saveCanonicalRoutine(
         await batch.commit();
       }
     } catch (err: any) {
+      assertDurableWrite('Firestore routine registry', err);
       console.warn('[RoutineRegistry] Could not persist canonical routine to Firestore:', err?.message || err);
     }
+  }
+
+  memoryRoutines.set(canonicalId, canonicalRoutine);
+  if (routine.community?.reviews) {
+    memoryReviews.set(canonicalId, [...routine.community.reviews]);
   }
 
   return { routine: canonicalRoutine, isNew: true };
@@ -393,34 +394,32 @@ export async function addCommunityReview(
   userId?: string
 ): Promise<CommunityReview> {
   const canonicalId = getCanonicalPaperId({ id: routineId }, routineId);
+  const reviewId = userId
+    ? `user_${userId.replace(/[^\w-]/g, '_')}`
+    : `rev_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
   const newReview: CommunityReview = {
     ...review,
-    id: `rev_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    id: reviewId,
     handle: review.handle || 'Anonymous participant',
-    userId: userId || review.userId,
+    ...(userId ? { userId } : {}),
     createdAt: new Date().toISOString()
   };
 
-  // Update in-memory cache
-  const existing = memoryReviews.get(canonicalId) || memoryReviews.get(routineId) || [];
-  const updated = [newReview, ...existing];
-  memoryReviews.set(canonicalId, updated);
-  if (routineId !== canonicalId) {
-    memoryReviews.set(routineId, updated);
-  }
-
-  // Persist to Cloud Firestore
+  // Persist to Cloud Firestore. A signed-in user's review uses a fixed id, so a second
+  // review from the same person replaces the first instead of adding another vote.
   const db = getFirestore();
-  if (db) {
+  if (!db) {
+    assertDurableWrite('Firestore community reviews');
+  } else {
     try {
       await db
         .collection(ROUTINES_COLLECTION)
         .doc(canonicalId)
         .collection(REVIEWS_SUBCOLLECTION)
         .doc(newReview.id)
-        .set(newReview);
+        .set(JSON.parse(JSON.stringify(newReview)));
 
-      // Invalidate / update metrics cache
+      // Invalidate the cached aggregate so the next read recomputes it
       await db
         .collection(ROUTINES_COLLECTION)
         .doc(canonicalId)
@@ -429,8 +428,18 @@ export async function addCommunityReview(
         .delete()
         .catch(() => {});
     } catch (err: any) {
+      assertDurableWrite('Firestore community reviews', err);
       console.warn('[RoutineRegistry] Failed to persist review to Firestore:', err?.message || err);
     }
+  }
+
+  const existing = (memoryReviews.get(canonicalId) || memoryReviews.get(routineId) || []).filter(
+    (r) => r.id !== newReview.id
+  );
+  const updated = [newReview, ...existing];
+  memoryReviews.set(canonicalId, updated);
+  if (routineId !== canonicalId) {
+    memoryReviews.set(routineId, updated);
   }
 
   return newReview;
@@ -590,43 +599,62 @@ export async function updateCanonicalRoutineVersion(
     updatedFields
   };
 
-  const updatedChangelog = [newEntry, ...(existing.changelog || [])];
-
-  const updatedRoutine: Routine = {
-    ...existing,
-    ...updates,
-    id: existing.id,
-    canonicalId: existing.canonicalId || canonicalId,
-    version: nextVersion,
-    changelog: updatedChangelog,
-    isCanonical: true
+  const buildUpdate = (base: Routine) => {
+    const baseVersion = base.version || '1.0';
+    const [majorText, minorText] = baseVersion.split('.');
+    const nextVersion = `${parseInt(majorText || '1', 10)}.${parseInt(minorText || '0', 10) + 1}`;
+    const changelog = [{ ...newEntry, version: nextVersion }, ...(base.changelog || [])];
+    const routine: Routine = {
+      ...base,
+      ...updates,
+      id: base.id,
+      canonicalId: base.canonicalId || canonicalId,
+      version: nextVersion,
+      changelog,
+      isCanonical: true
+    };
+    return { routine, nextVersion, changelog };
   };
 
-  memoryRoutines.set(canonicalId, updatedRoutine);
-  if (routineId !== canonicalId) {
-    memoryRoutines.set(routineId, updatedRoutine);
-  }
+  let result = buildUpdate(existing);
 
   const db = getFirestore();
-  if (db) {
+  if (!db) {
+    assertDurableWrite('Firestore routine registry');
+  } else {
     try {
-      await db
-        .collection(ROUTINES_COLLECTION)
-        .doc(canonicalId)
-        .set(
-          {
-            ...updates,
-            version: nextVersion,
-            changelog: updatedChangelog,
-            updatedAt: new Date().toISOString()
-          },
+      // Read and write inside one transaction so two concurrent corrections cannot
+      // both compute the same next version and overwrite each other's changelog entry
+      const docRef = db.collection(ROUTINES_COLLECTION).doc(canonicalId);
+      result = await db.runTransaction(async (tx) => {
+        const snapshot = await tx.get(docRef);
+        const base = snapshot.exists ? ({ ...existing, ...(snapshot.data() as Routine) }) : existing;
+        const next = buildUpdate(base);
+        tx.set(
+          docRef,
+          JSON.parse(
+            JSON.stringify({
+              ...updates,
+              version: next.nextVersion,
+              changelog: next.changelog,
+              updatedAt: new Date().toISOString()
+            })
+          ),
           { merge: true }
         );
+        return next;
+      });
     } catch (err: unknown) {
+      assertDurableWrite('Firestore routine registry', err);
       console.warn('[RoutineRegistry] Failed to persist routine version bump:', err);
     }
   }
 
-  return updatedRoutine;
+  memoryRoutines.set(canonicalId, result.routine);
+  if (routineId !== canonicalId) {
+    memoryRoutines.set(routineId, result.routine);
+  }
+
+  return result.routine;
 }
 

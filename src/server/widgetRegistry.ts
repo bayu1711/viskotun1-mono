@@ -1,4 +1,5 @@
 import { getFirestore } from './guardrailLedger';
+import { assertDurableWrite } from './persistence';
 import {
   SUPPORTED_WIDGET_TYPES,
   type DataCollectionField,
@@ -91,12 +92,18 @@ export async function registerWidgetProposal(proposal: ProposedWidgetSpec): Prom
   return proposal;
 }
 
+/** Proposal ids are derived from the routine and field, never taken from model output. */
+export function widgetProposalId(routineId: string, fieldId: string): string {
+  return `widget_${routineId}_${fieldId}`.replace(/[^\w.-]/g, '_').slice(0, 200);
+}
+
 /**
- * Validates all fields in a routine's dataCollectionSpec.
- * If a field requests an unsupported widget type or specifies a custom proposedWidget,
- * registers the proposal for human oversight while assigning a safe fallback WidgetType.
+ * Validates all fields in a routine's dataCollectionSpec without writing anything.
+ * Unsupported or custom widgets get a safe fallback type and a proposal marked
+ * `pending_review`. A proposal is only `approved` when an admin already approved that
+ * exact id on the server; status values in model output are ignored.
  */
-export async function validateAndRegisterRoutineWidgets(routine: Routine): Promise<Routine> {
+export async function validateRoutineWidgets(routine: Routine): Promise<Routine> {
   if (!routine.dataCollectionSpec || routine.dataCollectionSpec.length === 0) {
     return routine;
   }
@@ -118,36 +125,36 @@ export async function validateAndRegisterRoutineWidgets(routine: Routine): Promi
       ? rawType
       : inferFallbackWidgetType(requestedType, rawField);
 
-    const proposalId =
-      rawField.proposedWidget?.id || `widget_${routine.id}_${rawField.id}`;
+    const proposalId = widgetProposalId(routine.id, rawField.id);
+    const existing = await getWidgetProposal(proposalId);
 
-    const initialProposal: ProposedWidgetSpec = {
-      id: proposalId,
-      requestedType,
-      title: rawField.proposedWidget?.title || rawField.label || rawField.name,
-      description:
-        rawField.proposedWidget?.description ||
-        rawField.instructions ||
-        `Custom clinical endpoint widget for ${rawField.name}`,
-      status: rawField.proposedWidget?.status === 'approved' ? 'approved' : 'pending_review',
-      routineId: routine.id,
-      paperTitle: routine.paper?.title || routine.title,
-      fieldId: rawField.id,
-      unit: rawField.proposedWidget?.unit ?? rawField.unit,
-      min: rawField.proposedWidget?.min ?? rawField.min,
-      max: rawField.proposedWidget?.max ?? rawField.max,
-      step: rawField.proposedWidget?.step ?? rawField.step,
-      options: rawField.proposedWidget?.options ?? rawField.options,
-      submittedAt: rawField.proposedWidget?.submittedAt || new Date().toISOString(),
-      approvedAt: rawField.proposedWidget?.approvedAt
-    };
-
-    const resolvedProposal = await registerWidgetProposal(initialProposal);
+    const proposal: ProposedWidgetSpec =
+      existing?.status === 'approved'
+        ? existing
+        : {
+            id: proposalId,
+            requestedType,
+            title: rawField.proposedWidget?.title || rawField.label || rawField.name,
+            description:
+              rawField.proposedWidget?.description ||
+              rawField.instructions ||
+              `Custom clinical endpoint widget for ${rawField.name}`,
+            status: 'pending_review',
+            routineId: routine.id,
+            paperTitle: routine.paper?.title || routine.title,
+            fieldId: rawField.id,
+            unit: rawField.proposedWidget?.unit ?? rawField.unit,
+            min: rawField.proposedWidget?.min ?? rawField.min,
+            max: rawField.proposedWidget?.max ?? rawField.max,
+            step: rawField.proposedWidget?.step ?? rawField.step,
+            options: rawField.proposedWidget?.options ?? rawField.options,
+            submittedAt: new Date().toISOString()
+          };
 
     validatedFields.push({
       ...rawField,
       type: safeType,
-      proposedWidget: resolvedProposal
+      proposedWidget: proposal
     });
   }
 
@@ -155,6 +162,23 @@ export async function validateAndRegisterRoutineWidgets(routine: Routine): Promi
     ...routine,
     dataCollectionSpec: validatedFields
   };
+}
+
+/** Puts a confirmed routine's pending widget proposals into the admin review queue. */
+export async function registerRoutineWidgetProposals(routine: Routine): Promise<void> {
+  for (const field of routine.dataCollectionSpec ?? []) {
+    const proposal = field.proposedWidget;
+    if (proposal && proposal.status !== 'approved') {
+      await registerWidgetProposal({ ...proposal, status: 'pending_review' });
+    }
+  }
+}
+
+/** Validates widgets and immediately registers any pending proposals (used for confirmed routines). */
+export async function validateAndRegisterRoutineWidgets(routine: Routine): Promise<Routine> {
+  const validated = await validateRoutineWidgets(routine);
+  await registerRoutineWidgetProposals(validated);
+  return validated;
 }
 
 export async function listWidgetProposals(): Promise<ProposedWidgetSpec[]> {
@@ -197,20 +221,22 @@ export async function approveWidgetProposal(
     approvedAt: new Date().toISOString()
   };
 
-  memoryWidgetProposals.set(proposalId, approved);
-
   const db = getFirestore();
-  if (db) {
+  if (!db) {
+    assertDurableWrite('Firestore widget registry');
+  } else {
     try {
       await db
         .collection(WIDGET_PROPOSALS_COLLECTION)
         .doc(proposalId)
         .set(approved, { merge: true });
     } catch (err: unknown) {
+      assertDurableWrite('Firestore widget registry', err);
       const message = err instanceof Error ? err.message : String(err);
       console.warn('[WidgetRegistry] Could not update approved widget in Firestore:', message);
     }
   }
 
+  memoryWidgetProposals.set(proposalId, approved);
   return approved;
 }

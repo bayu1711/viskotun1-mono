@@ -12,6 +12,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { Storage } from '@google-cloud/storage';
+import { assertDurableWrite, isMemoryFallbackAllowed } from './persistence';
 
 export const DEFAULT_STORAGE_BUCKET = 'viskotun1-media-0064688276';
 
@@ -84,6 +85,12 @@ export function getGoogleCloudStorage(): Storage | null {
     return storageInstance;
   }
 
+  // Unit tests never touch a real bucket
+  if (process.env.VITEST) {
+    storageStatus = 'unconfigured';
+    return null;
+  }
+
   const projectId =
     process.env.GOOGLE_CLOUD_PROJECT ||
     process.env.GCP_PROJECT_ID ||
@@ -144,8 +151,24 @@ export interface UploadResult {
   size: number;
 }
 
+/** Image types this app stores and serves. SVG is excluded: it can carry script. */
+export const SERVABLE_IMAGE_TYPES: Record<string, string> = {
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.gif': 'image/gif'
+};
+
+function resolveLocalPath(cleanPath: string): string | null {
+  const root = path.resolve(LOCAL_UPLOADS_DIR);
+  const full = path.resolve(root, cleanPath);
+  return full.startsWith(root + path.sep) ? full : null;
+}
+
 /**
- * Upload a media buffer to Google Cloud Storage or local fallback directory.
+ * Upload a media buffer to Google Cloud Storage. Local disk is used only where memory
+ * fallback is allowed (development); in production a failed upload throws.
  */
 export async function uploadMediaFile(
   fileBuffer: Buffer,
@@ -155,22 +178,19 @@ export async function uploadMediaFile(
   const cleanPath = storagePath.replace(/^\/+/, '');
   const storage = getGoogleCloudStorage();
   const bucketName = getStorageBucketName();
+  let uploadError: unknown;
 
   if (storage) {
     try {
-      const bucket = storage.bucket(bucketName);
-      const file = bucket.file(cleanPath);
-
+      const file = storage.bucket(bucketName).file(cleanPath);
       await file.save(fileBuffer, {
         metadata: {
           contentType,
-          cacheControl: 'public, max-age=31536000, immutable'
+          cacheControl: 'private, max-age=31536000, immutable'
         },
         resumable: false
       });
-
       storageStatus = 'connected';
-
       return {
         url: `/api/media/${cleanPath}`,
         storagePath: cleanPath,
@@ -178,42 +198,35 @@ export async function uploadMediaFile(
         contentType,
         size: fileBuffer.length
       };
-    } catch (err: any) {
-      console.warn(`[CloudStorage] Failed to upload to gs://${bucketName}/${cleanPath}:`, err?.message || err);
+    } catch (err: unknown) {
+      uploadError = err;
+      console.warn(
+        `[CloudStorage] Failed to upload to gs://${bucketName}/${cleanPath}:`,
+        err instanceof Error ? err.message : err
+      );
     }
   }
 
-  // Fail-safe local filesystem fallback
-  try {
-    const fullLocalPath = path.join(LOCAL_UPLOADS_DIR, cleanPath);
-    const parentDir = path.dirname(fullLocalPath);
-    if (!fs.existsSync(parentDir)) {
-      fs.mkdirSync(parentDir, { recursive: true });
-    }
-    fs.writeFileSync(fullLocalPath, fileBuffer);
+  assertDurableWrite('Cloud Storage', uploadError);
 
-    return {
-      url: `/api/media/${cleanPath}`,
-      storagePath: cleanPath,
-      source: 'local-fallback',
-      contentType,
-      size: fileBuffer.length
-    };
-  } catch (localErr) {
-    console.error('[CloudStorage] Local filesystem write error:', localErr);
-    const base64Data = fileBuffer.toString('base64');
-    return {
-      url: `data:${contentType};base64,${base64Data}`,
-      storagePath: cleanPath,
-      source: 'local-fallback',
-      contentType,
-      size: fileBuffer.length
-    };
+  const fullLocalPath = resolveLocalPath(cleanPath);
+  if (!fullLocalPath) {
+    throw new Error('Invalid storage path');
   }
+  fs.mkdirSync(path.dirname(fullLocalPath), { recursive: true });
+  fs.writeFileSync(fullLocalPath, fileBuffer);
+
+  return {
+    url: `/api/media/${cleanPath}`,
+    storagePath: cleanPath,
+    source: 'local-fallback',
+    contentType,
+    size: fileBuffer.length
+  };
 }
 
 /**
- * Retrieve a media buffer from Google Cloud Storage or local fallback.
+ * Retrieve a media buffer from Google Cloud Storage, or local disk in development.
  */
 export async function getMediaFile(storagePath: string): Promise<{
   buffer: Buffer;
@@ -223,42 +236,34 @@ export async function getMediaFile(storagePath: string): Promise<{
   const storage = getGoogleCloudStorage();
   const bucketName = getStorageBucketName();
 
-  // 1. Try Google Cloud Storage
   if (storage) {
     try {
-      const bucket = storage.bucket(bucketName);
-      const file = bucket.file(cleanPath);
+      const file = storage.bucket(bucketName).file(cleanPath);
       const [exists] = await file.exists();
       if (exists) {
         const [contents] = await file.download();
         const [metadata] = await file.getMetadata();
         return {
           buffer: contents,
-          contentType: (metadata.contentType as string) || 'image/jpeg'
+          contentType: (metadata.contentType as string) || 'application/octet-stream'
         };
       }
-    } catch (err: any) {
-      console.warn(`[CloudStorage] Read error for gs://${bucketName}/${cleanPath}:`, err?.message || err);
+    } catch (err: unknown) {
+      console.warn(
+        `[CloudStorage] Read error for gs://${bucketName}/${cleanPath}:`,
+        err instanceof Error ? err.message : err
+      );
     }
   }
 
-  // 2. Check local filesystem fallback
-  const fullLocalPath = path.join(LOCAL_UPLOADS_DIR, cleanPath);
-  if (fs.existsSync(fullLocalPath)) {
+  if (!isMemoryFallbackAllowed()) return null;
+
+  const fullLocalPath = resolveLocalPath(cleanPath);
+  if (fullLocalPath && fs.existsSync(fullLocalPath)) {
     try {
-      const buffer = fs.readFileSync(fullLocalPath);
-      const ext = path.extname(cleanPath).toLowerCase();
-      const mimeTypes: Record<string, string> = {
-        '.png': 'image/png',
-        '.jpg': 'image/jpeg',
-        '.jpeg': 'image/jpeg',
-        '.webp': 'image/webp',
-        '.gif': 'image/gif',
-        '.svg': 'image/svg+xml'
-      };
       return {
-        buffer,
-        contentType: mimeTypes[ext] || 'application/octet-stream'
+        buffer: fs.readFileSync(fullLocalPath),
+        contentType: SERVABLE_IMAGE_TYPES[path.extname(cleanPath).toLowerCase()] || 'application/octet-stream'
       };
     } catch (readErr) {
       console.error('[CloudStorage] Local file read error:', readErr);

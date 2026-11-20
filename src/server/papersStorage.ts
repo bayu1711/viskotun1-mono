@@ -10,6 +10,7 @@ import { getFirestore } from './guardrailLedger';
 import { SAMPLE_PAPERS, PRECALIBRATED_SAMPLE_ROUTINES, type SamplePaper } from '../data/samplePapers';
 import type { Routine, StoredPaper } from '../types/routine';
 import { getLiveUserStats } from './userStorage';
+import { assertDurableWrite } from './persistence';
 
 export const PAPERS_COLLECTION = 'papers';
 
@@ -40,9 +41,9 @@ function createInitialSamplePapers(): StoredPaper[] {
     totalLogsCount: paper.totalLogsCount ?? 0,
     trendingRank: paper.trendingRank,
     routine: paper.routineId ? PRECALIBRATED_SAMPLE_ROUTINES[paper.routineId] : undefined,
-    userId: 'fazarathfazal@gmail.com',
-    userEmail: 'fazarathfazal@gmail.com',
-    uploadedBy: 'fazarathfazal@gmail.com',
+    userId: 'trialn1-curated',
+    userEmail: '',
+    uploadedBy: 'TrialN1',
     createdAt: Date.now(),
     updatedAt: Date.now()
   }));
@@ -137,9 +138,8 @@ export async function getSamplePapers(): Promise<{
             activeTrackersCount: data.activeTrackersCount ?? 0,
             totalLogsCount: data.totalLogsCount ?? 0,
             trendingRank: data.trendingRank,
-            userId: data.userId || 'fazarathfazal@gmail.com',
-            userEmail: data.userEmail || 'fazarathfazal@gmail.com',
-            uploadedBy: data.uploadedBy || 'fazarathfazal@gmail.com'
+            // Sample papers are curated by the team; never expose a personal address here
+            uploadedBy: 'TrialN1'
           });
 
           const rId = data.routineId;
@@ -201,9 +201,7 @@ export async function getSamplePapers(): Promise<{
         activeTrackersCount: item.activeTrackersCount ?? 0,
         totalLogsCount: item.totalLogsCount ?? 0,
         trendingRank: item.trendingRank,
-        userId: item.userId || 'fazarathfazal@gmail.com',
-        userEmail: item.userEmail || 'fazarathfazal@gmail.com',
-        uploadedBy: item.uploadedBy || 'fazarathfazal@gmail.com'
+        uploadedBy: 'TrialN1'
       });
       const rId = item.routineId;
       const rObj = item.routine;
@@ -242,20 +240,24 @@ export async function savePaper(paper: StoredPaper): Promise<{
     updatedAt: Date.now()
   };
 
-  // Always update in-memory cache
-  papersMemoryCache.set(paperWithTimestamps.id, paperWithTimestamps);
-
   const db = getFirestore();
   if (db) {
     try {
-      await db.collection(PAPERS_COLLECTION).doc(paperWithTimestamps.id).set(paperWithTimestamps, { merge: true });
+      await db
+        .collection(PAPERS_COLLECTION)
+        .doc(paperWithTimestamps.id)
+        .set(JSON.parse(JSON.stringify(paperWithTimestamps)), { merge: true });
+      papersMemoryCache.set(paperWithTimestamps.id, paperWithTimestamps);
       return { success: true, source: 'firestore-live' };
     } catch (err: any) {
+      assertDurableWrite('Firestore papers', err);
       console.warn('[PapersStorage] Could not write paper to Firestore, retained in memory cache:', err?.message || err);
-      return { success: true, source: 'memory-cache' };
     }
+  } else {
+    assertDurableWrite('Firestore papers');
   }
 
+  papersMemoryCache.set(paperWithTimestamps.id, paperWithTimestamps);
   return { success: true, source: 'memory-cache' };
 }
 
