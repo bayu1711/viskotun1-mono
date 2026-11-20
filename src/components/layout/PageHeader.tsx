@@ -15,16 +15,23 @@ interface PageHeaderProps {
   title: string;
   children?: React.ReactNode;
   switcherExtra?: React.ReactNode;
+  hideRoutineSwitcher?: boolean;
 }
 
 /** Routine switcher + page title shared by every route. */
-export function PageHeader({ eyebrow, title, children, switcherExtra }: PageHeaderProps) {
+export function PageHeader({
+  eyebrow,
+  title,
+  children,
+  switcherExtra,
+  hideRoutineSwitcher = false
+}: PageHeaderProps) {
   const { routine } = useRoutine();
 
   return (
     <header>
       <div className="mb-5 flex flex-wrap items-center gap-2.5">
-        <RoutineSwitcher />
+        {!hideRoutineSwitcher && <RoutineSwitcher />}
         {switcherExtra !== undefined ? (
           switcherExtra
         ) : !routine ? (

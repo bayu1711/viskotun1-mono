@@ -151,9 +151,11 @@ export function TopBar() {
           </CircleButton>
         )}
 
-        <CircleButton label={copy.shell.addPaper} onClick={() => openAssistant('upload')}>
-          <Icon icon={AddIcon} size="lg" />
-        </CircleButton>
+        {pathname !== ROUTES.profile && (
+          <CircleButton label={copy.shell.addPaper} onClick={() => openAssistant('upload')}>
+            <Icon icon={AddIcon} size="lg" />
+          </CircleButton>
+        )}
       </div>
     </header>
   );
