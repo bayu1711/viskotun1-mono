@@ -36,10 +36,11 @@ This document establishes the architectural principles, engineering standards, a
 
 ## 2. Git & Version Control Protocol
 
-Every agent working on this codebase must follow these mandatory git practices:
+Every agent working on this codebase must follow these streamlined git practices:
 
-1. **Verify Before Committing**:
-   - Always run `npm run build` and `npm run lint` before committing code. Zero warnings and zero errors are required.
+1. **Lightweight Verification Only (No Automatic `npm run build`)**:
+   - Do **NOT** run full `npm run build` during task iterations, edits, or commits. Production builds are run manually by the user to avoid heavy CPU contention and latency.
+   - Run lightweight checks (`npm run lint` or targeted unit tests) only when relevant to the modified files.
 2. **Atomic, Granular Slicing (No Monolithic Commits)**:
    - Commit after every isolated layer or logical milestone. Never bundle package dependencies, core types, backend routes, and UI components into a single massive commit.
    - Slice commits by architectural layer:
@@ -48,29 +49,14 @@ Every agent working on this codebase must follow these mandatory git practices:
      - `feat(server): ...` or `feat(api): ...` — Server route handlers, schemas, and gatekeeper logic
      - `feat(ui): ...` — Presentation components, hooks, and client state wiring
      - `docs(...)`: ... — Documentation, guidelines, or architectural notes
-   - Every single atomic commit must pass `npm run build` and `npm run lint`.
 3. **Traceability & History Integrity**:
    - Each commit should explain *what* and *why*, enabling clean rollbacks and bisecting if an edge case emerges.
 4. **Never Push Directly to `main`**:
    - `main` is strictly reserved for production releases and must **NEVER** be pushed to directly during feature work or automated commits.
-   - Active work is conducted on feature branches (e.g. `feat/<name>`), and finalized, verified work is merged exclusively into **`dev_staging`**.
-5. **Automatic Sandbox Promotion to `dev_staging` (Port 3020)**:
-   - The stable **Localhost Sandbox** lives in `../viskotun1-sandbox` (branch `dev_staging`, running on port `3020`), while active agent feature development runs in `viskotun1` on port `3010` (on the active feature branch).
-   - Whenever a task, feature slice, or milestone is **finalized and verified** (`npm run build` and `npm run lint` pass with zero errors):
-     1. Commit changes to the active feature branch and push to `origin <feature-branch>`.
-     2. **Promote to `dev_staging`**: Fast-forward/merge the verified feature state into `dev_staging` and push to remote:
-        ```bash
-        git branch -f dev_staging HEAD
-        git push origin dev_staging
-        ```
-     3. **Refresh Sandbox Worktree**: If the sibling worktree `../viskotun1-sandbox` exists, update it and re-compile so the user's sandbox at `http://localhost:3020` updates immediately:
-        ```bash
-        if [ -d "../viskotun1-sandbox" ]; then
-          (cd ../viskotun1-sandbox && git checkout dev_staging && git reset --hard origin/dev_staging && npm run build)
-        fi
-        ```
-     4. **Zero Push to `main`**: Under no circumstances should an agent push feature branches or sandbox builds to `main`.
-     5. **Integrity Rule**: Never push broken, unverified, or intermediate states to `dev_staging`. Only promote code that has passed full build and lint checks.
+   - Active work is conducted on feature branches or directly merged into **`dev_staging`**. Push feature branches and `dev_staging` to remote (`origin dev_staging`).
+5. **Single Development Environment (No Sandbox Worktree)**:
+   - There is no separate sandbox worktree. All development runs directly in `viskotun1`.
+   - Never spawn or rebuild a secondary sandbox repository.
 
 ---
 
@@ -78,8 +64,7 @@ Every agent working on this codebase must follow these mandatory git practices:
 
 - **Framework**: Next.js 14.2+ (App Router)
 - **Environments & Ports**:
-  - **Active Dev**: Port `3010` (`viskotun1`, active feature branch, outputs to `.next-dev` to prevent style asset wiping during builds)
-  - **Stable Sandbox**: Port `3020` (`viskotun1-sandbox`, branch `dev_staging`, output `.next`)
+  - **Local Dev**: Port `3010` (`viskotun1`, outputs to `.next-dev` to prevent style asset wiping)
 - **Language**: TypeScript (Strict mode enabled)
 - **Styling**: Tailwind CSS 3.4+ with custom CSS variable design tokens
 - **Icons**: Material UI Icons (`@mui/icons-material`, imported via root package)
