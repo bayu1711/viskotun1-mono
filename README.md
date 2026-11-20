@@ -2,7 +2,7 @@
 
 An AI-powered digital experience transforming complex peer-reviewed research papers into executable, adaptive, and personalized health and rehabilitation routines.
 
-Built with **Next.js 14 (App Router)**, **TypeScript**, and **Tailwind CSS**, designed for deployment to **Google Cloud Run** and integration with **Gemini on Vertex AI**.
+Built with **Next.js 14 (App Router)**, **TypeScript**, and **Tailwind CSS**, designed for deployment to **Google Cloud Run** and integration with the **Gemini API** (Google AI Studio keys via `@google/generative-ai`).
 
 ---
 
@@ -11,10 +11,10 @@ Built with **Next.js 14 (App Router)**, **TypeScript**, and **Tailwind CSS**, de
 Peer-reviewed clinical literature is notoriously dense and difficult for patients and athletes to follow safely. **TrialN1** bridges this gap by:
 - **Multimodal Paper Ingestion & Gatekeeping**: Ingesting scientific PDFs and full-text links, isolating actionable methods, dosing, tempo, and contraindications while strictly rejecting non-human (animal/in-vitro) or non-interventional studies—complete with an interactive **Suitability Q&A** flow explaining why a declined paper is ineligible.
 - **The "Morphing" Pipeline (Schema-Driven Adaptive UI & AI Widget Oversight)**: Dynamically generating bespoke data collection widgets and dashboard analytics tailored to the study's endpoints—spanning 6 core clinical primitives (`scale`, `photo`, `numeric`, `timer`, `multichoice`, `boolean`) plus **AI-Proposed Custom Widgets (`ProposedWidgetSpec`)** governed by a human-in-the-loop administrator approval queue.
-- **Canonical Paper Registry & Semantic Routine Versioning (`v1.0` → `v1.1`)**: Deduplicating papers by normalized DOI and title fingerprint so all participants tracking the same study share a single canonical routine, pooling real-world efficacy telemetry, drop-off curves, and a public version changelog updated via AI-verified community corrections.
+- **Canonical Paper Registry & Routine Versioning**: Deduplicating papers by normalized DOI and title fingerprint so all participants tracking the same study share a single canonical routine, pooling real-world efficacy telemetry and drop-off curves. Only routines extracted from Europe PMC full text become shared; uploaded PDFs and pasted text stay private to the user. Version history is shown per routine; community corrections are planned (see below).
 - **Live Routine Execution & Interactive Voice Coach**: Translating trial parameters into personalized daily routines with live set counters, tempo/hold pacing, guided audio coaching (`VoiceCoachBar` + Google Cloud TTS), and smart biofeedback scoring.
 - **Adaptive Safety Lockouts**: Automatically pausing escalation and recommending load/dosage reductions when adverse symptom or tolerability thresholds are exceeded, governed by a live **Firestore Guardrail Policy Ledger**.
-- **Grounded AI Paper Assistant**: Providing clinical Q&A grounded strictly in the study's *Methods and Interventions* section via a 3-tier hybrid AI cascade (On-Device Edge Gemma → Private Server Gemma → Cloud Gemini with multi-key 429 auto-failover).
+- **Grounded AI Paper Assistant**: Clinical Q&A grounded in the routine the server holds for the paper, including a verbatim *Methods and Interventions* excerpt when one was stored at extraction, via a hybrid cascade (On-Device model → Private Server Gemma → Cloud Gemini with multi-key 429 failover).
 
 ---
 
@@ -75,8 +75,9 @@ User Uploads PDF or Pastes Paper URL
 │ 1. Deterministic Paper Fingerprinting (src/utils/paperFingerprint.ts)       │
 │  • Normalizes DOI and title slugs (`findCanonicalRoutine`)                  │
 │  • Matches existing canonical entry OR stages a fresh candidate (`v1.0`)    │
-│  • Candidate-First Isolation: Fresh extractions are only registered into    │
-│    the shared catalog (`POST /api/papers`) after explicit user confirmation │
+│  • Candidate-First Isolation: /api/extract stores the candidate server-side │
+│    and returns a `candidateId`; POST /api/papers confirms by that id, so    │
+│    routine content from the browser is never registered                    │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
                                        ▼
@@ -89,13 +90,11 @@ User Uploads PDF or Pastes Paper URL
                                        │
                                        ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ 3. AI-Verified Community Corrections & Version Bumping (`v1.0` ➔ `v1.1`)   │
-│  • Users or clinicians report a parameter discrepancy or propose an         │
-│    improvement in the AI Paper Assistant chat                               │
-│  • Assistant cross-checks the request against the study's Methods section   │
-│  • If verified: Bumps routine minor version (`updateCanonicalRoutineVersion`)│
-│    and appends a `RoutineChangelogEntry` (`addedFields`, `updatedFields`)   │
-│  • Inspectable anytime via version pills (`v1.0`) & <VersionHistoryModal /> │
+│ 3. Community Corrections (planned)                                          │
+│  • Today the assistant can check a reported discrepancy against the paper,  │
+│    but it cannot change the routine and never says that it did             │
+│  • `updateCanonicalRoutineVersion` (transactional) is ready for a reviewed  │
+│    corrections flow; version history shows in <VersionHistoryModal />      │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -164,14 +163,14 @@ In safety-critical clinical and health applications, hardcoded thresholds in cod
 └───────────────────────────────┘  └───────────────────────────────────────────┘
 ```
 
-- **Zero-Downtime Policy Tuning**: Clinical administrators can update adverse escalation thresholds, load reduction percentages, and gatekeeper banned keywords on the fly without rebuilding or redeploying containers.
-- **Human-in-the-Loop AI Widget Approval**: Administrators review pending `ProposedWidgetSpec` items in the **Policy Ledger Drawer** and approve them with one click, immediately upgrading the routine's UI across sessions.
+- **Zero-Downtime Policy Tuning**: Clinical administrators can update adverse escalation thresholds, load reduction percentages, and gatekeeper banned keywords on the fly without rebuilding or redeploying containers. Every write requires a verified admin token.
+- **Human-in-the-Loop AI Widget Approval**: Administrators review pending `ProposedWidgetSpec` items in the **Policy Ledger Drawer** and approve them with one click. Model output can never mark its own widget as approved.
 - **Admin Simulation & Testing Controls**: Built-in testing controls allow simulating multi-day adherence (`simulatePastDays`), full routine completion (`simulateFullCompletion`), and local midnight day rollovers.
 - **Interactive UI Inspector**: Tap the **Shield** icon in the TopBar to inspect live policy provenance, view Firestore connectivity status, approve pending AI widgets, and test dynamic policy updates in real time.
 
 ---
 
-## Zero-Hallucination Parameter Resolution (3-Tier Clinical Pipeline)
+## Missing-Parameter Resolution (3-Tier Clinical Pipeline)
 
 When academic papers describe interventions in their Methods section, authors frequently omit minor execution parameters (e.g., stating *"participants performed static stretching"* without publishing hold duration or sets). Rather than silently hallucinating numbers or breaking routine execution, TrialN1 executes a deterministic **3-Tier Resolution Pipeline**:
 
@@ -220,7 +219,8 @@ Paper Omission Detected (e.g., Calf Stretch hold duration missing)
 - **Data Visualization**: Recharts (with SSR-safe client-side dynamic rendering)
 - **Notifications**: Sonner
 - **Persistence & Storage**: Google Cloud Firestore & Google Cloud Storage (with proxy streaming, private bucket security, and local disk fallbacks)
-- **AI & Cloud Backend**: Gemini on Vertex AI / Google AI Studio, Google Cloud Text-to-Speech (`/api/tts`), and Google Cloud Run (`output: 'standalone'`)
+- **AI & Cloud Backend**: Gemini API (Google AI Studio keys), Google Cloud Text-to-Speech (`/api/tts`), and Google Cloud Run (`output: 'standalone'`)
+- **Server identity**: Firebase ID tokens verified on every user, admin and write route (`src/server/auth.ts`, `jose`); per-user/IP rate limits on AI routes (`src/server/rateLimit.ts`)
 
 ---
 
@@ -283,12 +283,9 @@ TrialN1 offers multiple authentication and testing pathways designed for evaluat
    - **Persistence**: Full cloud synchronization via Firebase Client SDK and Google OAuth profile.
 
 4. **Admin Role (Clinical Lead & System Administration)**
-   - **How to test**:
-     - **1-Click Quick Access**: On `/login` or `/signup`, click the **"Continue as Admin"** button (`Dr. Evelyn Reed`).
-     - **Email Keyword**: Sign up or log in using any email containing `admin` (e.g. `admin@viskotun1.internal`, `admin@example.com`).
+   - **How to grant**: Sign in normally, then add the account to `ADMIN_UIDS` or `ADMIN_EMAILS` (verified email) in the server environment, or set the Firebase custom claim `{ "admin": true }`. The server reports the role through `GET /api/me`; the email text alone never grants admin.
    - **Badge**: Shows the green active dot with the `admin` badge in the top navigation bar.
-   - **Unlocked Features**: Activates the Guardrail Policy Ledger drawer, AI-proposed widget approval queue, fast-forward routine day simulations, and one-click demo reset.
-   - **Post-Competition Security**: *Following the completion of the Google AI Builder Cup evaluation, public admin entry points and one-click tester buttons will be sealed off and restricted strictly behind internal clinical staff credentials and enterprise IAM governance.*
+   - **Unlocked Features**: Activates the Guardrail Policy Ledger drawer, AI-proposed widget approval queue, fast-forward routine day simulations, and one-click demo reset. The admin API routes check the role again on every request.
 
 ---
 
@@ -304,7 +301,7 @@ TrialN1 offers multiple authentication and testing pathways designed for evaluat
 | **Grounded AI Clinical Assistant** | ✅ | ✅ | ✅ | ✅ | Open Assistant sheet; ask questions grounded strictly in paper's Methods section |
 | **Routine Switcher** | ✅ | ✅ | ✅ | ✅ | Switch between pre-loaded studies (Achilles Rehab, Hair Density, Calibrated Routines) |
 | **Morphing Visualizer Dashboard** | ✅ | ✅ | ✅ | ✅ | Navigate to `/dashboard`; view Before/After photo comparison slider & biomarker trend curves |
-| **Community Evidence & Reviews** | ✅ | ✅ | ✅ | ✅ | Navigate to `/community`; view pooled drop-off curves, efficacy scores, and public version history |
+| **Community Evidence & Reviews** | View only | ✅ | ✅ | ✅ | Navigate to `/community`; view pooled drop-off curves and efficacy. Posting a review requires sign-in (one review per user per routine) |
 | **Cross-Device Cloud Sync** | ❌ (Local only) | ✅ | ✅ | ✅ | State synced to Firebase & `/api/user/sync`; preserves streak across devices |
 | **Cloud Storage Photo Uploads** | Fallback (Data URL) | ✅ (GCS Bucket) | ✅ (GCS Bucket) | ✅ (GCS Bucket) | Complete a photo check-in step; tests `/api/upload` and `/api/media/...` streaming |
 | **Fast-Forward Routine Simulation** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Under *"Today's Progress"*: test *"Advance to Next Day"*, *"Simulate +4 Days"*, & *"Simulate Full Completion"* |
@@ -313,7 +310,7 @@ TrialN1 offers multiple authentication and testing pathways designed for evaluat
 | **One-Click Demo Reset** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Click Restart icon in TopBar; resets routine, telemetry, and routines to default state |
 
 > [!NOTE]
-> **Admin Panel Lifecycle & Post-Competition Sealing**: The 1-click admin sign-in, Policy Ledger drawer, AI-proposed widget approval queue, and fast-forward routine simulation controls are temporarily surfaced in the public UI exclusively to facilitate evaluation and technical grading for the **Google AI Builder Cup**. Once the competition concludes, the entire admin panel will be sealed off and placed behind private multi-factor authentication (MFA) and Google Cloud IAM role restrictions.
+> **Admin access**: The one-click demo admin and the "email contains admin" rule were removed. Admin is granted only by server configuration or a Firebase custom claim (see above).
 
 ---
 
@@ -358,7 +355,12 @@ cp .env.example .env.local
 | :--- | :--- | :--- |
 | `GEMINI_API_KEYS` | Recommended | Comma-separated list of Gemini API keys for automatic round-robin rotation and HTTP 429 quota failover. |
 | `GEMINI_API_KEY` | Optional | Single Gemini API key fallback if `GEMINI_API_KEYS` is not set. If omitted, pre-calibrated offline routines are used. |
-| `GEMINI_MODEL` | Optional | Gemini model identifier (default: `gemini-3.8-flash` / `gemini-3.1-flash-lite`). |
+| `GEMINI_MODEL` | Optional | Gemini model identifier (code default: `gemini-3.1-flash-lite`). |
+| `GOOGLE_TTS_API_KEY` | Optional | Google Cloud Text-to-Speech key for the voice coach. Without it the browser's speech synthesis is used. |
+| `FIREBASE_PROJECT_ID` | Recommended | Project whose Firebase ID tokens the API accepts. Defaults to `NEXT_PUBLIC_FIREBASE_PROJECT_ID`. |
+| `ADMIN_UIDS` / `ADMIN_EMAILS` | Optional | Comma-separated admin uids or verified emails. A Firebase custom claim `admin: true` also grants admin. |
+| `ALLOW_MEMORY_FALLBACK` | Optional | `true` lets production writes fall back to instance memory when Firestore/GCS are down. Leave unset on Cloud Run. |
+| `ENABLE_DEMO_EXTRACTION` | Optional | `true` lets production return the canned demo routine when no Gemini key is set. Leave unset for real users. |
 | `GOOGLE_CLOUD_PROJECT` | Optional | Google Cloud Project ID for Cloud Run deployment and Firestore integration. |
 | `FIRESTORE_DATABASE_ID` | Optional | Dedicated Firestore database ID (default: `viskotun1-database`). |
 | `NEXT_PUBLIC_FIREBASE_*` | Optional | Firebase Web Client SDK parameters for live Google OAuth, Email auth, and Cloud Storage photo uploads (`STORAGE_BUCKET`). |
