@@ -74,6 +74,18 @@ export function downloadUserDataExport(snapshot: UserDataExportSnapshot): void {
   URL.revokeObjectURL(url);
 }
 
+export const LEGACY_USER_PROFILE_KEY = 'viskotun1_user_profile';
+export const LEGACY_LIFESTYLE_PROFILE_KEY = 'viskotun1_lifestyle_profile';
+
+/** Returns user-scoped localStorage keys so profile & lifestyle settings never bleed across accounts. */
+export function getProfileStorageKeys(userId?: string) {
+  const scope = userId ? `usr_${userId}` : 'guest';
+  return {
+    userProfile: `viskotun1_user_profile_${scope}`,
+    lifestyleProfile: `viskotun1_lifestyle_profile_${scope}`
+  };
+}
+
 /** Clears scoped TrialN1 routine & profile keys from browser storage. */
 export function clearBrowserStorageForAccount(options: {
   userId?: string;
@@ -81,12 +93,15 @@ export function clearBrowserStorageForAccount(options: {
 }): void {
   if (typeof window === 'undefined') return;
   const scope = options.userId ? `usr_${options.userId}` : 'guest';
+  const profileKeys = getProfileStorageKeys(options.userId);
   const keysToRemove = [
     `viskotun1_v2_${scope}_routines`,
     `viskotun1_v2_${scope}_active_id`,
     `viskotun1_v2_${scope}_runtime`,
-    'viskotun1_user_profile',
-    'viskotun1_lifestyle_profile'
+    profileKeys.userProfile,
+    profileKeys.lifestyleProfile,
+    LEGACY_USER_PROFILE_KEY,
+    LEGACY_LIFESTYLE_PROFILE_KEY
   ];
 
   if (options.includeAuthSession) {

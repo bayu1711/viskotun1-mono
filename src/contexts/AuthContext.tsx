@@ -16,12 +16,15 @@ import { COPY } from '../data/copy';
 import { ROUTES } from '../data/navigation';
 import { getFirebaseAuth } from '../lib/firebase';
 import type { AuthState, RegionContext, User, UserLifestyleProfile, UserProfile } from '../types/auth';
-import { clearBrowserStorageForAccount } from '../utils/accountData';
+import {
+  clearBrowserStorageForAccount,
+  getProfileStorageKeys,
+  LEGACY_LIFESTYLE_PROFILE_KEY,
+  LEGACY_USER_PROFILE_KEY
+} from '../utils/accountData';
 import { resolveCountryCodeFromInput, resolveCountryName } from '../utils/geo';
 
 const STORAGE_KEY = 'viskotun1_auth_user';
-const USER_PROFILE_STORAGE_KEY = 'viskotun1_user_profile';
-const LIFESTYLE_STORAGE_KEY = 'viskotun1_lifestyle_profile';
 export const ONBOARDING_DISMISSED_KEY = 'trialn1_lifestyle_onboarding_dismissed';
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
@@ -43,11 +46,70 @@ export const DEFAULT_LIFESTYLE_PROFILE: UserLifestyleProfile = {
   workPattern: 'standard',
   smokingStatus: 'non_smoker',
   activityBaseline: 'moderate',
+  culturalRhythms: [],
   isRamadanFastingObserver: false,
   climateSensitivity: 'moderate',
+  physicalCautions: [],
   activeTags: [],
   intakeCompleted: false
 };
+
+function createFreshUserProfile(): UserProfile {
+  return { ...DEFAULT_USER_PROFILE };
+}
+
+function createFreshLifestyleProfile(detectedRegion?: RegionContext | null): UserLifestyleProfile {
+  return {
+    ...DEFAULT_LIFESTYLE_PROFILE,
+    region: detectedRegion
+      ? { ...detectedRegion, confirmed: false }
+      : { ...DEFAULT_LIFESTYLE_PROFILE.region },
+    culturalRhythms: [],
+    physicalCautions: [],
+    activeTags: [],
+    intakeCompleted: false
+  };
+}
+
+function resolveScopeUserId(targetUser: User | null | undefined): string | undefined {
+  return targetUser && !targetUser.isGuest ? targetUser.id : undefined;
+}
+
+function loadScopedProfilesForUser(
+  targetUser: User | null,
+  detectedRegion?: RegionContext | null
+): { profile: UserProfile; lifestyle: UserLifestyleProfile } {
+  const freshProfile = createFreshUserProfile();
+  const freshLifestyle = createFreshLifestyleProfile(detectedRegion);
+
+  if (typeof window === 'undefined') {
+    return { profile: freshProfile, lifestyle: freshLifestyle };
+  }
+
+  const keys = getProfileStorageKeys(resolveScopeUserId(targetUser));
+  let resolvedProfile = freshProfile;
+  let resolvedLifestyle = freshLifestyle;
+
+  try {
+    const savedProfileRaw = window.localStorage.getItem(keys.userProfile);
+    if (savedProfileRaw) {
+      resolvedProfile = { ...freshProfile, ...JSON.parse(savedProfileRaw) };
+    } else if (targetUser?.profile) {
+      resolvedProfile = { ...freshProfile, ...targetUser.profile };
+    }
+
+    const savedLifestyleRaw = window.localStorage.getItem(keys.lifestyleProfile);
+    if (savedLifestyleRaw) {
+      resolvedLifestyle = { ...freshLifestyle, ...JSON.parse(savedLifestyleRaw) };
+    } else if (targetUser?.lifestyleProfile) {
+      resolvedLifestyle = { ...freshLifestyle, ...targetUser.lifestyleProfile };
+    }
+  } catch {
+    // Ignore parse/storage errors and fall back to fresh defaults
+  }
+
+  return { profile: resolvedProfile, lifestyle: resolvedLifestyle };
+}
 
 function deriveInitials(name: string, fallback: string = COPY.auth.initials.fallback): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -115,42 +177,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [lifestyleProfile, setLifestyleProfile] = useState<UserLifestyleProfile>(DEFAULT_LIFESTYLE_PROFILE);
   const [isLoading, setIsLoading] = useState(true);
 
+  const userRef = useRef<User | null>(user);
+  userRef.current = user;
   const userProfileRef = useRef(userProfile);
   userProfileRef.current = userProfile;
   const lifestyleProfileRef = useRef(lifestyleProfile);
   lifestyleProfileRef.current = lifestyleProfile;
+  const detectedRegionRef = useRef<RegionContext | null>(null);
 
-  // Safe client hydration from localStorage + automatic global geo-detection when unconfirmed
+  // Safe client hydration from user-scoped localStorage + automatic global geo-detection when unconfirmed
   useEffect(() => {
     let hasConfirmedSavedRegion = false;
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setUser(parsed);
-        if (parsed.profile) {
-          setUserProfile({ ...DEFAULT_USER_PROFILE, ...parsed.profile });
-        }
-        if (parsed.lifestyleProfile) {
-          setLifestyleProfile(parsed.lifestyleProfile);
-          if (parsed.lifestyleProfile?.region?.confirmed) {
-            hasConfirmedSavedRegion = true;
-          }
-        }
-        window.localStorage.setItem(STORAGE_KEY, saved);
+      const parsedUser: User | null = saved ? JSON.parse(saved) : null;
+      if (parsedUser) {
+        userRef.current = parsedUser;
+        setUser(parsedUser);
       }
-      const savedUserProfile = window.localStorage.getItem(USER_PROFILE_STORAGE_KEY);
-      if (savedUserProfile) {
-        setUserProfile({ ...DEFAULT_USER_PROFILE, ...JSON.parse(savedUserProfile) });
+
+      const { profile, lifestyle } = loadScopedProfilesForUser(parsedUser);
+      userProfileRef.current = profile;
+      lifestyleProfileRef.current = lifestyle;
+      setUserProfile(profile);
+      setLifestyleProfile(lifestyle);
+
+      if (lifestyle.region?.confirmed) {
+        hasConfirmedSavedRegion = true;
       }
-      const savedProfile = window.localStorage.getItem(LIFESTYLE_STORAGE_KEY);
-      if (savedProfile) {
-        const parsedLp = JSON.parse(savedProfile);
-        setLifestyleProfile(parsedLp);
-        if (parsedLp?.region?.confirmed) {
-          hasConfirmedSavedRegion = true;
-        }
-      }
+
+      // Clean up legacy unscoped keys so prior accounts/guests can never bleed into new sign-ins
+      window.localStorage.removeItem(LEGACY_USER_PROFILE_KEY);
+      window.localStorage.removeItem(LEGACY_LIFESTYLE_PROFILE_KEY);
     } catch {
       // Fallback silently if localStorage is restricted
     } finally {
@@ -167,7 +225,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!res.ok || !active) return;
         const data = await res.json();
         if (!data?.countryCode || !active) return;
-        if (lifestyleProfileRef.current.region.confirmed) return;
 
         const detectedRegion: RegionContext = {
           countryCode: String(data.countryCode).toUpperCase(),
@@ -179,10 +236,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               : 'default_uae',
           confirmed: false
         };
-        setLifestyleProfile((prev) => ({
-          ...prev,
-          region: prev.region.confirmed ? prev.region : detectedRegion
-        }));
+        detectedRegionRef.current = detectedRegion;
+
+        if (lifestyleProfileRef.current.region.confirmed) return;
+        setLifestyleProfile((prev) => {
+          const next = {
+            ...prev,
+            region: prev.region.confirmed ? prev.region : detectedRegion
+          };
+          lifestyleProfileRef.current = next;
+          return next;
+        });
       } catch {
         // Offline / restricted fallback stays silently on default region
       }
@@ -203,8 +267,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     userProfileRef.current = next;
     setUserProfile(next);
 
+    const keys = getProfileStorageKeys(resolveScopeUserId(userRef.current));
     try {
-      window.localStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(next));
+      window.localStorage.setItem(keys.userProfile, JSON.stringify(next));
     } catch {}
 
     setUser((current) => {
@@ -217,6 +282,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         initials: customName ? deriveInitials(resolvedName, current.initials) : current.initials,
         profile: next
       };
+      userRef.current = updated;
       try {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       } catch {}
@@ -233,13 +299,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     lifestyleProfileRef.current = next;
     setLifestyleProfile(next);
 
+    const keys = getProfileStorageKeys(resolveScopeUserId(userRef.current));
     try {
-      window.localStorage.setItem(LIFESTYLE_STORAGE_KEY, JSON.stringify(next));
+      window.localStorage.setItem(keys.lifestyleProfile, JSON.stringify(next));
     } catch {}
 
     setUser((current) => {
       if (!current) return current;
       const updated = { ...current, lifestyleProfile: next };
+      userRef.current = updated;
       try {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       } catch {}
@@ -262,45 +330,85 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, [updateLifestyleProfile]);
 
-  const persistUser = useCallback((nextUser: User | null) => {
-    const resolvedUser: User | null = nextUser
-      ? (() => {
-          const savedName = userProfileRef.current.displayName?.trim();
-          const finalName = savedName || nextUser.name;
-          return {
-            ...nextUser,
-            name: finalName,
-            initials: savedName ? deriveInitials(finalName, nextUser.initials) : nextUser.initials,
-            profile: nextUser.profile ?? userProfileRef.current,
-            lifestyleProfile: nextUser.lifestyleProfile ?? lifestyleProfileRef.current
-          };
-        })()
-      : null;
+  const persistUser = useCallback(
+    (nextUser: User | null, options?: { freshAccount?: boolean }) => {
+      if (!nextUser) {
+        const freshProfile = createFreshUserProfile();
+        const freshLifestyle = createFreshLifestyleProfile(detectedRegionRef.current);
+        userRef.current = null;
+        userProfileRef.current = freshProfile;
+        lifestyleProfileRef.current = freshLifestyle;
+        setUserProfile(freshProfile);
+        setLifestyleProfile(freshLifestyle);
+        setUser(null);
+        try {
+          window.localStorage.removeItem(STORAGE_KEY);
+          window.localStorage.removeItem(LEGACY_USER_PROFILE_KEY);
+          window.localStorage.removeItem(LEGACY_LIFESTYLE_PROFILE_KEY);
+        } catch {
+          // Ignore storage write issues
+        }
+        return;
+      }
 
-    setUser((prev) => {
-      if (
-        prev &&
-        resolvedUser &&
-        prev.id === resolvedUser.id &&
-        prev.name === resolvedUser.name &&
-        prev.email === resolvedUser.email &&
-        prev.isGuest === resolvedUser.isGuest &&
-        prev.role === resolvedUser.role
-      ) {
-        return prev;
+      const isAccountSwitch =
+        Boolean(options?.freshAccount) || userRef.current?.id !== nextUser.id;
+
+      let activeProfile = userProfileRef.current;
+      let activeLifestyle = lifestyleProfileRef.current;
+
+      if (isAccountSwitch) {
+        if (options?.freshAccount) {
+          activeProfile = createFreshUserProfile();
+          activeLifestyle = createFreshLifestyleProfile(detectedRegionRef.current);
+          const keys = getProfileStorageKeys(resolveScopeUserId(nextUser));
+          try {
+            window.localStorage.removeItem(keys.userProfile);
+            window.localStorage.removeItem(keys.lifestyleProfile);
+          } catch {}
+        } else {
+          const loaded = loadScopedProfilesForUser(nextUser, detectedRegionRef.current);
+          activeProfile = loaded.profile;
+          activeLifestyle = loaded.lifestyle;
+        }
+        userProfileRef.current = activeProfile;
+        lifestyleProfileRef.current = activeLifestyle;
+        setUserProfile(activeProfile);
+        setLifestyleProfile(activeLifestyle);
       }
-      return resolvedUser;
-    });
-    try {
-      if (resolvedUser) {
+
+      const savedName = activeProfile.displayName?.trim();
+      const finalName = savedName || nextUser.name;
+      const resolvedUser: User = {
+        ...nextUser,
+        name: finalName,
+        initials: savedName ? deriveInitials(finalName, nextUser.initials) : nextUser.initials,
+        profile: activeProfile,
+        lifestyleProfile: activeLifestyle
+      };
+
+      userRef.current = resolvedUser;
+      setUser((prev) => {
+        if (
+          prev &&
+          prev.id === resolvedUser.id &&
+          prev.name === resolvedUser.name &&
+          prev.email === resolvedUser.email &&
+          prev.isGuest === resolvedUser.isGuest &&
+          prev.role === resolvedUser.role
+        ) {
+          return prev;
+        }
+        return resolvedUser;
+      });
+      try {
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(resolvedUser));
-      } else {
-        window.localStorage.removeItem(STORAGE_KEY);
+      } catch {
+        // Ignore storage write issues
       }
-    } catch {
-      // Ignore storage write issues
-    }
-  }, []);
+    },
+    []
+  );
 
   // Synchronize authenticated Firebase session if active
   useEffect(() => {
@@ -445,32 +553,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           window.sessionStorage.removeItem(ONBOARDING_DISMISSED_KEY);
         } catch {}
-        updateLifestyleProfile({ intakeCompleted: false });
-        persistUser(authenticatedUser);
+        persistUser(authenticatedUser, { freshAccount: true });
         return;
       } catch (err: unknown) {
         throw formatFirebaseAuthError(err);
       }
     },
-    [persistUser, updateLifestyleProfile]
+    [persistUser]
   );
 
   const resetProfileToDefaults = useCallback(() => {
-    const freshUserProfile: UserProfile = { ...DEFAULT_USER_PROFILE };
-    const freshLifestyle: UserLifestyleProfile = {
-      ...DEFAULT_LIFESTYLE_PROFILE,
-      region: { ...DEFAULT_LIFESTYLE_PROFILE.region },
-      activeTags: []
-    };
+    const freshUserProfile = createFreshUserProfile();
+    const freshLifestyle = createFreshLifestyleProfile(detectedRegionRef.current);
 
     userProfileRef.current = freshUserProfile;
     lifestyleProfileRef.current = freshLifestyle;
     setUserProfile(freshUserProfile);
     setLifestyleProfile(freshLifestyle);
 
+    const keys = getProfileStorageKeys(resolveScopeUserId(userRef.current));
     try {
-      window.localStorage.removeItem(USER_PROFILE_STORAGE_KEY);
-      window.localStorage.removeItem(LIFESTYLE_STORAGE_KEY);
+      window.localStorage.removeItem(keys.userProfile);
+      window.localStorage.removeItem(keys.lifestyleProfile);
+      window.localStorage.removeItem(LEGACY_USER_PROFILE_KEY);
+      window.localStorage.removeItem(LEGACY_LIFESTYLE_PROFILE_KEY);
       window.sessionStorage.removeItem(ONBOARDING_DISMISSED_KEY);
     } catch {}
 
