@@ -5,6 +5,7 @@ import '../index.css';
 import { Providers } from './providers';
 
 import { COPY } from '@/data/copy';
+import { DEFAULT_FIREBASE_CONFIG } from '@/lib/firebase';
 
 // Figtree: calm, compact geometric sans for body and UI. Bricolage Grotesque: warm display face for headings.
 const bodyFont = Figtree({
@@ -53,23 +54,25 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const runtimeFirebaseConfig = process.env.NEXT_PUBLIC_FIREBASE_API_KEY
-    ? {
-        apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-        authDomain:
-          process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
-          `${process.env.GOOGLE_CLOUD_PROJECT || 'gen-lang-client-0064688276'}.firebaseapp.com`,
-        projectId:
-          process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
-          process.env.GOOGLE_CLOUD_PROJECT ||
-          'gen-lang-client-0064688276',
-        storageBucket:
-          process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
-          'viskotun1-media-0064688276',
-        messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
-        appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || ''
-      }
-    : null;
+  const runtimeFirebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || DEFAULT_FIREBASE_CONFIG.apiKey,
+    authDomain:
+      process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
+      `${process.env.GOOGLE_CLOUD_PROJECT || DEFAULT_FIREBASE_CONFIG.projectId}.firebaseapp.com`,
+    projectId:
+      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+      process.env.GOOGLE_CLOUD_PROJECT ||
+      DEFAULT_FIREBASE_CONFIG.projectId,
+    storageBucket:
+      process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+      DEFAULT_FIREBASE_CONFIG.storageBucket,
+    messagingSenderId:
+      process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ||
+      DEFAULT_FIREBASE_CONFIG.messagingSenderId,
+    appId:
+      process.env.NEXT_PUBLIC_FIREBASE_APP_ID ||
+      DEFAULT_FIREBASE_CONFIG.appId
+  };
 
   return (
     <html lang={COPY.metadata.lang} className={`${bodyFont.variable} ${displayFont.variable}`}>

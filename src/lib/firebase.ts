@@ -22,25 +22,42 @@ declare global {
   }
 }
 
+export const DEFAULT_FIREBASE_CONFIG: Required<FirebaseRuntimeConfig> = {
+  apiKey: 'AIzaSyB6edKU-gKOcCliCC3MrBJCGIhdkhWJcPY',
+  authDomain: 'gen-lang-client-0064688276.firebaseapp.com',
+  projectId: 'gen-lang-client-0064688276',
+  storageBucket: 'viskotun1-media-0064688276',
+  messagingSenderId: '536575310594',
+  appId: '1:536575310594:web:2252e378e1e4dbabe1a01b'
+};
+
 export function getFirebaseConfig(): FirebaseRuntimeConfig {
-  if (typeof window !== 'undefined' && window.__FIREBASE_CONFIG__) {
+  if (typeof window !== 'undefined' && window.__FIREBASE_CONFIG__ && window.__FIREBASE_CONFIG__.apiKey) {
     return window.__FIREBASE_CONFIG__;
   }
 
   const projectId =
     process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
     process.env.GOOGLE_CLOUD_PROJECT ||
-    '';
+    DEFAULT_FIREBASE_CONFIG.projectId;
 
   return {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
+    apiKey:
+      process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
+      DEFAULT_FIREBASE_CONFIG.apiKey,
     authDomain:
       process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
-      (projectId ? `${projectId}.firebaseapp.com` : ''),
+      (projectId ? `${projectId}.firebaseapp.com` : DEFAULT_FIREBASE_CONFIG.authDomain),
     projectId,
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '',
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || ''
+    storageBucket:
+      process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+      DEFAULT_FIREBASE_CONFIG.storageBucket,
+    messagingSenderId:
+      process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ||
+      DEFAULT_FIREBASE_CONFIG.messagingSenderId,
+    appId:
+      process.env.NEXT_PUBLIC_FIREBASE_APP_ID ||
+      DEFAULT_FIREBASE_CONFIG.appId
   };
 }
 

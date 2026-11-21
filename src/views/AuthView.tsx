@@ -80,8 +80,9 @@ export function AuthView({ mode }: AuthViewProps) {
       await loginWithGoogle();
       toast.success(copy.auth.toastGoogleSuccess);
       router.push(ROUTES.routine);
-    } catch {
-      toast.error(copy.auth.toastGoogleFailed);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : copy.auth.toastGoogleFailed;
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
