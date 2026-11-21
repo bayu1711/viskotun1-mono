@@ -12,9 +12,13 @@ Peer-reviewed clinical literature is notoriously dense and difficult for patient
 - **Multimodal Paper Ingestion & Gatekeeping**: Ingesting scientific PDFs and full-text links, isolating actionable methods, dosing, tempo, and contraindications while strictly rejecting non-human (animal/in-vitro) or non-interventional studies—complete with an interactive **Suitability Q&A** flow explaining why a declined paper is ineligible.
 - **The "Morphing" Pipeline (Schema-Driven Adaptive UI & AI Widget Oversight)**: Dynamically generating bespoke data collection widgets and dashboard analytics tailored to the study's endpoints—spanning 6 core clinical primitives (`scale`, `photo`, `numeric`, `timer`, `multichoice`, `boolean`) plus **AI-Proposed Custom Widgets (`ProposedWidgetSpec`)** governed by a human-in-the-loop administrator approval queue.
 - **Canonical Paper Registry & Semantic Routine Versioning (`v1.0` → `v1.1`)**: Deduplicating papers by normalized DOI and title fingerprint so all participants tracking the same study share a single canonical routine, pooling real-world efficacy telemetry, drop-off curves, and a public version changelog updated via AI-verified community corrections.
-- **Live Routine Execution & Interactive Voice Coach**: Translating trial parameters into personalized daily routines with live set counters, tempo/hold pacing, guided audio coaching (`VoiceCoachBar` + Google Cloud TTS), and smart biofeedback scoring.
+- **Live Routine Execution, Dose Modes & Interactive Voice Coach**: Translating trial parameters into personalized daily routines with live set counters, tempo/hold pacing, **Dose Mode** switching (`Standard` vs low-friction `Micro`), guided audio coaching (`VoiceCoachBar` + Google Cloud TTS), and smart biofeedback scoring.
+- **Global Adaptive Lifestyle Engine & Multicultural Interview**: Adapting schedules safely to each participant's city/climate, age, multi-select daily availability windows, physical cautions, and country-independent **Cultural & Household Rhythms** (`CulturalRhythmId` — Ramadan/intermittent/periodic fasting, late family dinners, early dawn rising, midday rest, Sabbath/weekly rest, and shared households) without stereotyping by location.
+- **Biological Health Age & Accredited Habit Science (BCT)**: Computing personalized **Biological Health Age** projections (`src/utils/healthAgeEngine.ts`) from chronological age, streak, and adherence, backed by an inspectable **Behavior Change Technique (BCT)** taxonomy in the **How-To Guide** and **BCT Ledger Drawer**.
+- **Routine Sharing, Calendar Export & Profile Controls**: Exporting daily adherence schedules to Google Calendar / `.ics` (RFC 5545), sharing QR-linked study summaries, and managing identity, clinical focus, data export, and account deletion under `/profile` (**Lifestyle** + **Data & Account Controls**).
 - **Adaptive Safety Lockouts**: Automatically pausing escalation and recommending load/dosage reductions when adverse symptom or tolerability thresholds are exceeded, governed by a live **Firestore Guardrail Policy Ledger**.
-- **Grounded AI Paper Assistant**: Providing clinical Q&A grounded strictly in the study's *Methods and Interventions* section via a 3-tier hybrid AI cascade (On-Device Edge Gemma → Private Server Gemma → Cloud Gemini with multi-key 429 auto-failover).
+- **Grounded AI Paper Assistant & Paper Discovery**: Providing clinical Q&A grounded strictly in the study's *Methods and Interventions* section via a 4-path hybrid AI cascade with per-key timeouts and HTTP 429 failover, plus live keyword search (`/api/papers/search`) and interactive guidance cards (`PaperGuidanceCard`).
+- **Full English & RTL Arabic Localization (`/uae` Edition)**: Switching seamlessly between English and full RTL Arabic across the entire workspace, paired with the dedicated **Abu Dhabi & UAE Future Health Challenge 09** showcase at `/uae`.
 
 ---
 
@@ -211,16 +215,28 @@ Paper Omission Detected (e.g., Calf Stretch hold duration missing)
 
 ---
 
+## Global Adaptive Lifestyle Profile & Multicultural Personalization
+
+Instead of forcing one generic schedule or assuming cultural habits from a user's country, TrialN1 separates **geography/environment** from **culture, availability, and clinical physiology**:
+
+- **Conversational 5-Stage Adaptive Interview (`LifestyleTuningView` & `src/utils/lifestyleInterview.ts`)**: Auto-opens inside the workspace for newly registered/un-onboarded users (staying silent on public landing/auth routes) and walks through 5 lightweight chat stages—**Region & Environment** (`/api/geo`) → **Age** → **Multi-Select Availability Windows** (`AvailableWindowsEditor`) → **Work & Multicultural Rhythms** → **Physical Cautions**—displaying live context chips, routine-change summary chips, and supporting post-onboarding natural-language or imperative updates via `POST /api/lifestyle/tune`.
+- **Country-Independent Cultural & Household Rhythms (`CulturalRhythmId`)**: Supports `ramadan_fasting`, `intermittent_fasting`, `periodic_religious_fasting`, `late_family_dinner`, `early_dawn_riser`, `midday_siesta_rest`, `sabbath_weekly_rest`, and `collectivist_household` anywhere in the world—adapting daily availability chips, AI context suggestions, and step timing tips without geographic stereotyping.
+- **Schedule Compatibility & Guardrail-Protected Adaptation (`AdaptiveLifestyleModal` & `src/server/lifestyleGuardrails.ts`)**: `POST /api/lifestyle/adapt` produces a `LifestyleAdaptationSpec` rendered in `AdaptiveLifestyleBanner` and `AdaptiveLifestyleModal`, where users can switch between `anytime`, `profile_windows`, and per-routine `custom_windows` (`evaluateRoutineScheduleCompatibility`). Safety guardrails block load/dose inflation, validate step IDs, and recommend `micro` / `rest` pacing (`DoseModeModal`) when compounding friction exists.
+- **Profile & Account Hub (`/profile`)**: Accessible from the header avatar with **Lifestyle** (`UserProfile` + `UserLifestyleProfile` + auto-derived Clinical Focus) and **Data & Account Controls** (`AccountControlsPanel` + `/api/user/account` JSON export, session management, and account deletion).
+
+---
+
 ## Tech Stack
 
 - **Framework**: Next.js 14 (App Router, Server & Client Components)
 - **Language**: TypeScript (Strict mode)
-- **Styling**: Tailwind CSS, CSS variables with alpha-channel support
-- **UI & Animation**: Framer Motion, Material UI Icons (`@mui/icons-material`)
-- **Data Visualization**: Recharts (with SSR-safe client-side dynamic rendering)
+- **Styling & Localization**: Tailwind CSS with CSS-variable design tokens, full English + RTL Arabic support (`src/data/locales/ar.ts`)
+- **UI & Animation**: Framer Motion, Material UI Icons (`@mui/icons-material`), `qrcode` (QR sharing)
+- **Data Visualization**: Recharts (SSR-safe dynamic client-only rendering)
 - **Notifications**: Sonner
-- **Persistence & Storage**: Google Cloud Firestore & Google Cloud Storage (with proxy streaming, private bucket security, and local disk fallbacks)
-- **AI & Cloud Backend**: Gemini on Vertex AI / Google AI Studio, Google Cloud Text-to-Speech (`/api/tts`), and Google Cloud Run (`output: 'standalone'`)
+- **Testing & Quality**: Vitest (`49` test files, `380` unit tests), ESLint (`next lint`)
+- **Persistence & Storage**: Google Cloud Firestore & Google Cloud Storage (with proxy streaming `/api/media/[...path]`, private bucket security, and local file fallbacks)
+- **AI & Cloud Backend**: Gemini on Vertex AI / Google AI Studio (per-key timeout + HTTP 429 multi-key failover), Google Cloud Text-to-Speech (`/api/tts`), and Google Cloud Run (`output: 'standalone'`)
 
 ---
 
@@ -238,7 +254,7 @@ npm install
 
 ### Development Server
 
-Run the development server locally:
+Run the development server locally on port `3010` (uses `.next-dev` to keep dev assets isolated from production `.next`):
 
 ```bash
 npm run dev
@@ -246,14 +262,19 @@ npm run dev
 
 Open [http://localhost:3010](http://localhost:3010) in your browser.
 
-### Production Build & Verification
+### Lightweight Verification & Release Build
 
-Create an optimized standalone production build and run tests:
+During iterative development, run lightweight checks (per `AGENTS.md`, full `npm run build` is reserved for manual release checks rather than every task iteration):
 
 ```bash
 npm run lint
-npm run build
 npm test
+```
+
+For full standalone production container or release verification:
+
+```bash
+npm run build
 npm run start
 ```
 
@@ -302,10 +323,14 @@ TrialN1 offers multiple authentication and testing pathways designed for evaluat
 | **Multimodal Paper Ingestion** | ✅ | ✅ | ✅ | ✅ | Tap `+` button in top bar or drop PDF into `/routine`; tests Gemini extraction & gatekeeping |
 | **Suitability Q&A Flow** | ✅ | ✅ | ✅ | ✅ | Upload an ineligible paper (e.g. animal/in-vitro) to trigger interactive rejection explanation |
 | **Grounded AI Clinical Assistant** | ✅ | ✅ | ✅ | ✅ | Open Assistant sheet; ask questions grounded strictly in paper's Methods section |
-| **Routine Switcher** | ✅ | ✅ | ✅ | ✅ | Switch between pre-loaded studies (Achilles Rehab, Hair Density, Calibrated Routines) |
-| **Morphing Visualizer Dashboard** | ✅ | ✅ | ✅ | ✅ | Navigate to `/dashboard`; view Before/After photo comparison slider & biomarker trend curves |
+| **Routine Switcher & Dose Modes** | ✅ | ✅ | ✅ | ✅ | Switch between pre-loaded studies or toggle `Standard` / `Micro` dose modes in `/routine` |
+| **Adaptive Lifestyle Profile & Interview** | ✅ | ✅ | ✅ | ✅ | Auto-opens guided Q&A for new workspace users or via **Lifestyle** button on `/routine` |
+| **Profile & Data Controls** | Partial (Local) | ✅ | ✅ | ✅ | Click header avatar → `/profile` (**Lifestyle** & **Data & Account Controls** tabs, JSON export/delete) |
+| **Routine Sharing & Calendar Export** | ✅ | ✅ | ✅ | ✅ | Click Share icon on `/routine` for QR code links, `.ics` download, or Google Calendar event |
+| **Habit Science & How-To Guide** | ✅ | ✅ | ✅ | ✅ | Open How-To modal (**Habit Science** tab) or inspect live BCT principles across the UI |
+| **Biological Health Age & Morphing Dashboard** | ✅ | ✅ | ✅ | ✅ | Navigate to `/dashboard`; view age-calibrated Health Age, photo sliders & biomarker trends |
 | **Community Evidence & Reviews** | ✅ | ✅ | ✅ | ✅ | Navigate to `/community`; view pooled drop-off curves, efficacy scores, and public version history |
-| **Cross-Device Cloud Sync** | ❌ (Local only) | ✅ | ✅ | ✅ | State synced to Firebase & `/api/user/sync`; preserves streak across devices |
+| **Cross-Device Cloud Sync** | ❌ (Local only) | ✅ | ✅ | ✅ | State synced to Firebase & `/api/user/sync`; preserves streak and lifestyle profile across devices |
 | **Cloud Storage Photo Uploads** | Fallback (Data URL) | ✅ (GCS Bucket) | ✅ (GCS Bucket) | ✅ (GCS Bucket) | Complete a photo check-in step; tests `/api/upload` and `/api/media/...` streaming |
 | **Fast-Forward Routine Simulation** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Under *"Today's Progress"*: test *"Advance to Next Day"*, *"Simulate +4 Days"*, & *"Simulate Full Completion"* |
 | **Dynamic Guardrail Policy Ledger** | ❌ | ❌ | ❌ | ✅ **(Admin Only)** | Click Shield icon in TopBar; adjust pain lockout threshold slider & load reduction % |
@@ -381,34 +406,49 @@ cp .env.example .env.local
 │   │   │   │   ├── metrics/        # Live pooled efficacy & tracker telemetry API
 │   │   │   │   └── reviews/        # Canonical paper community reviews API
 │   │   │   ├── extract/            # Multimodal PDF & full-text extraction endpoint
-│   │   │   ├── papers/             # Canonical paper confirmation & trending catalog API
+│   │   │   ├── geo/                # Global ISO-3166 region & timezone auto-detection API
+│   │   │   ├── lifestyle/
+│   │   │   │   ├── adapt/          # Guardrail-protected LifestyleAdaptationSpec engine API
+│   │   │   │   └── tune/           # Multicultural suggestion & semantic lifestyle intent API
+│   │   │   ├── media/[...path]/    # Authenticated proxy streaming for uploaded GCS images
+│   │   │   ├── papers/
+│   │   │   │   ├── route.ts        # Canonical paper confirmation & trending catalog API
+│   │   │   │   └── search/         # Literature keyword search API for PaperGuidanceCard
 │   │   │   ├── tts/                # Google Cloud Text-to-Speech audio streaming
-│   │   │   └── user/sync/          # User routine cloud persistence endpoint
+│   │   │   ├── upload/             # Cloud Storage upload endpoint with offline fallback
+│   │   │   └── user/
+│   │   │       ├── account/        # User data JSON export & account deletion API
+│   │   │       └── sync/           # User routine & profile cloud persistence endpoint
 │   │   ├── community/              # Community evidence insights & explore route (/community)
-│   │   ├── dashboard/              # Routine tracking & morphing metrics route (/dashboard)
+│   │   ├── dashboard/              # Routine tracking, Health Age & morphing metrics (/dashboard)
 │   │   ├── login/                  # Authentication sign-in route (/login)
-│   │   ├── routine/                # Main daily routine route (/routine)
+│   │   ├── profile/                # Lifestyle & Data/Account Controls hub (/profile)
+│   │   ├── routine/                # Main daily routine execution route (/routine)
 │   │   ├── signup/                 # Authentication registration route (/signup)
+│   │   ├── uae/                    # Dedicated Abu Dhabi & UAE Challenge 09 landing (/uae)
 │   │   ├── layout.tsx              # Root server layout & font configuration
-│   │   ├── page.tsx                # Public scientific landing page (/)
+│   │   ├── page.tsx                # Public global scientific landing page (/)
 │   │   └── providers.tsx           # Client context providers
 │   ├── components/                 # Reusable UI & domain components
 │   │   ├── admin/                  # Policy ledger drawer, threshold inspector & widget approval queue
-│   │   ├── assistant/              # AI Paper Assistant sheet, candidate cards & hybrid badge tags
+│   │   ├── assistant/              # AI Paper Assistant sheet, LifestyleTuningView, PaperGuidanceCard & hybrid chips
+│   │   ├── bct/                    # Behavior Change Technique inspector drawer (`BctLedgerDrawer`)
 │   │   ├── community/              # Efficacy cards, drop-off charts, trending cards & VersionHistoryModal
-│   │   ├── dashboard/              # Stat cards, MilestonePhotoComparison, BiomarkerTrendChart & physician summary
+│   │   ├── dashboard/              # Stat cards, HealthAgeCard, MilestonePhotoComparison, BiomarkerTrendChart & physician summary
 │   │   ├── feedback/               # Error boundary, fallbacks, callouts
-│   │   ├── layout/                 # Shell, sidebar, topbar, mobile nav
-│   │   ├── routine/                # Set counters, calendar, VoiceCoachBar, DynamicFieldRenderer, switchers
+│   │   ├── howto/                  # Interactive walkthrough & Habit Science tabs (`HowToModal`)
+│   │   ├── layout/                 # Shell, sidebar, topbar, LanguageSwitcher, mobile nav
+│   │   ├── profile/                # Account data export & deletion panel (`AccountControlsPanel`)
+│   │   ├── routine/                # Set counters, calendar, VoiceCoachBar, ShareRoutineModal, DoseModeModal, AdaptiveLifestyleModal, DynamicFieldRenderer
 │   │   │   └── widgets/            # Polymorphic morphing widgets (Scale, Photo, Numeric, Timer, MultiChoice, Boolean, CustomGenerated)
-│   │   └── ui/                     # Atomic design tokens (buttons, badges, icons, panels)
-│   ├── contexts/                   # React Contexts (RoutineContext, AssistantContext, AuthContext, PolicyLedgerContext)
-│   ├── data/                       # Centralized copy (copy.ts), config, calibrated routines & benchmark studies
+│   │   └── ui/                     # Atomic design tokens (AvailableWindowsEditor, buttons, badges, icons, panels)
+│   ├── contexts/                   # React Contexts (RoutineContext, AssistantContext, AuthContext, LocaleContext, PolicyLedgerContext)
+│   ├── data/                       # Centralized EN copy (copy.ts), RTL Arabic locales (locales/ar.ts), calibrated routines & BCT taxonomy
 │   ├── hooks/                      # Custom hooks (a11y, file drop, timers, voice coach, routine state)
 │   ├── lib/                        # Firebase client & Cloud Storage singletons (firebase.ts)
-│   ├── server/                     # Server-only logic (Gemini extraction, multi-key failover, Firestore ledger, canonical routine registry, widget registry)
-│   ├── types/                      # Domain TypeScript interfaces (routine, auth, guardrails)
-│   └── utils/                      # Paper fingerprinting, routine metrics, rejection assistant, voice, time & math utilities
+│   ├── server/                     # Server-only logic (Gemini extraction, multi-key failover, lifestyleEngine, lifestyleGuardrails, regionalRegistry, Firestore ledger, canonical routine registry, widget registry)
+│   ├── types/                      # Domain TypeScript interfaces (routine, auth, bct, guardrails, schedule)
+│   └── utils/                      # Paper fingerprinting, lifestyleInterview, healthAgeEngine, calendar (.ics), sharing, profile, voice & routine metrics
 ├── next.config.mjs                 # Next.js standalone container configuration
 ├── tailwind.config.js              # Design system color & typography tokens
 ├── tsconfig.json                   # TypeScript path alias configuration
@@ -419,19 +459,24 @@ cp .env.example .env.local
 
 ---
 
-## Teammate Collaboration & Development Guidelines
+## Teammate Collaboration & Development Workflow
 
-Welcome to the team! Before pushing code, please review [`AGENTS.md`](./AGENTS.md):
+Welcome to the team! Before committing or pushing code, please review [`AGENTS.md`](./AGENTS.md):
 
-1. **Verify Before Committing**:
-   - Always run `npm run lint` and `npm run build` before pushing. Zero warnings and zero errors are required.
-2. **Strict DRY & Centralized Copy**:
-   - Modals and drawers must be mounted once in `AppShell.tsx` and controlled via shared Context.
-   - All user-facing strings must be declared in [`src/data/copy.ts`](./src/data/copy.ts).
-3. **Atomic Commit Slicing**:
-   - Slice commits by layer: `feat(api): ...`, `feat(ui): ...`, `feat(copy): ...`, `fix(...): ...`, `docs(...): ...`.
-4. **Zero Secrets on Client**:
-   - Cloud keys and service account tokens must only reside in server route handlers (`src/app/api/...` or `src/server/...`).
+1. **Git Branching & Release Policy (Never Push Directly to `main`)**:
+   - **`main` is reserved strictly for production releases** and must **never** be pushed to directly during feature work or automated commits.
+   - Conduct active work directly in `viskotun1` on feature branches or merged into **`dev_staging`** (`git push origin dev_staging`), then promote `dev_staging` → `main` via Pull Request.
+   - There is no separate sandbox worktree; all development runs cleanly inside `viskotun1`.
+2. **Lightweight Verification During Iteration**:
+   - Run `npm run lint` and targeted `npm test` suites during feature iterations (`npx tsc --noEmit` + full `npm test` cleanly verifies types and all 49 suites).
+   - Do **not** run automatic full `npm run build` on every intermediate edit—reserve full production builds for manual release checks.
+3. **Strict DRY & Centralized Bilingual Copy**:
+   - Mount shared modals and drawers **once** in `AppShell.tsx` and control them via shared Context.
+   - Declare all user-facing English strings in [`src/data/copy.ts`](./src/data/copy.ts) and mirror Arabic translations in [`src/data/locales/ar.ts`](./src/data/locales/ar.ts).
+4. **Atomic Commit Slicing**:
+   - Slice commits cleanly by architectural layer: `feat(types): ...`, `feat(copy): ...`, `feat(server): ...`, `feat(api): ...`, `feat(ui): ...`, `test(...): ...`, `docs(...): ...`.
+5. **Zero Secrets on Client**:
+   - Cloud keys, Gemini API key pools, and service account tokens must only reside in server route handlers (`src/app/api/...` or `src/server/...`).
 
 ---
 
