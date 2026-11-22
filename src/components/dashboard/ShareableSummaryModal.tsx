@@ -50,7 +50,7 @@ export function ShareableSummaryModal({ isOpen, onClose }: ShareableSummaryModal
   const compliance = complianceLevel(adherenceRate);
   const isRct = isRandomizedTrial(routine.paper);
   const stopRule = stopRuleOf(routine);
-  const progressionRule = routine.progressionRules[0];
+  const progressionRule = routine.progressionRules?.[0];
   const recentLogs = (feedbackLogs || []).slice(-5).reverse();
   const todayFormatted = new Date().toLocaleDateString(undefined, {
     year: 'numeric',

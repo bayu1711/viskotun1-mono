@@ -22,7 +22,7 @@ export function ProgressionPanel() {
     <Panel tone={STATUS_TONE[status]} aria-live="polite">
       <SectionHeading eyebrow={copy.dashboard.progressionEyebrow} title={copy.dashboard.progressionTitle} />
       <p className="mt-4 text-sm leading-relaxed">
-        {progressionMessage(copy, status, routine.progressionRules[0], feedbackMetric?.escalationMessage)}
+        {progressionMessage(copy, status, routine.progressionRules?.[0], feedbackMetric?.escalationMessage)}
       </p>
     </Panel>
   );

@@ -26,12 +26,13 @@ export function RoutineCard() {
   if (!routine) return null;
 
   const stopRule = stopRuleOf(routine);
-  const rule = routine.progressionRules[0];
+  const rule = routine.progressionRules?.[0];
+  const steps = routine.steps || [];
 
   return (
     <Panel aria-label={copy.routineCard.label} className="sm:p-5">
       <SectionHeading
-        eyebrow={copy.routineCard.eyebrow(routine.phase)}
+        eyebrow={copy.routineCard.eyebrow(routine.phase || '1')}
         title={copy.routineCard.title}
         action={
           <CircleButton label={copy.routineCard.openRoutine} href={ROUTES.routine} onClick={closeAssistant}>
@@ -42,11 +43,11 @@ export function RoutineCard() {
 
       <MissingDataBanner routine={routine} className="mt-3 rounded-tile" />
 
-      {routine.steps.length === 0 ? (
+      {steps.length === 0 ? (
         <EmptyState className="mt-5" title={copy.routine.emptyStepsTitle} description={copy.routine.emptyStepsBody} />
       ) : (
         <ul className="mt-5 space-y-2">
-          {routine.steps.map((step) => (
+          {steps.map((step) => (
             <RoutineStepRow key={step.id} step={step} />
           ))}
         </ul>
