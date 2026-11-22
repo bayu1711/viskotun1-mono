@@ -36,12 +36,22 @@ export async function GET(
       return new NextResponse('Media Not Found', { status: 404 });
     }
 
+    // Never serve active content like HTML or SVG
+    const safeContentType =
+      fileData.contentType === 'image/jpeg' ||
+      fileData.contentType === 'image/png' ||
+      fileData.contentType === 'image/webp' ||
+      fileData.contentType === 'image/gif'
+        ? fileData.contentType
+        : 'application/octet-stream';
+
     return new NextResponse(new Uint8Array(fileData.buffer), {
       status: 200,
       headers: {
-        'Content-Type': fileData.contentType,
+        'Content-Type': safeContentType,
         'Cache-Control': 'public, max-age=31536000, immutable',
-        'X-Content-Type-Options': 'nosniff'
+        'X-Content-Type-Options': 'nosniff',
+        'Content-Security-Policy': "default-src 'none'; sandbox"
       }
     });
   } catch (err: any) {
