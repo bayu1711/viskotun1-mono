@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import TravelExploreOutlinedIcon from '@mui/icons-material/TravelExploreOutlined';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { type AssistantMode, useAssistant } from '../../contexts/AssistantContext';
@@ -23,6 +24,8 @@ import {
 } from '../../utils/lifestyleInterview';
 import { getDynamicSuggestions } from '../../utils/suggestions';
 import { formatRoutineTitle } from '../../utils/text';
+import { Icon } from '../ui/Icon';
+import { IconTile } from '../ui/IconTile';
 import { EmptyState } from '../feedback/EmptyState';
 import { MissingDataBanner } from '../routine/MissingDataBanner';
 import { AssistantComposer } from './AssistantComposer';
@@ -158,8 +161,11 @@ export function AssistantSheet() {
         /^(?:explore(?:\s+routines?)?|browse(?:\s+routines?)?|find(?:\s+a)?\s+routine|show(?:\s+me)?\s+routines?|استكشاف الروتينات)/i.test(trimmed)
       ) {
         setSelectedChips([]);
-        closeAssistant();
-        router.push(`${ROUTES.community}?tab=explore`);
+        setMode('ask');
+        const primaryCaution = lifestyleProfile?.physicalCautions?.[0];
+        if (primaryCaution) {
+          askQuestion(primaryCaution);
+        }
         return;
       }
       if (
@@ -234,7 +240,10 @@ export function AssistantSheet() {
       locale,
       restartLifestyleInterview,
       jumpToLifestyleStage,
-      setDoseMode
+      setDoseMode,
+      setMode,
+      lifestyleProfile,
+      askQuestion
     ]
   );
 
@@ -363,15 +372,27 @@ export function AssistantSheet() {
           >
             <AssistantHeader
               mode={mode}
-              routineTitle={routine ? formatRoutineTitle(routine.shortTitle) : copy.assistant.noActiveRoutineForAskTitle}
+              routineTitle={
+                routine
+                  ? formatRoutineTitle(routine.shortTitle)
+                  : !isAsk && !isLifestyle && stagingRoutine
+                  ? copy.assistant.stagingTitle
+                  : isAsk && !routine
+                  ? copy.assistant.unifiedTitleNoRoutine
+                  : copy.assistant.titleAsk
+              }
               customTitle={
                 !isAsk && !isLifestyle && stagingRoutine
                   ? copy.assistant.stagingTitle
+                  : isAsk && !routine
+                  ? copy.assistant.unifiedTitleNoRoutine
                   : undefined
               }
               customEyebrow={
                 !isAsk && !isLifestyle && stagingRoutine
                   ? copy.assistant.stagingEyebrow
+                  : isAsk && !routine
+                  ? copy.assistant.unifiedEyebrowNoRoutine
                   : undefined
               }
               titleId={titleId}
@@ -412,20 +433,55 @@ export function AssistantSheet() {
                     )}
                     {assistantTyping && <TypingIndicator />}
                   </>
+                ) : stagingMessages.length > 0 ? (
+                  <div className="space-y-3">
+                    {stagingMessages.map((message) => (
+                      <AssistantMessage key={message.id} message={message} />
+                    ))}
+                    {isStagingAssistantTyping && <TypingIndicator />}
+                  </div>
                 ) : (
-                  <div className="py-8 text-center space-y-4">
-                    <EmptyState
-                      icon={ChatBubbleOutlineIcon}
-                      title={copy.assistant.noActiveRoutineForAskTitle}
-                      description={copy.assistant.noActiveRoutineForAskBody}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setMode('upload')}
-                      className="rounded-full bg-ink px-4 py-2 text-xs font-medium text-white transition-opacity hover:opacity-90"
-                    >
-                      {copy.assistant.switchToUpload}
-                    </button>
+                  <div className="py-2 space-y-4">
+                    <div className="rounded-card border border-ink/10 bg-white p-5 text-start space-y-3 shadow-xs">
+                      <div className="flex items-center gap-2.5">
+                        <IconTile variant="plain" shape="circle" size={36} className="bg-mint">
+                          <Icon icon={TravelExploreOutlinedIcon} size="sm" className="text-ink" />
+                        </IconTile>
+                        <div>
+                          <h3 className="text-sm font-semibold text-ink">
+                            {copy.assistant.unifiedWelcomeNoRoutine}
+                          </h3>
+                          <p className="text-2xs text-ink/60">
+                            {copy.assistant.unifiedEyebrowNoRoutine}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-ink/75 leading-relaxed">
+                        {copy.assistant.unifiedWelcomeNoRoutineBody}
+                      </p>
+
+                      <div className="pt-2 border-t border-ink/5">
+                        <p className="text-2xs font-medium text-ink/60 mb-2">
+                          {copy.assistant.linkGuidance.communityTitle}
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {copy.assistant.problemChips.map((chip) => (
+                            <button
+                              key={chip}
+                              type="button"
+                              onClick={() => askQuestion(chip)}
+                              className="rounded-full border border-ink/15 bg-canvas px-2.5 py-1 text-2xs font-medium text-ink transition-colors hover:border-ink/30 hover:bg-white cursor-pointer"
+                            >
+                              {chip}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-card border border-ink/10 bg-white/70 p-4">
+                      <UploadDropzone onFile={addPaper} />
+                    </div>
                   </div>
                 )
               ) : (
@@ -521,9 +577,9 @@ export function AssistantSheet() {
               ) : isAsk ? (
                 <>
                   <FaqSuggestions
-                    suggestions={askSuggestions}
+                    suggestions={routine ? askSuggestions : copy.assistant.problemChips}
                     onSelect={askQuestion}
-                    disabled={assistantTyping}
+                    disabled={assistantTyping || isStagingAssistantTyping}
                   />
                   <AssistantComposer
                     ref={inputRef}
@@ -531,6 +587,11 @@ export function AssistantSheet() {
                     onAsk={askQuestion}
                     onAddPaper={addPaper}
                     onFile={handleFile}
+                    placeholder={
+                      routine
+                        ? copy.assistant.universalPlaceholderWithRoutine
+                        : copy.assistant.universalPlaceholderNoRoutine
+                    }
                   />
                 </>
               ) : stagingRoutine ? (

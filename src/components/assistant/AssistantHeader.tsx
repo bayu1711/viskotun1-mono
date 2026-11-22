@@ -95,7 +95,7 @@ export function AssistantHeader({
       <div className="pt-4">
         <div className="flex items-center justify-between gap-2">
           <p className="truncate text-sm leading-none text-ink/60">
-            {customEyebrow || (mode === 'lifestyle' ? copy.lifestyleTuning.badge : isAsk ? displayTitle : copy.assistant.eyebrowUpload)}
+            {customEyebrow || (mode === 'lifestyle' ? copy.lifestyleTuning.badge : isAsk ? (displayTitle || copy.assistant.unifiedEyebrowNoRoutine) : copy.assistant.eyebrowUpload)}
           </p>
           <div ref={disclaimerRef} className="relative flex items-center gap-1.5 shrink-0">
             <button

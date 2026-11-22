@@ -8,12 +8,12 @@ import { Icon } from '../ui/Icon';
 
 import { useLocale } from '../../contexts/LocaleContext';
 interface FaqSuggestionsProps {
-  suggestions?: string[];
+  suggestions?: readonly string[] | string[];
   faqs?: PaperFaq[];
   onSelect: (question: string) => void;
   disabled?: boolean;
   isMultiSelect?: boolean;
-  selected?: string[];
+  selected?: readonly string[] | string[];
   onToggle?: (item: string) => void;
   onConfirm?: () => void;
   confirmLabel?: string;

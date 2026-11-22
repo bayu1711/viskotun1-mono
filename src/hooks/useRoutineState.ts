@@ -51,7 +51,8 @@ import {
   type LifestyleInterviewStage,
   parseConversationalLifestyleAnswer
 } from '../utils/lifestyleInterview';
-import { answerForRejection, isUnrecognizedLinkReason } from '../utils/rejectionAssistant';
+import { answerForGuidance, answerForRejection, isUnrecognizedLinkReason } from '../utils/rejectionAssistant';
+import { extractQueryFromInput } from '../utils/paperQuery';
 import { clamp, toPercent } from '../utils/math';
 import {
   adherenceOf,
@@ -1714,7 +1715,114 @@ export function useRoutineState() {
   const askQuestion = useCallback(
     async (text: string) => {
       if (!routine) {
-        toast.info(copyRef.current.errors.noRoutinesBody);
+        const userMsg: ChatMessage = {
+          id: createId('msg'),
+          role: 'user',
+          kind: 'question',
+          content: text,
+          timestamp: nowLabel()
+        };
+        setStagingMessages((prev) => [...prev, userMsg]);
+        setIsStagingAssistantTyping(true);
+
+        try {
+          const res = await fetch('/api/assistant', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              question: text,
+              userProfile: userProfileRef.current,
+              lifestyleProfile: lifestyleProfileRef.current
+            }),
+            signal: AbortSignal.timeout(10000)
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            if (data?.answer) {
+              const aiMsg: ChatMessage = {
+                id: createId('msg'),
+                role: 'ai',
+                kind: 'answer',
+                content: stripClinicalDisclaimer(data.answer),
+                engine: data.engine ?? 'cloud-gemini',
+                source: data.source ?? copyRef.current.assistant.researchNavigatorSource,
+                timestamp: nowLabel()
+              };
+              const newMsgs: ChatMessage[] = [aiMsg];
+
+              if (data.isGuidance || data.suggestedQuery) {
+                newMsgs.push({
+                  id: createId('msg'),
+                  role: 'ai',
+                  kind: 'paper_guidance',
+                  content: JSON.stringify({
+                    reason: data.answer,
+                    source: text,
+                    suggestedQuery: data.suggestedQuery || text
+                  }),
+                  timestamp: nowLabel()
+                });
+              }
+
+              setStagingMessages((prev) => [...prev, ...newMsgs]);
+              return;
+            }
+          }
+
+          const fallbackAnswer = stripClinicalDisclaimer(answerForGuidance(text));
+          setStagingMessages((prev) => [
+            ...prev,
+            {
+              id: createId('msg'),
+              role: 'ai',
+              kind: 'answer',
+              content: fallbackAnswer,
+              engine: 'local-rules',
+              source: copyRef.current.assistant.researchNavigatorSource,
+              timestamp: nowLabel()
+            },
+            {
+              id: createId('msg'),
+              role: 'ai',
+              kind: 'paper_guidance',
+              content: JSON.stringify({
+                reason: fallbackAnswer,
+                source: text,
+                suggestedQuery: extractQueryFromInput(text) || text
+              }),
+              timestamp: nowLabel()
+            }
+          ]);
+        } catch (err) {
+          console.error('[askQuestion] Discovery research query failed:', err);
+          const fallbackAnswer = stripClinicalDisclaimer(answerForGuidance(text));
+          setStagingMessages((prev) => [
+            ...prev,
+            {
+              id: createId('msg'),
+              role: 'ai',
+              kind: 'answer',
+              content: fallbackAnswer,
+              engine: 'local-rules',
+              source: copyRef.current.assistant.researchNavigatorSource,
+              timestamp: nowLabel()
+            },
+            {
+              id: createId('msg'),
+              role: 'ai',
+              kind: 'paper_guidance',
+              content: JSON.stringify({
+                reason: fallbackAnswer,
+                source: text,
+                suggestedQuery: extractQueryFromInput(text) || text
+              }),
+              timestamp: nowLabel()
+            }
+          ]);
+        } finally {
+          setIsStagingAssistantTyping(false);
+        }
         return;
       }
       const target = routine;
@@ -1799,7 +1907,7 @@ export function useRoutineState() {
         updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: false }));
       }
     },
-    [routine, pushMessages, updateRuntime]
+    [routine, pushMessages, updateRuntime, setStagingMessages, setIsStagingAssistantTyping]
   );
 
   const askAboutStep = useCallback(
