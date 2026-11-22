@@ -94,10 +94,10 @@ describe('papersStorage and /api/papers endpoint', () => {
     expect(data.error).toBeDefined();
   });
 
-  it('assigns trending and sample papers to user fazarathfazal@gmail.com in the database', async () => {
-    const userPapers = await getUserPapers('fazarathfazal@gmail.com');
+  it('assigns trending and sample papers to trialn1-curated in the database', async () => {
+    const userPapers = await getUserPapers('trialn1-curated');
     expect(userPapers.length).toBeGreaterThanOrEqual(5);
     expect(userPapers.some((p) => p.id === 'achilles-rehab')).toBe(true);
-    expect(userPapers.every((p) => p.userId === 'fazarathfazal@gmail.com')).toBe(true);
+    expect(userPapers.every((p) => p.userId === 'trialn1-curated')).toBe(true);
   });
 });

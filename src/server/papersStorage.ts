@@ -40,9 +40,9 @@ function createInitialSamplePapers(): StoredPaper[] {
     totalLogsCount: paper.totalLogsCount ?? 0,
     trendingRank: paper.trendingRank,
     routine: paper.routineId ? PRECALIBRATED_SAMPLE_ROUTINES[paper.routineId] : undefined,
-    userId: 'fazarathfazal@gmail.com',
-    userEmail: 'fazarathfazal@gmail.com',
-    uploadedBy: 'fazarathfazal@gmail.com',
+    userId: 'trialn1-curated',
+    userEmail: '',
+    uploadedBy: 'TrialN1',
     createdAt: Date.now(),
     updatedAt: Date.now()
   }));
@@ -137,9 +137,7 @@ export async function getSamplePapers(): Promise<{
             activeTrackersCount: data.activeTrackersCount ?? 0,
             totalLogsCount: data.totalLogsCount ?? 0,
             trendingRank: data.trendingRank,
-            userId: data.userId || 'fazarathfazal@gmail.com',
-            userEmail: data.userEmail || 'fazarathfazal@gmail.com',
-            uploadedBy: data.uploadedBy || 'fazarathfazal@gmail.com'
+            uploadedBy: 'TrialN1'
           });
 
           const rId = data.routineId;
@@ -201,9 +199,7 @@ export async function getSamplePapers(): Promise<{
         activeTrackersCount: item.activeTrackersCount ?? 0,
         totalLogsCount: item.totalLogsCount ?? 0,
         trendingRank: item.trendingRank,
-        userId: item.userId || 'fazarathfazal@gmail.com',
-        userEmail: item.userEmail || 'fazarathfazal@gmail.com',
-        uploadedBy: item.uploadedBy || 'fazarathfazal@gmail.com'
+        uploadedBy: 'TrialN1'
       });
       const rId = item.routineId;
       const rObj = item.routine;

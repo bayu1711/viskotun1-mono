@@ -6,15 +6,20 @@ import {
   deleteUserAccount,
   reactivateUserAccount
 } from '../../../../server/userStorage';
+import { getRequestUser } from '../../../../server/auth';
 
 type AccountAction = 'clear_data' | 'deactivate' | 'reactivate';
 
 const VALID_ACTIONS = new Set<AccountAction>(['clear_data', 'deactivate', 'reactivate']);
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
+    const authUser = await getRequestUser(request);
     const body = await request.json().catch(() => null);
-    const userId = typeof body?.userId === 'string' ? body.userId.trim() : '';
+    const rawUserId = typeof body?.userId === 'string' ? body.userId.trim() : '';
+    const userId = authUser?.uid || rawUserId;
     const action = body?.action as AccountAction | undefined;
 
     if (!userId) {
@@ -57,11 +62,12 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const authUser = await getRequestUser(request);
     const { searchParams } = new URL(request.url);
     const body = await request.json().catch(() => null);
     const rawUserId =
       (typeof body?.userId === 'string' && body.userId) || searchParams.get('userId') || '';
-    const userId = rawUserId.trim();
+    const userId = authUser?.uid || rawUserId.trim();
 
     if (!userId) {
       return NextResponse.json({ error: COPY.api.userSync.userIdRequired }, { status: 400 });

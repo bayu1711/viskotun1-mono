@@ -39,6 +39,7 @@ import {
 } from '../utils/accountData';
 import { stripClinicalDisclaimer } from '../utils/disclaimer';
 import { isEdgeGemmaAvailable, queryEdgeGemma } from '../utils/edgeGemma';
+import { apiFetch, apiPostJson } from '../lib/apiClient';
 import { createId } from '../utils/id';
 import {
   buildConversationalLifestyleReply,
@@ -397,7 +398,7 @@ export function useRoutineState() {
 
     async function fetchRemoteState() {
       try {
-        const res = await fetch(`/api/user/sync?userId=${encodeURIComponent(userId!)}`);
+        const res = await apiFetch(`/api/user/sync?userId=${encodeURIComponent(userId!)}`);
         if (res.ok) {
           const data = await res.json();
           if (isMounted) {
@@ -429,15 +430,11 @@ export function useRoutineState() {
                     currentLocal.length === 0 ||
                     currentLocal.every((p) => ['achilles', 'hair-loss', 'creatine-sleep'].includes(p.id))
                   ) {
-                    fetch('/api/user/sync', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        userId,
-                        activeRoutineId: '',
-                        routines: [],
-                        runtime: {}
-                      })
+                    apiPostJson('/api/user/sync', {
+                      userId,
+                      activeRoutineId: '',
+                      routines: [],
+                      runtime: {}
                     }).catch(() => {});
                     setActiveRoutine('');
                     setRuntime({});
@@ -454,15 +451,11 @@ export function useRoutineState() {
                   );
                   if (missingFromRemote.length > 0) {
                     const merged = [...remoteList, ...missingFromRemote];
-                    fetch('/api/user/sync', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        userId,
-                        activeRoutineId: data.activeRoutineId || merged[0]?.id || '',
-                        routines: merged,
-                        runtime: { ...(data.runtime || {}), ...runtimeRef.current }
-                      })
+                    apiPostJson('/api/user/sync', {
+                      userId,
+                      activeRoutineId: data.activeRoutineId || merged[0]?.id || '',
+                      routines: merged,
+                      runtime: { ...(data.runtime || {}), ...runtimeRef.current }
                     }).catch(() => {});
                     return merged;
                   }
@@ -518,17 +511,13 @@ export function useRoutineState() {
               // DO NOT wipe local state! If the user already has routines locally, sync them to remote!
               setRoutineList((currentLocal) => {
                 if (currentLocal.length > 0) {
-                  fetch('/api/user/sync', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      userId,
-                      activeRoutineId: activeRoutineIdRef.current,
-                      routines: currentLocal,
-                      runtime: runtimeRef.current,
-                      profile: userProfileRef.current,
-                      lifestyleProfile: lifestyleProfileRef.current
-                    })
+                  apiPostJson('/api/user/sync', {
+                    userId,
+                    activeRoutineId: activeRoutineIdRef.current,
+                    routines: currentLocal,
+                    runtime: runtimeRef.current,
+                    profile: userProfileRef.current,
+                    lifestyleProfile: lifestyleProfileRef.current
                   }).catch(() => {});
                   return currentLocal;
                 }
@@ -558,17 +547,13 @@ export function useRoutineState() {
     if (!hasHydrated || isAuthLoading || !isAuthenticated || !userId || !hasRemoteHydrated) return;
 
     const timer = window.setTimeout(() => {
-      fetch('/api/user/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          activeRoutineId,
-          routines: routineList,
-          runtime,
-          profile: auth?.userProfile,
-          lifestyleProfile: auth?.lifestyleProfile
-        })
+      apiPostJson('/api/user/sync', {
+        userId,
+        activeRoutineId,
+        routines: routineList,
+        runtime,
+        profile: auth?.userProfile,
+        lifestyleProfile: auth?.lifestyleProfile
       }).catch((err) => {
         console.error('[useRoutineState] Cloud sync error:', err);
       });
@@ -609,15 +594,11 @@ export function useRoutineState() {
     setRuntime({});
 
     if (isAuthenticated && userId) {
-      fetch('/api/user/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          activeRoutineId: '',
-          routines: [],
-          runtime: {}
-        })
+      apiPostJson('/api/user/sync', {
+        userId,
+        activeRoutineId: '',
+        routines: [],
+        runtime: {}
       }).catch(() => {});
     }
 
@@ -765,15 +746,11 @@ export function useRoutineState() {
 
       // Immediate outbound sync to backend if signed in
       if (isAuthenticated && userId) {
-        fetch('/api/user/sync', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId,
-            activeRoutineId: cleanRoutine.id,
-            routines: updatedList.length > 0 ? updatedList : [cleanRoutine],
-            runtime: Object.keys(updatedRuntime).length > 0 ? updatedRuntime : { [cleanRoutine.id]: initialRuntimeEntry }
-          })
+        apiPostJson('/api/user/sync', {
+          userId,
+          activeRoutineId: cleanRoutine.id,
+          routines: updatedList.length > 0 ? updatedList : [cleanRoutine],
+          runtime: Object.keys(updatedRuntime).length > 0 ? updatedRuntime : { [cleanRoutine.id]: initialRuntimeEntry }
         }).catch((err) => {
           console.warn('[loadSampleRoutine] Cloud sync error:', err);
         });
@@ -1874,15 +1851,11 @@ export function useRoutineState() {
     setActiveRoutine(newRoutine.id);
 
     if (isAuthenticated && userId) {
-      fetch('/api/user/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          activeRoutineId: newRoutine.id,
-          routines: updatedList.length > 0 ? updatedList : [newRoutine],
-          runtime: Object.keys(updatedRuntime).length > 0 ? updatedRuntime : { [newRoutine.id]: newRuntimeEntry }
-        })
+      apiPostJson('/api/user/sync', {
+        userId,
+        activeRoutineId: newRoutine.id,
+        routines: updatedList.length > 0 ? updatedList : [newRoutine],
+        runtime: Object.keys(updatedRuntime).length > 0 ? updatedRuntime : { [newRoutine.id]: newRuntimeEntry }
       }).catch((err) => {
         console.warn('[addRoutine] Cloud sync error:', err);
       });

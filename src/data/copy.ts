@@ -1872,6 +1872,7 @@ export const COPY = {
     },
     extract: {
       inputRequired: 'PDF file or paper URL/DOI is required',
+      textTooLong: (max: number) => `Pasted text is too long. Keep it under ${max} characters or upload the PDF.`,
       fileSizeExceeded: 'File size exceeds maximum limit of 20MB',
       invalidFormat: 'Invalid file format. Only PDF files are supported.',
       internalError: 'Internal Server Error during extraction'
@@ -1898,6 +1899,8 @@ export const COPY = {
       fetchError: 'Internal Server Error fetching papers',
       saveError: 'Internal Server Error saving paper',
       paperRequired: 'Paper object is required',
+      candidateRequired: 'candidateId is required',
+      candidateNotFound: 'This extraction has expired. Add the paper again to confirm it.',
       seedSuccess: 'Sample papers seeded successfully',
       saveSuccess: 'Paper saved to Firestore papers collection'
     },

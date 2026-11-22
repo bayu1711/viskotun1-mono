@@ -61,6 +61,20 @@ describe('User Sync API Route', () => {
     expect(getData.routines[0].id).toBe('achilles');
     expect(getData.runtime.achilles.setsDone['ach-1']).toBe(1);
 
+    // Verify 409 Conflict rejection on stale baseUpdatedAt
+    const staleReq = new Request('http://localhost:3000/api/user/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...payload,
+        baseUpdatedAt: getData.updatedAt - 1000
+      })
+    });
+    const staleRes = await POST(staleReq);
+    expect(staleRes.status).toBe(409);
+    const staleData = await staleRes.json();
+    expect(staleData.code).toBe('conflict');
+
     // Clean up
     memoryUserStorage.delete(testUserId);
   });

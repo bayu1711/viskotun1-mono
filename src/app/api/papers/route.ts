@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getSamplePapers, savePaper, getUserPapers, seedSamplePapersIfEmpty } from '../../../server/papersStorage';
 import { saveCanonicalRoutine } from '../../../server/routineRegistry';
+import { getExtractionCandidate } from '../../../server/candidateStore';
+import { registerRoutineWidgetProposals } from '../../../server/widgetRegistry';
 import { COPY } from '../../../data/copy';
-import type { StoredPaper } from '../../../types/routine';
+import type { RoutineStep, StoredPaper } from '../../../types/routine';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -10,7 +12,6 @@ export const revalidate = 0;
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type');
     const userId = searchParams.get('userId');
 
     if (userId) {
@@ -36,6 +37,61 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, seeded, message: COPY.api.papers.seedSuccess });
     }
 
+    // 1. Candidate-based confirmation (prevents client-side routine poisoning)
+    if (body.candidateId) {
+      const candidate = await getExtractionCandidate(body.candidateId);
+      if (!candidate) {
+        return NextResponse.json({ error: COPY.api.papers.candidateNotFound }, { status: 404 });
+      }
+
+      const routine = candidate.routine;
+      await registerRoutineWidgetProposals(routine);
+
+      const isShared = candidate.sourceKind === 'europe-pmc' || candidate.sourceKind === 'catalog';
+      if (candidate.sourceKind === 'europe-pmc') {
+        await saveCanonicalRoutine(routine);
+      }
+
+      const userId = body.userId || candidate.createdBy || null;
+      const paperDocument: StoredPaper = {
+        id: userId ? `${userId}__${routine.id}`.slice(0, 300) : routine.id,
+        title: routine.paper?.title || routine.title,
+        shortTitle: routine.shortTitle || routine.title,
+        domain: routine.phase || 'Clinical Research',
+        category: 'rehab',
+        authors: routine.paper?.authors || 'Unknown Authors',
+        journal: routine.paper?.journal || 'Clinical Trial',
+        year: routine.paper?.year || new Date().getFullYear(),
+        doi: routine.paper?.doi || '',
+        openAccessUrl: routine.paper?.doi ? `https://doi.org/${routine.paper.doi}` : '',
+        pdfUrl: '',
+        summary: routine.steps?.map((s: RoutineStep) => s.action).join('. ') || '',
+        featuresTested: routine.steps?.map((s: RoutineStep) => s.action) || [],
+        routineId: routine.id,
+        isSample: false,
+        isGuardrailRejectionTest: false,
+        popularityScore: 10,
+        activeTrackersCount: 0,
+        totalLogsCount: 0,
+        routine,
+        userId,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      };
+
+      const result = await savePaper(paperDocument);
+
+      return NextResponse.json({
+        success: true,
+        source: result.source,
+        shared: isShared,
+        message: COPY.api.papers.saveSuccess,
+        paperId: paperDocument.id,
+        routineId: routine.id
+      });
+    }
+
+    // 2. Legacy paper object fallback
     const { paper, routine } = body;
     if (!paper) {
       return NextResponse.json({ error: COPY.api.papers.paperRequired }, { status: 400 });
