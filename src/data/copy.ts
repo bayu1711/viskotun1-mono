@@ -971,6 +971,26 @@ export const COPY = {
     noActiveRoutineForAskTitle: 'No active routine selected',
     noActiveRoutineForAskBody: 'Add a research paper or load a trending routine to start asking questions.',
     switchToUpload: 'Add a paper',
+    unifiedTitleNoRoutine: 'Research & Protocol Navigator',
+    unifiedEyebrowNoRoutine: 'TrialN1 Intelligence',
+    unifiedEyebrowWithRoutine: 'Active Protocol Coach',
+    unifiedWelcomeNoRoutine: 'What health goal or condition are you looking to solve?',
+    unifiedWelcomeNoRoutineBody:
+      "Describe what you're dealing with (e.g. knee tendinopathy, sleep latency, fasting), paste a DOI/PubMed link, or attach a study PDF. I'll find or extract a peer-reviewed human trial for your daily schedule.",
+    universalPlaceholderNoRoutine: 'Describe a problem (e.g. knee pain), paste DOI, or attach PDF…',
+    universalPlaceholderWithRoutine: 'Ask about this protocol, report pain, or adjust timing…',
+    problemChips: [
+      'Achilles & knee tendon rehab',
+      'Sleep latency & grogginess',
+      'Early time-restricted fasting',
+      'Hair regrowth (Alopecia)',
+      'Creatine & cognitive fatigue',
+      'Bright light circadian therapy'
+    ],
+    lifestyleBridgePrompt: (caution: string) =>
+      `Based on your ${caution} caution, would you like to review clinical rehab protocols?`,
+    lifestyleBridgeAction: 'Find Clinical Protocols',
+    researchNavigatorSource: 'Source · Peer-Reviewed Human Research',
     intakeInstructionTitle: 'Add an interventional study',
     intakeInstructionBody: 'Upload a clinical trial PDF or enter a DOI/PubMed link. Gemini will extract the routine, steps, and safety rules so you can review and discuss it before adding it to your schedule.',
     typing: 'N1 AI is typing…',

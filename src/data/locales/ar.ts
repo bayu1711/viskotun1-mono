@@ -670,6 +670,26 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     noActiveRoutineForAskTitle: 'لا توجد خطة نشطة محددة',
     noActiveRoutineForAskBody: 'قم برفع ورقة بحثية أو اختر خطة من الأبحاث الرائجة للبدء في توجيه الأسئلة.',
     switchToUpload: 'إضافة بحث',
+    unifiedTitleNoRoutine: 'مستكشف الأبحاث والخطط السريرية',
+    unifiedEyebrowNoRoutine: 'ذكاء TrialN1 السريري',
+    unifiedEyebrowWithRoutine: 'موجه الخطة النشطة',
+    unifiedWelcomeNoRoutine: 'ما هو الهدف الصحي أو الحالة التي تسعى لمعالجتها؟',
+    unifiedWelcomeNoRoutineBody:
+      'صف حالتك أو هدفك (مثل آلام الركبة، جودة النوم، الصيام)، أو الصق معرّف DOI أو رابط PubMed، أو ارفع ملف PDF. سأجد لك دراسة سريرية محكمة تناسب جدولك اليومي.',
+    universalPlaceholderNoRoutine: 'صف حالتك (مثل ألم الركبة)، أو الصق رابط البحث، أو ارفع PDF...',
+    universalPlaceholderWithRoutine: 'اسأل عن هذه الخطة، أو أبلغ عن ألم، أو عدّل التوقيت...',
+    problemChips: [
+      'تأهيل أوتار الركبة والعرقوب',
+      'علاج تأخر النوم والإرهاق',
+      'الصيام المتقيد بالوقت',
+      'علاج تساقط الشعر (الثعلبة)',
+      'الكرياتين والإرهاق الإدراكي',
+      'العلاج بالضوء الساطع'
+    ],
+    lifestyleBridgePrompt: (caution: string) =>
+      `بناءً على التنبيه الصحي الخاص بـ (${caution})، هل ترغب في استعراض خطط إعادة التأهيل السريرية؟`,
+    lifestyleBridgeAction: 'استعراض الخطط السريرية',
+    researchNavigatorSource: 'المصدر · أبحاث سريرية بشرية محكمة',
     typing: 'N1 AI يكتب الآن...',
     attach: 'إرفاق ملف PDF',
     send: 'إرسال',
