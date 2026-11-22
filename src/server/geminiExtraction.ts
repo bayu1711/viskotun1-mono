@@ -7,7 +7,8 @@ import { generateFallbackRoutine } from './fallbackRoutines';
 import { classifyPaperSource, containsTerm } from './gatekeeper';
 import { getEffectiveGuardrails } from './guardrailLedger';
 import { findCanonicalRoutine } from './routineRegistry';
-import { validateAndRegisterRoutineWidgets } from './widgetRegistry';
+import { validateRoutineWidgets, validateAndRegisterRoutineWidgets } from './widgetRegistry';
+import { validateExtractedRoutine } from './routineSchema';
 import { executeWithGeminiFailover, getGeminiApiKeys } from './geminiKeys';
 import { resolvePaperSource, type PaperResolution } from './paperSource';
 import { extractQueryFromInput } from '../utils/paperQuery';
@@ -18,9 +19,16 @@ export interface ExtractInput {
   text?: string | null;
 }
 
+/**
+ * Where an extracted routine's content came from. Only `europe-pmc` (full text fetched by the
+ * server from Europe PMC) is trusted enough to become the shared routine for a paper.
+ */
+export type ExtractionSourceKind = 'europe-pmc' | 'pdf-upload' | 'pasted-text' | 'demo-fallback' | 'catalog';
+
 export interface ExtractResult {
   success: boolean;
   eligible: boolean;
+  sourceKind?: ExtractionSourceKind;
   rejectionReason?: string;
   errorType?: 'unrecognized' | 'not-found' | 'no-full-text' | 'policy-rejection';
   suggestedQuery?: string;
@@ -245,6 +253,7 @@ async function screenPaper(
       eligible: true,
       routine,
       isExistingCanonical: true,
+      sourceKind: 'catalog',
       source: sourceName
     };
   }
@@ -386,19 +395,23 @@ export async function extractPaperRoutine(input: ExtractInput): Promise<ExtractR
 
         const rawRoutine = parsed.routine;
         if (rawRoutine) {
-          const normalizedSteps: RoutineStep[] = Array.isArray(rawRoutine.steps)
-            ? rawRoutine.steps.map((step: RoutineStep) => ({
-                ...step,
-                timing: resolveStepTiming(step)
-              }))
-            : [];
+          const validation = validateExtractedRoutine(rawRoutine);
+          if (!validation.ok) {
+            throw new Error(`Gemini routine failed validation: ${validation.reason}`);
+          }
+          const validatedRoutine = validation.routine;
+
+          const normalizedSteps: RoutineStep[] = validatedRoutine.steps.map((step: RoutineStep) => ({
+            ...step,
+            timing: resolveStepTiming(step)
+          }));
 
           const routine: Routine = {
-            ...rawRoutine,
+            ...validatedRoutine,
             steps: normalizedSteps,
-            version: rawRoutine.version || '1.0',
-            changelog: rawRoutine.changelog && rawRoutine.changelog.length > 0
-              ? rawRoutine.changelog
+            version: validatedRoutine.version || '1.0',
+            changelog: validatedRoutine.changelog && validatedRoutine.changelog.length > 0
+              ? validatedRoutine.changelog
               : [
                   {
                     version: '1.0',
@@ -407,47 +420,48 @@ export async function extractPaperRoutine(input: ExtractInput): Promise<ExtractR
                     author: 'Gemini Multimodal Extraction'
                   }
                 ],
-            dayHistory: rawRoutine.dayHistory ?? [],
-            initialSetsDone: rawRoutine.initialSetsDone ?? {},
-            initialFeedbackLogs: rawRoutine.initialFeedbackLogs ?? [],
-            feedbackMetric: rawRoutine.feedbackMetric
+            dayHistory: validatedRoutine.dayHistory ?? [],
+            initialSetsDone: validatedRoutine.initialSetsDone ?? {},
+            initialFeedbackLogs: validatedRoutine.initialFeedbackLogs ?? [],
+            feedbackMetric: validatedRoutine.feedbackMetric
               ? {
-                  ...rawRoutine.feedbackMetric,
+                  ...validatedRoutine.feedbackMetric,
                   escalationThreshold: activePolicy.painEscalationThreshold,
                   escalationMessage: activePolicy.escalationAlertMessage
                 }
               : undefined,
-            initialMessages: rawRoutine.initialMessages ?? [
+            initialMessages: validatedRoutine.initialMessages ?? [
               {
-                id: `${rawRoutine.id}-msg-1`,
+                id: `${validatedRoutine.id}-msg-1`,
                 role: 'user',
                 kind: 'file',
                 content: sourceName,
                 timestamp: COPY.assistant.timestampJustNow
               },
               {
-                id: `${rawRoutine.id}-msg-2`,
+                id: `${validatedRoutine.id}-msg-2`,
                 role: 'ai',
                 kind: 'text',
-                content: COPY.assistant.parsedSummary(rawRoutine.paper?.pages ?? 'the'),
+                content: COPY.assistant.parsedSummary(validatedRoutine.paper?.pages ?? 'the'),
                 timestamp: COPY.assistant.timestampJustNow
               },
               {
-                id: `${rawRoutine.id}-msg-3`,
+                id: `${validatedRoutine.id}-msg-3`,
                 role: 'ai',
                 kind: 'routine',
-                content: rawRoutine.id,
+                content: validatedRoutine.id,
                 timestamp: COPY.assistant.timestampJustNow
               }
             ]
           };
 
-          const validatedRoutine = await validateAndRegisterRoutineWidgets(routine);
+          const routineWithWidgets = await validateRoutineWidgets(routine);
 
           return {
             success: true,
             eligible: true,
-            routine: validatedRoutine,
+            routine: routineWithWidgets,
+            sourceKind: (paperFromLink ? 'europe-pmc' : input.file ? 'pdf-upload' : 'pasted-text') as ExtractionSourceKind,
             source: sourceName
           };
         }
@@ -491,6 +505,7 @@ export async function extractPaperRoutine(input: ExtractInput): Promise<ExtractR
     success: true,
     eligible: true,
     routine: fallbackRoutine,
+    sourceKind: 'demo-fallback',
     source: sourceName
   };
 }
