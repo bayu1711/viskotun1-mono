@@ -128,7 +128,7 @@ export function TrendingPaperCard({
         loadRoutine(resolvedTargetId);
       }
     } else {
-      openAssistant('upload');
+      openAssistant('ask');
     }
   };
 

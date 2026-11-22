@@ -33,7 +33,7 @@ export function RoutineSwitcher() {
 
   const handleAddPaper = () => {
     close();
-    openAssistant('upload');
+    openAssistant('ask');
   };
 
   if (!routine) {

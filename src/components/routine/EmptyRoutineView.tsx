@@ -40,7 +40,7 @@ export function EmptyRoutineView() {
   }, [availablePapers, selectedCategory]);
 
   const handleOpenUpload = () => {
-    openAssistant('upload');
+    openAssistant('ask');
   };
 
   return (

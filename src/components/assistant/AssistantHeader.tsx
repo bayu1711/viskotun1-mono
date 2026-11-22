@@ -5,26 +5,18 @@ import CloseIcon from '@mui/icons-material/Close';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { AssistantMode } from '../../contexts/AssistantContext';
-import type { LocaleCopy } from '../../data/locales/types';
 import type { AIEngineType } from '../../types/routine';
 import { isEdgeGemmaAvailable } from '../../utils/edgeGemma';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
-import { SegmentedTabs } from '../ui/SegmentedTabs';
 import { getEngineMeta } from './engineMeta';
-
 import { useLocale } from '../../contexts/LocaleContext';
-const MODE_OPTIONS = (copy: LocaleCopy): { id: AssistantMode; label: string }[] => [
-  { id: 'ask', label: copy.assistant.modes.ask },
-  { id: 'upload', label: copy.assistant.modes.upload },
-  { id: 'lifestyle', label: copy.assistant.modes.lifestyle }
-];
 
 interface AssistantHeaderProps {
-  mode: AssistantMode;
+  mode?: AssistantMode;
   routineTitle?: string;
   titleId: string;
-  onModeChange: (mode: AssistantMode) => void;
+  onModeChange?: (mode: AssistantMode) => void;
   onClose: () => void;
   customTitle?: string;
   customEyebrow?: string;
@@ -33,17 +25,14 @@ interface AssistantHeaderProps {
 }
 
 export function AssistantHeader({
-  mode,
   routineTitle,
   titleId,
-  onModeChange,
   onClose,
   customTitle,
   customEyebrow,
   lastEngine
 }: AssistantHeaderProps) {
   const { copy } = useLocale();
-  const isAsk = mode === 'ask';
   const displayTitle = routineTitle || '';
   const [isEdgeAvailable, setIsEdgeAvailable] = useState<boolean>(false);
   const [isDisclaimerOpen, setIsDisclaimerOpen] = useState<boolean>(false);
@@ -79,99 +68,93 @@ export function AssistantHeader({
   }, [isDisclaimerOpen]);
 
   return (
-    <header className="shrink-0 px-5 pt-5">
-      <div className="flex items-center justify-between gap-3 border-b border-ink pb-4">
-        <CircleButton label={copy.assistant.close} onClick={onClose}>
-          <Icon icon={CloseIcon} size="md" />
-        </CircleButton>
-        <SegmentedTabs
-          options={MODE_OPTIONS(copy)}
-          value={mode}
-          onChange={onModeChange}
-          ariaLabel={copy.assistant.modeLabel}
-        />
-        <span className="w-10" aria-hidden="true" />
-      </div>
-      <div className="pt-4">
-        <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-sm leading-none text-ink/60">
-            {customEyebrow || (mode === 'lifestyle' ? copy.lifestyleTuning.badge : isAsk ? (displayTitle || copy.assistant.unifiedEyebrowNoRoutine) : copy.assistant.eyebrowUpload)}
-          </p>
-          <div ref={disclaimerRef} className="relative flex items-center gap-1.5 shrink-0">
-            <button
-              type="button"
-              onClick={() => setIsDisclaimerOpen((prev) => !prev)}
-              className="inline-flex items-center gap-1 rounded-full border border-ink/10 bg-cream/70 hover:bg-cream px-2 py-0.5 text-3xs font-medium text-ink transition-colors focus:outline-none focus:ring-1 focus:ring-ink cursor-pointer"
-              title={copy.safety.clinicalDisclaimer}
-              aria-expanded={isDisclaimerOpen}
-              aria-haspopup="dialog"
-              aria-label={copy.assistant.medicalDisclaimerChip}
-            >
-              <Icon icon={ShieldOutlinedIcon} size="xs" className="text-ink/60" />
-              <span>{copy.assistant.medicalDisclaimerChip}</span>
-            </button>
-
-            {(isAsk || mode === 'lifestyle') && engine && engine !== 'cloud-gemini' && (() => {
-              const engineMeta = getEngineMeta(engine);
-              return (
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-3xs font-medium ${
-                    engine === 'on-device-gemma' ? 'bg-mint text-ink' : 'bg-cream text-ink/80'
-                  }`}
-                >
-                  <Icon icon={engineMeta.icon} size="xs" />
-                  <span>{engineMeta.label}</span>
-                </span>
-              );
-            })()}
-
-            <AnimatePresence>
-              {isDisclaimerOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -4, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                  transition={{ duration: 0.15, ease: 'easeOut' }}
-                  className="absolute end-0 top-full mt-2 z-popover w-72 sm:w-80 rounded-card bg-white p-3.5 shadow-lg text-start"
-                  role="dialog"
-                  aria-label={copy.assistant.medicalDisclaimerChip}
-                >
-                  <div className="flex items-start justify-between gap-2 pb-1.5 border-b border-ink/5">
-                    <div className="flex items-center gap-1.5">
-                      <Icon icon={ShieldOutlinedIcon} size="xs" className="text-ink/70" />
-                      <h4 className="text-xs font-semibold text-ink">
-                        {copy.assistant.medicalDisclaimerTitle}
-                      </h4>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsDisclaimerOpen(false)}
-                      className="text-ink/60 hover:text-ink transition-colors p-0.5 rounded cursor-pointer"
-                      aria-label={copy.assistant.closeDisclaimer}
-                    >
-                      <Icon icon={CloseIcon} size="xs" />
-                    </button>
-                  </div>
-                  <p className="mt-2 text-2xs leading-relaxed text-ink/75">
-                    {copy.safety.clinicalDisclaimer}
-                  </p>
-                  <div className="mt-3 flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => setIsDisclaimerOpen(false)}
-                      className="rounded-full bg-ink px-3 py-1 text-3xs font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
-                    >
-                      {copy.assistant.medicalDisclaimerGotIt}
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+    <header className="shrink-0 px-5 pt-4 pb-3 border-b border-ink/10">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <CircleButton label={copy.assistant.close} onClick={onClose}>
+            <Icon icon={CloseIcon} size="md" />
+          </CircleButton>
+          <div className="min-w-0">
+            <p className="truncate text-2xs font-medium uppercase tracking-wider text-ink/50">
+              {customEyebrow || (displayTitle ? copy.assistant.unifiedEyebrowWithRoutine : copy.assistant.unifiedEyebrowNoRoutine)}
+            </p>
+            <h2 id={titleId} className="truncate text-sm sm:text-base font-semibold text-ink leading-tight">
+              {customTitle || (displayTitle || copy.assistant.titleAsk)}
+            </h2>
           </div>
         </div>
-        <h2 id={titleId} className="mt-1 text-display-sm leading-tight tracking-tight">
-          {customTitle || (mode === 'lifestyle' ? copy.lifestyleTuning.title : isAsk ? copy.assistant.titleAsk : copy.assistant.titleUpload)}
-        </h2>
+
+        <div ref={disclaimerRef} className="relative flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => setIsDisclaimerOpen((prev) => !prev)}
+            className="inline-flex items-center gap-1 rounded-full border border-ink/10 bg-cream/70 hover:bg-cream px-2 py-0.5 text-3xs font-medium text-ink transition-colors focus:outline-none focus:ring-1 focus:ring-ink cursor-pointer"
+            title={copy.safety.clinicalDisclaimer}
+            aria-expanded={isDisclaimerOpen}
+            aria-haspopup="dialog"
+            aria-label={copy.assistant.medicalDisclaimerChip}
+          >
+            <Icon icon={ShieldOutlinedIcon} size="xs" className="text-ink/60" />
+            <span>{copy.assistant.medicalDisclaimerChip}</span>
+          </button>
+
+          {engine && engine !== 'cloud-gemini' && (() => {
+            const engineMeta = getEngineMeta(engine);
+            return (
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-3xs font-medium ${
+                  engine === 'on-device-gemma' ? 'bg-mint text-ink' : 'bg-cream text-ink/80'
+                }`}
+              >
+                <Icon icon={engineMeta.icon} size="xs" />
+                <span>{engineMeta.label}</span>
+              </span>
+            );
+          })()}
+
+          <AnimatePresence>
+            {isDisclaimerOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -4, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -4, scale: 0.96 }}
+                transition={{ duration: 0.15, ease: 'easeOut' }}
+                className="absolute end-0 top-full mt-2 z-popover w-72 sm:w-80 rounded-card bg-white p-3.5 shadow-lg text-start"
+                role="dialog"
+                aria-label={copy.assistant.medicalDisclaimerChip}
+              >
+                <div className="flex items-start justify-between gap-2 pb-1.5 border-b border-ink/5">
+                  <div className="flex items-center gap-1.5">
+                    <Icon icon={ShieldOutlinedIcon} size="xs" className="text-ink/70" />
+                    <h4 className="text-xs font-semibold text-ink">
+                      {copy.assistant.medicalDisclaimerTitle}
+                    </h4>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsDisclaimerOpen(false)}
+                    className="text-ink/60 hover:text-ink transition-colors p-0.5 rounded cursor-pointer"
+                    aria-label={copy.assistant.closeDisclaimer}
+                  >
+                    <Icon icon={CloseIcon} size="xs" />
+                  </button>
+                </div>
+                <p className="mt-2 text-2xs leading-relaxed text-ink/75">
+                  {copy.safety.clinicalDisclaimer}
+                </p>
+                <div className="mt-3 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setIsDisclaimerOpen(false)}
+                    className="rounded-full bg-ink px-3 py-1 text-3xs font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
+                  >
+                    {copy.assistant.medicalDisclaimerGotIt}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </header>
   );

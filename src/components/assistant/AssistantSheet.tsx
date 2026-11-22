@@ -1,27 +1,21 @@
 'use client';
 
-import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useId, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import TravelExploreOutlinedIcon from '@mui/icons-material/TravelExploreOutlined';
 import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { type AssistantMode, useAssistant } from '../../contexts/AssistantContext';
-import { ONBOARDING_DISMISSED_KEY } from '../../contexts/AuthContext';
+import { useAssistant } from '../../contexts/AssistantContext';
 import { useLocale } from '../../contexts/LocaleContext';
 import { useRoutine } from '../../contexts/RoutineContext';
 import type { RoutineSchedulePreference } from '../../types/schedule';
 import { MOTION } from '../../data/config';
 import { ROUTES } from '../../data/navigation';
-import { PRECALIBRATED_SAMPLE_ROUTINES } from '../../data/samplePapers';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useScrollToLatest } from '../../hooks/useScrollToLatest';
 import { isPdfFile } from '../../utils/files';
 import { isUnrecognizedLinkReason } from '../../utils/rejectionAssistant';
-import {
-  getQuickRepliesForStage,
-  getStagePlaceholder
-} from '../../utils/lifestyleInterview';
 import { getDynamicSuggestions } from '../../utils/suggestions';
 import { formatRoutineTitle } from '../../utils/text';
 import { Icon } from '../ui/Icon';
@@ -32,7 +26,6 @@ import { AssistantComposer } from './AssistantComposer';
 import { AssistantHeader } from './AssistantHeader';
 import { AssistantMessage } from './AssistantMessage';
 import { FaqSuggestions } from './FaqSuggestions';
-import { LifestyleTuningView } from './LifestyleTuningView';
 import { CandidateRoutineCard } from './messages/CandidateRoutineCard';
 import { ProcessingCard } from './ProcessingCard';
 import { TypingIndicator } from './TypingIndicator';
@@ -40,9 +33,8 @@ import { UploadDropzone } from './UploadDropzone';
 
 export function AssistantSheet() {
   const router = useRouter();
-  const { isOpen, mode, setMode, closeAssistant } = useAssistant();
-  const { locale, copy } = useLocale();
-  const [selectedChips, setSelectedChips] = useState<string[]>([]);
+  const { isOpen, closeAssistant } = useAssistant();
+  const { copy } = useLocale();
   const {
     messages,
     routine,
@@ -59,27 +51,10 @@ export function AssistantSheet() {
     discardStagingRoutine,
     askStagingQuestion,
     toggleStagingExcludeStep,
-    lifestyleProfile,
-    userProfile,
-    updateLifestyleProfile,
-    lifestyleMessages,
-    isLifestyleTyping,
-    lifestyleInterviewStage,
-    jumpToLifestyleStage,
-    setDoseMode,
-    lifestyleSuggestions,
-    setLifestyleSuggestions,
-    initLifestyleConversation,
-    restartLifestyleInterview,
-    tuneLifestyle
+    userProfile
   } = useRoutine();
 
   const handleClose = () => {
-    if (mode === 'lifestyle' && !lifestyleProfile?.intakeCompleted) {
-      try {
-        window.sessionStorage.setItem(ONBOARDING_DISMISSED_KEY, '1');
-      } catch {}
-    }
     closeAssistant();
   };
 
@@ -89,21 +64,11 @@ export function AssistantSheet() {
 
   useDialogA11y(panelRef, { open: isOpen, onClose: handleClose, initialFocusRef: inputRef });
 
-  const isAsk = mode === 'ask';
-  const isLifestyle = mode === 'lifestyle';
-
-  const scrollTrigger = isLifestyle
-    ? `lifestyle-${lifestyleMessages.length}-${isLifestyleTyping ? 'typing' : 'idle'}`
-    : isAsk
-      ? `ask-${messages.length}-${assistantTyping ? 'typing' : 'idle'}`
-      : `upload-${stagingMessages.length}-${isStagingAssistantTyping ? 'typing' : 'idle'}-${isExtractingPaper ? 'extracting' : 'ready'}`;
+  const scrollTrigger = routine
+    ? `routine-${messages.length}-${assistantTyping ? 'typing' : 'idle'}`
+    : `staging-${stagingMessages.length}-${isStagingAssistantTyping ? 'typing' : 'idle'}-${isExtractingPaper ? 'extracting' : 'ready'}`;
 
   const endRef = useScrollToLatest<HTMLDivElement>(isOpen, scrollTrigger);
-
-  const handleModeChange = (next: AssistantMode) => {
-    setMode(next);
-    inputRef.current?.focus();
-  };
 
   const addPaper = useCallback((source: string | File) => {
     uploadPaper(source);
@@ -119,161 +84,14 @@ export function AssistantSheet() {
 
   const handleConfirmCandidate = (scheduleOverride?: RoutineSchedulePreference) => {
     confirmStagingRoutine(scheduleOverride);
-    setMode('ask');
   };
 
-  useEffect(() => {
-    setSelectedChips([]);
-  }, [lifestyleInterviewStage, isOpen]);
-
-  const isMultiSelectStage =
-    isLifestyle &&
-    (lifestyleInterviewStage === 'availability' ||
-      lifestyleInterviewStage === 'age_time' ||
-      lifestyleInterviewStage === 'rhythm' ||
-      lifestyleInterviewStage === 'cautions');
-
-  const isNoneOption = useCallback(
-    (item: string) =>
-      item === copy.lifestyleTuning.onboarding.quickNoCautions ||
-      item === copy.lifestyleTuning.onboarding.quickStandardRhythm ||
-      item === copy.lifestyleTuning.onboarding.quickAnytime ||
-      item === copy.lifestyleTuning.onboarding.quickSkipAge,
-    [copy]
-  );
-
-  const isPrimaryOption = useCallback(
-    (item: string) => item === copy.lifestyleTuning.onboarding.quickExploreRoutines,
-    [copy]
-  );
-
-  const handleToggleChip = useCallback((item: string) => {
-    setSelectedChips((prev) =>
-      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
-    );
-  }, []);
-
-  const handleLifestyleReply = useCallback(
-    (input: string) => {
-      const trimmed = input.trim();
-      if (
-        trimmed === copy.lifestyleTuning.onboarding.quickExploreRoutines ||
-        /^(?:explore(?:\s+routines?)?|browse(?:\s+routines?)?|find(?:\s+a)?\s+routine|show(?:\s+me)?\s+routines?|استكشاف الروتينات)/i.test(trimmed)
-      ) {
-        setSelectedChips([]);
-        setMode('ask');
-        const primaryCaution = lifestyleProfile?.physicalCautions?.[0];
-        if (primaryCaution) {
-          askQuestion(primaryCaution);
-        }
-        return;
-      }
-      if (
-        trimmed === copy.lifestyleTuning.onboarding.quickDone ||
-        /^(?:done|back to routine|view routine|go to routine|العودة للخطة)/i.test(trimmed)
-      ) {
-        setSelectedChips([]);
-        closeAssistant();
-        if (routine) {
-          router.push(ROUTES.routine);
-        } else {
-          router.push(`${ROUTES.community}?tab=explore`);
-        }
-        return;
-      }
-      if (trimmed === copy.lifestyleTuning.onboarding.quickUpdateProfile) {
-        setSelectedChips([]);
-        restartLifestyleInterview(copy);
-        return;
-      }
-      if (
-        trimmed === copy.lifestyleTuning.onboarding.quickChangeSchedule ||
-        /^(?:adjust|change|update)\s+(?:my\s+)?schedule|change\s+availability|change\s+time\s+windows?|تعديل الجدول/i.test(trimmed)
-      ) {
-        setSelectedChips([]);
-        jumpToLifestyleStage('availability', copy, trimmed);
-        return;
-      }
-      if (
-        trimmed === copy.lifestyleTuning.onboarding.quickAddCaution ||
-        /^(?:add|have)\s+(?:a\s+)?(?:physical\s+)?caution|joint sensitivity|إضافة احتياط/i.test(trimmed)
-      ) {
-        setSelectedChips([]);
-        jumpToLifestyleStage('cautions', copy, trimmed);
-        return;
-      }
-      if (
-        trimmed === copy.lifestyleTuning.onboarding.quickChangeRhythm ||
-        /^(?:change|update)\s+(?:work|daily|rhythm|pattern)|نمط العمل/i.test(trimmed)
-      ) {
-        setSelectedChips([]);
-        jumpToLifestyleStage('rhythm', copy, trimmed);
-        return;
-      }
-      if (
-        trimmed === copy.lifestyleTuning.onboarding.quickLowerIntensity ||
-        /^(?:lower|reduce|decrease|gentle|micro)\s+(?:the\s+)?(?:intensity|load|pace|pacing|difficulty)|micro-?dose|تخفيف الشدة/i.test(trimmed)
-      ) {
-        setSelectedChips([]);
-        if (routine) {
-          setDoseMode('micro');
-        }
-        tuneLifestyle(trimmed, { locale, localeCopy: copy });
-        return;
-      }
-
-      let finalMessage = input;
-      if (selectedChips.length > 0 && !isNoneOption(trimmed) && !selectedChips.includes(trimmed)) {
-        finalMessage = `${selectedChips.join(', ')}, ${trimmed}`;
-      }
-      setSelectedChips([]);
-      tuneLifestyle(finalMessage, { locale, localeCopy: copy });
-    },
-    [
-      copy,
-      closeAssistant,
-      router,
-      routine,
-      selectedChips,
-      isNoneOption,
-      tuneLifestyle,
-      locale,
-      restartLifestyleInterview,
-      jumpToLifestyleStage,
-      setDoseMode,
-      setMode,
-      lifestyleProfile,
-      askQuestion
-    ]
-  );
-
-  const handleConfirmChips = useCallback(() => {
-    if (selectedChips.length === 0) return;
-    const combined = selectedChips.join(', ');
-    setSelectedChips([]);
-    tuneLifestyle(combined, { locale, localeCopy: copy });
-  }, [selectedChips, tuneLifestyle, locale, copy]);
-
   const hasAskConversation = messages.length > 0 || assistantTyping;
-  const activeMessages = isLifestyle ? lifestyleMessages : isAsk ? messages : stagingMessages;
+  const activeMessages = routine ? messages : stagingMessages;
   const lastEngine = useMemo(
     () => [...activeMessages].reverse().find((m) => m.engine)?.engine,
     [activeMessages]
   );
-
-  const lifestyleQuickReplies = useMemo(
-    () =>
-      getQuickRepliesForStage({
-        stage: lifestyleInterviewStage,
-        lifestyleProfile,
-        suggestions: lifestyleSuggestions,
-        copy,
-        hasActiveRoutine: Boolean(routine)
-      }),
-    [lifestyleInterviewStage, lifestyleProfile, lifestyleSuggestions, copy, routine]
-  );
-
-  const lifestylePlaceholder = getStagePlaceholder(lifestyleInterviewStage, copy);
 
   const askSuggestions = useMemo(
     () => getDynamicSuggestions(routine, messages),
@@ -371,230 +189,140 @@ export function AssistantSheet() {
             className="fixed inset-x-0 bottom-0 z-sheet flex h-sheet flex-col overflow-hidden rounded-t-sheet bg-canvas font-sans text-ink focus:outline-none lg:inset-y-3 lg:left-auto lg:right-3 lg:h-auto lg:w-sheet lg:rounded-sheet"
           >
             <AssistantHeader
-              mode={mode}
               routineTitle={
                 routine
                   ? formatRoutineTitle(routine.shortTitle)
-                  : !isAsk && !isLifestyle && stagingRoutine
+                  : stagingRoutine
                   ? copy.assistant.stagingTitle
-                  : isAsk && !routine
-                  ? copy.assistant.unifiedTitleNoRoutine
-                  : copy.assistant.titleAsk
+                  : undefined
               }
               customTitle={
-                !isAsk && !isLifestyle && stagingRoutine
+                stagingRoutine
                   ? copy.assistant.stagingTitle
-                  : isAsk && !routine
+                  : !routine
                   ? copy.assistant.unifiedTitleNoRoutine
                   : undefined
               }
               customEyebrow={
-                !isAsk && !isLifestyle && stagingRoutine
+                stagingRoutine
                   ? copy.assistant.stagingEyebrow
-                  : isAsk && !routine
+                  : !routine
                   ? copy.assistant.unifiedEyebrowNoRoutine
                   : undefined
               }
               titleId={titleId}
-              onModeChange={handleModeChange}
               onClose={handleClose}
               lastEngine={lastEngine}
             />
 
             <div role="log" aria-live="polite" className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
-              {isLifestyle ? (
-                /* Conversational Adaptive Lifestyle Interview & Ongoing Tuning */
-                <LifestyleTuningView
-                  lifestyleProfile={lifestyleProfile}
-                  userProfile={userProfile}
-                  messages={lifestyleMessages}
-                  isTyping={isLifestyleTyping}
-                  stage={lifestyleInterviewStage}
-                  onInitConversation={initLifestyleConversation}
-                  onRestartInterview={restartLifestyleInterview}
-                  onSuggestionsLoaded={setLifestyleSuggestions}
-                  onUpdateProfile={updateLifestyleProfile}
-                />
-              ) : isAsk ? (
-                /* Ask Mode: Contextual to Active Routine */
-                routine || messages.length > 0 ? (
-                  <>
-                    {routine && <MissingDataBanner />}
-                    {hasAskConversation ? (
-                      messages.map((message) => (
-                        <AssistantMessage key={message.id} message={message} />
-                      ))
-                    ) : (
-                      <EmptyState
-                        icon={ChatBubbleOutlineIcon}
-                        title={copy.assistant.emptyTitle}
-                        description={copy.assistant.emptyBody}
-                      />
-                    )}
-                    {assistantTyping && <TypingIndicator />}
-                  </>
-                ) : stagingMessages.length > 0 ? (
-                  <div className="space-y-3">
-                    {stagingMessages.map((message) => (
+              {isExtractingPaper ? (
+                /* 1. Extraction in progress */
+                <div className="py-4">
+                  <ProcessingCard source={extractingSourceName} createdAt={Date.now()} />
+                </div>
+              ) : stagingRoutine ? (
+                /* 2. Candidate Routine Staged for Review */
+                <div className="space-y-4">
+                  <CandidateRoutineCard
+                    routine={stagingRoutine}
+                    userProfile={userProfile}
+                    onConfirm={handleConfirmCandidate}
+                    onDiscard={discardStagingRoutine}
+                    onToggleExcludeStep={toggleStagingExcludeStep}
+                    onAskAboutStep={(step) => {
+                      if (step.id === 'improvement') {
+                        askStagingQuestion(step.action);
+                      } else {
+                        askStagingQuestion(copy.task.taskQuestionPrompt(step.action));
+                      }
+                    }}
+                  />
+
+                  {/* Pre-confirmation Q&A messages */}
+                  {stagingMessages
+                    .filter((m) => m.kind !== 'candidate' && m.kind !== 'file')
+                    .map((message) => (
                       <AssistantMessage key={message.id} message={message} />
                     ))}
-                    {isStagingAssistantTyping && <TypingIndicator />}
-                  </div>
-                ) : (
-                  <div className="py-2 space-y-4">
-                    <div className="rounded-card border border-ink/10 bg-white p-5 text-start space-y-3 shadow-xs">
-                      <div className="flex items-center gap-2.5">
-                        <IconTile variant="plain" shape="circle" size={36} className="bg-mint">
-                          <Icon icon={TravelExploreOutlinedIcon} size="sm" className="text-ink" />
-                        </IconTile>
-                        <div>
-                          <h3 className="text-sm font-semibold text-ink">
-                            {copy.assistant.unifiedWelcomeNoRoutine}
-                          </h3>
-                          <p className="text-2xs text-ink/60">
-                            {copy.assistant.unifiedEyebrowNoRoutine}
-                          </p>
-                        </div>
-                      </div>
-                      <p className="text-xs text-ink/75 leading-relaxed">
-                        {copy.assistant.unifiedWelcomeNoRoutineBody}
-                      </p>
 
-                      <div className="pt-2 border-t border-ink/5">
-                        <p className="text-2xs font-medium text-ink/60 mb-2">
-                          {copy.assistant.linkGuidance.communityTitle}
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {copy.assistant.problemChips.map((chip) => (
-                            <button
-                              key={chip}
-                              type="button"
-                              onClick={() => askQuestion(chip)}
-                              className="rounded-full border border-ink/15 bg-canvas px-2.5 py-1 text-2xs font-medium text-ink transition-colors hover:border-ink/30 hover:bg-white cursor-pointer"
-                            >
-                              {chip}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="rounded-card border border-ink/10 bg-white/70 p-4">
-                      <UploadDropzone onFile={addPaper} />
-                    </div>
-                  </div>
-                )
-              ) : (
-                /* Add Paper Mode: Intake, Staging & Pre-Confirmation Discussion */
-                <div className="space-y-4">
-                  {isExtractingPaper ? (
-                    <div className="py-4">
-                      <ProcessingCard source={extractingSourceName} createdAt={Date.now()} />
-                    </div>
-                  ) : stagingRoutine ? (
-                    <div className="space-y-4">
-                      <CandidateRoutineCard
-                        routine={stagingRoutine}
-                        userProfile={userProfile}
-                        onConfirm={handleConfirmCandidate}
-                        onDiscard={discardStagingRoutine}
-                        onToggleExcludeStep={toggleStagingExcludeStep}
-                        onAskAboutStep={(step) => {
-                          if (step.id === 'improvement') {
-                            askStagingQuestion(step.action);
-                          } else {
-                            askStagingQuestion(copy.task.taskQuestionPrompt(step.action));
-                          }
-                        }}
-                      />
-
-                      {/* Pre-confirmation Q&A messages */}
-                      {stagingMessages
-                        .filter((m) => m.kind !== 'candidate' && m.kind !== 'file')
-                        .map((message) => (
-                          <AssistantMessage key={message.id} message={message} />
-                        ))}
-
-                      {isStagingAssistantTyping && <TypingIndicator />}
-                    </div>
+                  {isStagingAssistantTyping && <TypingIndicator />}
+                </div>
+              ) : routine ? (
+                /* 3. Active Routine Q&A & Support */
+                <>
+                  <MissingDataBanner />
+                  {hasAskConversation ? (
+                    messages.map((message) => (
+                      <AssistantMessage key={message.id} message={message} />
+                    ))
                   ) : (
-                    <div className="space-y-4">
-                      {stagingMessages.length > 0 && (
-                        <div className="space-y-3">
-                          {stagingMessages.map((message) => (
-                            <AssistantMessage key={message.id} message={message} />
-                          ))}
-                          {isStagingAssistantTyping && <TypingIndicator />}
-                        </div>
-                      )}
-
-                      {!stagingError && (
-                        <>
-                          <div className="rounded-card border border-ink/10 bg-white p-4 space-y-2">
-                            <h3 className="text-sm font-semibold text-ink">
-                              {copy.assistant.intakeInstructionTitle}
-                            </h3>
-                            <p className="text-xs text-ink/65 leading-relaxed">
-                              {copy.assistant.intakeInstructionBody}
-                            </p>
-                          </div>
-
-                          <UploadDropzone onFile={addPaper} />
-                        </>
-                      )}
-                    </div>
+                    <EmptyState
+                      icon={ChatBubbleOutlineIcon}
+                      title={copy.assistant.emptyTitle}
+                      description={copy.assistant.emptyBody}
+                    />
                   )}
+                  {assistantTyping && <TypingIndicator />}
+                </>
+              ) : stagingMessages.length > 0 ? (
+                /* 4. Pre-routine Research Navigator & Staging Chat */
+                <div className="space-y-3">
+                  {stagingMessages.map((message) => (
+                    <AssistantMessage key={message.id} message={message} />
+                  ))}
+                  {isStagingAssistantTyping && <TypingIndicator />}
+                </div>
+              ) : (
+                /* 5. Welcome & Health Goal / Symptom Discovery */
+                <div className="py-2 space-y-4">
+                  <div className="rounded-card border border-ink/10 bg-white p-5 text-start space-y-3 shadow-xs">
+                    <div className="flex items-center gap-2.5">
+                      <IconTile variant="plain" shape="circle" size={36} className="bg-mint">
+                        <Icon icon={TravelExploreOutlinedIcon} size="sm" className="text-ink" />
+                      </IconTile>
+                      <div>
+                        <h3 className="text-sm font-semibold text-ink">
+                          {copy.assistant.unifiedWelcomeNoRoutine}
+                        </h3>
+                        <p className="text-2xs text-ink/60">
+                          {copy.assistant.unifiedEyebrowNoRoutine}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-ink/75 leading-relaxed">
+                      {copy.assistant.unifiedWelcomeNoRoutineBody}
+                    </p>
+
+                    <div className="pt-2 border-t border-ink/5">
+                      <p className="text-2xs font-medium text-ink/60 mb-2">
+                        {copy.assistant.linkGuidance.communityTitle}
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {copy.assistant.problemChips.map((chip) => (
+                          <button
+                            key={chip}
+                            type="button"
+                            onClick={() => askQuestion(chip)}
+                            className="rounded-full border border-ink/15 bg-canvas px-2.5 py-1 text-2xs font-medium text-ink transition-colors hover:border-ink/30 hover:bg-white cursor-pointer"
+                          >
+                            {chip}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-card border border-ink/10 bg-white/70 p-4">
+                    <UploadDropzone onFile={addPaper} />
+                  </div>
                 </div>
               )}
               <div ref={endRef} />
             </div>
 
             <footer className="shrink-0 space-y-3 border-t border-ink/10 bg-canvas px-5 pb-5 pt-3">
-              {isLifestyle ? (
-                <>
-                  <FaqSuggestions
-                    suggestions={lifestyleQuickReplies}
-                    onSelect={handleLifestyleReply}
-                    disabled={isLifestyleTyping}
-                    isMultiSelect={isMultiSelectStage}
-                    selected={selectedChips}
-                    onToggle={handleToggleChip}
-                    onConfirm={handleConfirmChips}
-                    confirmLabel={copy.lifestyleTuning.onboarding.multiSelectContinue(selectedChips.length)}
-                    isNoneOption={isNoneOption}
-                    isPrimaryOption={isPrimaryOption}
-                  />
-                  <AssistantComposer
-                    ref={inputRef}
-                    mode="lifestyle"
-                    onAsk={handleLifestyleReply}
-                    onAddPaper={addPaper}
-                    onFile={handleFile}
-                    placeholder={lifestylePlaceholder}
-                    ariaLabel={copy.lifestyleTuning.title}
-                  />
-                </>
-              ) : isAsk ? (
-                <>
-                  <FaqSuggestions
-                    suggestions={routine ? askSuggestions : copy.assistant.problemChips}
-                    onSelect={askQuestion}
-                    disabled={assistantTyping || isStagingAssistantTyping}
-                  />
-                  <AssistantComposer
-                    ref={inputRef}
-                    mode="ask"
-                    onAsk={askQuestion}
-                    onAddPaper={addPaper}
-                    onFile={handleFile}
-                    placeholder={
-                      routine
-                        ? copy.assistant.universalPlaceholderWithRoutine
-                        : copy.assistant.universalPlaceholderNoRoutine
-                    }
-                  />
-                </>
-              ) : stagingRoutine ? (
+              {stagingRoutine ? (
                 <>
                   <FaqSuggestions
                     suggestions={stagingSuggestions}
@@ -637,15 +365,25 @@ export function AssistantSheet() {
                   />
                 </>
               ) : (
-                <AssistantComposer
-                  ref={inputRef}
-                  mode="upload"
-                  onAsk={askQuestion}
-                  onAddPaper={addPaper}
-                  onFile={handleFile}
-                  placeholder={copy.assistant.placeholderUpload}
-                  ariaLabel={copy.assistant.inputUpload}
-                />
+                <>
+                  <FaqSuggestions
+                    suggestions={routine ? askSuggestions : copy.assistant.problemChips}
+                    onSelect={askQuestion}
+                    disabled={assistantTyping || isStagingAssistantTyping}
+                  />
+                  <AssistantComposer
+                    ref={inputRef}
+                    mode="ask"
+                    onAsk={stagingRoutine ? askStagingQuestion : askQuestion}
+                    onAddPaper={addPaper}
+                    onFile={handleFile}
+                    placeholder={
+                      routine
+                        ? copy.assistant.universalPlaceholderWithRoutine
+                        : copy.assistant.universalPlaceholderNoRoutine
+                    }
+                  />
+                </>
               )}
             </footer>
           </motion.aside>

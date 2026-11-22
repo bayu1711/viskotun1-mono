@@ -28,7 +28,7 @@ export function PapersPanel() {
   const headingId = useId();
 
   const isEmpty = routines.length === 0 && queuedPapers.length === 0;
-  const openUpload = () => openAssistant('upload');
+  const openUpload = () => openAssistant('ask');
 
   const handleOpenRoutine = (id: string) => {
     setActiveRoutine(id);
