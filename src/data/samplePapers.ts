@@ -65,9 +65,9 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     activeTrackersCount: 0,
     totalLogsCount: 0,
     trendingRank: 1,
-    userId: 'fazarathfazal@gmail.com',
-    userEmail: 'fazarathfazal@gmail.com',
-    uploadedBy: 'fazarathfazal@gmail.com'
+    userId: 'trialn1-curated',
+    userEmail: '',
+    uploadedBy: 'TrialN1'
   },
   {
     id: 'hair-regrowth',
@@ -95,9 +95,9 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     activeTrackersCount: 0,
     totalLogsCount: 0,
     trendingRank: 2,
-    userId: 'fazarathfazal@gmail.com',
-    userEmail: 'fazarathfazal@gmail.com',
-    uploadedBy: 'fazarathfazal@gmail.com'
+    userId: 'trialn1-curated',
+    userEmail: '',
+    uploadedBy: 'TrialN1'
   },
   {
     id: 'creatine-sleep',
@@ -125,9 +125,9 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     activeTrackersCount: 0,
     totalLogsCount: 0,
     trendingRank: 3,
-    userId: 'fazarathfazal@gmail.com',
-    userEmail: 'fazarathfazal@gmail.com',
-    uploadedBy: 'fazarathfazal@gmail.com'
+    userId: 'trialn1-curated',
+    userEmail: '',
+    uploadedBy: 'TrialN1'
   },
   {
     id: 'time-restricted-eating',
@@ -154,9 +154,9 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     activeTrackersCount: 0,
     totalLogsCount: 0,
     trendingRank: 4,
-    userId: 'fazarathfazal@gmail.com',
-    userEmail: 'fazarathfazal@gmail.com',
-    uploadedBy: 'fazarathfazal@gmail.com'
+    userId: 'trialn1-curated',
+    userEmail: '',
+    uploadedBy: 'TrialN1'
   },
   {
     id: 'light-circadian',
@@ -183,9 +183,9 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     activeTrackersCount: 0,
     totalLogsCount: 0,
     trendingRank: 5,
-    userId: 'fazarathfazal@gmail.com',
-    userEmail: 'fazarathfazal@gmail.com',
-    uploadedBy: 'fazarathfazal@gmail.com'
+    userId: 'trialn1-curated',
+    userEmail: '',
+    uploadedBy: 'TrialN1'
   },
   {
     id: 'rodent-exercise-model',
@@ -211,9 +211,9 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     popularityScore: 0,
     activeTrackersCount: 0,
     totalLogsCount: 0,
-    userId: 'fazarathfazal@gmail.com',
-    userEmail: 'fazarathfazal@gmail.com',
-    uploadedBy: 'fazarathfazal@gmail.com'
+    userId: 'trialn1-curated',
+    userEmail: '',
+    uploadedBy: 'TrialN1'
   },
   {
     id: 'uae-heat-circadian',
@@ -240,9 +240,9 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     activeTrackersCount: 42,
     totalLogsCount: 168,
     trendingRank: 1,
-    userId: 'fazarathfazal@gmail.com',
-    userEmail: 'fazarathfazal@gmail.com',
-    uploadedBy: 'fazarathfazal@gmail.com'
+    userId: 'trialn1-curated',
+    userEmail: '',
+    uploadedBy: 'TrialN1'
   },
   {
     id: 'uae-ramadan-metabolic',
@@ -269,9 +269,9 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     activeTrackersCount: 68,
     totalLogsCount: 290,
     trendingRank: 2,
-    userId: 'fazarathfazal@gmail.com',
-    userEmail: 'fazarathfazal@gmail.com',
-    uploadedBy: 'fazarathfazal@gmail.com'
+    userId: 'trialn1-curated',
+    userEmail: '',
+    uploadedBy: 'TrialN1'
   },
   {
     id: 'uae-midwakh-tapering',
@@ -298,9 +298,9 @@ export const SAMPLE_PAPERS: SamplePaper[] = [
     activeTrackersCount: 94,
     totalLogsCount: 420,
     trendingRank: 3,
-    userId: 'fazarathfazal@gmail.com',
-    userEmail: 'fazarathfazal@gmail.com',
-    uploadedBy: 'fazarathfazal@gmail.com'
+    userId: 'trialn1-curated',
+    userEmail: '',
+    uploadedBy: 'TrialN1'
   }
 ];
 
