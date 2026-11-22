@@ -8,11 +8,12 @@ import {
   isRejectionQuestionInScope,
   isUnrecognizedLinkReason
 } from '../../../utils/rejectionAssistant';
+import { extractQueryFromInput } from '../../../utils/paperQuery';
 import { stripClinicalDisclaimer } from '../../../utils/disclaimer';
 import { COPY } from '../../../data/copy';
 import type { Routine } from '../../../types/routine';
-import { getEffectiveGuardrails } from '@/server/guardrailLedger';
-import { executeWithGeminiFailover, getGeminiApiKeys } from '@/server/geminiKeys';
+import { getEffectiveGuardrails } from '../../../server/guardrailLedger';
+import { executeWithGeminiFailover, getGeminiApiKeys } from '../../../server/geminiKeys';
 
 export async function POST(request: Request) {
   try {
@@ -135,7 +136,15 @@ Strict Scope Rules:
       ? `\nParticipant Profile & Adaptive Lifestyle Context:\n${JSON.stringify(contextPayload)}`
       : '';
 
-    const systemInstruction = `You are N1 AI, a clinical study safety assistant for the research paper routine "${resolvedTitle}".
+    const hasActiveRoutine = Boolean(
+      (routineTitle && routineTitle.trim().length > 0 && routineTitle !== 'Study') ||
+      (Array.isArray(steps) && steps.length > 0)
+    );
+
+    const extractedQuery = extractQueryFromInput(question);
+
+    const systemInstruction = hasActiveRoutine
+      ? `You are N1 AI, a clinical study safety assistant for the research paper routine "${resolvedTitle}".
 Clinical Policy Standard (v${activePolicy.version}):
 - Safety Lockout: If the user reports symptom/pain intensity of ${activePolicy.painEscalationThreshold}/10 or higher, escalation must be paused with a ${activePolicy.loadReductionPercent}% load reduction recommendation.
 Context from the paper:
@@ -163,7 +172,31 @@ Instructions:
    - If VALID per the study: Confirm the correction citing the exact paper section. State clearly: "Correction verified: updated [parameter] to [value]. Routine version bumped to next minor version."
    - If INVALID: Politely explain why the published paper does not support the request, citing what the paper actually investigated.
 7. Do NOT include Clinical Advisory prefixes or Medical Disclaimer statements in your response text (the UI displays a dedicated Medical Disclaimer chip in the header).
-8. Never show internal identifiers from the context (step, rule, contraindication or field ids such as "ach-rule-2" or "ach-c-1"). Refer to steps, rules and safety limits by their wording instead.`;
+8. Never show internal identifiers from the context (step, rule, contraindication or field ids such as "ach-rule-2" or "ach-c-1"). Refer to steps, rules and safety limits by their wording instead.`
+      : `You are N1 AI, an expert clinical research navigator and trial matching assistant for TrialN1.
+The user does not currently have an active clinical routine loaded, and is asking a health question, describing symptoms, or looking for evidence-based clinical protocols.
+
+TrialN1 Eligibility Policy:
+- TrialN1 strictly builds routines from INTERVENTIONAL HUMAN RESEARCH (clinical rehabilitation, physical therapy, pharmacology, supplementation, sleep scheduling, nutrition/fasting, or cognitive/behavioral interventions tested on human participants).
+- Animal models (mice, rats, rabbits), in-vitro studies, and purely observational epidemiology without an actionable intervention are strictly ineligible.
+${participantContext}
+
+Instructions:
+1. Understand the user's health goal, symptom, or question:
+   - Identify the biological/physiological mechanism and target tissue.
+   - Explain concisely (2-3 sentences) how peer-reviewed human clinical trials investigate this condition (e.g. eccentric mechanical loading for tendon remodeling, early time-restricted feeding for glycemic variability, circadian bright light exposure for sleep phase realignment, creatine monohydrate for sleep-deprived cognitive fatigue).
+   - If the participant has physical cautions, schedule constraints, or fasting rhythms, briefly reference how those harmonize with the trial parameters.
+2. Guide them to legitimate research:
+   - Mention the gold-standard published protocol or researcher when applicable (e.g., Alfredson protocol for Achilles tendinopathy, Stanish eccentric program, Panda time-restricted feeding).
+   - Encourage them to review the recommended community routines or search open-access trials on Europe PMC and PubMed.
+3. Strict Safety & Regulatory Guardrails:
+   - Do NOT provide a formal medical diagnosis or claim to prescribe a personal cure. Frame all statements as educational findings from published interventional human trials.
+   - Do NOT include Medical Disclaimer prefixes (the UI features a dedicated Medical Disclaimer chip).
+4. Keep the tone scientific, encouraging, and concise (3-4 sentences total).`;
+
+    const resolvedSource = hasActiveRoutine
+      ? COPY.assistant.methodsSectionSource
+      : COPY.assistant.researchNavigatorSource;
 
     // 1. Check for dedicated Gemma / Ollama Endpoint if configured
     const gemmaEndpoint = process.env.GEMMA_ENDPOINT_URL;
@@ -186,8 +219,10 @@ Instructions:
           if (gemmaJson?.response) {
             return NextResponse.json({
               answer: stripClinicalDisclaimer(gemmaJson.response.trim()),
-              source: COPY.assistant.serverGemmaSource,
-              engine: 'server-gemma'
+              source: hasActiveRoutine ? COPY.assistant.serverGemmaSource : COPY.assistant.researchNavigatorSource,
+              engine: 'server-gemma',
+              suggestedQuery: extractedQuery,
+              isGuidance: !hasActiveRoutine
             });
           }
         }
@@ -210,8 +245,10 @@ Instructions:
           const res = await model.generateContent(question);
           return {
             answer: stripClinicalDisclaimer(res.response.text().trim()),
-            source: COPY.assistant.methodsSectionSource,
-            engine: 'cloud-gemini'
+            source: resolvedSource,
+            engine: 'cloud-gemini',
+            suggestedQuery: extractedQuery,
+            isGuidance: !hasActiveRoutine
           };
         });
 
@@ -221,7 +258,17 @@ Instructions:
       }
     }
 
-    // 3. Dynamic local fallback matching using full routine context
+    // 3. Dynamic local fallback matching
+    if (!hasActiveRoutine) {
+      return NextResponse.json({
+        answer: stripClinicalDisclaimer(answerForGuidance(question)),
+        source: COPY.assistant.researchNavigatorSource,
+        engine: 'local-rules',
+        suggestedQuery: extractedQuery,
+        isGuidance: true
+      });
+    }
+
     const proto = {
       title: resolvedTitle,
       shortTitle: shortTitle || resolvedTitle || 'this routine',
