@@ -690,6 +690,22 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     attachPdfChip: 'إسقاط أو إرفاق ملف PDF للبحث (أو استخدم 📎 بالأسفل)',
     attachPdfHint: 'يمكنك أيضاً إرفاق ملف PDF في أي وقت عبر أيقونة المشبك 📎 بالأسفل.',
     backToDiscovery: 'العودة إلى استكشاف الروتينات',
+    backToRoutine: 'العودة إلى الخطة النشطة',
+    lifestyleMatchedTitle: 'مقترح بناءً على نمط حياتك',
+    lifestyleMatchedSubtitle:
+      'بناءً على ملف نمط حياتك المحفوظ — ابدأ بخطة معتمدة أو استكشف حالة صحية أخرى بالأسفل.',
+    orExploreGoals: 'أو استكشف حسب الهدف الصحي أو الحالة:',
+    lifestyleMatchReasons: {
+      summer_heat: 'يطابق: حرارة الصيف',
+      ramadan_fasting: 'يطابق: صيام رمضان',
+      intermittent_fasting: 'يطابق: الصيام المتقطع',
+      smoking: 'يطابق: الحد من التدخين',
+      shift_work: 'يطابق: الورديات والنوم',
+      desk_sedentary: 'يطابق: العمل المكتبي',
+      circadian: 'يطابق: الإيقاع اليومي',
+      physical_caution: 'يطابق: حماية المفاصل',
+      popular: 'خطة سريرية معتمدة'
+    },
     lifestyleChips: [
       'حرارة الصيف الشديدة والترطيب',
       'الصيام المتقطع وصيام رمضان',

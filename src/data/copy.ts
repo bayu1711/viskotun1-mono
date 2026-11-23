@@ -991,6 +991,22 @@ export const COPY = {
     attachPdfChip: 'Drop or attach a research PDF (or use 📎 below)',
     attachPdfHint: 'You can also attach a PDF anytime using the 📎 paperclip icon below.',
     backToDiscovery: 'Back to routine discovery',
+    backToRoutine: 'Back to active routine',
+    lifestyleMatchedTitle: 'Suggested for your lifestyle',
+    lifestyleMatchedSubtitle:
+      'Based on your saved lifestyle profile — start a verified preset or explore another condition below.',
+    orExploreGoals: 'Or explore by health goal or condition:',
+    lifestyleMatchReasons: {
+      summer_heat: 'Matches: Extreme heat',
+      ramadan_fasting: 'Matches: Ramadan fasting',
+      intermittent_fasting: 'Matches: Intermittent fasting',
+      smoking: 'Matches: Harm reduction',
+      shift_work: 'Matches: Shift & sleep schedule',
+      desk_sedentary: 'Matches: Desk & focus',
+      circadian: 'Matches: Circadian rhythm',
+      physical_caution: 'Matches: Joint & rehab',
+      popular: 'Verified preset'
+    },
     lifestyleChips: [
       'Extreme summer heat & hydration',
       'Intermittent & Ramadan fasting',
