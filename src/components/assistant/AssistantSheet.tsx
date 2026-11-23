@@ -53,6 +53,7 @@ export function AssistantSheet() {
     extractingSourceName,
     stagingMessages,
     stagingError,
+    clearStagingError,
     isStagingAssistantTyping,
     confirmStagingRoutine,
     discardStagingRoutine,
@@ -104,10 +105,14 @@ export function AssistantSheet() {
 
   const addPaper = useCallback(
     (source: string | File) => {
-      if (mode === 'lifestyle') setMode('ask');
+      if (routine) {
+        setMode('upload');
+      } else if (mode === 'lifestyle') {
+        setMode('ask');
+      }
       uploadPaper(source);
     },
-    [uploadPaper, mode, setMode]
+    [uploadPaper, routine, mode, setMode]
   );
 
   const handleFile = useCallback(
@@ -388,7 +393,10 @@ export function AssistantSheet() {
                     <div className="flex items-center justify-between pb-1 border-b border-ink/5">
                       <button
                         type="button"
-                        onClick={() => setMode('ask')}
+                        onClick={() => {
+                          clearStagingError();
+                          setMode('ask');
+                        }}
                         className="inline-flex items-center gap-1.5 text-2xs font-medium text-ink/70 hover:text-ink transition-colors cursor-pointer"
                       >
                         <Icon icon={ArrowBackIcon} size="xs" />
@@ -452,7 +460,10 @@ export function AssistantSheet() {
                     <div className="flex items-center justify-between pb-1 border-b border-ink/5">
                       <button
                         type="button"
-                        onClick={() => setMode('ask')}
+                        onClick={() => {
+                          clearStagingError();
+                          setMode('ask');
+                        }}
                         className="inline-flex items-center gap-1.5 text-2xs font-medium text-ink/70 hover:text-ink transition-colors cursor-pointer"
                       >
                         <Icon icon={ArrowBackIcon} size="xs" />
@@ -553,7 +564,7 @@ export function AssistantSheet() {
                     ariaLabel={copy.assistant.inputStaging}
                   />
                 </>
-              ) : isExtractingPaper ? null : stagingError ? (
+              ) : isExtractingPaper ? null : stagingError && (isDiscoveryMode || !routine) ? (
                 <>
                   <FaqSuggestions
                     suggestions={
