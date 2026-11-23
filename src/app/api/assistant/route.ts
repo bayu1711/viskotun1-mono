@@ -174,7 +174,7 @@ Instructions:
 7. Do NOT include Clinical Advisory prefixes or Medical Disclaimer statements in your response text (the UI displays a dedicated Medical Disclaimer chip in the header).
 8. Never show internal identifiers from the context (step, rule, contraindication or field ids such as "ach-rule-2" or "ach-c-1"). Refer to steps, rules and safety limits by their wording instead.`
       : `You are N1 AI, an expert clinical research navigator and trial matching assistant for TrialN1.
-The user does not currently have an active clinical routine loaded, and is asking a health question, describing symptoms, or looking for evidence-based clinical protocols.
+The user does not currently have an active clinical routine loaded, and is asking a health question, describing symptoms, or looking for evidence-based clinical routines.
 
 TrialN1 Eligibility Policy:
 - TrialN1 strictly builds routines from INTERVENTIONAL HUMAN RESEARCH (clinical rehabilitation, physical therapy, pharmacology, supplementation, sleep scheduling, nutrition/fasting, or cognitive/behavioral interventions tested on human participants).
