@@ -40,7 +40,7 @@ export function PaperGuidanceCard({ content }: PaperGuidanceCardProps) {
   const { closeAssistant } = useAssistant();
   const { samplePapers, uploadPaper } = useRoutine();
 
-  let parsed: { reason?: string; source?: string; suggestedQuery?: string } = {};
+  let parsed: { mode?: 'discovery' | 'link_error'; reason?: string; source?: string; suggestedQuery?: string } = {};
   try {
     if (content && typeof content === 'string' && content.startsWith('{')) {
       parsed = JSON.parse(content);
@@ -48,6 +48,10 @@ export function PaperGuidanceCard({ content }: PaperGuidanceCardProps) {
   } catch {
     // Keep fallback defaults
   }
+
+  const isLinkError =
+    parsed.mode === 'link_error' ||
+    (parsed.mode !== 'discovery' && Boolean(parsed.source && /^https?:\/\/|www\./i.test(parsed.source)));
 
   const initialQuery = parsed.suggestedQuery || '';
   const [searchDraft, setSearchDraft] = useState(initialQuery);
@@ -145,6 +149,109 @@ export function PaperGuidanceCard({ content }: PaperGuidanceCardProps) {
   };
 
   const t = copy.assistant.linkGuidance;
+
+  if (!isLinkError) {
+    return (
+      <article className="space-y-3 rounded-card border border-ink/10 bg-white p-4 shadow-xs">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <h4 className="text-xs font-semibold text-ink flex items-center gap-1.5 shrink-0">
+              <Icon icon={MenuBookOutlinedIcon} size="xs" className="text-ink/70" />
+              {t.discoveryMatchesTitle}
+            </h4>
+            {activeQuery && (
+              <span className="truncate rounded-full bg-canvas px-2 py-0.5 text-3xs font-medium text-ink/70">
+                {activeQuery}
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={handleBrowseCommunity}
+            className="text-2xs font-medium text-ink underline underline-offset-2 hover:opacity-80 shrink-0 cursor-pointer"
+          >
+            {t.browseCommunity}
+          </button>
+        </div>
+
+        <div className="space-y-2">
+          {communityMatches.map((paper) => {
+            const hasPrecalibratedRoutine = Boolean(
+              paper.routineId && PRECALIBRATED_SAMPLE_ROUTINES[paper.routineId]
+            );
+            return (
+              <div
+                key={paper.id}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-tile border border-ink/10 bg-mint/25 p-3 transition-colors hover:bg-mint/40"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="rounded bg-white/80 px-1.5 py-0.5 text-3xs font-medium uppercase tracking-wide text-ink/75">
+                      {paper.category}
+                    </span>
+                    {hasPrecalibratedRoutine && (
+                      <span className="flex items-center gap-1 text-3xs font-medium text-emerald-800">
+                        <CheckCircleOutlineOutlinedIcon className="h-3 w-3" />
+                        Verified
+                      </span>
+                    )}
+                  </div>
+                  <h5 className="mt-1 text-xs font-semibold text-ink truncate">{paper.shortTitle}</h5>
+                  <p className="text-2xs text-ink/65 line-clamp-1">{paper.summary}</p>
+                </div>
+
+                <div className="shrink-0 self-end sm:self-center">
+                  <PillButton
+                    size="sm"
+                    variant="primary"
+                    onClick={() => handleLoadCommunityRoutine(paper)}
+                    className="h-7 px-3 text-2xs"
+                  >
+                    <Icon icon={AutoAwesomeOutlinedIcon} size="xs" className="me-1" />
+                    {t.loadRoutine}
+                  </PillButton>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {isSearchingLive && (
+          <p className="text-2xs text-ink/60 italic">{t.searchingEuropePmc}</p>
+        )}
+
+        {liveResults.length > 0 && (
+          <div className="space-y-1.5 rounded-tile border border-ink/10 bg-canvas/50 p-2.5">
+            <p className="text-2xs font-medium text-ink/70">{t.openAccessTrialsTitle}</p>
+            {liveResults.map((res) => (
+              <div
+                key={res.doi || res.title}
+                className="flex items-center justify-between gap-2 border-b border-ink/5 pb-1.5 last:border-b-0 last:pb-0"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-2xs font-medium text-ink truncate">{res.title}</p>
+                  <p className="text-3xs text-ink/60 truncate">
+                    {res.authors} · {res.journal} ({res.year})
+                  </p>
+                </div>
+                {res.doi && (
+                  <button
+                    type="button"
+                    onClick={() => handleExtractExternalPaper(res.doi)}
+                    className="shrink-0 rounded-full bg-ink px-2.5 py-0.5 text-3xs font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
+                  >
+                    {t.extractRoutine}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <p className="text-3xs text-ink/55">{t.discoveryMatchesFooter}</p>
+      </article>
+    );
+  }
 
   return (
     <article className="space-y-4 rounded-card border border-ink/10 bg-white p-4 sm:p-5 shadow-sm">

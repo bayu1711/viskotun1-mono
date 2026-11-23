@@ -28,11 +28,11 @@ export const metadata: Metadata = {
   keywords: [...COPY.metadata.keywords],
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/icon.png', type: 'image/png' },
+      { url: '/icon.png?v=trialn1-2', type: 'image/png', sizes: '512x512' },
+      { url: '/favicon.ico?v=trialn1-2', sizes: 'any' },
     ],
-    shortcut: '/icon.png',
-    apple: '/apple-icon.png',
+    shortcut: '/icon.png?v=trialn1-2',
+    apple: '/apple-icon.png?v=trialn1-2',
   },
   openGraph: {
     title: COPY.metadata.openGraphTitle,

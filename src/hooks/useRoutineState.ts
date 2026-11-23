@@ -1715,6 +1715,7 @@ export function useRoutineState() {
   const askQuestion = useCallback(
     async (text: string) => {
       if (!routine) {
+        const cleanedQuery = extractQueryFromInput(text) || text;
         const userMsg: ChatMessage = {
           id: createId('msg'),
           role: 'user',
@@ -1722,107 +1723,17 @@ export function useRoutineState() {
           content: text,
           timestamp: nowLabel()
         };
-        setStagingMessages((prev) => [...prev, userMsg]);
-        setIsStagingAssistantTyping(true);
-
-        try {
-          const res = await fetch('/api/assistant', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              question: text,
-              userProfile: userProfileRef.current,
-              lifestyleProfile: lifestyleProfileRef.current
-            }),
-            signal: AbortSignal.timeout(10000)
-          });
-
-          if (res.ok) {
-            const data = await res.json();
-            if (data?.answer) {
-              const aiMsg: ChatMessage = {
-                id: createId('msg'),
-                role: 'ai',
-                kind: 'answer',
-                content: stripClinicalDisclaimer(data.answer),
-                engine: data.engine ?? 'cloud-gemini',
-                source: data.source ?? copyRef.current.assistant.researchNavigatorSource,
-                timestamp: nowLabel()
-              };
-              const newMsgs: ChatMessage[] = [aiMsg];
-
-              if (data.isGuidance || data.suggestedQuery) {
-                newMsgs.push({
-                  id: createId('msg'),
-                  role: 'ai',
-                  kind: 'paper_guidance',
-                  content: JSON.stringify({
-                    reason: data.answer,
-                    source: text,
-                    suggestedQuery: data.suggestedQuery || text
-                  }),
-                  timestamp: nowLabel()
-                });
-              }
-
-              setStagingMessages((prev) => [...prev, ...newMsgs]);
-              return;
-            }
-          }
-
-          const fallbackAnswer = stripClinicalDisclaimer(answerForGuidance(text));
-          setStagingMessages((prev) => [
-            ...prev,
-            {
-              id: createId('msg'),
-              role: 'ai',
-              kind: 'answer',
-              content: fallbackAnswer,
-              engine: 'local-rules',
-              source: copyRef.current.assistant.researchNavigatorSource,
-              timestamp: nowLabel()
-            },
-            {
-              id: createId('msg'),
-              role: 'ai',
-              kind: 'paper_guidance',
-              content: JSON.stringify({
-                reason: fallbackAnswer,
-                source: text,
-                suggestedQuery: extractQueryFromInput(text) || text
-              }),
-              timestamp: nowLabel()
-            }
-          ]);
-        } catch (err) {
-          console.error('[askQuestion] Discovery research query failed:', err);
-          const fallbackAnswer = stripClinicalDisclaimer(answerForGuidance(text));
-          setStagingMessages((prev) => [
-            ...prev,
-            {
-              id: createId('msg'),
-              role: 'ai',
-              kind: 'answer',
-              content: fallbackAnswer,
-              engine: 'local-rules',
-              source: copyRef.current.assistant.researchNavigatorSource,
-              timestamp: nowLabel()
-            },
-            {
-              id: createId('msg'),
-              role: 'ai',
-              kind: 'paper_guidance',
-              content: JSON.stringify({
-                reason: fallbackAnswer,
-                source: text,
-                suggestedQuery: extractQueryFromInput(text) || text
-              }),
-              timestamp: nowLabel()
-            }
-          ]);
-        } finally {
-          setIsStagingAssistantTyping(false);
-        }
+        const discoveryCardMsg: ChatMessage = {
+          id: createId('msg'),
+          role: 'ai',
+          kind: 'paper_guidance',
+          content: JSON.stringify({
+            mode: 'discovery',
+            suggestedQuery: cleanedQuery
+          }),
+          timestamp: nowLabel()
+        };
+        setStagingMessages((prev) => [...prev, userMsg, discoveryCardMsg]);
         return;
       }
       const target = routine;
@@ -1907,7 +1818,7 @@ export function useRoutineState() {
         updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: false }));
       }
     },
-    [routine, pushMessages, updateRuntime, setStagingMessages, setIsStagingAssistantTyping]
+    [routine, pushMessages, updateRuntime, setStagingMessages]
   );
 
   const askAboutStep = useCallback(

@@ -323,9 +323,7 @@ export function AssistantSheet() {
               }
               customEyebrow={
                 isLifestyle
-                  ? isPostLifestyleDiscovery
-                    ? copy.assistant.unifiedEyebrowNoRoutine
-                    : copy.lifestyleTuning.badge
+                  ? copy.assistant.unifiedEyebrowNoRoutine
                   : stagingRoutine
                   ? copy.assistant.stagingEyebrow
                   : !routine
@@ -373,18 +371,33 @@ export function AssistantSheet() {
               ) : isLifestyle ? (
                 /* 3. Interactive Lifestyle Interview & Post-Completion Routine Suggestions */
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between pb-1 border-b border-ink/5">
-                    <button
-                      type="button"
-                      onClick={() => setMode('ask')}
-                      className="inline-flex items-center gap-1.5 text-2xs font-medium text-ink/70 hover:text-ink transition-colors cursor-pointer"
-                    >
-                      <Icon icon={ArrowBackIcon} size="xs" />
-                      <span>
-                        {routine ? copy.assistant.backToRoutine : copy.assistant.backToDiscovery}
-                      </span>
-                    </button>
-                  </div>
+                  {routine ? (
+                    <div className="flex items-center justify-between pb-1 border-b border-ink/5">
+                      <button
+                        type="button"
+                        onClick={() => setMode('ask')}
+                        className="inline-flex items-center gap-1.5 text-2xs font-medium text-ink/70 hover:text-ink transition-colors cursor-pointer"
+                      >
+                        <Icon icon={ArrowBackIcon} size="xs" />
+                        <span>{copy.assistant.backToRoutine}</span>
+                      </button>
+                    </div>
+                  ) : !lifestyleProfile?.intakeCompleted && lifestyleInterviewStage !== 'complete' ? (
+                    <div className="flex items-center justify-end">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          try {
+                            window.sessionStorage.setItem(ONBOARDING_DISMISSED_KEY, '1');
+                          } catch {}
+                          setMode('ask');
+                        }}
+                        className="text-2xs font-medium text-ink/60 hover:text-ink underline underline-offset-4 transition-colors cursor-pointer"
+                      >
+                        {copy.lifestyleTuning.onboarding.skipForNow}
+                      </button>
+                    </div>
+                  ) : null}
                   <LifestyleTuningView
                     lifestyleProfile={lifestyleProfile}
                     userProfile={userProfile}

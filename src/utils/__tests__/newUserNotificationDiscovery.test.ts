@@ -167,4 +167,34 @@ describe('New User Discovery, Lifestyle Presets, and On-Device Label Removal', (
     const fatigueMatches = matchCommunityPapers('Shift work cognitive fatigue', SAMPLE_PAPERS);
     expect(fatigueMatches.some((p) => p.id === 'creatine-sleep')).toBe(true);
   });
+
+  it('omits Context Tuning jargon, removes back-to-discovery during onboarding, and offers Skip for now', () => {
+    expect(COPY.lifestyleTuning.badge).not.toMatch(/Context Tuning/i);
+    expect(COPY.lifestyleTuning.onboarding.skipForNow).toBe('Skip for now');
+
+    const sheetSource = fs.readFileSync(
+      path.resolve(__dirname, '../../components/assistant/AssistantSheet.tsx'),
+      'utf-8'
+    );
+    expect(sheetSource).not.toContain('copy.lifestyleTuning.badge');
+    expect(sheetSource).not.toContain('copy.assistant.backToDiscovery');
+    expect(sheetSource).toContain('copy.lifestyleTuning.onboarding.skipForNow');
+  });
+
+  it('keeps routine discovery results clean without broken-link error banners', () => {
+    const guidanceCardSource = fs.readFileSync(
+      path.resolve(__dirname, '../../components/assistant/messages/PaperGuidanceCard.tsx'),
+      'utf-8'
+    );
+    expect(guidanceCardSource).toContain("mode?: 'discovery' | 'link_error'");
+    expect(guidanceCardSource).toContain('if (!isLinkError)');
+
+    const layoutSource = fs.readFileSync(
+      path.resolve(__dirname, '../../app/layout.tsx'),
+      'utf-8'
+    );
+    expect(layoutSource).toContain('/icon.png?v=trialn1-2');
+    expect(layoutSource).toContain('/favicon.ico?v=trialn1-2');
+    expect(fs.existsSync(path.resolve(__dirname, '../../app/favicon.ico'))).toBe(false);
+  });
 });
