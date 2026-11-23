@@ -1,4 +1,5 @@
 import type { SamplePaper } from '../data/samplePapers';
+import type { UserLifestyleProfile } from '../types/auth';
 
 const URL_STOP_WORDS = new Set([
   'http',
@@ -253,4 +254,138 @@ export function buildExternalSearchLinks(query: string): ExternalSearchLinks {
   const clinicalTrials = `https://clinicaltrials.gov/search?term=${ctFilter}`;
 
   return { pubmed, europePmc, googleScholar, clinicalTrials };
+}
+
+export type LifestyleMatchReasonKey =
+  | 'summer_heat'
+  | 'ramadan_fasting'
+  | 'intermittent_fasting'
+  | 'smoking'
+  | 'shift_work'
+  | 'desk_sedentary'
+  | 'circadian'
+  | 'physical_caution'
+  | 'popular';
+
+export interface LifestylePresetMatch {
+  paper: SamplePaper;
+  score: number;
+  reasonKey: LifestyleMatchReasonKey;
+}
+
+const HOT_CLIMATE_COUNTRIES = new Set(['AE', 'SA', 'QA', 'KW', 'BH', 'OM', 'EG', 'IQ']);
+
+/**
+ * Ranks pre-calibrated community routine presets against the user's saved UserLifestyleProfile
+ * so new users immediately see tailored routine suggestions after completing lifestyle questions.
+ */
+export function getLifestyleMatchedPresets(
+  lifestyleProfile?: Partial<UserLifestyleProfile>,
+  papers: SamplePaper[] = [],
+  limit = 3
+): LifestylePresetMatch[] {
+  const eligible = papers.filter((p) => !p.isGuardrailRejectionTest && Boolean(p.routineId));
+  if (eligible.length === 0) return [];
+
+  const countryCode = (lifestyleProfile?.region?.countryCode || '').toUpperCase();
+  const rhythms = new Set(lifestyleProfile?.culturalRhythms ?? []);
+  const cautionsText = (lifestyleProfile?.physicalCautions ?? []).join(' ').toLowerCase();
+  const tagsText = (lifestyleProfile?.activeTags ?? []).join(' ').toLowerCase();
+  const workPattern = lifestyleProfile?.workPattern;
+  const activityBaseline = lifestyleProfile?.activityBaseline;
+  const climate = lifestyleProfile?.climateSensitivity;
+  const smoking = lifestyleProfile?.smokingStatus;
+  const isRamadan = Boolean(lifestyleProfile?.isRamadanFastingObserver || rhythms.has('ramadan_fasting'));
+  const isFasting = rhythms.has('intermittent_fasting') || tagsText.includes('fasting');
+  const isHotClimate =
+    climate === 'summer_heat' ||
+    HOT_CLIMATE_COUNTRIES.has(countryCode) ||
+    tagsText.includes('heat') ||
+    tagsText.includes('summer');
+  const isSmoker =
+    Boolean(smoking && smoking !== 'non_smoker' && smoking !== 'former_smoker') ||
+    tagsText.includes('midwakh') ||
+    tagsText.includes('dokha') ||
+    tagsText.includes('smok') ||
+    tagsText.includes('shisha') ||
+    tagsText.includes('vape');
+  const isShiftWork =
+    workPattern === 'shift_work' ||
+    rhythms.has('late_family_dinner') ||
+    tagsText.includes('shift') ||
+    tagsText.includes('night');
+  const isDeskSedentary =
+    workPattern === 'desk_sedentary' ||
+    activityBaseline === 'sedentary' ||
+    tagsText.includes('desk') ||
+    tagsText.includes('sedentary');
+  const hasJointCaution =
+    /knee|ankle|heel|achilles|tendon|joint|foot|back|rehab|pain/.test(cautionsText) ||
+    /knee|ankle|heel|achilles|tendon|joint/.test(tagsText) ||
+    activityBaseline === 'active';
+  const isCircadianFocus =
+    climate === 'cold_climate' ||
+    rhythms.has('early_dawn_riser') ||
+    tagsText.includes('sleep') ||
+    tagsText.includes('circadian');
+
+  const scored: LifestylePresetMatch[] = eligible.map((paper) => {
+    let score = 0;
+    let reasonKey: LifestyleMatchReasonKey = 'popular';
+    const id = paper.id.toLowerCase();
+
+    const applyBoost = (points: number, reason: LifestyleMatchReasonKey) => {
+      if (points > score) {
+        reasonKey = reason;
+      }
+      score += points;
+    };
+
+    if (isRamadan && id.includes('ramadan')) {
+      applyBoost(55, 'ramadan_fasting');
+    } else if (isFasting && (id.includes('ramadan') || id.includes('restricted'))) {
+      applyBoost(40, 'intermittent_fasting');
+    }
+
+    if (isSmoker && id.includes('midwakh')) {
+      applyBoost(55, 'smoking');
+    }
+
+    if (isHotClimate && id.includes('heat')) {
+      applyBoost(50, 'summer_heat');
+    }
+
+    if (hasJointCaution && id.includes('achilles')) {
+      applyBoost(45, 'physical_caution');
+    }
+
+    if (isShiftWork) {
+      if (id.includes('creatine')) {
+        applyBoost(50, 'shift_work');
+      } else if (id.includes('circadian') || id.includes('light')) {
+        applyBoost(35, 'shift_work');
+      }
+    }
+
+    if (isDeskSedentary) {
+      if (id.includes('creatine')) {
+        applyBoost(40, 'desk_sedentary');
+      } else if (id.includes('heat')) {
+        applyBoost(25, 'desk_sedentary');
+      }
+    }
+
+    if (isCircadianFocus && (id.includes('circadian') || id.includes('light') || id.includes('creatine'))) {
+      applyBoost(30, 'circadian');
+    }
+
+    return { paper, score, reasonKey };
+  });
+
+  scored.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return (b.paper.popularityScore ?? 0) - (a.paper.popularityScore ?? 0);
+  });
+
+  return scored.slice(0, limit);
 }
