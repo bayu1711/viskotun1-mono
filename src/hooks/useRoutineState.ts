@@ -1713,8 +1713,8 @@ export function useRoutineState() {
   );
 
   const askQuestion = useCallback(
-    async (text: string) => {
-      if (!routine) {
+    async (text: string, options?: { forceDiscovery?: boolean }) => {
+      if (!routine || options?.forceDiscovery) {
         const cleanedQuery = extractQueryFromInput(text) || text;
         const userMsg: ChatMessage = {
           id: createId('msg'),

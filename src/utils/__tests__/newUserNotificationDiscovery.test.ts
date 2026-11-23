@@ -197,4 +197,55 @@ describe('New User Discovery, Lifestyle Presets, and On-Device Label Removal', (
     expect(layoutSource).toContain('/favicon.ico?v=trialn1-2');
     expect(fs.existsSync(path.resolve(__dirname, '../../app/favicon.ico'))).toBe(false);
   });
+
+  it('supports Option A add-another routine discovery excluding already-tracked routines', () => {
+    const html = renderToStaticMarkup(
+      inLocale(
+        React.createElement(RoutineDiscoveryCard, {
+          variant: 'add-another',
+          lifestyleProfile: {
+            region: {
+              countryCode: 'AE',
+              countryName: 'United Arab Emirates',
+              city: 'Abu Dhabi',
+              confirmed: true,
+              detectedBy: 'user_selected'
+            },
+            climateSensitivity: 'summer_heat',
+            isRamadanFastingObserver: true,
+            culturalRhythms: ['ramadan_fasting'],
+            smokingStatus: 'non_smoker',
+            activeTags: ['summer_heat', 'ramadan_fasting'],
+            intakeCompleted: true
+          },
+          samplePapers: SAMPLE_PAPERS,
+          excludeRoutineIds: ['uae-ramadan-metabolic'],
+          activeTab: 'lifestyle',
+          onTabChange: () => {},
+          onAskQuestion: () => {},
+          onSelectLifestyleChip: () => {},
+          onStartLifestyleInterview: () => {},
+          onLoadPreset: () => {},
+          onBrowseCommunity: () => {},
+          onFile: () => {}
+        })
+      )
+    );
+
+    expect(html).toContain(COPY.assistant.addAnotherWelcome);
+    expect(html).toContain(COPY.assistant.browseCommunityLink);
+    expect(html).not.toContain('Ramadan Circadian');
+
+    const topBarSource = fs.readFileSync(
+      path.resolve(__dirname, '../../components/layout/TopBar.tsx'),
+      'utf-8'
+    );
+    const papersPanelSource = fs.readFileSync(
+      path.resolve(__dirname, '../../components/dashboard/PapersPanel.tsx'),
+      'utf-8'
+    );
+    expect(topBarSource).toContain("openAssistant('upload')");
+    expect(papersPanelSource).toContain("openAssistant('upload')");
+    expect(papersPanelSource).toContain('copy.dashboard.addAnotherPrompt');
+  });
 });

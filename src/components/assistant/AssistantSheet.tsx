@@ -43,6 +43,7 @@ export function AssistantSheet() {
   const {
     messages,
     routine,
+    routines,
     samplePapers,
     assistantTyping,
     askQuestion,
@@ -88,14 +89,16 @@ export function AssistantSheet() {
   useDialogA11y(panelRef, { open: isOpen, onClose: handleClose, initialFocusRef: inputRef });
 
   const isLifestyle = mode === 'lifestyle';
+  const isDiscoveryMode = mode === 'upload';
   const isPostLifestyleDiscovery =
     isLifestyle && lifestyleInterviewStage === 'complete' && !routine && !isLifestyleTyping;
+  const trackedRoutineIds = useMemo(() => routines.map((r) => r.id), [routines]);
 
   const scrollTrigger = isLifestyle
     ? `lifestyle-${lifestyleMessages.length}-${isLifestyleTyping ? 'typing' : 'idle'}-${lifestyleInterviewStage}`
-    : routine
-    ? `routine-${messages.length}-${assistantTyping ? 'typing' : 'idle'}`
-    : `staging-${stagingMessages.length}-${isStagingAssistantTyping ? 'typing' : 'idle'}-${isExtractingPaper ? 'extracting' : 'ready'}`;
+    : isDiscoveryMode || !routine
+    ? `staging-${stagingMessages.length}-${isStagingAssistantTyping ? 'typing' : 'idle'}-${isExtractingPaper ? 'extracting' : 'ready'}`
+    : `routine-${messages.length}-${assistantTyping ? 'typing' : 'idle'}`;
 
   const endRef = useScrollToLatest<HTMLDivElement>(isOpen, scrollTrigger);
 
@@ -138,11 +141,19 @@ export function AssistantSheet() {
 
   const handleAskDiscoveryQuestion = useCallback(
     (question: string) => {
-      if (mode === 'lifestyle') setMode('ask');
-      askQuestion(question);
+      const shouldForceDiscovery = isDiscoveryMode || !routine;
+      if (mode === 'lifestyle') {
+        setMode(routine ? 'upload' : 'ask');
+      }
+      askQuestion(question, { forceDiscovery: shouldForceDiscovery });
     },
-    [mode, setMode, askQuestion]
+    [mode, isDiscoveryMode, routine, setMode, askQuestion]
   );
+
+  const handleBrowseCommunity = useCallback(() => {
+    closeAssistant();
+    router.push(`${ROUTES.community}?tab=explore`);
+  }, [closeAssistant, router]);
 
   const handleTuneLifestyle = useCallback(
     (message: string) => {
@@ -273,7 +284,9 @@ export function AssistantSheet() {
     [copy, closeAssistant, router, addPaper, askStagingQuestion]
   );
 
-  const isWelcomeDiscovery = !routine && !isLifestyle && stagingMessages.length === 0;
+  const isWelcomeDiscovery =
+    (!routine && !isLifestyle && stagingMessages.length === 0) ||
+    (isDiscoveryMode && stagingMessages.length === 0);
 
   return (
     <AnimatePresence>
@@ -304,7 +317,7 @@ export function AssistantSheet() {
           >
             <AssistantHeader
               routineTitle={
-                !isLifestyle && routine
+                !isLifestyle && !isDiscoveryMode && routine
                   ? formatRoutineTitle(routine.shortTitle)
                   : stagingRoutine
                   ? copy.assistant.stagingTitle
@@ -317,12 +330,12 @@ export function AssistantSheet() {
                     : copy.lifestyleTuning.title
                   : stagingRoutine
                   ? copy.assistant.stagingTitle
-                  : !routine
+                  : isDiscoveryMode || !routine
                   ? copy.assistant.unifiedTitleNoRoutine
                   : undefined
               }
               customEyebrow={
-                isLifestyle
+                isLifestyle || isDiscoveryMode
                   ? copy.assistant.unifiedEyebrowNoRoutine
                   : stagingRoutine
                   ? copy.assistant.stagingEyebrow
@@ -419,15 +432,59 @@ export function AssistantSheet() {
                         variant="post-lifestyle"
                         lifestyleProfile={lifestyleProfile}
                         samplePapers={samplePapers}
+                        excludeRoutineIds={trackedRoutineIds}
                         activeTab={activeDiscoveryTab}
                         onTabChange={setActiveDiscoveryTab}
                         onAskQuestion={handleAskDiscoveryQuestion}
                         onSelectLifestyleChip={handleLifestyleChipSelect}
                         onStartLifestyleInterview={() => restartLifestyleInterview(copy)}
                         onLoadPreset={handleLoadPreset}
+                        onBrowseCommunity={handleBrowseCommunity}
                         onFile={handleFile}
                       />
                     </motion.div>
+                  )}
+                </div>
+              ) : isDiscoveryMode ? (
+                /* 4. New Routine Discovery (triggered via + New routine while a routine is active) */
+                <div className="space-y-4">
+                  {routine && (
+                    <div className="flex items-center justify-between pb-1 border-b border-ink/5">
+                      <button
+                        type="button"
+                        onClick={() => setMode('ask')}
+                        className="inline-flex items-center gap-1.5 text-2xs font-medium text-ink/70 hover:text-ink transition-colors cursor-pointer"
+                      >
+                        <Icon icon={ArrowBackIcon} size="xs" />
+                        <span>{copy.assistant.backToRoutine}</span>
+                      </button>
+                    </div>
+                  )}
+                  {stagingMessages.length > 0 ? (
+                    <div className="space-y-3">
+                      {stagingMessages.map((message) => (
+                        <AssistantMessage key={message.id} message={message} />
+                      ))}
+                      {isStagingAssistantTyping && <TypingIndicator />}
+                    </div>
+                  ) : (
+                    <RoutineDiscoveryCard
+                      variant={routine ? 'add-another' : 'welcome'}
+                      lifestyleProfile={lifestyleProfile}
+                      samplePapers={samplePapers}
+                      excludeRoutineIds={trackedRoutineIds}
+                      activeTab={activeDiscoveryTab}
+                      onTabChange={setActiveDiscoveryTab}
+                      onAskQuestion={handleAskDiscoveryQuestion}
+                      onSelectLifestyleChip={handleLifestyleChipSelect}
+                      onStartLifestyleInterview={() => {
+                        setMode('lifestyle');
+                        initLifestyleConversation(copy);
+                      }}
+                      onLoadPreset={handleLoadPreset}
+                      onBrowseCommunity={handleBrowseCommunity}
+                      onFile={handleFile}
+                    />
                   )}
                 </div>
               ) : routine ? (
@@ -579,7 +636,9 @@ export function AssistantSheet() {
                 <>
                   {!isWelcomeDiscovery && (
                     <FaqSuggestions
-                      suggestions={routine ? askSuggestions : copy.assistant.problemChips}
+                      suggestions={
+                        !isDiscoveryMode && routine ? askSuggestions : copy.assistant.problemChips
+                      }
                       onSelect={handleAskDiscoveryQuestion}
                       disabled={assistantTyping || isStagingAssistantTyping}
                     />
@@ -591,7 +650,7 @@ export function AssistantSheet() {
                     onAddPaper={addPaper}
                     onFile={handleFile}
                     placeholder={
-                      routine
+                      !isDiscoveryMode && routine
                         ? copy.assistant.universalPlaceholderWithRoutine
                         : copy.assistant.universalPlaceholderNoRoutine
                     }

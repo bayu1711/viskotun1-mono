@@ -16,15 +16,17 @@ import { PillButton } from '../ui/PillButton';
 import { HiddenPdfInput } from './HiddenPdfInput';
 
 export interface RoutineDiscoveryCardProps {
-  variant?: 'welcome' | 'post-lifestyle';
+  variant?: 'welcome' | 'post-lifestyle' | 'add-another';
   lifestyleProfile?: UserLifestyleProfile;
   samplePapers?: SamplePaper[];
+  excludeRoutineIds?: string[];
   activeTab: 'goals' | 'lifestyle';
   onTabChange: (tab: 'goals' | 'lifestyle') => void;
   onAskQuestion: (query: string) => void;
   onSelectLifestyleChip: (chip: string) => void;
   onStartLifestyleInterview: () => void;
   onLoadPreset: (paper: SamplePaper) => void;
+  onBrowseCommunity?: () => void;
   onFile: (file: File) => void;
 }
 
@@ -32,12 +34,14 @@ export function RoutineDiscoveryCard({
   variant = 'welcome',
   lifestyleProfile,
   samplePapers,
+  excludeRoutineIds,
   activeTab,
   onTabChange,
   onAskQuestion,
   onSelectLifestyleChip,
   onStartLifestyleInterview,
   onLoadPreset,
+  onBrowseCommunity,
   onFile
 }: RoutineDiscoveryCardProps) {
   const { copy } = useLocale();
@@ -46,8 +50,15 @@ export function RoutineDiscoveryCard({
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const hintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const papersPool = samplePapers && samplePapers.length > 0 ? samplePapers : SAMPLE_PAPERS;
+  const papersPool = useMemo(() => {
+    const base = samplePapers && samplePapers.length > 0 ? samplePapers : SAMPLE_PAPERS;
+    if (!excludeRoutineIds || excludeRoutineIds.length === 0) return base;
+    const excluded = new Set(excludeRoutineIds);
+    return base.filter((p) => !p.routineId || !excluded.has(p.routineId));
+  }, [samplePapers, excludeRoutineIds]);
+
   const isPostLifestyle = variant === 'post-lifestyle';
+  const isAddAnother = variant === 'add-another';
 
   const matchedPresets = useMemo(
     () => getLifestyleMatchedPresets(lifestyleProfile, papersPool, isPostLifestyle ? 3 : 2),
@@ -96,7 +107,9 @@ export function RoutineDiscoveryCard({
           </IconTile>
           <div>
             <h3 className="text-sm font-semibold text-ink leading-snug">
-              {copy.assistant.unifiedWelcomeNoRoutine}
+              {isAddAnother
+                ? copy.assistant.addAnotherWelcome
+                : copy.assistant.unifiedWelcomeNoRoutine}
             </h3>
             <p className="text-2xs text-ink/60 mt-0.5">
               {isPostLifestyle
@@ -111,6 +124,8 @@ export function RoutineDiscoveryCard({
             ? copy.assistant.lifestyleMatchedSubtitle
             : activeTab === 'lifestyle'
             ? copy.assistant.lifestyleDiscoveryBody
+            : isAddAnother
+            ? copy.assistant.addAnotherBody
             : copy.assistant.unifiedWelcomeNoRoutineBody}
         </p>
 
@@ -317,6 +332,18 @@ export function RoutineDiscoveryCard({
             )}
           </AnimatePresence>
         </div>
+
+        {onBrowseCommunity && (
+          <div className="pt-1 flex justify-end">
+            <button
+              type="button"
+              onClick={onBrowseCommunity}
+              className="text-2xs font-medium text-ink/65 hover:text-ink underline underline-offset-4 transition-colors cursor-pointer"
+            >
+              {copy.assistant.browseCommunityLink}
+            </button>
+          </div>
+        )}
 
         <HiddenPdfInput ref={uploadInputRef} onFile={onFile} />
       </div>

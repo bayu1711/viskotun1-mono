@@ -28,7 +28,8 @@ export function PapersPanel() {
   const headingId = useId();
 
   const isEmpty = routines.length === 0 && queuedPapers.length === 0;
-  const openUpload = () => openAssistant('ask');
+  const openUpload = () => openAssistant('upload');
+  const openCommunity = () => router.push(`${ROUTES.community}?tab=explore`);
 
   const handleOpenRoutine = (id: string) => {
     setActiveRoutine(id);
@@ -74,6 +75,24 @@ export function PapersPanel() {
             <QueuedPaperItem key={paper.id} paper={paper} variant="card" />
           ))}
         </ul>
+      )}
+
+      {!isEmpty && (
+        <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-tile border border-ink/10 bg-canvas/70 px-3.5 py-3">
+          <p className="text-xs font-medium text-ink/80">{copy.dashboard.addAnotherPrompt}</p>
+          <div className="flex items-center gap-2.5 shrink-0">
+            <PillButton size="sm" variant="primary" onClick={openUpload}>
+              {copy.dashboard.startNewRoutine}
+            </PillButton>
+            <button
+              type="button"
+              onClick={openCommunity}
+              className="text-2xs font-medium text-ink/65 hover:text-ink underline underline-offset-4 transition-colors cursor-pointer"
+            >
+              {copy.dashboard.browseCommunity}
+            </button>
+          </div>
+        </div>
       )}
 
       {routine && (
