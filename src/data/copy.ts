@@ -50,7 +50,7 @@ export const COPY = {
   shell: {
     dayBadge: (day: number): string => `Day ${day}`,
     streak: (days: number) => `${days} day streak`,
-    addPaper: 'Add new paper',
+    addPaper: 'New routine',
     openAssistant: 'Ask N1',
     openProfile: 'Open profile & adaptive lifestyle settings',
     resetDemo: 'Reset to demo defaults',
@@ -69,8 +69,8 @@ export const COPY = {
     manageLanguages: 'Language settings'
   },
   switcher: {
-    heading: 'Your papers',
-    addPaper: 'Add new paper',
+    heading: 'Your routines',
+    addPaper: 'Start new routine',
     meta: (day: number, total: number, percent: number) => `Day ${day}/${total} · ${percent}% today`
   },
   papers: {
@@ -449,8 +449,11 @@ export const COPY = {
     paperMeta: (day: number, total: number) => `Day ${day}/${total}`,
     activeSuffix: ' · Active',
     sourcePaper: 'Source paper',
-    emptyPapersTitle: 'No papers yet',
-    emptyPapersBody: 'Drop a research PDF to extract your first routine.',
+    emptyPapersTitle: 'No routines yet',
+    emptyPapersBody: 'Describe a health goal, pick a preset, or drop a research PDF to start.',
+    addAnotherPrompt: 'Have another goal or paper in mind?',
+    startNewRoutine: 'Start new routine',
+    browseCommunity: 'Browse Community',
     progressionEyebrow: 'Next step',
     progressionTitle: 'Progression',
     progressionHolding: 'Holding until the progression rule threshold is met.',
@@ -978,6 +981,10 @@ export const COPY = {
     unifiedWelcomeNoRoutine: 'Which routine would you like to get into for your health conditions, goals, or lifestyle?',
     unifiedWelcomeNoRoutineBody:
       'Explore evidence-grounded human research routines by health condition, target goal, or daily lifestyle to start a verified routine.',
+    addAnotherWelcome: 'What else would you like to work on?',
+    addAnotherBody:
+      'Describe another health goal, condition, or lifestyle target — or attach a research PDF to build a new verified routine.',
+    browseCommunityLink: 'Or browse trending in Community →',
     universalPlaceholderNoRoutine: 'Describe a condition or lifestyle (e.g. shift work, knee rehab), paste DOI, or attach PDF…',
     universalPlaceholderWithRoutine: 'Ask about this routine, report pain, or adjust timing…',
     discoveryTabs: {

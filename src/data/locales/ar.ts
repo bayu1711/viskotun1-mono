@@ -55,7 +55,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
         : days <= 10
         ? `${days} أيام التزام`
         : `${days} يوماً من الالتزام`,
-    addPaper: 'إضافة بحث جديد',
+    addPaper: 'روتين جديد',
     openAssistant: 'اسأل N1',
     openProfile: 'فتح الملف الشخصي وإعدادات نمط الحياة التكيفي',
     resetDemo: 'إعادة ضبط التجربة',
@@ -74,8 +74,8 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     manageLanguages: 'إعدادات اللغة'
   },
   switcher: {
-    heading: 'أوراقك البحثية',
-    addPaper: 'إضافة بحث جديد',
+    heading: 'خططك الصحية',
+    addPaper: 'بدء روتين جديد',
     meta: (day: number, total: number, percent: number) => `اليوم ${day}/${total} · ${percent}% اليوم`
   },
   papers: {
@@ -677,6 +677,10 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     unifiedWelcomeNoRoutine: 'ما هو الروتين الذي تود البدء به لأهدافك الصحية، حالتك، أو نمط حياتك؟',
     unifiedWelcomeNoRoutineBody:
       'استكشف روتينات الأبحاث البشرية الموثقة حسب الحالة الصحية، الهدف، أو نمط الحياة للبدء في روتين معتمد.',
+    addAnotherWelcome: 'ما الهدف الصحي الآخر الذي تود العمل عليه؟',
+    addAnotherBody:
+      'صف هدفاً صحياً جديداً أو حالة أو نمط حياة — أو أرفق ملف PDF للبحث لبناء روتين معتمد آخر.',
+    browseCommunityLink: 'أو تصفح الأبحاث الرائجة في المجتمع ←',
     universalPlaceholderNoRoutine: 'صف حالتك أو نمط حياتك (مثل الورديات، تأهيل الركبة)، أو الصق رابط البحث، أو ارفع PDF...',
     universalPlaceholderWithRoutine: 'اسأل عن هذه الخطة، أو أبلغ عن ألم، أو عدّل التوقيت...',
     discoveryTabs: {
