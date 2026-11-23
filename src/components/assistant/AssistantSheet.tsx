@@ -17,7 +17,6 @@ import type { UserLifestyleProfile } from '../../types/auth';
 import type { RoutineSchedulePreference } from '../../types/schedule';
 import { useDialogA11y } from '../../hooks/useDialogA11y';
 import { useScrollToLatest } from '../../hooks/useScrollToLatest';
-import { detectNewRoutineIntent } from '../../utils/assistant';
 import { isPdfFile } from '../../utils/files';
 import { getQuickRepliesForStage } from '../../utils/lifestyleInterview';
 import { resolveCulturalRhythms, syncLifestyleActiveTags } from '../../utils/profile';
@@ -142,16 +141,6 @@ export function AssistantSheet() {
 
   const handleAskDiscoveryQuestion = useCallback(
     (question: string) => {
-      if (!isDiscoveryMode && routine) {
-        const intent = detectNewRoutineIntent(question);
-        if (intent.isNewRoutine) {
-          setMode('upload');
-          if (intent.topicQuery) {
-            askQuestion(intent.topicQuery, { forceDiscovery: true });
-          }
-          return;
-        }
-      }
       const shouldForceDiscovery = isDiscoveryMode || !routine;
       if (mode === 'lifestyle') {
         setMode(routine ? 'upload' : 'ask');

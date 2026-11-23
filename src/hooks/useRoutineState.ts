@@ -32,7 +32,7 @@ import type {
   QueuedPaper
 } from '../types/routine';
 import type { RoutineSchedulePreference } from '../types/schedule';
-import { answerFor } from '../utils/assistant';
+import { answerFor, detectNewRoutineIntent } from '../utils/assistant';
 import {
   clearBrowserStorageForAccount,
   countStoredUserLogs
@@ -1737,6 +1737,20 @@ export function useRoutineState() {
         return;
       }
       const target = routine;
+      const newRoutineIntent = detectNewRoutineIntent(text);
+      if (newRoutineIntent.isNewRoutine) {
+        pushMessages(
+          target.id,
+          { role: 'user', kind: 'question', content: text },
+          {
+            role: 'ai',
+            kind: 'discovery_handoff',
+            content: JSON.stringify({ topicQuery: newRoutineIntent.topicQuery })
+          }
+        );
+        return;
+      }
+
       pushMessages(target.id, { role: 'user', kind: 'question', content: text });
       updateRuntime(target.id, (prev) => ({ ...prev, assistantTyping: true }));
 

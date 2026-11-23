@@ -6,6 +6,7 @@ import { MOTION } from '../../data/config';
 import type { ChatMessage } from '../../types/routine';
 import { RoutineCard } from '../routine/RoutineCard';
 import { AlertCard } from './messages/AlertCard';
+import { DiscoveryHandoffCard } from './messages/DiscoveryHandoffCard';
 import { PaperGuidanceCard } from './messages/PaperGuidanceCard';
 import { AnswerBubble } from './messages/AnswerBubble';
 import { ConfirmationCard } from './messages/ConfirmationCard';
@@ -65,6 +66,8 @@ export function AssistantMessage({ message }: AssistantMessageProps) {
         return <AlertCard content={message.content} />;
       case 'paper_guidance':
         return <PaperGuidanceCard content={message.content} />;
+      case 'discovery_handoff':
+        return <DiscoveryHandoffCard content={message.content} />;
       default:
         return null;
     }
