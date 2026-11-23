@@ -21,7 +21,7 @@ describe('AIIcon component and configuration', () => {
   });
 
   it('uses the centralized brand favicon icon URL as the AI icon source', () => {
-    expect(COPY.brand.iconUrl).toBe('/images/viskotun1-icon.png');
+    expect(COPY.brand.iconUrl).toBe('/images/trialn1-icon.png');
   });
 
   it('renders AIIcon on Tune with N1 AI action button in Profile instead of sparkle icon', () => {

@@ -30,8 +30,8 @@ export function AIIcon({ size = 'md', className, alt = '', priority = false }: A
     <Image
       src={copy.brand.iconUrl}
       alt={alt}
-      width={241}
-      height={239}
+      width={269}
+      height={217}
       priority={priority}
       unoptimized
       className={cn('shrink-0 object-contain', sizeClass, className)}

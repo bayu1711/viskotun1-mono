@@ -28,7 +28,7 @@ export const COPY = {
     name: 'TrialN1',
     initials: 'TN1',
     logoUrl: '/images/trialn1-logo.png',
-    iconUrl: '/images/viskotun1-icon.png'
+    iconUrl: '/images/trialn1-icon.png'
   },
   greeting: {
     morning: 'Morning,',
