@@ -681,6 +681,15 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     addAnotherBody:
       'صف هدفاً صحياً جديداً أو حالة أو نمط حياة — أو أرفق ملف PDF للبحث لبناء روتين معتمد آخر.',
     browseCommunityLink: 'أو تصفح الأبحاث الرائجة في المجتمع ←',
+    discoveryHandoff: {
+      promptGeneric:
+        'بكل سرور! هل تود البحث عن روتين جديد لهدف صحي آخر، حالة، أو بناءً على نمط حياتك؟',
+      promptWithTopic: (topic: string) =>
+        `بكل سرور! هل تود استعراض الروتينات الموثقة لـ "${topic}" أو استكشاف خيارات أخرى؟`,
+      ctaGeneric: 'البحث عن روتين جديد',
+      ctaWithTopic: (topic: string) => `عرض الروتينات لـ "${topic}"`,
+      browseCommunity: 'تصفح المجتمع'
+    },
     universalPlaceholderNoRoutine: 'صف حالتك أو نمط حياتك (مثل الورديات، تأهيل الركبة)، أو الصق رابط البحث، أو ارفع PDF...',
     universalPlaceholderWithRoutine: 'اسأل عن هذه الخطة، أو أبلغ عن ألم، أو عدّل التوقيت...',
     discoveryTabs: {

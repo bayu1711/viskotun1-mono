@@ -985,6 +985,15 @@ export const COPY = {
     addAnotherBody:
       'Describe another health goal, condition, or lifestyle target — or attach a research PDF to build a new verified routine.',
     browseCommunityLink: 'Or browse trending in Community →',
+    discoveryHandoff: {
+      promptGeneric:
+        'Sounds good! Would you like to find a new routine for another health goal, condition, or your lifestyle?',
+      promptWithTopic: (topic: string) =>
+        `Sounds good! Would you like to see verified routines for "${topic}" or explore other options?`,
+      ctaGeneric: 'Find a new routine',
+      ctaWithTopic: (topic: string) => `See routines for "${topic}"`,
+      browseCommunity: 'Browse Community'
+    },
     universalPlaceholderNoRoutine: 'Describe a condition or lifestyle (e.g. shift work, knee rehab), paste DOI, or attach PDF…',
     universalPlaceholderWithRoutine: 'Ask about this routine, report pain, or adjust timing…',
     discoveryTabs: {
