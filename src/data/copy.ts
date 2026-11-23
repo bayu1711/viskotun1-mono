@@ -974,11 +974,31 @@ export const COPY = {
     unifiedTitleNoRoutine: 'Research & Protocol Navigator',
     unifiedEyebrowNoRoutine: 'TrialN1 Intelligence',
     unifiedEyebrowWithRoutine: 'Active Protocol Coach',
-    unifiedWelcomeNoRoutine: 'What health goal or condition are you looking to solve?',
+    unifiedWelcomeNoRoutine: 'Which routine would you like to get into for your health conditions, goals, or lifestyle?',
     unifiedWelcomeNoRoutineBody:
-      "Describe what you're dealing with (e.g. knee tendinopathy, sleep latency, fasting), paste a DOI/PubMed link, or attach a study PDF. I'll find or extract a peer-reviewed human trial for your daily schedule.",
-    universalPlaceholderNoRoutine: 'Describe a problem (e.g. knee pain), paste DOI, or attach PDF…',
+      'Explore evidence-grounded human research routines by health condition, target goal, or daily lifestyle to start a verified protocol.',
+    universalPlaceholderNoRoutine: 'Describe a condition or lifestyle (e.g. shift work, knee rehab), paste DOI, or attach PDF…',
     universalPlaceholderWithRoutine: 'Ask about this protocol, report pain, or adjust timing…',
+    discoveryTabs: {
+      healthGoals: 'Health Conditions & Goals',
+      lifestyle: 'Lifestyle & Habits'
+    },
+    lifestyleDiscoveryTitle: 'Personalize by Lifestyle',
+    lifestyleDiscoveryBody:
+      'Answer a few quick lifestyle questions or choose your daily rhythm so we can suggest clinical routines tailored to your schedule and environment.',
+    answerLifestyleQuestionsBtn: 'Answer 3 quick lifestyle questions',
+    orPickLifestylePreset: 'Or choose a lifestyle pattern to match routines:',
+    attachPdfChip: 'Drop or attach a research PDF (or use 📎 below)',
+    attachPdfHint: 'You can also attach a PDF anytime using the 📎 paperclip icon below.',
+    backToDiscovery: 'Back to routine discovery',
+    lifestyleChips: [
+      'Extreme summer heat & hydration',
+      'Intermittent & Ramadan fasting',
+      'Shift work & night schedule',
+      'Desk-bound & sedentary focus',
+      'Nicotine & Dokha harm reduction',
+      'Joint-friendly low-impact rehab'
+    ],
     problemChips: [
       'Achilles & knee tendon rehab',
       'Sleep latency & grogginess',
