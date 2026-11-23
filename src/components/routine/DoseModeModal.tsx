@@ -52,8 +52,8 @@ export function DoseModeModal() {
         label: copy.doseMode.standard,
         description:
           locale === 'ar'
-            ? 'الجرعة الكاملة: إنجاز جميع المجموعات والبروتوكولات المقررة (100% من الحجم المستهدف).'
-            : 'Full prescribed volume: complete all target sets and interventional protocols.',
+            ? 'الجرعة الكاملة: إنجاز جميع المجموعات وخطوات الروتين المقررة (100% من الحجم المستهدف).'
+            : 'Full prescribed volume: complete all target sets and routine steps.',
         icon: FitnessCenterOutlinedIcon,
         iconColor: 'text-ink'
       },
