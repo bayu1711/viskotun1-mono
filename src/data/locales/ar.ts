@@ -59,7 +59,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     openAssistant: 'اسأل N1',
     openProfile: 'فتح الملف الشخصي وإعدادات نمط الحياة التكيفي',
     resetDemo: 'إعادة ضبط التجربة',
-    assistantFab: (title: string) => `اسأل N1 عن ${title} أو ارفع ملف PDF`,
+    assistantFab: (title: string) => `اسأل N1 عن ${title}`,
     todaySummaryLabel: 'تقدم اليوم',
     noActiveRoutine: 'لا توجد خطة نشطة',
     noActivePrompt: 'قم برفع ورقة بحثية أو استكشف الخطط الرائجة لبدء المتابعة.',

@@ -54,7 +54,7 @@ export const COPY = {
     openAssistant: 'Ask N1',
     openProfile: 'Open profile & adaptive lifestyle settings',
     resetDemo: 'Reset to demo defaults',
-    assistantFab: (title: string) => `Ask N1 about ${title} or drop a PDF`,
+    assistantFab: (title: string) => `Ask N1 about ${title}`,
     todaySummaryLabel: "Today's progress",
     noActiveRoutine: 'No active routine',
     noActivePrompt: 'Upload a research paper or explore trending routines to start tracking.',
