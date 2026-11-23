@@ -417,7 +417,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     reEntryPrompt: 'تعطل جدولك؟ تكييف الخطة'
   },
   lifestyleTuning: {
-    badge: 'التكيف السياقي',
+    badge: 'نمط حياتك',
     title: 'الملف السلوكي والبيئي المتكيف',
     tuneButton: 'تخصيص الخطة للسياق',
     topBarPill: (region: string, tagCount: number) =>
@@ -488,6 +488,7 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
       quickNoCautions: 'لا توجد احتياطات · غير مدخن',
       quickDone: 'تم — العودة للخطة',
       quickExploreRoutines: 'استكشاف الروتينات',
+      skipForNow: 'تخطي الآن',
       quickChangeSchedule: 'تعديل الجدول والأوقات',
       quickLowerIntensity: 'تخفيف الشدة والجهد',
       quickAddCaution: 'إضافة احتياط بدني',
@@ -736,6 +737,9 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     emptyTitle: 'لا توجد رسائل سابقة',
     emptyBody: 'اسأل عن الجرعات، وتيرة التمرين، معايير الأمان، أو قواعد التصعيد.',
     linkGuidance: {
+      discoveryMatchesTitle: 'روتينات مطابقة',
+      openAccessTrialsTitle: 'تجارب سريرية مفتوحة الوصول',
+      discoveryMatchesFooter: 'أو أرفق ملف PDF للبحث (📎) أو الصق معرّف DOI بالأسفل.',
       title: 'لم يتم العثور على معرّف بحثي في هذا الرابط',
       subtitle: 'معظم مقالات المدونات وروابط المواقع العامة لا تتضمن معرّف DOI المباشر للأبحاث المفتوحة.',
       askPrompt: 'ما هو الهدف الصحي أو التدخل السريري الذي تبحث عنه؟',

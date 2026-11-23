@@ -169,7 +169,7 @@ export const COPY = {
     reEntryPrompt: 'Life disrupted? Adapt routine'
   },
   lifestyleTuning: {
-    badge: 'Context Tuning',
+    badge: 'Your Lifestyle',
     title: 'Adaptive Lifestyle Profile',
     tuneButton: 'Tune Lifestyle',
     topBarPill: (region: string, tagCount: number) =>
@@ -239,6 +239,7 @@ export const COPY = {
       quickNoCautions: 'No cautions · non-smoker',
       quickDone: 'Done — back to routine',
       quickExploreRoutines: 'Explore routines',
+      skipForNow: 'Skip for now',
       quickChangeSchedule: 'Adjust schedule',
       quickLowerIntensity: 'Lower intensity',
       quickAddCaution: 'Add physical caution',
@@ -1069,6 +1070,9 @@ export const COPY = {
       }
     },
     linkGuidance: {
+      discoveryMatchesTitle: 'Matching routines',
+      openAccessTrialsTitle: 'Open-access clinical trials',
+      discoveryMatchesFooter: 'Or attach a research PDF (📎) or paste a DOI below.',
       title: "Couldn't find a paper identifier in that link",
       subtitle: "Most article links, blog posts, or journal pages don't include the direct open-access paper DOI.",
       askPrompt: 'What health goal, condition, or intervention are you looking for?',
