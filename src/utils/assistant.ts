@@ -146,3 +146,30 @@ export function answerFor(routine: Routine, question: string): string {
 export function isPaperLink(value: string) {
   return PAPER_LINK_PATTERN.test(value);
 }
+
+const NEW_ROUTINE_INTENT_EN =
+  /\b(?:(?:new|another|different|better|improved|other|more)\s+(?:routine|routines|protocol|protocols|plan|plans)|(?:suggest|recommend|find|discover|explore|start|add|create|get|want|need|looking\s+for|switch\s+to|try)\s+(?:me\s+)?(?:a\s+|an\s+|some\s+|any\s+|another\s+|other\s+)?(?:new\s+|better\s+|improved\s+|different\s+)?(?:routine|routines|protocol|protocols|plan|plans))\b/i;
+
+const NEW_ROUTINE_INTENT_AR =
+  /(?:روتين\s*(?:جديد|آخر|أفضل|محسن)|خطة\s*(?:جديدة|أخرى|أفضل)|اقترح\s*(?:لي\s*)?(?:روتين|خطة|خطط|روتينات)|ابحث\s*عن\s*(?:روتين|خطة)|أريد\s*(?:روتين|خطة))/i;
+
+const TOPIC_AFTER_FOR_REGEX = /\b(?:for|targeting|to\s+help\s+with|to\s+solve|about)\s+([^?.!]+)[?.!]?$/i;
+
+/**
+ * Detects when a user in active-routine Q&A is asking for a new, improved, or suggested routine
+ * so the assistant can smoothly hand them off to the New Routine Discovery flow.
+ */
+export function detectNewRoutineIntent(text: string): { isNewRoutine: boolean; topicQuery: string } {
+  const trimmed = text.trim();
+  if (!trimmed) return { isNewRoutine: false, topicQuery: '' };
+
+  const isMatch = NEW_ROUTINE_INTENT_EN.test(trimmed) || NEW_ROUTINE_INTENT_AR.test(trimmed);
+  if (!isMatch) return { isNewRoutine: false, topicQuery: '' };
+
+  const topicMatch = trimmed.match(TOPIC_AFTER_FOR_REGEX);
+  const rawTopic = topicMatch?.[1]?.trim() ?? '';
+  // Ignore generic filler like "for me" or "for my lifestyle"
+  const topicQuery = /^(?:me|myself|my\s+routine|this)$/i.test(rawTopic) ? '' : rawTopic;
+
+  return { isNewRoutine: true, topicQuery };
+}

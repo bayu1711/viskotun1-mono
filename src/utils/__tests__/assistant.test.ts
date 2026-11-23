@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Routine } from '../../types/routine';
-import { answerFor, isPaperLink } from '../assistant';
+import { answerFor, detectNewRoutineIntent, isPaperLink } from '../assistant';
 
 const sampleRoutine: Routine = {
   id: 'creatine-test',
@@ -212,6 +212,30 @@ describe('Assistant answerFor generalization', () => {
     expect(isPaperLink('10.1016/j.clinbiomech.2014.11.005')).toBe(true);
     expect(isPaperLink('https://pubmed.ncbi.nlm.nih.gov/25498305/')).toBe(true);
     expect(isPaperLink('What is the routine sets count?')).toBe(false);
+  });
+
+  it('detects new, improved, or suggested routine intent for seamless handoff to discovery', () => {
+    expect(detectNewRoutineIntent('I want a new routine')).toEqual({
+      isNewRoutine: true,
+      topicQuery: ''
+    });
+    expect(detectNewRoutineIntent('Can you suggest an improved routine for sleep latency?')).toEqual({
+      isNewRoutine: true,
+      topicQuery: 'sleep latency'
+    });
+    expect(detectNewRoutineIntent('Recommend a routine for knee pain')).toEqual({
+      isNewRoutine: true,
+      topicQuery: 'knee pain'
+    });
+    expect(detectNewRoutineIntent('أريد روتين جديد')).toEqual({
+      isNewRoutine: true,
+      topicQuery: ''
+    });
+
+    // Regular active-routine Q&A questions must NOT trigger handoff
+    expect(detectNewRoutineIntent('What is the dosage for this routine?').isNewRoutine).toBe(false);
+    expect(detectNewRoutineIntent('Should I stop if pain hits 6/10?').isNewRoutine).toBe(false);
+    expect(detectNewRoutineIntent('Update timer to 45 seconds').isNewRoutine).toBe(false);
   });
 });
 
