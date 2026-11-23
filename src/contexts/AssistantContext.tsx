@@ -25,8 +25,8 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
   const routineContext = useContext(RoutineContext);
   const askQuestion = routineContext?.askQuestion;
 
-  const openAssistant = useCallback((_nextMode: AssistantMode = 'ask') => {
-    setMode('ask');
+  const openAssistant = useCallback((nextMode: AssistantMode = 'ask') => {
+    setMode(nextMode);
     setIsOpen(true);
   }, []);
 
@@ -44,7 +44,7 @@ export function AssistantProvider({ children }: { children: React.ReactNode }) {
   );
 
   const openLifestyleTuning = useCallback(() => {
-    setMode('ask');
+    setMode('lifestyle');
     setIsOpen(true);
   }, []);
 

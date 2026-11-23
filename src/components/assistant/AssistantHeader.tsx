@@ -6,10 +6,8 @@ import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { AssistantMode } from '../../contexts/AssistantContext';
 import type { AIEngineType } from '../../types/routine';
-import { isEdgeGemmaAvailable } from '../../utils/edgeGemma';
 import { CircleButton } from '../ui/CircleButton';
 import { Icon } from '../ui/Icon';
-import { getEngineMeta } from './engineMeta';
 import { useLocale } from '../../contexts/LocaleContext';
 
 interface AssistantHeaderProps {
@@ -20,7 +18,7 @@ interface AssistantHeaderProps {
   onClose: () => void;
   customTitle?: string;
   customEyebrow?: string;
-  /** Engine that produced the latest answer, so the badge reflects what actually responded. */
+  /** Engine that produced the latest answer. */
   lastEngine?: AIEngineType;
 }
 
@@ -29,25 +27,12 @@ export function AssistantHeader({
   titleId,
   onClose,
   customTitle,
-  customEyebrow,
-  lastEngine
+  customEyebrow
 }: AssistantHeaderProps) {
   const { copy } = useLocale();
   const displayTitle = routineTitle || '';
-  const [isEdgeAvailable, setIsEdgeAvailable] = useState<boolean>(false);
   const [isDisclaimerOpen, setIsDisclaimerOpen] = useState<boolean>(false);
   const disclaimerRef = useRef<HTMLDivElement>(null);
-  const engine = lastEngine ?? (isEdgeAvailable ? 'on-device-gemma' : undefined);
-
-  useEffect(() => {
-    let active = true;
-    isEdgeGemmaAvailable().then((avail) => {
-      if (active) setIsEdgeAvailable(avail);
-    });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   useEffect(() => {
     if (!isDisclaimerOpen) return;
@@ -97,20 +82,6 @@ export function AssistantHeader({
             <Icon icon={ShieldOutlinedIcon} size="xs" className="text-ink/60" />
             <span>{copy.assistant.medicalDisclaimerChip}</span>
           </button>
-
-          {engine && engine !== 'cloud-gemini' && (() => {
-            const engineMeta = getEngineMeta(engine);
-            return (
-              <span
-                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-3xs font-medium ${
-                  engine === 'on-device-gemma' ? 'bg-mint text-ink' : 'bg-cream text-ink/80'
-                }`}
-              >
-                <Icon icon={engineMeta.icon} size="xs" />
-                <span>{engineMeta.label}</span>
-              </span>
-            );
-          })()}
 
           <AnimatePresence>
             {isDisclaimerOpen && (

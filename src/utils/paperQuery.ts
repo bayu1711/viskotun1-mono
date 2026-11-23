@@ -186,8 +186,26 @@ export function matchCommunityPapers(query: string, papers: SamplePaper[] = []):
       score += 25;
     }
     if (
-      (trimmed.includes('smoke') || trimmed.includes('smoking') || trimmed.includes('nicotine') || trimmed.includes('habit') || trimmed.includes('craving') || trimmed.includes('midwakh') || trimmed.includes('dokha')) &&
+      (trimmed.includes('smoke') || trimmed.includes('smoking') || trimmed.includes('nicotine') || trimmed.includes('habit') || trimmed.includes('craving') || trimmed.includes('midwakh') || trimmed.includes('dokha') || trimmed.includes('tobacco')) &&
       paper.id.includes('midwakh')
+    ) {
+      score += 25;
+    }
+    if (
+      (trimmed.includes('heat') || trimmed.includes('summer') || trimmed.includes('hydration') || trimmed.includes('ambient') || trimmed.includes('hot') || trimmed.includes('climate')) &&
+      paper.id.includes('heat')
+    ) {
+      score += 35;
+    }
+    if (
+      (trimmed.includes('shift') || trimmed.includes('night') || trimmed.includes('desk') || trimmed.includes('sedentary')) &&
+      (paper.id.includes('creatine') || paper.id.includes('circadian'))
+    ) {
+      score += 25;
+    }
+    if (
+      (trimmed.includes('joint') || trimmed.includes('low-impact') || trimmed.includes('low impact') || trimmed.includes('rehab')) &&
+      paper.id.includes('achilles')
     ) {
       score += 25;
     }
