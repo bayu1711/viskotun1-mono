@@ -972,14 +972,14 @@ export const COPY = {
     noActiveRoutineForAskTitle: 'No active routine selected',
     noActiveRoutineForAskBody: 'Add a research paper or load a trending routine to start asking questions.',
     switchToUpload: 'Add a paper',
-    unifiedTitleNoRoutine: 'Research & Protocol Navigator',
+    unifiedTitleNoRoutine: 'Research & Routine Navigator',
     unifiedEyebrowNoRoutine: 'TrialN1 Intelligence',
-    unifiedEyebrowWithRoutine: 'Active Protocol Coach',
+    unifiedEyebrowWithRoutine: 'Active Routine Coach',
     unifiedWelcomeNoRoutine: 'Which routine would you like to get into for your health conditions, goals, or lifestyle?',
     unifiedWelcomeNoRoutineBody:
-      'Explore evidence-grounded human research routines by health condition, target goal, or daily lifestyle to start a verified protocol.',
+      'Explore evidence-grounded human research routines by health condition, target goal, or daily lifestyle to start a verified routine.',
     universalPlaceholderNoRoutine: 'Describe a condition or lifestyle (e.g. shift work, knee rehab), paste DOI, or attach PDF…',
-    universalPlaceholderWithRoutine: 'Ask about this protocol, report pain, or adjust timing…',
+    universalPlaceholderWithRoutine: 'Ask about this routine, report pain, or adjust timing…',
     discoveryTabs: {
       healthGoals: 'Health Conditions & Goals',
       lifestyle: 'Lifestyle & Habits'
@@ -1025,8 +1025,8 @@ export const COPY = {
       'Bright light circadian therapy'
     ],
     lifestyleBridgePrompt: (caution: string) =>
-      `Based on your ${caution} caution, would you like to review clinical rehab protocols?`,
-    lifestyleBridgeAction: 'Find Clinical Protocols',
+      `Based on your ${caution} caution, would you like to review clinical rehab routines?`,
+    lifestyleBridgeAction: 'Find Clinical Routines',
     researchNavigatorSource: 'Source · Peer-Reviewed Human Research',
     intakeInstructionTitle: 'Add an interventional study',
     intakeInstructionBody: 'Upload a clinical trial PDF or enter a DOI/PubMed link. Gemini will extract the routine, steps, and safety rules so you can review and discuss it before adding it to your schedule.',
@@ -1547,7 +1547,7 @@ export const COPY = {
     rigorSubtitle:
       'Every UAE adaptation is mapped to peer-reviewed human guidelines—never generic fitness streaks or guesswork.',
     scopeNote:
-      'Our UAE routines follow ACSM thermal safety thresholds, Gulf Endocrine Society Ramadan guidance, and Cochrane tobacco harm-reduction protocols, aligned with ADPHC standards.',
+      'Our UAE routines follow ACSM thermal safety thresholds, Gulf Endocrine Society Ramadan guidance, and Cochrane tobacco harm-reduction guidelines, aligned with ADPHC standards.',
     capabilitiesTitle: 'What we built for the UAE',
     features: {
       gatekeeperTitle: 'Indoor Heat Micro-Dosing',
