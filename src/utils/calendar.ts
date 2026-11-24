@@ -239,3 +239,18 @@ export function getGoogleCalendarUrl(routine: Routine, options: CalendarExportOp
 
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
+
+export interface LiveCalendarFeedUrls {
+  httpsUrl: string;
+  webcalUrl: string;
+}
+
+/** Builds subscribable HTTPS and webcal:// calendar feed URLs for a user's opaque feed token. */
+export function buildCalendarFeedUrls(origin: string, token: string): LiveCalendarFeedUrls {
+  const normalizedOrigin = origin.replace(/\/+$/, '');
+  const path = `/api/calendar/${encodeURIComponent(token)}`;
+  const httpsUrl = `${normalizedOrigin}${path}`;
+  const hostPart = normalizedOrigin.replace(/^https?:\/\//i, '');
+  const webcalUrl = `webcal://${hostPart}${path}`;
+  return { httpsUrl, webcalUrl };
+}
