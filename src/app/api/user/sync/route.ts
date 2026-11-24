@@ -68,6 +68,7 @@ export async function POST(request: Request) {
       runtime: body.runtime || {},
       ...(profile ? { profile } : {}),
       ...(lifestyleProfile ? { lifestyleProfile } : {}),
+      ...(existing?.notifications ? { notifications: existing.notifications } : {}),
       accountStatus: existing?.accountStatus ?? 'active',
       ...(existing?.deactivatedAt ? { deactivatedAt: existing.deactivatedAt } : {}),
       updatedAt

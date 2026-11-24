@@ -116,6 +116,11 @@ function hasFirestoreCredentials(): boolean {
   return false;
 }
 
+/** Shared GCP credential availability check reused by Firestore & FCM servers. */
+export function hasGcpCredentials(): boolean {
+  return hasFirestoreCredentials();
+}
+
 /** Get or initialize Firestore singleton with fail-safe error handling. */
 export function getFirestore(): Firestore | null {
   if (firestoreInstance) {

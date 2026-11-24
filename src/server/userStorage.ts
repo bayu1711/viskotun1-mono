@@ -6,10 +6,12 @@
  * Provides live aggregate statistics for routines without dummy or simulated multipliers.
  */
 
+import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { getFirestore } from './guardrailLedger';
 import type { UserLifestyleProfile, UserProfile } from '../types/auth';
+import type { UserNotificationPreferences } from '../types/notifications';
 import type { Routine, RoutineRuntime } from '../types/routine';
 import { SEEDED_COMMUNITY_USERS } from './seedUsers';
 
@@ -20,6 +22,7 @@ export interface UserRecord {
   runtime: Record<string, RoutineRuntime>;
   profile?: UserProfile;
   lifestyleProfile?: UserLifestyleProfile;
+  notifications?: UserNotificationPreferences;
   accountStatus?: 'active' | 'deactivated';
   deactivatedAt?: number;
   updatedAt: number;
@@ -108,6 +111,7 @@ export async function getUserRecord(userId: string): Promise<UserRecord | null> 
             runtime: data.runtime || {},
             ...(data.profile ? { profile: data.profile } : {}),
             ...(data.lifestyleProfile ? { lifestyleProfile: data.lifestyleProfile } : {}),
+            ...(data.notifications ? { notifications: data.notifications } : {}),
             updatedAt: data.updatedAt || Date.now()
           };
           memoryUserStorage.set(userId, resolved);
@@ -186,6 +190,7 @@ export async function deactivateUserAccount(userId: string): Promise<UserRecord>
     runtime: existing?.runtime ?? {},
     ...(existing?.profile ? { profile: existing.profile } : {}),
     ...(existing?.lifestyleProfile ? { lifestyleProfile: existing.lifestyleProfile } : {}),
+    ...(existing?.notifications ? { notifications: existing.notifications } : {}),
     accountStatus: 'deactivated',
     deactivatedAt: Date.now(),
     updatedAt: Date.now()
@@ -275,6 +280,9 @@ export async function getAllUserRecords(): Promise<UserRecord[]> {
               activeRoutineId: data.activeRoutineId,
               routines: data.routines || [],
               runtime: data.runtime || {},
+              ...(data.profile ? { profile: data.profile } : {}),
+              ...(data.lifestyleProfile ? { lifestyleProfile: data.lifestyleProfile } : {}),
+              ...(data.notifications ? { notifications: data.notifications } : {}),
               updatedAt: data.updatedAt || Date.now()
             };
             recordsMap.set(uid, resolved);
@@ -350,4 +358,158 @@ export async function getLiveUserStats(routineId: string): Promise<{
     activeTrackersCount,
     userLogsCount
   };
+}
+
+const MAX_FCM_TOKENS_PER_USER = 10;
+
+async function getOrInitUserRecord(userId: string): Promise<UserRecord> {
+  const existing = await getUserRecord(userId);
+  if (existing) return existing;
+  const created: UserRecord = {
+    userId,
+    activeRoutineId: '',
+    routines: [],
+    runtime: {},
+    accountStatus: 'active',
+    updatedAt: Date.now()
+  };
+  await saveUserRecord(created);
+  return created;
+}
+
+/** Ensures a user has a persistent opaque token for live `webcal://` calendar feed subscriptions. */
+export async function ensureCalendarFeedToken(userId: string, rotate = false): Promise<string> {
+  const record = await getOrInitUserRecord(userId);
+  const current = record.notifications?.calendarFeedToken;
+  if (current && !rotate) return current;
+
+  const token = crypto.randomBytes(18).toString('base64url');
+  const next: UserRecord = {
+    ...record,
+    notifications: {
+      ...record.notifications,
+      calendarFeedToken: token
+    },
+    updatedAt: Date.now()
+  };
+  await saveUserRecord(next);
+  return token;
+}
+
+/** Resolves the user record owning a live calendar feed subscription token. */
+export async function findUserByCalendarToken(token: string): Promise<UserRecord | null> {
+  const clean = token.trim();
+  if (!clean || clean.length < 8) return null;
+
+  const users = await getAllUserRecords();
+  return users.find((u) => u.notifications?.calendarFeedToken === clean) ?? null;
+}
+
+/** Registers or refreshes a Firebase Cloud Messaging (FCM) Web Push token for a user device. */
+export async function registerUserFcmToken(userId: string, token: string): Promise<string[]> {
+  const clean = token.trim();
+  if (!clean) throw new Error('FCM token required');
+  const record = await getOrInitUserRecord(userId);
+  const current = record.notifications?.webPushTokens ?? [];
+  const nextTokens = [clean, ...current.filter((t) => t !== clean)].slice(0, MAX_FCM_TOKENS_PER_USER);
+
+  await saveUserRecord({
+    ...record,
+    notifications: {
+      ...record.notifications,
+      webPushTokens: nextTokens
+    },
+    updatedAt: Date.now()
+  });
+  return nextTokens;
+}
+
+/** Removes an FCM Web Push token when disabled on a device or invalidated by FCM. */
+export async function removeUserFcmToken(userId: string, token?: string): Promise<string[]> {
+  const record = await getOrInitUserRecord(userId);
+  const current = record.notifications?.webPushTokens ?? [];
+  const nextTokens = token ? current.filter((t) => t !== token.trim()) : [];
+
+  await saveUserRecord({
+    ...record,
+    notifications: {
+      ...record.notifications,
+      webPushTokens: nextTokens
+    },
+    updatedAt: Date.now()
+  });
+  return nextTokens;
+}
+
+/** Issues an 8-character single-use deep-link code to bind a Telegram chat via `/start <code>`. */
+export async function issueTelegramLinkCode(userId: string): Promise<string> {
+  const record = await getOrInitUserRecord(userId);
+  const code = crypto.randomBytes(4).toString('hex').toUpperCase();
+
+  await saveUserRecord({
+    ...record,
+    notifications: {
+      ...record.notifications,
+      telegram: {
+        connected: Boolean(record.notifications?.telegram?.connected),
+        ...(record.notifications?.telegram?.chatId ? { chatId: record.notifications.telegram.chatId } : {}),
+        ...(record.notifications?.telegram?.username ? { username: record.notifications.telegram.username } : {}),
+        linkCode: code,
+        linkCodeIssuedAt: Date.now()
+      }
+    },
+    updatedAt: Date.now()
+  });
+  return code;
+}
+
+/** Binds a Telegram chatId & optional username using the issued `/start <code>` token. */
+export async function linkTelegramChatByCode(
+  code: string,
+  chatId: string,
+  username?: string
+): Promise<UserRecord | null> {
+  const cleanCode = code.trim().toUpperCase();
+  if (!cleanCode) return null;
+
+  const users = await getAllUserRecords();
+  const target = users.find((u) => u.notifications?.telegram?.linkCode === cleanCode);
+  if (!target) return null;
+
+  const updated: UserRecord = {
+    ...target,
+    notifications: {
+      ...target.notifications,
+      telegram: {
+        connected: true,
+        chatId: String(chatId),
+        ...(username ? { username } : {}),
+        connectedAt: Date.now()
+      }
+    },
+    updatedAt: Date.now()
+  };
+  await saveUserRecord(updated);
+  return updated;
+}
+
+/** Unlinks a user's Telegram Bot connection cleanly. */
+export async function unlinkTelegramChat(userId: string): Promise<void> {
+  const record = await getOrInitUserRecord(userId);
+  await saveUserRecord({
+    ...record,
+    notifications: {
+      ...record.notifications,
+      telegram: { connected: false }
+    },
+    updatedAt: Date.now()
+  });
+}
+
+/** Looks up an account currently linked to a Telegram chat ID. */
+export async function findUserByTelegramChatId(chatId: string): Promise<UserRecord | null> {
+  const clean = String(chatId).trim();
+  if (!clean) return null;
+  const users = await getAllUserRecords();
+  return users.find((u) => u.notifications?.telegram?.connected && u.notifications.telegram.chatId === clean) ?? null;
 }
