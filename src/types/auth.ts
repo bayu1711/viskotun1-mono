@@ -87,6 +87,8 @@ export interface UserProfile {
   secondaryLanguage?: SecondaryLanguage;
   /** Whether daily routine reminder nudges are enabled. */
   reminderNotificationsEnabled?: boolean;
+  /** Opaque per-user calendar subscription token (`webcal://` / `/api/calendar/[token]`). */
+  calendarFeedToken?: string;
   /** Whether anonymized adherence cohort insights can be shared with Community reviews. */
   communityCohortOptIn?: boolean;
   updatedAt?: string;
