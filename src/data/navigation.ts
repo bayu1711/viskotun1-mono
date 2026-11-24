@@ -7,13 +7,22 @@ import type { LocaleCopy } from './locales/types';
 
 export const ROUTES = {
   landing: '/',
+  about: '/about',
   uae: '/uae',
   routine: '/routine',
   dashboard: '/dashboard',
   community: '/community',
   profile: '/profile',
   login: '/login',
-  signup: '/signup'
+  signup: '/signup',
+  admin: '/admin',
+  legal: '/legal',
+  privacy: '/legal/privacy',
+  terms: '/legal/terms',
+  termsOfUse: '/legal/terms-of-use',
+  disclaimer: '/legal/disclaimer',
+  cookies: '/legal/cookies',
+  aiTransparency: '/legal/ai-transparency'
 } as const;
 
 export interface NavItem {

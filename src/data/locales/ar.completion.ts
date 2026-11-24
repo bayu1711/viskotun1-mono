@@ -510,7 +510,17 @@ export const COPY_AR_COMPLETION: DeepPartial<LocaleCopy> = {
     toastGoogleSuccess: 'تم تسجيل الدخول باستخدام Google!',
     toastGoogleFailed: 'فشل تسجيل الدخول باستخدام Google.',
     toastGuestEntered: 'دخلت كزائر مستكشف',
-    toastAdminEntered: 'تم تسجيل الدخول كمسؤول سريري'
+    toastAdminEntered: 'تم تسجيل الدخول كمسؤول سريري',
+    toastAcceptTerms: 'يرجى الموافقة على الشروط والأحكام وسياسة الخصوصية لإنشاء حساب.',
+    legalConsentPrefix: 'أوافق على',
+    legalTermsLink: 'الشروط والأحكام',
+    legalTermsOfUseLink: 'شروط الاستخدام',
+    legalPrivacyLink: 'سياسة الخصوصية',
+    legalDisclaimerLink: 'إخلاء المسؤولية الطبية والبحثية',
+    legalConsentConjunction: 'و',
+    legalConsentDisclaimerJoin: '، وأقر بـ',
+    legalOAuthNoticePrefix: 'بالمتابعة باستخدام Google أو كزائر، فإنك توافق على',
+    legalFooterNotice: 'راجع سياساتنا في أي وقت:'
   },
   errors: {
     boundaryTitle: 'حدث خطأ ما',
@@ -753,5 +763,98 @@ export const COPY_AR_COMPLETION: DeepPartial<LocaleCopy> = {
     quickLoadButton: 'ابدأ الخطة',
     noActiveRoutine: 'لا توجد خطة نشطة',
     noActiveRoutineDesc: 'ارفع ورقة بحثية أو اختر ورقة سريرية رائجة لبدء المتابعة.'
+  },
+  footer: {
+    brandDescription:
+      'تحويل التجارب السريرية البشرية المحكّمة إلى روتين يومي منظم وموثّق بالمصادر مع تدريب صوتي تكيّفي.',
+    scopePill: 'أبحاث التدخل البشري السريرية فقط',
+    medicalNoticePrefix: 'للاستخدام المعلوماتي والتعليمي فقط — وليس استشارة طبية.',
+    medicalNoticeLink: 'اقرأ إخلاء المسؤولية الكامل',
+    columns: {
+      product: 'استكشف',
+      account: 'الحساب والموارد',
+      legal: 'القانون والخصوصية'
+    },
+    links: {
+      about: 'من نحن',
+      domains: 'المجالات الصحية',
+      howItWorks: 'كيف يعمل',
+      gatekeeper: 'البوابة العلمية',
+      features: 'المزايا',
+      tryGuest: 'جرّب كزائر',
+      dashboard: 'التقدم والإحصاءات',
+      community: 'المجتمع',
+      github: 'مستودع GitHub',
+      contactLegal: 'التواصل القانوني والخصوصية',
+      legalCenter: 'المركز القانوني',
+      privacy: 'سياسة الخصوصية',
+      terms: 'الشروط والأحكام',
+      termsOfUse: 'شروط الاستخدام',
+      disclaimer: 'إخلاء المسؤولية الطبية',
+      cookies: 'سياسة ملفات الارتباط والتخزين',
+      aiTransparency: 'شفافية الذكاء الاصطناعي والبيانات'
+    },
+    copyright: '© 2026 TrialN1. جميع الحقوق محفوظة.',
+    builtForScience: 'مصمم لأبحاث التدخل البشري السريرية'
+  },
+  legal: {
+    centerBadge: 'مركز القانون والثقة',
+    centerTitle: 'الخصوصية والشروط والشفافية السريرية',
+    centerSubtitle:
+      'سياسات واضحة بلغة مبسطة توضح كيفية تعامل TrialN1 مع بياناتك وإدارة الذكاء الاصطناعي وحدود السلامة السريرية.',
+    medicalBannerTitle: 'ليست استشارة طبية',
+    medicalBannerBody:
+      'TrialN1 أداة تعليمية وداعمة للسلوك الصحي مبنية على أبحاث بشرية منشورة، ولا تقدم تشخيصاً أو علاجاً ولا تغني عن الطبيب المختص.',
+    readDocument: 'اقرأ السياسة',
+    backToHome: 'العودة للرئيسية',
+    legalCenterNav: 'المركز القانوني',
+    allPolicies: 'جميع السياسات',
+    onThisPage: 'في هذه الصفحة',
+    lastUpdatedLabel: 'ساري منذ',
+    previousPolicy: 'السابق',
+    nextPolicy: 'التالي',
+    questionsTitle: 'هل لديك أسئلة حول سياساتنا القانونية أو بياناتك؟',
+    questionsBody:
+      'تواصل مع فريقنا لاستفسارات الخصوصية أو طلبات تصدير البيانات أو حذفها أو أي استفسار قانوني.',
+    contactLegalCta: 'راسل legal@trialn1.app',
+    contactPrivacyCta: 'راسل privacy@trialn1.app'
+  },
+  admin: {
+    eyebrow: 'الحوكمة السريرية',
+    title: 'لوحة تحكم المسؤول',
+    subtitle:
+      'إدارة ضوابط السلامة السريرية وقائمة حظر البوابة العلمية وموافقات عناصر القياس وصحة النظام.',
+    refreshButton: 'تحديث البيانات',
+    firestoreLive: 'Cloud Firestore متصل',
+    memoryLedger: 'سجل الذاكرة المحلي',
+    firestoreError: 'الوضع الاحتياطي نشط',
+    restrictedBadge: 'يتطلب صلاحية مسؤول',
+    restrictedTitle: 'مخصص للمسؤولين السريريين فقط',
+    restrictedBody:
+      'تتحكم هذه اللوحة في حدود السلامة السريرية وقواعد البوابة العلمية وموافقات عناصر القياس.',
+    restrictedSignInCta: 'تسجيل الدخول بحساب مسؤول',
+    restrictedBackCta: 'العودة إلى الخطة',
+    restrictedDemoCta: 'الدخول كمسؤول تجريبي للمسابقة',
+    restrictedDemoNote: 'وضع تقييم المسابقة: يفتح اللوحة محلياً لأغراض التحكيم والاختبار.',
+    tabs: {
+      guardrails: 'الضوابط والبوابة العلمية',
+      widgets: 'موافقات العناصر',
+      system: 'النظام والسياسات'
+    }
+  },
+  about: {
+    badge: 'عن TrialN1',
+    heroTitle: 'تحويل الأبحاث البشرية المحكّمة إلى روتين يومي واضح — دون تخمين.',
+    heroSubtitle:
+      'أُنشئت TrialN1 لسد فجوة بسيطة ومستمرة: التدخلات السريرية القيمة حبيسة ملفات PDF الأكاديمية المعقدة، بينما يعتمد الناس يومياً على نصائح غير موثّقة. بنينا منصة ذكاء اصطناعي موثّقة بالمصادر لتحويل التجارب البشرية الحقيقية إلى عادات يومية آمنة ومهيكلة.',
+    storyEyebrow: 'كيف بدأت TrialN1',
+    storyTitle: 'من ملفات PDF السريرية المعقدة إلى رفيق يومي للتجربة الفردية (N-of-1)',
+    teamEyebrow: 'المؤسسون',
+    teamTitle: 'تعرّف على فزارث فضل وتوشي',
+    principlesEyebrow: 'مبادئنا',
+    principlesTitle: 'المبادئ التي لا نساوم عليها',
+    ctaTitle: 'هل أنت مستعد لتجربة روتين يومي مبني على العلم؟',
+    ctaPrimary: 'ابدأ TrialN1',
+    ctaSecondary: 'زيارة المركز القانوني'
   }
 };
