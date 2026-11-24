@@ -31,6 +31,7 @@ import { Avatar } from '../components/ui/Avatar';
 import { Icon } from '../components/ui/Icon';
 import { IconTile } from '../components/ui/IconTile';
 import { PillButton, pillClassName } from '../components/ui/PillButton';
+import { SiteFooter } from '../components/layout/SiteFooter';
 import type { Tone } from '../types/routine';
 import { toneStyles } from '../utils/tones';
 import { cn } from '../utils/cn';
@@ -107,6 +108,7 @@ export interface LandingShowcaseContent {
     howItWorks: string;
     gatekeeper: string;
     features: string;
+    about?: string;
   };
   interactivePreview: LandingPreviewConfig;
   domainsTitle: string;
@@ -308,6 +310,9 @@ export function LandingShowcase({
               <a href="#features" className="rounded-full px-3 py-2.5 transition-colors hover:bg-ink/5 hover:text-ink">
                 {content.nav.features}
               </a>
+              <Link href={ROUTES.about} className="rounded-full px-3 py-2.5 transition-colors hover:bg-ink/5 hover:text-ink">
+                {content.nav.about || copy.footer.links.about}
+              </Link>
               {navExtra}
             </nav>
           </div>
@@ -611,55 +616,17 @@ export function LandingShowcase({
       </section>
 
       {/* Footer */}
-      <footer className="bg-canvas py-10 text-center text-sm text-ink/75">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 sm:flex-row lg:px-8">
-          <div className="flex items-center gap-2">
-            <Image
-              src={copy.brand.iconUrl}
-              alt=""
-              width={20}
-              height={20}
-              unoptimized
-              className="h-5 w-5 object-contain"
-            />
-            <p>{content.footerTagline}</p>
-          </div>
-          <div className="flex items-center gap-5">
-            {user ? (
-              <>
-                <Link href={ROUTES.routine} className="inline-flex min-h-11 items-center transition-colors hover:text-ink">
-                  {content.ctaGoToApp}
-                </Link>
-                <button
-                  type="button"
-                  onClick={logout}
-                  className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 transition-colors hover:text-ink"
-                >
-                  {content.ctaSignOut}
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href={ROUTES.login} className="inline-flex min-h-11 items-center transition-colors hover:text-ink">
-                  {content.footerSignIn}
-                </Link>
-                <Link href={ROUTES.signup} className="inline-flex min-h-11 items-center transition-colors hover:text-ink">
-                  {content.footerCreateAccount}
-                </Link>
-              </>
-            )}
-            {footerExtraLink}
-            <a
-              href="https://github.com/bayu1711/viskotun1-mono"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-11 items-center underline underline-offset-2 transition-colors hover:text-ink"
-            >
-              {content.footerGithub}
-            </a>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter
+        tagline={content.footerTagline}
+        extraProductLink={footerExtraLink}
+        anchorPrefix=""
+        onLaunch={handleLaunch}
+        navLabels={content.nav}
+        signInLabel={content.footerSignIn}
+        createAccountLabel={content.footerCreateAccount}
+        goToAppLabel={content.ctaGoToApp}
+        signOutLabel={content.ctaSignOut}
+      />
     </div>
   );
 }
@@ -738,7 +705,7 @@ export function LandingPage() {
         </div>
       }
       footerExtraLink={
-        <Link href={ROUTES.uae} className="inline-flex min-h-11 items-center font-medium text-ink transition-colors hover:underline">
+        <Link href={ROUTES.uae} className="inline-flex items-center py-1 text-sm font-semibold text-ink transition-colors hover:underline">
           {copy.landing.uaeEditionLink}
         </Link>
       }

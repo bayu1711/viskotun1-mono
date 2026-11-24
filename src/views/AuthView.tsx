@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useId, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -44,7 +44,15 @@ export function AuthView({ mode }: AuthViewProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [termsError, setTermsError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const termsCheckboxRef = useRef<HTMLInputElement>(null);
+
+  const handleModeChange = (nextMode: 'login' | 'signup') => {
+    setActiveMode(nextMode);
+    setTermsError(false);
+  };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +64,13 @@ export function AuthView({ mode }: AuthViewProps) {
       toast.error(copy.auth.toastPasswordRequired);
       return;
     }
+    if (!isLogin && !acceptedTerms) {
+      setTermsError(true);
+      toast.error(copy.auth.toastAcceptTerms);
+      termsCheckboxRef.current?.focus();
+      return;
+    }
+    setTermsError(false);
     setIsSubmitting(true);
     try {
       if (isLogin) {
@@ -119,7 +134,7 @@ export function AuthView({ mode }: AuthViewProps) {
         <div className="mb-6 flex rounded-full bg-ink/5 p-1">
           <button
             type="button"
-            onClick={() => setActiveMode('login')}
+            onClick={() => handleModeChange('login')}
             className={clsx(
               'min-h-11 flex-1 rounded-full text-sm font-semibold transition-colors',
               isLogin ? 'bg-white text-ink' : 'text-ink/70 hover:text-ink'
@@ -129,7 +144,7 @@ export function AuthView({ mode }: AuthViewProps) {
           </button>
           <button
             type="button"
-            onClick={() => setActiveMode('signup')}
+            onClick={() => handleModeChange('signup')}
             className={clsx(
               'min-h-11 flex-1 rounded-full text-sm font-semibold transition-colors',
               !isLogin ? 'bg-white text-ink' : 'text-ink/70 hover:text-ink'
@@ -158,6 +173,39 @@ export function AuthView({ mode }: AuthViewProps) {
           <Icon icon={GoogleIcon} size="sm" />
           <span>{copy.auth.googleButton}</span>
         </button>
+
+        {!isLogin && (
+          <p className="mt-2.5 text-center text-xs leading-relaxed text-ink/65">
+            {copy.auth.legalOAuthNoticePrefix}{' '}
+            <Link
+              href={ROUTES.terms}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-ink underline underline-offset-2 hover:text-ink/80"
+            >
+              {copy.auth.legalTermsLink}
+            </Link>
+            ,{' '}
+            <Link
+              href={ROUTES.termsOfUse}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-ink underline underline-offset-2 hover:text-ink/80"
+            >
+              {copy.auth.legalTermsOfUseLink}
+            </Link>
+            , {copy.auth.legalConsentConjunction}{' '}
+            <Link
+              href={ROUTES.privacy}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-ink underline underline-offset-2 hover:text-ink/80"
+            >
+              {copy.auth.legalPrivacyLink}
+            </Link>
+            .
+          </p>
+        )}
 
         <div className="relative my-6 text-center">
           <div className="absolute inset-0 flex items-center">
@@ -219,6 +267,77 @@ export function AuthView({ mode }: AuthViewProps) {
           </div>
 
 
+          {!isLogin && (
+            <div
+              className={clsx(
+                'rounded-xl border p-3.5 transition-colors',
+                termsError ? 'border-danger bg-blush/50' : 'border-ink/15 bg-white'
+              )}
+            >
+              <label
+                htmlFor={`${fieldId}-terms`}
+                className="flex cursor-pointer items-start gap-3 text-xs leading-relaxed text-ink/80"
+              >
+                <input
+                  ref={termsCheckboxRef}
+                  id={`${fieldId}-terms`}
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => {
+                    setAcceptedTerms(e.target.checked);
+                    if (e.target.checked) setTermsError(false);
+                  }}
+                  aria-invalid={termsError}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-ink/40 accent-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+                />
+                <span>
+                  {copy.auth.legalConsentPrefix}{' '}
+                  <Link
+                    href={ROUTES.terms}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-ink underline underline-offset-2 hover:text-ink/80"
+                  >
+                    {copy.auth.legalTermsLink}
+                  </Link>
+                  ,{' '}
+                  <Link
+                    href={ROUTES.termsOfUse}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-ink underline underline-offset-2 hover:text-ink/80"
+                  >
+                    {copy.auth.legalTermsOfUseLink}
+                  </Link>
+                  , {copy.auth.legalConsentConjunction}{' '}
+                  <Link
+                    href={ROUTES.privacy}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-ink underline underline-offset-2 hover:text-ink/80"
+                  >
+                    {copy.auth.legalPrivacyLink}
+                  </Link>
+                  {copy.auth.legalConsentDisclaimerJoin}{' '}
+                  <Link
+                    href={ROUTES.disclaimer}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-ink underline underline-offset-2 hover:text-ink/80"
+                  >
+                    {copy.auth.legalDisclaimerLink}
+                  </Link>
+                  .
+                </span>
+              </label>
+              {termsError && (
+                <p role="alert" className="mt-2 text-xs font-medium text-danger">
+                  {copy.auth.toastAcceptTerms}
+                </p>
+              )}
+            </div>
+          )}
+
           <PillButton type="submit" size="md" fullWidth loading={isSubmitting} className="mt-2 min-h-12 text-base font-semibold">
             {isLogin ? copy.auth.loginButton : copy.auth.signupButton}
           </PillButton>
@@ -261,7 +380,7 @@ export function AuthView({ mode }: AuthViewProps) {
         {isLogin ? (
           <button
             type="button"
-            onClick={() => setActiveMode('signup')}
+            onClick={() => handleModeChange('signup')}
             className="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-ink"
           >
             {copy.auth.needAccount}
@@ -269,13 +388,35 @@ export function AuthView({ mode }: AuthViewProps) {
         ) : (
           <button
             type="button"
-            onClick={() => setActiveMode('login')}
+            onClick={() => handleModeChange('login')}
             className="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-ink"
           >
             {copy.auth.haveAccount}
           </button>
         )}
       </p>
+
+      {/* Legal Footer Links */}
+      <nav
+        aria-label={copy.footer.columns.legal}
+        className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-ink/60"
+      >
+        <Link href={ROUTES.privacy} className="transition-colors hover:text-ink hover:underline">
+          {copy.footer.links.privacy}
+        </Link>
+        <span aria-hidden="true">·</span>
+        <Link href={ROUTES.terms} className="transition-colors hover:text-ink hover:underline">
+          {copy.footer.links.terms}
+        </Link>
+        <span aria-hidden="true">·</span>
+        <Link href={ROUTES.termsOfUse} className="transition-colors hover:text-ink hover:underline">
+          {copy.footer.links.termsOfUse}
+        </Link>
+        <span aria-hidden="true">·</span>
+        <Link href={ROUTES.disclaimer} className="transition-colors hover:text-ink hover:underline">
+          {copy.footer.links.disclaimer}
+        </Link>
+      </nav>
     </div>
   );
 }

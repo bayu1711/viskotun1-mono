@@ -96,7 +96,7 @@ export function UaeLandingView() {
       footerExtraLink={
         <Link
           href={ROUTES.landing}
-          className="inline-flex min-h-11 items-center font-medium text-ink transition-colors hover:underline"
+          className="inline-flex items-center py-1 text-sm font-semibold text-ink transition-colors hover:underline"
         >
           {t.backToGlobal}
         </Link>
