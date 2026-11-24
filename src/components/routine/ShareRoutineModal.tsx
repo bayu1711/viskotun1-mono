@@ -13,7 +13,9 @@ import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import XIcon from '@mui/icons-material/X';
 import { toast } from 'sonner';
+import { useAuth } from '../../contexts/AuthContext';
 import { useRoutine } from '../../contexts/RoutineContext';
+import { apiFetch } from '../../lib/apiClient';
 import { downloadIcsFile, getGoogleCalendarUrl } from '../../utils/calendar';
 import { buildCalendarBlocksForRoutine } from '../../utils/schedule';
 import {
@@ -29,6 +31,7 @@ import { Icon } from '../ui/Icon';
 import { useLocale } from '../../contexts/LocaleContext';
 export function ShareRoutineModal() {
   const { copy } = useLocale();
+  const { user } = useAuth();
   const { routine, routineSchedule, userProfile, isShareModalOpen, closeShareModal } = useRoutine();
   const titleId = useId();
   const descId = useId();
@@ -36,6 +39,7 @@ export function ShareRoutineModal() {
   const [copied, setCopied] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [isGeneratingQr, setIsGeneratingQr] = useState(false);
+  const [liveFeedWebcalUrl, setLiveFeedWebcalUrl] = useState<string | null>(null);
 
   const displayTitle = formatRoutineTitle(routine?.shortTitle) || routine?.title || 'Clinical Routine';
   const shareUrl = useMemo(
@@ -83,6 +87,25 @@ export function ShareRoutineModal() {
       isMounted = false;
     };
   }, [isShareModalOpen, shareUrl]);
+
+  // Fetch user's live webcal:// calendar feed URL when modal opens
+  useEffect(() => {
+    if (!isShareModalOpen || !user?.id) return;
+    let active = true;
+    apiFetch(`/api/notifications/preferences?userId=${encodeURIComponent(user.id)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && data?.calendarFeedWebcalUrl) {
+          setLiveFeedWebcalUrl(data.calendarFeedWebcalUrl);
+        }
+      })
+      .catch(() => {
+        // Non-fatal
+      });
+    return () => {
+      active = false;
+    };
+  }, [isShareModalOpen, user?.id]);
 
   // Keyboard escape listener
   useEffect(() => {
@@ -305,6 +328,16 @@ export function ShareRoutineModal() {
               <Icon icon={DownloadOutlinedIcon} size="xs" />
               <span>{copy.shareModal.downloadIcs}</span>
             </button>
+
+            {liveFeedWebcalUrl && (
+              <a
+                href={liveFeedWebcalUrl}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-ink/20 bg-mint/40 hover:bg-mint/70 px-3 py-2 text-xs font-semibold text-ink transition-colors cursor-pointer"
+              >
+                <Icon icon={OpenInNewOutlinedIcon} size="xs" />
+                <span>{copy.touchpoints.subscribeWebcalBtn}</span>
+              </a>
+            )}
           </div>
         </div>
       </div>

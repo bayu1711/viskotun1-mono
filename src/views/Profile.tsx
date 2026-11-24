@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { PageContainer } from '../components/layout/PageContainer';
 import { PageHeader } from '../components/layout/PageHeader';
 import { AccountControlsPanel } from '../components/profile/AccountControlsPanel';
+import { TouchpointChannelsPanel } from '../components/profile/TouchpointChannelsPanel';
 import { AIIcon } from '../components/ui/AIIcon';
 import { Avatar } from '../components/ui/Avatar';
 import { AvailableWindowsEditor } from '../components/ui/AvailableWindowsEditor';
@@ -815,6 +816,8 @@ export function ProfilePage() {
                   </div>
                 </div>
               </div>
+
+              <TouchpointChannelsPanel />
             </Panel>
             )}
 
