@@ -28,11 +28,11 @@ export const metadata: Metadata = {
   keywords: [...COPY.metadata.keywords],
   icons: {
     icon: [
-      { url: '/icon.png?v=trialn1-2', type: 'image/png', sizes: '512x512' },
-      { url: '/favicon.ico?v=trialn1-2', sizes: 'any' },
+      { url: '/icon.png?v=trialn1-3', type: 'image/png', sizes: '512x512' },
+      { url: '/favicon.ico?v=trialn1-3', sizes: 'any' },
     ],
-    shortcut: '/icon.png?v=trialn1-2',
-    apple: '/apple-icon.png?v=trialn1-2',
+    shortcut: '/icon.png?v=trialn1-3',
+    apple: '/apple-icon.png?v=trialn1-3',
   },
   openGraph: {
     title: COPY.metadata.openGraphTitle,
@@ -41,8 +41,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: COPY.brand.logoUrl,
-        width: 1153,
-        height: 302,
+        width: 2064,
+        height: 512,
         alt: COPY.brand.name,
       },
     ],

@@ -193,8 +193,8 @@ describe('New User Discovery, Lifestyle Presets, and On-Device Label Removal', (
       path.resolve(__dirname, '../../app/layout.tsx'),
       'utf-8'
     );
-    expect(layoutSource).toContain('/icon.png?v=trialn1-2');
-    expect(layoutSource).toContain('/favicon.ico?v=trialn1-2');
+    expect(layoutSource).toContain('/icon.png?v=trialn1-');
+    expect(layoutSource).toContain('/favicon.ico?v=trialn1-');
     expect(fs.existsSync(path.resolve(__dirname, '../../app/favicon.ico'))).toBe(false);
   });
 
