@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { achillesRoutine } from '../../data/routines/achilles';
 import {
+  buildCalendarFeedUrls,
   buildCalendarWindow,
   buildRoutineCalendarDescription,
   escapeIcsText,
@@ -78,5 +79,11 @@ describe('calendar utility', () => {
     expect(window.days[0].status).toBe('complete');
     expect(window.days[1].status).toBe('today');
     expect(window.days[2].status).toBe('upcoming');
+  });
+
+  it('builds live subscribable HTTPS and webcal:// calendar feed URLs', () => {
+    const urls = buildCalendarFeedUrls('https://trialn1.app/', 'feed_token_123');
+    expect(urls.httpsUrl).toBe('https://trialn1.app/api/calendar/feed_token_123');
+    expect(urls.webcalUrl).toBe('webcal://trialn1.app/api/calendar/feed_token_123');
   });
 });
