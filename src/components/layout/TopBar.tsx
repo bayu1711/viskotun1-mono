@@ -78,10 +78,13 @@ export function TopBar() {
               {copy.auth.signInToSyncBadge}
             </Link>
           ) : isAdmin ? (
-            <span className="flex items-center gap-1 rounded-full border border-ink/20 bg-cream px-2 py-0.5 text-2xs font-semibold lowercase text-ink">
+            <Link
+              href={ROUTES.admin}
+              className="flex items-center gap-1 rounded-full border border-ink/20 bg-cream px-2 py-0.5 text-2xs font-semibold lowercase text-ink transition-colors hover:border-ink/40 hover:bg-cream/80"
+            >
               <span className="h-1.5 w-1.5 rounded-full bg-ink" />
               {copy.auth.adminBadge}
-            </span>
+            </Link>
           ) : null}
         </div>
 

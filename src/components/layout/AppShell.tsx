@@ -51,9 +51,11 @@ export function AppShell({ children }: AppShellProps) {
 
   const isPublicPage =
     pathname === '/' ||
+    pathname === '/about' ||
     pathname === '/uae' ||
     pathname === '/login' ||
-    pathname === '/signup';
+    pathname === '/signup' ||
+    Boolean(pathname?.startsWith('/legal'));
 
   useEffect(() => {
     if (!user) {
@@ -63,7 +65,7 @@ export function AppShell({ children }: AppShellProps) {
 
   // Automatically popup the guided Adaptive Lifestyle interview once for newly registered / un-onboarded workspace users
   useEffect(() => {
-    if (isPublicPage || pathname === ROUTES.profile) return;
+    if (isPublicPage || pathname === ROUTES.profile || pathname === ROUTES.admin) return;
     if (isAuthLoading || !hasHydrated || isAssistantOpen) return;
     if (!isAuthenticated && !isGuest) return;
     if (lifestyleProfile.intakeCompleted || hasPromptedOnboardingRef.current) return;
