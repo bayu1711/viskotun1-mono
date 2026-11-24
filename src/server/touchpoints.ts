@@ -1,5 +1,5 @@
 import { GoogleAuth } from 'google-auth-library';
-import { getCalibratedDefaultRoutine } from '../data/routines/calibrated';
+import { achillesRoutine } from '../data/routines/achilles';
 import type { DailyNudgePayload, NudgeAction } from '../types/notifications';
 import type { Routine, RoutineRuntime } from '../types/routine';
 import { buildDailyNudgePayload } from '../utils/notifications';
@@ -43,7 +43,7 @@ export function resolveActiveRoutineForRecord(record: UserRecord): Routine {
     const match = routines.find((r) => r.id === record.activeRoutineId);
     if (match) return match;
   }
-  return routines[0] ?? getCalibratedDefaultRoutine('achilles');
+  return routines[0] ?? achillesRoutine;
 }
 
 function formatDayKey(date: Date): string {
@@ -247,14 +247,14 @@ export async function applyNudgeActionToUserRecord(
   const routine = resolveActiveRoutineForRecord(record);
   const title = routine.shortTitle || routine.title;
   const runtimeMap: Record<string, RoutineRuntime> = { ...(record.runtime || {}) };
+  const existingRuntime = runtimeMap[routine.id];
   const currentEntry: RoutineRuntime = {
-    completed: 0,
-    setsDone: {},
-    feedbackLogs: [],
-    dayHistory: [],
-    currentDay: 1,
-    doseMode: 'standard',
-    ...runtimeMap[routine.id]
+    ...(existingRuntime ?? {}),
+    setsDone: existingRuntime?.setsDone ?? {},
+    feedbackLogs: existingRuntime?.feedbackLogs ?? [],
+    messages: existingRuntime?.messages ?? routine.initialMessages ?? [],
+    escalationPaused: existingRuntime?.escalationPaused ?? false,
+    doseMode: existingRuntime?.doseMode ?? 'standard'
   };
 
   let confirmation = `Opened ${title}.`;
@@ -264,8 +264,8 @@ export async function applyNudgeActionToUserRecord(
       nextSetsDone[step.id] = Math.max(nextSetsDone[step.id] ?? 0, step.sets ?? 1);
     }
     currentEntry.setsDone = nextSetsDone;
-    currentEntry.completed = Math.max(currentEntry.completed, currentEntry.currentDay);
-    confirmation = `Logged Day ${currentEntry.currentDay} full set for ${title}.`;
+    currentEntry.lastActiveDate = formatDayKey(new Date());
+    confirmation = `Logged Day ${routine.currentDay} full set for ${title}.`;
   } else if (action === 'switch_micro') {
     currentEntry.doseMode = 'micro';
     confirmation = `Switched ${title} to low-friction Micro mode (1 set preserves your momentum).`;
@@ -341,12 +341,11 @@ export async function dispatchDueTouchpoints(options: {
     }
 
     const routine = resolveActiveRoutineForRecord(record);
-    const runtime = record.runtime?.[routine.id];
     const payload = buildDailyNudgePayload({
       routine,
       userProfile: record.profile,
       lifestyleProfile: record.lifestyleProfile,
-      day: runtime?.currentDay ?? 1,
+      day: routine.currentDay ?? 1,
       windowLabel
     });
     if (!previewPayload) previewPayload = payload;
