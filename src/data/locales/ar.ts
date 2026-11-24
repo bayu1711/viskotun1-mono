@@ -1141,5 +1141,47 @@ export const COPY_AR_OVERRIDE: DeepPartial<LocaleCopy> = {
     addToCalendarButton: 'التقويم',
     scanQrLabel: 'امسح بكاميرا الهاتف لتحميل الخطة',
     closeButton: 'إغلاق'
+  },
+  touchpoints: {
+    eyebrow: 'التنبيهات التلقائية الذكية',
+    title: 'قنوات متابعة يومية مجانية بالكامل',
+    subtitle: 'استلم تذكيرات ذكية في أوقات فراغك المختارة دون أي تكلفة رسائل — اشترك في رابط التقويم الحي، أو فعّل إشعارات المتصفح، أو اربط بوت تيليجرام.',
+    freeBadge: 'مجاناً 0$',
+    calendarTitle: 'بث التقويم الحي (webcal://)',
+    calendarDesc: 'اشترك مرة واحدة في تقويم Apple أو Google أو Outlook، ويتحدث جدولك تلقائياً عند تغيير الخطة أو تفعيل ساعات الصيام أو تعديل أوقاتك.',
+    subscribeWebcalBtn: 'اشتراك مباشر (webcal://)',
+    copyFeedUrlBtn: 'نسخ رابط البث',
+    feedUrlCopiedToast: 'تم نسخ رابط بث التقويم الحي!',
+    rotateFeedTokenBtn: 'تحديث الرابط',
+    feedTokenRotatedToast: 'تم تجديد رابط التقويم بنجاح.',
+    webPushTitle: 'إشعارات المتصفح الفورية (FCM)',
+    webPushDesc: 'تنبيهات مجانية مباشرة على المتصفح أو تطبيق الويب في بداية نافذة وقتك المحددة.',
+    enableWebPushBtn: 'تفعيل إشعارات المتصفح',
+    webPushEnabledBadge: (count: number) => `مفعّل (${count} جهاز)`,
+    webPushMissingVapidNotice: 'أضف NEXT_PUBLIC_FIREBASE_VAPID_KEY لتفعيل إشعارات المتصفح الحية.',
+    webPushDeniedToast: 'تم حظر الإشعارات في المتصفح — يرجى السماح بها من إعدادات الموقع.',
+    webPushUnsupportedToast: 'هذا المتصفح لا يدعم إشعارات الويب الفورية.',
+    webPushEnabledToast: 'تم تفعيل إشعارات المتصفح على هذا الجهاز.',
+    webPushRemoveBtn: 'إيقاف على هذا الجهاز',
+    webPushRemovedToast: 'تمت إزالة رمز الإشعارات لهذا الجهاز.',
+    telegramTitle: 'بوت تيليجرام التفاعلي',
+    telegramDesc: 'تذكيرات يومية ثنائية الاتجاه مع أزرار سريعة (تم الإنجاز، يوم شاق ← خطوة ميسرة، يوم راحة) مجاناً عبر تيليجرام.',
+    connectTelegramBtn: 'ربط بوت تيليجرام',
+    openTelegramDeepLinkBtn: 'افتح تيليجرام لإتمام الربط',
+    telegramBotMissingNotice: 'أضف TELEGRAM_BOT_TOKEN و NEXT_PUBLIC_TELEGRAM_BOT_USERNAME لتفعيل الربط المباشر.',
+    telegramConnectedBadge: (username?: string) => (username ? `متصل (@${username})` : 'متصل'),
+    telegramLinkInstructions: (code: string) =>
+      `اضغط الزر أدناه أو أرسل "/start ${code}" لبوت TrialN1 على تيليجرام لربط حسابك.`,
+    unlinkTelegramBtn: 'إلغاء ربط تيليجرام',
+    telegramUnlinkedToast: 'تم فصل بوت تيليجرام.',
+    sendTestNudgeBtn: 'إرسال تنبيه تجريبي',
+    testNudgeSentToast: 'تم إرسال التنبيه التجريبي!',
+    testNudgeNoTargetToast: 'فعّل إشعارات المتصفح أو اربط تيليجرام أولاً.',
+    telegramActions: {
+      completeDay: 'أتممت الجرعة الكاملة',
+      switchMicro: 'يوم شاق ← خطوة ميسرة',
+      logRest: 'يوم راحة',
+      openRoutine: 'فتح TrialN1'
+    }
   }
 };

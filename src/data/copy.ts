@@ -45,7 +45,8 @@ export const COPY = {
     mobileLabel: 'Primary mobile',
     today: 'Today',
     stats: 'Stats',
-    community: 'Community'
+    community: 'Community',
+    admin: 'Admin'
   },
   shell: {
     dayBadge: (day: number): string => `Day ${day}`,
@@ -1421,7 +1422,8 @@ export const COPY = {
       howItWorks: 'How it works',
       domains: 'Health domains',
       gatekeeper: 'Scientific gatekeeper',
-      features: 'Features'
+      features: 'Features',
+      about: 'About us'
     },
     steps: {
       step1Number: '01',
@@ -1728,7 +1730,17 @@ export const COPY = {
     toastGoogleSuccess: 'Signed in with Google!',
     toastGoogleFailed: 'Google sign-in failed.',
     toastGuestEntered: 'Entered as guest explorer',
-    toastAdminEntered: 'Signed in as Clinical Administrator'
+    toastAdminEntered: 'Signed in as Clinical Administrator',
+    toastAcceptTerms: 'Please agree to the Terms & Conditions and Privacy Policy to create an account.',
+    legalConsentPrefix: 'I agree to the',
+    legalTermsLink: 'Terms & Conditions',
+    legalTermsOfUseLink: 'Terms of Use',
+    legalPrivacyLink: 'Privacy Policy',
+    legalDisclaimerLink: 'Medical & Research Disclaimer',
+    legalConsentConjunction: 'and',
+    legalConsentDisclaimerJoin: ', and acknowledge the',
+    legalOAuthNoticePrefix: 'By continuing with Google or as a guest, you agree to our',
+    legalFooterNotice: 'Review our policies anytime:'
   },
   errors: {
     boundaryTitle: 'Something went wrong',
@@ -2144,5 +2156,271 @@ export const COPY = {
     quickLoadButton: 'Start routine',
     noActiveRoutine: 'No active routine',
     noActiveRoutineDesc: 'Upload a research paper or choose a trending clinical paper to start tracking.'
+  },
+  footer: {
+    brandDescription:
+      'Peer-reviewed human interventional trials translated into structured, citation-grounded daily routines with adaptive voice coaching.',
+    scopePill: 'Strictly interventional human research',
+    medicalNoticePrefix: 'Informational & educational use only — not medical advice.',
+    medicalNoticeLink: 'Read full disclaimer',
+    columns: {
+      product: 'Explore',
+      account: 'Account & Resources',
+      legal: 'Legal & Trust'
+    },
+    links: {
+      about: 'About us',
+      domains: 'Health domains',
+      howItWorks: 'How it works',
+      gatekeeper: 'Scientific gatekeeper',
+      features: 'Features',
+      tryGuest: 'Try as guest',
+      dashboard: 'Progress & stats',
+      community: 'Community',
+      github: 'GitHub repository',
+      contactLegal: 'Legal & privacy contact',
+      legalCenter: 'Legal Center',
+      privacy: 'Privacy Policy',
+      terms: 'Terms & Conditions',
+      termsOfUse: 'Terms of Use',
+      disclaimer: 'Medical Disclaimer',
+      cookies: 'Cookie & Storage Policy',
+      aiTransparency: 'AI & Data Transparency'
+    },
+    copyright: '© 2026 TrialN1. All rights reserved.',
+    builtForScience: 'Built for human interventional science'
+  },
+  legal: {
+    centerBadge: 'Legal & Trust Center',
+    centerTitle: 'Privacy, terms & clinical transparency',
+    centerSubtitle:
+      'Clear, plain-language policies covering how TrialN1 handles your data, governs AI extraction, and defines clinical safety boundaries.',
+    medicalBannerTitle: 'Not medical advice',
+    medicalBannerBody:
+      'TrialN1 is an educational and behavioral-support tool grounded in published human research. It does not diagnose, treat, or replace a licensed physician or clinician.',
+    readDocument: 'Read policy',
+    backToHome: 'Back to home',
+    legalCenterNav: 'Legal Center',
+    allPolicies: 'All policies',
+    onThisPage: 'On this page',
+    lastUpdatedLabel: 'Effective',
+    previousPolicy: 'Previous',
+    nextPolicy: 'Next',
+    questionsTitle: 'Questions about our legal policies or your data?',
+    questionsBody:
+      'Reach out to our team for privacy inquiries, data export or deletion requests, or legal questions.',
+    contactLegalCta: 'Email legal@trialn1.app',
+    contactPrivacyCta: 'Email privacy@trialn1.app'
+  },
+  admin: {
+    eyebrow: 'Clinical Governance',
+    title: 'Admin Console',
+    subtitle:
+      'Manage live clinical guardrails, Scientific Gatekeeper blocklists, AI widget approvals, and platform health.',
+    refreshButton: 'Refresh telemetry',
+    firestoreLive: 'Cloud Firestore Live',
+    memoryLedger: 'Local Memory Ledger',
+    firestoreError: 'Firestore Fallback Active',
+    restrictedBadge: 'Administrator Access Required',
+    restrictedTitle: 'Restricted to Clinical Administrators',
+    restrictedBody:
+      'This console manages live clinical safety thresholds, Scientific Gatekeeper rules, and AI widget approvals. Production access is granted via Firebase admin claims, ADMIN_EMAILS, or ADMIN_UIDS.',
+    restrictedSignInCta: 'Sign in with admin account',
+    restrictedBackCta: 'Return to routine',
+    restrictedDemoCta: 'Enter as Competition Demo Admin',
+    restrictedDemoNote:
+      'Competition evaluation mode: unlocks the console locally for judging and testing.',
+    tabs: {
+      guardrails: 'Guardrails & Gatekeeper',
+      widgets: 'Widget Approvals',
+      system: 'System & Legal'
+    },
+    kpi: {
+      ledgerLabel: 'Policy Ledger',
+      thresholdsLabel: 'Safety Thresholds',
+      widgetsLabel: 'Widget Queue',
+      keywordsLabel: 'Gatekeeper Rules',
+      pendingSuffix: 'pending',
+      approvedSuffix: 'approved',
+      keywordsSuffix: 'blocked terms'
+    },
+    guardrails: {
+      sectionTitle: 'Clinical Safety Thresholds',
+      sectionSubtitle:
+        'Changes propagate dynamically to active routines and AI extraction without redeploying.',
+      painLabel: 'Pain escalation threshold (VAS 1–10)',
+      painHint: 'Biofeedback logs at or above this score trigger load-reduction alerts.',
+      loadReductionLabel: 'Automatic load reduction (%)',
+      loadReductionHint: 'Recommended set/rep or intensity reduction when escalation triggers.',
+      progressionWindowLabel: 'Progression window (logs)',
+      progressionMaxPainLabel: 'Max pain for progression (0–10)',
+      escalationMessageLabel: 'Escalation alert banner copy',
+      clinicalDisclaimerLabel: 'Global clinical disclaimer',
+      keywordsTitle: 'Scientific Gatekeeper Blocklist',
+      keywordsSubtitle:
+        'Papers matching these non-human, observational, or non-health terms are automatically declined.',
+      keywordPlaceholder: 'Add keyword (e.g. zebrafish, astrophysics)',
+      addKeywordButton: 'Add term',
+      saveButton: 'Save guardrail policy',
+      resetButton: 'Reset to baseline',
+      unsavedChanges: 'You have unsaved guardrail changes.'
+    },
+    widgets: {
+      sectionTitle: 'AI-Proposed Clinical Endpoint Widgets',
+      sectionSubtitle:
+        'Review custom measurement widgets proposed during PDF extraction before injecting them into canonical routines.',
+      filterAll: 'All',
+      filterPending: 'Pending review',
+      filterApproved: 'Approved',
+      emptyTitle: 'No widget proposals in this view',
+      emptyBody:
+        'When Gemini proposes a non-standard clinical measurement widget from an uploaded paper, it appears here for review.',
+      approveButton: 'Approve & inject',
+      approvingButton: 'Approving…',
+      approvedBadge: 'Approved',
+      pendingBadge: 'Pending review',
+      requestedTypeLabel: 'Requested type',
+      fieldIdLabel: 'Field ID',
+      paperLabel: 'Source paper'
+    },
+    system: {
+      infraTitle: 'Infrastructure & Runtime Telemetry',
+      firestoreLabel: 'Cloud Firestore Ledger',
+      projectLabel: 'Firebase Project ID',
+      aiProviderLabel: 'Gemini / Vertex AI Runtime',
+      policySourceLabel: 'Active Policy Source',
+      lastSyncedLabel: 'Last Synced',
+      curatedPapersLabel: 'Curated Sample Papers',
+      configured: 'Configured',
+      notConfigured: 'Fallback / Unconfigured',
+      legalTitle: 'Legal & Compliance Registry',
+      legalSubtitle: 'Published legal policies linked across the landing footer and sign-up flow.',
+      openPolicy: 'Open',
+      demoToolsTitle: 'Workspace & Evaluation Controls',
+      demoToolsSubtitle:
+        'Quick actions for resetting local demo state or opening the compact Policy Ledger drawer.',
+      resetWorkspaceButton: 'Reset demo workspace',
+      openQuickDrawerButton: 'Open compact policy drawer',
+      signOutAdminButton: 'Sign out of admin session'
+    }
+  },
+  about: {
+    badge: 'About TrialN1',
+    heroTitle: 'Turning peer-reviewed human science into daily life—without the guesswork.',
+    heroSubtitle:
+      'TrialN1 was created to bridge a simple but stubborn divide: life-changing clinical interventions live inside dense academic PDFs, while everyday people are left navigating health habits through hearsay. We built an AI-grounded platform that translates real human trials into safe, structured, adaptive daily routines.',
+    storyEyebrow: 'How TrialN1 came to be',
+    storyTitle: 'From dense clinical PDFs to an N-of-1 daily companion',
+    storyIntro:
+      'Every year, clinicians and researchers publish thousands of human interventional trials on tendon rehabilitation, sleep hygiene, autonomic breathwork, cognitive performance, and nutrition. Yet turning a 14-page paper into a Tuesday morning routine is surprisingly hard—especially when studies omit hold durations, progression criteria, or what to do when pain flares up.',
+    milestones: [
+      {
+        number: '01',
+        title: 'The Friction',
+        body: 'Trying to follow real clinical protocols ourselves exposed a recurring gap: even gold-standard papers rarely spell out every day-to-day execution parameter, forcing patients and athletes to guess or give up.'
+      },
+      {
+        number: '02',
+        title: 'Why the name "TrialN1"',
+        body: 'In clinical medicine, an N-of-1 trial is a structured single-person study designed to see what truly works for one individual. TrialN1 brings that scientific rigor to personal health—turning population evidence into measurable daily experiments.'
+      },
+      {
+        number: '03',
+        title: 'Engineering Clinical Rigor',
+        body: 'Rather than building another generic wellness chatbot, we engineered a Scientific Gatekeeper that declines animal models and pure theory, Missing Parameter Auditing that flags omitted trial details with conservative defaults, and a Schema-Driven Morphing UI where each paper builds its own measurement widgets.'
+      },
+      {
+        number: '04',
+        title: 'Built for Real-World Lives',
+        body: 'Rigid habit apps fail the moment life gets busy. We anchored TrialN1 in accredited Behavior Change Techniques (BCT v1)—non-punitive re-entry, 2-minute micro-doses, bilingual English & RTL Arabic support, and adaptive lifestyle tuning for climate and cultural rhythms—showcased for the Google AI Builder Cup and Future Health Challenge · Abu Dhabi 2026.'
+      }
+    ],
+    teamEyebrow: 'The builders',
+    teamTitle: 'Meet Fazarath Fazal & Thoshi',
+    teamSubtitle:
+      'TrialN1 is built by two collaborators who share a conviction that evidence-based health science should be approachable, honest about its limits, and usable every single day.',
+    founders: [
+      {
+        initials: 'FF',
+        name: 'Fazarath Fazal',
+        role: 'Co-Founder · Product Architecture & AI Systems',
+        tone: 'mint' as const,
+        bio: 'Fazarath architected TrialN1’s end-to-end platform—from multimodal PDF ingestion on Gemini and Vertex AI to the Scientific Gatekeeper, Firestore Guardrail Policy Ledger, Canonical Paper Registry, and Schema-Driven Morphing UI. Driven by the idea that scientific literacy shouldn’t require a PhD to practice safely.'
+      },
+      {
+        initials: 'TH',
+        name: 'Thoshi',
+        role: 'Co-Founder · Experience, Clinical Research & Behavioral Design',
+        tone: 'cream' as const,
+        bio: 'Thoshi shaped TrialN1’s human-centered experience and behavioral science foundation—focusing on how real participants sustain clinical protocols without burnout. Guided the integration of BCT v1 habit science, micro-dose fallbacks, calm visual clarity, and practical usability across everyday routines.'
+      }
+    ],
+    principlesEyebrow: 'What guides us',
+    principlesTitle: 'Our non-negotiable principles',
+    principles: [
+      {
+        title: 'Strictly Interventional Human Research',
+        body: 'We only build routines from human interventional trials—filtering out preclinical animal studies, in-vitro assays, and pure theory.'
+      },
+      {
+        title: 'Honesty About Missing Data',
+        body: 'When a paper leaves out a tempo, dosage, or rest interval, TrialN1 flags the omission explicitly and labels conservative defaults rather than inventing fake precision.'
+      },
+      {
+        title: 'Humane Habit Science (BCT v1)',
+        body: 'Zero streak guilt. Two-minute micro-doses, climate-aware substitutions, and gentle re-entry keep long-term health behaviors alive.'
+      },
+      {
+        title: 'Privacy & Safety Boundaries First',
+        body: 'Instant browser-local Guest Mode, zero ad tracking, transparent AI governance, and clear medical disclaimers at every step.'
+      }
+    ],
+    ctaTitle: 'Ready to experience science-backed daily routines?',
+    ctaSubtitle:
+      'Explore curated human clinical trials in seconds or drop your own peer-reviewed PDF to see TrialN1 in action.',
+    ctaPrimary: 'Launch TrialN1',
+    ctaSecondary: 'Visit Legal & Trust Center'
+  },
+  touchpoints: {
+    eyebrow: 'Automated Touchpoints',
+    title: 'Zero-Cost Daily Adherence Channels',
+    subtitle: 'Receive nudges at your chosen availability windows without paying per message—subscribe once to your live calendar feed, enable browser push, or link Telegram.',
+    freeBadge: '$0 / message',
+    calendarTitle: 'Live Calendar Feed (webcal://)',
+    calendarDesc: 'Subscribe once in Apple, Google, or Outlook Calendar. Automatically shifts whenever you switch routines, enable fasting hours, or change availability.',
+    subscribeWebcalBtn: 'Subscribe (webcal://)',
+    copyFeedUrlBtn: 'Copy feed URL',
+    feedUrlCopiedToast: 'Live calendar feed URL copied!',
+    rotateFeedTokenBtn: 'Reset feed link',
+    feedTokenRotatedToast: 'Calendar feed URL refreshed.',
+    webPushTitle: 'Web Push (FCM)',
+    webPushDesc: 'Browser & home-screen PWA push alerts sent directly at your available window with zero message fees.',
+    enableWebPushBtn: 'Enable Web Push',
+    webPushEnabledBadge: (count: number) => `Enabled (${count} device${count === 1 ? '' : 's'})`,
+    webPushMissingVapidNotice: 'Add NEXT_PUBLIC_FIREBASE_VAPID_KEY to enable live browser push tokens.',
+    webPushDeniedToast: 'Browser notifications are blocked—allow notifications in site settings.',
+    webPushUnsupportedToast: 'This browser does not support Web Push notifications.',
+    webPushEnabledToast: 'Web Push notifications enabled on this device.',
+    webPushRemoveBtn: 'Disable on device',
+    webPushRemovedToast: 'Browser push token removed.',
+    telegramTitle: 'Telegram Bot',
+    telegramDesc: 'Two-way daily reminders with interactive Done, Tough Day (Micro), and Rest buttons directly inside Telegram ($0/msg).',
+    connectTelegramBtn: 'Link Telegram Bot',
+    openTelegramDeepLinkBtn: 'Open Telegram to finish linking',
+    telegramBotMissingNotice: 'Configure TELEGRAM_BOT_TOKEN and NEXT_PUBLIC_TELEGRAM_BOT_USERNAME to enable live bot linking.',
+    telegramConnectedBadge: (username?: string) => (username ? `Connected (@${username})` : 'Connected'),
+    telegramLinkInstructions: (code: string) =>
+      `Tap the button below or send "/start ${code}" to the TrialN1 Telegram bot to connect your account.`,
+    unlinkTelegramBtn: 'Unlink Telegram',
+    telegramUnlinkedToast: 'Telegram bot disconnected.',
+    sendTestNudgeBtn: 'Send test nudge',
+    testNudgeSentToast: 'Test nudge dispatched!',
+    testNudgeNoTargetToast: 'Link Telegram or enable Web Push first, or inspect the generated payload below.',
+    telegramActions: {
+      completeDay: 'Done Full Set',
+      switchMicro: 'Tough Day -> Micro',
+      logRest: 'Rest Day',
+      openRoutine: 'Open TrialN1'
+    }
   }
 } as const;
