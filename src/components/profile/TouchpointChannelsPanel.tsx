@@ -188,6 +188,9 @@ export function TouchpointChannelsPanel() {
 
   if (!userId) return null;
 
+  const isWebPushReady = Boolean(status?.config.webPushVapidConfigured);
+  const isTelegramReady = Boolean(status?.config.telegramBotConfigured);
+
   return (
     <div className="border-t border-ink/10 pt-5 space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -200,15 +203,17 @@ export function TouchpointChannelsPanel() {
           </div>
           <p className="mt-0.5 text-2xs leading-relaxed text-ink/65">{tp.subtitle}</p>
         </div>
-        <button
-          type="button"
-          onClick={handleSendTestNudge}
-          disabled={busyAction !== null}
-          className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-ink/20 bg-white px-3 py-1 text-2xs font-semibold text-ink transition-colors hover:bg-cream disabled:opacity-50 cursor-pointer"
-        >
-          <Icon icon={SendOutlinedIcon} size="xs" />
-          <span>{tp.sendTestNudgeBtn}</span>
-        </button>
+        {(isWebPushReady || isTelegramReady) && (
+          <button
+            type="button"
+            onClick={handleSendTestNudge}
+            disabled={busyAction !== null}
+            className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-ink/20 bg-white px-3 py-1 text-2xs font-semibold text-ink transition-colors hover:bg-cream disabled:opacity-50 cursor-pointer"
+          >
+            <Icon icon={SendOutlinedIcon} size="xs" />
+            <span>{tp.sendTestNudgeBtn}</span>
+          </button>
+        )}
       </div>
 
       {/* Channel 1: Live Subscribable webcal:// Calendar Feed */}
@@ -258,41 +263,48 @@ export function TouchpointChannelsPanel() {
             <Icon icon={NotificationsActiveOutlinedIcon} size="sm" className="text-ink" />
             <p className="text-xs font-semibold text-ink">{tp.webPushTitle}</p>
           </div>
-          {status && status.webPushTokenCount > 0 && (
-            <span className="rounded-full bg-mint px-2.5 py-0.5 text-3xs font-semibold text-ink">
-              {tp.webPushEnabledBadge(status.webPushTokenCount)}
+          {!isWebPushReady ? (
+            <span className="rounded-full border border-ink/15 bg-cream px-2.5 py-0.5 text-3xs font-semibold text-ink/75">
+              {tp.comingSoonBadge}
             </span>
+          ) : (
+            status &&
+            status.webPushTokenCount > 0 && (
+              <span className="rounded-full bg-mint px-2.5 py-0.5 text-3xs font-semibold text-ink">
+                {tp.webPushEnabledBadge(status.webPushTokenCount)}
+              </span>
+            )
           )}
         </div>
         <p className="text-2xs leading-relaxed text-ink/70">{tp.webPushDesc}</p>
 
-        {status && !status.config.webPushVapidConfigured && (
+        {!isWebPushReady ? (
           <p className="rounded-xl bg-cream/70 px-3 py-2 text-3xs text-ink/75">
             {tp.webPushMissingVapidNotice}
           </p>
-        )}
-
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={handleEnableWebPush}
-            disabled={busyAction !== null}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-ink px-3.5 py-1.5 text-2xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
-          >
-            <Icon icon={NotificationsActiveOutlinedIcon} size="xs" />
-            <span>{tp.enableWebPushBtn}</span>
-          </button>
-          {status && status.webPushTokenCount > 0 && (
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={handleRemoveWebPush}
+              onClick={handleEnableWebPush}
               disabled={busyAction !== null}
-              className="inline-flex min-h-9 items-center rounded-full border border-ink/20 bg-white px-3 py-1.5 text-2xs font-medium text-ink/75 hover:border-ink/40 cursor-pointer"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-ink px-3.5 py-1.5 text-2xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
             >
-              {tp.webPushRemoveBtn}
+              <Icon icon={NotificationsActiveOutlinedIcon} size="xs" />
+              <span>{tp.enableWebPushBtn}</span>
             </button>
-          )}
-        </div>
+            {status && status.webPushTokenCount > 0 && (
+              <button
+                type="button"
+                onClick={handleRemoveWebPush}
+                disabled={busyAction !== null}
+                className="inline-flex min-h-9 items-center rounded-full border border-ink/20 bg-white px-3 py-1.5 text-2xs font-medium text-ink/75 hover:border-ink/40 cursor-pointer"
+              >
+                {tp.webPushRemoveBtn}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Channel 3: Telegram Bot */}
@@ -302,61 +314,69 @@ export function TouchpointChannelsPanel() {
             <Icon icon={TelegramIcon} size="sm" className="text-ink" />
             <p className="text-xs font-semibold text-ink">{tp.telegramTitle}</p>
           </div>
-          {status?.telegram.connected && (
-            <span className="rounded-full bg-mint px-2.5 py-0.5 text-3xs font-semibold text-ink">
-              {tp.telegramConnectedBadge(status.telegram.username)}
+          {!isTelegramReady ? (
+            <span className="rounded-full border border-ink/15 bg-cream px-2.5 py-0.5 text-3xs font-semibold text-ink/75">
+              {tp.comingSoonBadge}
             </span>
+          ) : (
+            status?.telegram.connected && (
+              <span className="rounded-full bg-mint px-2.5 py-0.5 text-3xs font-semibold text-ink">
+                {tp.telegramConnectedBadge(status.telegram.username)}
+              </span>
+            )
           )}
         </div>
         <p className="text-2xs leading-relaxed text-ink/70">{tp.telegramDesc}</p>
 
-        {status && !status.config.telegramBotConfigured && (
+        {!isTelegramReady ? (
           <p className="rounded-xl bg-cream/70 px-3 py-2 text-3xs text-ink/75">
             {tp.telegramBotMissingNotice}
           </p>
-        )}
-
-        {status?.telegram.linkCode && !status.telegram.connected && (
-          <div className="rounded-xl border border-ink/15 bg-white p-3 space-y-2">
-            <p className="text-2xs text-ink/80">
-              {tp.telegramLinkInstructions(status.telegram.linkCode)}
-            </p>
-            {status.telegram.deepLinkUrl && (
-              <a
-                href={status.telegram.deepLinkUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-ink px-3 py-1 text-2xs font-semibold text-white hover:opacity-90"
-              >
-                <Icon icon={OpenInNewOutlinedIcon} size="xs" />
-                <span>{tp.openTelegramDeepLinkBtn}</span>
-              </a>
+        ) : (
+          <>
+            {status?.telegram.linkCode && !status.telegram.connected && (
+              <div className="rounded-xl border border-ink/15 bg-white p-3 space-y-2">
+                <p className="text-2xs text-ink/80">
+                  {tp.telegramLinkInstructions(status.telegram.linkCode)}
+                </p>
+                {status.telegram.deepLinkUrl && (
+                  <a
+                    href={status.telegram.deepLinkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-ink px-3 py-1 text-2xs font-semibold text-white hover:opacity-90"
+                  >
+                    <Icon icon={OpenInNewOutlinedIcon} size="xs" />
+                    <span>{tp.openTelegramDeepLinkBtn}</span>
+                  </a>
+                )}
+              </div>
             )}
-          </div>
-        )}
 
-        <div className="flex flex-wrap items-center gap-2">
-          {!status?.telegram.connected ? (
-            <button
-              type="button"
-              onClick={handleGenerateTelegramLink}
-              disabled={busyAction !== null}
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-ink px-3.5 py-1.5 text-2xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
-            >
-              <Icon icon={TelegramIcon} size="xs" />
-              <span>{tp.connectTelegramBtn}</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleUnlinkTelegram}
-              disabled={busyAction !== null}
-              className="inline-flex min-h-9 items-center rounded-full border border-ink/20 bg-white px-3 py-1.5 text-2xs font-medium text-ink/75 hover:border-ink/40 cursor-pointer"
-            >
-              {tp.unlinkTelegramBtn}
-            </button>
-          )}
-        </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {!status?.telegram.connected ? (
+                <button
+                  type="button"
+                  onClick={handleGenerateTelegramLink}
+                  disabled={busyAction !== null}
+                  className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-ink px-3.5 py-1.5 text-2xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer"
+                >
+                  <Icon icon={TelegramIcon} size="xs" />
+                  <span>{tp.connectTelegramBtn}</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleUnlinkTelegram}
+                  disabled={busyAction !== null}
+                  className="inline-flex min-h-9 items-center rounded-full border border-ink/20 bg-white px-3 py-1.5 text-2xs font-medium text-ink/75 hover:border-ink/40 cursor-pointer"
+                >
+                  {tp.unlinkTelegramBtn}
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
